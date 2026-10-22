@@ -1,5 +1,76 @@
 {
-  "app": {
-    "title": "Interactive Portfolio"
+  "chat": {
+    "boasVindas": "Hello! I am Gustavo's virtual assistant. How can I help you today?",
+    "subtitulo": "Ask about projects, tech stack, university, or live metrics.",
+    "placeholder": "Ask something about Gustavo...",
+    "enviar": "Send",
+    "pensando": "Gustavo AI is typing...",
+    "sugestoesTitulo": "Suggested questions:",
+    "sugestoes": [
+      "What are Gustavo's main projects?",
+      "What technologies does he know?",
+      "What is he studying at PUC Minas?",
+      "Show his GitHub and Wakatime metrics",
+      "When is Galo's next match?"
+    ],
+    "fallbackIdioma": "I can only communicate in Portuguese or English. Please choose one of these languages."
+  },
+  "navbar": {
+    "baixarCv": "Download Resume",
+    "idioma": "Language",
+    "temaEscuro": "Dark Mode",
+    "temaClaro": "Light Mode"
+  },
+  "cards": {
+    "spotify": {
+      "titulo": "Listening on Spotify",
+      "tocando": "Currently playing",
+      "pausado": "Recently played"
+    },
+    "wakatime": {
+      "titulo": "Coding Time (WakaTime)",
+      "total": "Total hours coded",
+      "mediaDiaria": "Daily average",
+      "linguagens": "Top Languages"
+    },
+    "github": {
+      "titulo": "GitHub Statistics",
+      "repos": "Repositories",
+      "contribs": "Contributions this year",
+      "streak": "Current streak"
+    },
+    "canvas": {
+      "titulo": "PUC Minas (Canvas LMS)",
+      "curso": "Software Engineering - 2nd Semester",
+      "proximasEntregas": "Upcoming Assignments"
+    },
+    "galo": {
+      "titulo": "Clube Atlético Mineiro (Galo)",
+      "proximoJogo": "Next Match",
+      "competicao": "Tournament"
+    }
+  },
+  "contato": {
+    "titulo": "Get in Touch with Gustavo",
+    "subtitulo": "Send a direct message to his email.",
+    "nome": "Your Name",
+    "email": "Your Email",
+    "mensagem": "Your Message",
+    "enviar": "Send Message",
+    "sucesso": "✅ Message sent successfully!",
+    "erro": "❌ Failed to send message. Please try again."
+  },
+  "projetos": {
+    "portfolio_proj_title": "Interactive AI Portfolio",
+    "portfolio_proj_desc": "Portfolio built with React, Tailwind CSS, and Vercel Serverless Functions simulating an AI chat (Gemini API) with dynamic visual cards.",
+    "geosolar_proj_title": "GEOSOLAR - Auth System",
+    "geosolar_proj_desc": "Security module built with Java (Spring Boot) and Thymeleaf for solar potential mapping using MVC architecture.",
+    "carrinho_proj_title": "CLI Shopping Cart in Java",
+    "carrinho_proj_desc": "Object-oriented checkout and shopping cart management system in Java."
+  },
+  "experiencias": {
+    "voluntario_puc_role": "Academic Event Volunteer",
+    "voluntario_puc_desc": "Logistical support, accreditation, and attendee service at the We Make Software event at PUC Minas.",
+    "voluntario_puc_skills": "Teamwork, Communication, Organization"
   }
 }

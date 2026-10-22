@@ -1,5 +1,76 @@
 {
-  "app": {
-    "title": "Portfólio Interativo"
+  "chat": {
+    "boasVindas": "Olá! Sou o assistente virtual do Gustavo. Como posso te ajudar hoje?",
+    "subtitulo": "Pergunte sobre projetos, stack técnica, faculdade ou métricas ao vivo.",
+    "placeholder": "Digite uma pergunta sobre o Gustavo...",
+    "enviar": "Enviar",
+    "pensando": "Gustavo AI está digitando...",
+    "sugestoesTitulo": "Sugestões de perguntas:",
+    "sugestoes": [
+      "Quais são os principais projetos do Gustavo?",
+      "Quais tecnologias ele domina?",
+      "O que ele está estudando na PUC Minas?",
+      "Mostre as métricas do GitHub e Wakatime dele",
+      "Qual é o próximo jogo do Galo?"
+    ],
+    "fallbackIdioma": "I can only communicate in Portuguese or English. Please choose one of these languages."
+  },
+  "navbar": {
+    "baixarCv": "Baixar CV",
+    "idioma": "Idioma",
+    "temaEscuro": "Modo Escuro",
+    "temaClaro": "Modo Claro"
+  },
+  "cards": {
+    "spotify": {
+      "titulo": "Ouvindo Agora no Spotify",
+      "tocando": "Tocando agora",
+      "pausado": "Ultima música ouvida"
+    },
+    "wakatime": {
+      "titulo": "Tempo de Código (WakaTime)",
+      "total": "Horas codadas",
+      "mediaDiaria": "Média diária",
+      "linguagens": "Principais Linguagens"
+    },
+    "github": {
+      "titulo": "Estatísticas do GitHub",
+      "repos": "Repositórios",
+      "contribs": "Contribuições no ano",
+      "streak": "Sequência atual"
+    },
+    "canvas": {
+      "titulo": "PUC Minas (Canvas LMS)",
+      "curso": "Engenharia de Software - 2º Período",
+      "proximasEntregas": "Próximas Tarefas/Provas"
+    },
+    "galo": {
+      "titulo": "Clube Atlético Mineiro (Galo)",
+      "proximoJogo": "Próxima Partida",
+      "competicao": "Campeonato"
+    }
+  },
+  "contato": {
+    "titulo": "Entre em Contato com o Gustavo",
+    "subtitulo": "Envie uma mensagem direta para o e-mail dele.",
+    "nome": "Seu Nome",
+    "email": "Seu E-mail",
+    "mensagem": "Sua Mensagem",
+    "enviar": "Enviar Mensagem",
+    "sucesso": "✅ Mensagem enviada com sucesso!",
+    "erro": "❌ Falha ao enviar mensagem. Tente novamente."
+  },
+  "projetos": {
+    "portfolio_proj_title": "Portfólio Interativo IA",
+    "portfolio_proj_desc": "Portfólio em React, Tailwind CSS e Vercel Serverless Functions que simula um chat de IA (Gemini API) com renderização dinâmica de cards visuais.",
+    "geosolar_proj_title": "GEOSOLAR - Sistema de Autenticação",
+    "geosolar_proj_desc": "Módulo de segurança em Java (Spring Boot) e Thymeleaf para mapeamento de potencial solar, aplicando arquitetura MVC.",
+    "carrinho_proj_title": "Carrinho de Compras em Java",
+    "carrinho_proj_desc": "Sistema de gestão de caixa e carrinho de compras orientado a objetos em Java."
+  },
+  "experiencias": {
+    "voluntario_puc_role": "Voluntário em Eventos Acadêmicos",
+    "voluntario_puc_desc": "Apoio logístico, credenciamento e atendimento ao público no evento We Make Software na PUC Minas.",
+    "voluntario_puc_skills": "Trabalho em equipe, Comunicação, Organização"
   }
 }
