@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ThemeContext } from '../context/ThemeContext';
-import { Sun, Moon, Download, Globe } from 'lucide-react';
+import { Sun, Moon, Download, Globe, Sparkles } from 'lucide-react';
 
 export default function Navbar() {
   const { darkMode, toggleTheme } = useContext(ThemeContext);
@@ -12,33 +12,37 @@ export default function Navbar() {
   };
 
   return (
-    <header className="sticky top-0 z-10 flex items-center justify-between border-b border-zinc-800 bg-zinc-950/90 px-6 py-4 backdrop-blur-sm">
-      <div className="flex items-center gap-2">
-        <span className="text-lg font-bold text-white">
-          Gustavo Ryan<span className="text-amber-400">.ai</span>
-        </span>
+    <header className={`relative z-10 px-8 py-5 flex items-center justify-between border-b transition-colors duration-300 ${darkMode ? 'bg-[#0a0a0a]/60 border-[#1f1f1f] backdrop-blur-md' : 'bg-white/80 border-gray-200 backdrop-blur-md'}`}>
+      
+      <div className="flex items-center gap-3">
+        <Sparkles className="w-7 h-7 text-amber-500" />
+        <h1 className={`font-bold text-2xl tracking-tight ${darkMode ? 'text-white' : 'text-zinc-900'}`}>
+          Gustavo Ryan<span className="text-amber-500">.ai</span>
+        </h1>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-5">
         {/* Seletor de Idioma */}
-        <div className="flex items-center gap-1 rounded-full border border-zinc-800 bg-zinc-900 p-1 text-xs font-medium">
-          <Globe className="ml-1 h-3.5 w-3.5 text-zinc-500" />
+        <div className={`flex items-center rounded-full p-1 border transition-colors ${darkMode ? 'bg-[#141414] border-[#222]' : 'bg-gray-100 border-gray-200'}`}>
+          <div className={`p-1 mr-1 ${darkMode ? 'text-zinc-400' : 'text-zinc-500'}`}>
+            <Globe className="w-4 h-4" />
+          </div>
           <button
             onClick={() => changeLanguage('pt')}
-            className={`px-2 py-1 rounded transition-colors ${
+            className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
               i18n.language.startsWith('pt')
-                ? 'bg-amber-500 text-zinc-950 shadow-sm font-semibold'
-                : 'text-zinc-500 hover:text-amber-400'
+                ? 'bg-amber-500 text-black'
+                : (darkMode ? 'text-zinc-400 hover:text-white' : 'text-zinc-500 hover:text-black')
             }`}
           >
             PT
           </button>
           <button
             onClick={() => changeLanguage('en')}
-            className={`px-2 py-1 rounded transition-colors ${
+            className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
               i18n.language.startsWith('en')
-                ? 'bg-amber-500 text-zinc-950 shadow-sm font-semibold'
-                : 'text-zinc-500 hover:text-amber-400'
+                ? 'bg-amber-500 text-black'
+                : (darkMode ? 'text-zinc-400 hover:text-white' : 'text-zinc-500 hover:text-black')
             }`}
           >
             EN
@@ -48,19 +52,19 @@ export default function Navbar() {
         {/* Alternar Tema */}
         <button
           onClick={toggleTheme}
-          className="rounded-full border border-zinc-800 bg-zinc-900 p-2 text-zinc-400 transition-colors hover:text-amber-400"
+          className={`p-2.5 rounded-full border transition-all ${darkMode ? 'bg-[#141414] border-[#222] text-zinc-400 hover:text-white' : 'bg-white border-gray-200 text-zinc-600 hover:text-black shadow-sm'}`}
           title={darkMode ? t('navbar.temaClaro') : t('navbar.temaEscuro')}
         >
-          {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+          {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
         </button>
 
         {/* Download do CV */}
         <a
           href="/cv-gustavo.pdf"
           download="cv-gustavo.pdf"
-          className="flex items-center gap-1.5 rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-medium text-zinc-950 transition-colors hover:bg-amber-400"
+          className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold transition-all border ${darkMode ? 'bg-transparent border-amber-500 text-amber-500 hover:bg-amber-500/10' : 'bg-white border-zinc-300 text-zinc-900 hover:bg-zinc-50 shadow-sm'}`}
         >
-          <Download className="w-3.5 h-3.5" />
+          <Download className="w-4 h-4" />
           <span>{t('navbar.baixarCv')}</span>
         </a>
       </div>

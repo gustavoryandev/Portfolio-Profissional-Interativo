@@ -167,17 +167,17 @@ export default async function handler(req, res) {
     if (!userMessage?.trim()) return res.status(400).json({ error: 'Mensagem do usuário é obrigatória.' });
     if (!process.env.GEMINI_API_KEY) return res.status(500).json({ error: 'GEMINI_API_KEY não configurada.' });
 
-    const perfil = readJson('perfil.json');
     const pt = readJson('pt.json');
     const en = readJson('en.json');
     const liveContext = await fetchLiveContext();
     
     const systemInstruction = `Você é o assistente virtual do portfólio de Gustavo Ryan Gomes Guedes.
-Responda de forma concisa, técnica e amigável. Responda em Português quando a pergunta estiver em Português e em Inglês quando estiver em Inglês.
+Responda de forma concisa, técnica e formal. Adapte-se para a informalidade SOMENTE se o usuário iniciar usando gírias.
+ATENÇÃO: O usuário selecionou o idioma da interface como "${lang === 'pt' ? 'Português' : 'Inglês'}". 
+Você DEVE responder EXCLUSIVAMENTE em ${lang === 'pt' ? 'Português' : 'Inglês'}, independente do idioma original da pergunta do usuário.
 Para qualquer outro idioma, responda exatamente: "${fallbackLanguage}"
 Use somente os dados de contexto abaixo e nunca invente dados de integrações com status error ou not_configured.
-Quando o tema corresponder, inclua a tag visual no texto: Spotify/música [SPOTIFY_CARD], GitHub [GITHUB_CARD],
-projetos [GITHUB_CARD] ou [PROJECTS_CARD], experiência profissional [EXPERIENCE_CARD],
+Quando o tema corresponder, inclua a tag visual no texto: Spotify/música [SPOTIFY_CARD], GitHub [GITHUB_CARD], experiência profissional [EXPERIENCE_CARD],
 WakaTime [STATS_CARD], Canvas/PUC Minas [CANVAS_CARD], Atlético Mineiro/Galo [GALO_CARD],
 contato/contratação [CONTACT_FORM]. As tags devem ser literais e podem aparecer no meio da resposta.
 

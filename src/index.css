@@ -3,33 +3,52 @@
 @tailwind utilities;
 
 :root {
-  font-family: Inter, system-ui, sans-serif;
-  --surface: #18181b;
-  --surface-muted: #27272a;
+font-family: Inter, system-ui, sans-serif;
+--surface: #ffffff;
+--surface-border: #e5e7eb;
+--surface-text: #374151;
+--surface-heading: #111827;
+--surface-shadow: 0 12px 32px rgb(0 0 0 / 0.05);
+}
+
+.dark {
+--surface: #18181b;
+--surface-border: rgb(63 63 70);
+--surface-text: rgb(212 212 216);
+--surface-heading: white;
+--surface-shadow: 0 12px 32px rgb(0 0 0 / 0.2);
 }
 
 body {
-  margin: 0;
-  background: #09090b;
+margin: 0;
+background: #f9fafb;
+}
+
+.dark body {
+background: #09090b;
 }
 
 .card-surface {
-  border: 1px solid rgb(63 63 70);
-  border-radius: 1rem;
-  background: var(--surface);
-  color: rgb(212 212 216);
-  box-shadow: 0 12px 32px rgb(0 0 0 / 0.2);
-  transition: border-color 160ms ease, outline-color 160ms ease;
+border: 1px solid var(--surface-border);
+border-radius: 1rem;
+background: var(--surface);
+color: var(--surface-text);
+box-shadow: var(--surface-shadow);
+transition: all 300ms ease;
 }
 
 .card-surface:hover {
-  border-color: rgb(245 158 11 / 0.75);
-  outline: 1px solid rgb(245 158 11 / 0.2);
+border-color: rgb(245 158 11 / 0.75);
+outline: 1px solid rgb(245 158 11 / 0.2);
 }
 
 .card-heading {
-  color: white;
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
+color: var(--surface-heading);
+font-size: 0.75rem;
+font-weight: 700;
+letter-spacing: 0.12em;
 }
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.animate-spin-slow { animation: spin 3s linear infinite; }
