@@ -1,187 +1,243 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
-import fs from "fs";
-import path from "path";
-import dotenv from "dotenv";
+import axios from 'axios';
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import fs from 'fs';
+import path from 'path';
+import dotenv from 'dotenv';
 
-// Carrega .env.local em ambiente de desenvolvimento local
-try {
-  dotenv.config({ path: path.resolve(process.cwd(), ".env.local") });
-} catch (e) {
-  // Ignora se estiver em produção onde variáveis de ambiente já são injetadas
+// Carrega as variáveis de ambiente localmente (em produção a Vercel gerencia isso)
+dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
+
+const client = axios.create({ timeout: 8000 });
+const fallbackLanguage = 'I can only communicate in Portuguese or English. Please choose one of these languages.';
+
+// Função para ler arquivos de contexto (JSON)
+function readJson(fileName) {
+  const candidates = [
+    path.join(process.cwd(), 'src', 'data', fileName),
+    path.join(process.cwd(), 'src', 'i18n', fileName),
+    path.join(process.cwd(), 'data', fileName)
+  ];
+
+  for (const filePath of candidates) {
+    if (fs.existsSync(filePath)) {
+      return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+    }
+  }
+
+  throw new Error(`Context file not found: ${fileName}`);
 }
 
-/**
- * Sanitiza o histórico para cumprir rigorosamente as regras da API Gemini:
- * 1. Mapeia remetentes para 'user' e 'model'.
- * 2. Agrupa mensagens consecutivas do mesmo remetente.
- * 3. Garante que o histórico COMEÇA com 'user'.
- * 4. Garante que o histórico TERMINA com 'model' (pois a mensagem atual será enviada como 'user').
- */
-function sanitizeHistory(chatHistory) {
-  if (!Array.isArray(chatHistory) || chatHistory.length === 0) {
-    return [];
-  }
+async function fetchSpotify() {
+  const { SPOTIFY_CLIENT_ID: id, SPOTIFY_CLIENT_SECRET: secret, SPOTIFY_REFRESH_TOKEN: refresh } = process.env;
+  if (!id || !secret || !refresh) return { status: 'not_configured' };
 
-  const items = [];
-  chatHistory.slice(-10).forEach((msg) => {
-    if (msg && msg.text && typeof msg.text === "string" && msg.text.trim()) {
-      const role = msg.sender === "user" || msg.role === "user" ? "user" : "model";
-      items.push({ role, text: msg.text.trim() });
-    }
-  });
-
-  if (items.length === 0) return [];
-
-  // Junta mensagens consecutivas enviadas pelo mesmo autor
-  const combined = [];
-  for (const item of items) {
-    if (combined.length === 0) {
-      combined.push(item);
-    } else {
-      const last = combined[combined.length - 1];
-      if (last.role === item.role) {
-        last.text += "\n" + item.text;
-      } else {
-        combined.push(item);
+  try {
+    const token = await client.post('https://accounts.spotify.com/api/token', new URLSearchParams({
+      grant_type: 'refresh_token',
+      refresh_token: refresh
+    }).toString(), {
+      headers: {
+        Authorization: `Basic ${Buffer.from(`${id}:${secret}`).toString('base64')}`,
+        'Content-Type': 'application/x-www-form-urlencoded'
       }
+    });
+    const response = await client.get('https://api.spotify.com/v1/me/player', {
+      headers: { Authorization: `Bearer ${token.data.access_token}` }
+    });
+    const item = response.status === 204 ? null : response.data.item;
+    return {
+      status: 'ok',
+      playing: response.status !== 204 && response.data.is_playing,
+      track: item?.name,
+      artists: item?.artists?.map((artist) => artist.name)
+    };
+  } catch (error) {
+    throw new Error('Falha ao buscar dados do Spotify');
+  }
+}
+
+async function fetchGithub() {
+  const { GITHUB_USERNAME: username, GITHUB_TOKEN: token } = process.env;
+  if (!username) return { status: 'not_configured' };
+  try {
+    const response = await client.get(`https://api.github.com/users/${encodeURIComponent(username)}/repos`, {
+      params: { sort: 'updated', per_page: 10 },
+      headers: {
+        Accept: 'application/vnd.github+json',
+        ...(token && token !== '******' ? { Authorization: `Bearer ${token}` } : {})
+      }
+    });
+    return {
+      status: 'ok',
+      repositories: response.data.map(({ name, description, language, stargazers_count: stars, html_url: url }) => ({
+        name, description, language, stars, url
+      }))
+    };
+  } catch (error) {
+     throw new Error('Falha ao buscar dados do GitHub');
+  }
+}
+
+async function fetchWakatime() {
+  const { WAKATIME_API_KEY: key } = process.env;
+  if (!key) return { status: 'not_configured' };
+  const end = new Date();
+  const start = new Date(end);
+  start.setDate(end.getDate() - 7);
+  
+  try {
+    const response = await client.get('https://wakatime.com/api/v1/users/current/summaries', {
+      params: { start: start.toISOString().slice(0, 10), end: end.toISOString().slice(0, 10) },
+      auth: { username: key, password: '' }
+    });
+    return {
+      status: 'ok',
+      days: response.data.data?.map((day) => ({
+        date: day.range?.date,
+        totalSeconds: day.grand_total?.total_seconds,
+        readable: day.grand_total?.text
+      }))
+    };
+  } catch (error) {
+     throw new Error('Falha ao buscar dados do Wakatime');
+  }
+}
+
+async function fetchCanvas() {
+  const { CANVAS_API_TOKEN: token, CANVAS_BASE_URL: baseUrl } = process.env;
+  if (!token || !baseUrl) return { status: 'not_configured' };
+  try {
+    const response = await client.get(`${baseUrl.replace(/\/$/, '')}/api/v1/courses`, {
+      params: { enrollment_state: 'active', per_page: 10 },
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    return {
+      status: 'ok',
+      courses: response.data.map(({ id, name, course_code: code, workflow_state: state }) => ({
+        id, name, code, state
+      }))
+    };
+  } catch (error) {
+    throw new Error('Falha ao buscar dados do Canvas');
+  }
+}
+
+async function fetchLiveContext() {
+  const sources = { spotify: fetchSpotify, github: fetchGithub, wakatime: fetchWakatime, canvas: fetchCanvas };
+  const entries = await Promise.all(Object.entries(sources).map(async ([name, fetcher]) => {
+    try {
+      return [name, await fetcher()];
+    } catch (error) {
+      return [name, { status: 'error', message: error instanceof Error ? error.message : 'Unavailable' }];
     }
-  }
-
-  // O histórico na API Gemini DEVE começar com 'user'
-  while (combined.length > 0 && combined[0].role !== "user") {
-    combined.shift();
-  }
-
-  // O histórico na API Gemini DEVE terminar com 'model' antes da chamada sendMessage
-  while (combined.length > 0 && combined[combined.length - 1].role !== "model") {
-    combined.pop();
-  }
-
-  return combined.map((item) => ({
-    role: item.role,
-    parts: [{ text: item.text }],
   }));
+  return Object.fromEntries(entries);
+}
+
+// CORREÇÃO APLICADA: Tratamento para evitar loop infinito com grouped.length > 0
+function sanitizeHistory(history) {
+  if (!Array.isArray(history)) return [];
+  const messages = history.slice(-10).map((message) => ({
+    role: message.sender === 'user' ? 'user' : 'model',
+    text: message.text?.trim()
+  })).filter((message) => message.text);
+  
+  const grouped = [];
+  for (const message of messages) {
+    const previous = grouped.at(-1);
+    if (previous?.role === message.role) previous.text += `\n${message.text}`;
+    else grouped.push(message);
+  }
+  
+  // Garantindo que a limpeza não quebre se o array esvaziar
+  while (grouped.length > 0 && grouped[0]?.role !== 'user') grouped.shift();
+  while (grouped.length > 0 && grouped.at(-1)?.role !== 'model') grouped.pop();
+  
+  return grouped.map(({ role, text }) => ({ role, parts: [{ text }] }));
 }
 
 export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method Not Allowed" });
-  }
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' });
 
   try {
-    let body = req.body;
-    if (typeof body === "string") {
-      try {
-        body = JSON.parse(body);
-      } catch (e) {
-        body = {};
-      }
-    }
+    const { userMessage, lang = 'pt', chatHistory = [] } = typeof req.body === 'string'
+      ? JSON.parse(req.body)
+      : req.body || {};
+      
+    if (!userMessage?.trim()) return res.status(400).json({ error: 'Mensagem do usuário é obrigatória.' });
+    if (!process.env.GEMINI_API_KEY) return res.status(500).json({ error: 'GEMINI_API_KEY não configurada.' });
 
-    const { userMessage, lang, chatHistory } = body || {};
-    const apiKey = process.env.GEMINI_API_KEY;
-
-    if (!apiKey) {
-      return res.status(200).json({
-        response: "Erro: A variável GEMINI_API_KEY não foi encontrada no seu arquivo .env.local.",
-      });
-    }
-
-    if (!userMessage || typeof userMessage !== "string" || !userMessage.trim()) {
-      return res.status(400).json({ error: "Mensagem do usuário é obrigatória." });
-    }
-
-    // Leitura resiliente do perfil.json
-    let perfilData = {};
-    const possiblePaths = [
-      path.join(process.cwd(), "src", "data", "perfil.json"),
-      path.join(process.cwd(), "data", "perfil.json"),
-      path.join(process.cwd(), "public", "perfil.json"),
-    ];
-
-    for (const p of possiblePaths) {
-      try {
-        if (fs.existsSync(p)) {
-          perfilData = JSON.parse(fs.readFileSync(p, "utf-8"));
-          break;
-        }
-      } catch (fsErr) {
-        console.warn("Aviso ao carregar perfil.json:", fsErr.message);
-      }
-    }
-
-    const systemInstructionText = `
-Você é o assistente virtual do Gustavo Ryan Gomes Guedes no portfólio interativo dele.
-Idioma da interface selecionado: ${lang || "pt"}.
-
-DADOS DO GUSTAVO:
-${JSON.stringify(perfilData, null, 2)}
-
-DIRETRIZES DE LINGUAGEM E RECONHECIMENTO:
-1. Você entende linguagem natural e gírias do Brasil (ex: "trampos", "facul", "manja de", "Galo", "stack").
-2. Responda em tom profissional, amigável e direto.
-
-REGRAS RÍGIDAS DE IDIOMA:
-- Português se perguntado em Português.
-- Inglês se perguntado em Inglês.
-- FALLBACK OBRIGATÓRIO: Se perguntado em QUALQUER OUTRO IDIOMA, responda EXATAMENTE:
-"I can only communicate in Portuguese or English. Please choose one of these languages."
-
-MARCADORES VISUAIS DE CARDS:
-Inclua os marcadores abaixo quando o assunto for citado:
-- Spotify / Música -> [SPOTIFY_CARD]
-- Wakatime / Horas de código -> [STATS_CARD]
-- GitHub / Repositórios -> [GITHUB_CARD]
-- Canvas / PUC Minas -> [CANVAS_CARD]
-- Atlético Mineiro / Galo -> [GALO_CARD]
-- Contato / Contratar -> [CONTACT_FORM]
-`;
-
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const formattedHistory = sanitizeHistory(chatHistory);
-
-    // Sistema de cascata (Fallback) baseado EXATAMENTE nos modelos disponíveis nos seus prints.
-    // Se o 3.8 der erro 503 (servidor lotado), o código tenta o 3.6 automaticamente, e assim por diante.
-    const candidateModels = [
-      "gemini-3.8-flash",
-      "gemini-3.6-flash",
-      "gemini-3.5-flash",
-      "gemini-3.1-flash"
-    ];
+    const perfil = readJson('perfil.json');
+    const pt = readJson('pt.json');
+    const en = readJson('en.json');
+    const liveContext = await fetchLiveContext();
     
-    let responseText = null;
-    const errorsDetails = [];
+    const systemInstruction = `Você é o assistente virtual do portfólio de Gustavo Ryan Gomes Guedes.
+Responda de forma concisa, técnica e amigável. Responda em Português quando a pergunta estiver em Português e em Inglês quando estiver em Inglês.
+Para qualquer outro idioma, responda exatamente: "${fallbackLanguage}"
+Use somente os dados de contexto abaixo e nunca invente dados de integrações com status error ou not_configured.
+Quando o tema corresponder, inclua a tag visual no texto: Spotify/música [SPOTIFY_CARD], GitHub [GITHUB_CARD],
+projetos [GITHUB_CARD] ou [PROJECTS_CARD], experiência profissional [EXPERIENCE_CARD],
+WakaTime [STATS_CARD], Canvas/PUC Minas [CANVAS_CARD], Atlético Mineiro/Galo [GALO_CARD],
+contato/contratação [CONTACT_FORM]. As tags devem ser literais e podem aparecer no meio da resposta.
 
-    for (const modelName of candidateModels) {
+PERFIL:
+${JSON.stringify(perfil)}
+
+TRADUÇÕES PT:
+${JSON.stringify(pt)}
+
+TRADUÇÕES EN:
+${JSON.stringify(en)}
+
+DADOS AO VIVO:
+${JSON.stringify(liveContext)}`;
+
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+    
+    // Lista de modelos priorizados: do mais rápido/recente com cota, até os mais antigos como plano de segurança
+    const preferredModels = [
+      'gemini-3.8-flash',
+      'gemini-3.6-flash',
+      'gemini-3.1-flash',
+      'gemini-2.5-flash',
+      'gemini-2.0-flash',
+      'gemini-1.5-flash'
+    ];
+
+    let result = null;
+    let lastError = null;
+
+    // Sistema de Fallback: Tenta iterar sobre a lista até obter sucesso
+    for (const modelName of preferredModels) {
       try {
         const model = genAI.getGenerativeModel({
           model: modelName,
-          systemInstruction: systemInstructionText,
+          systemInstruction
         });
-
-        const chat = model.startChat({ history: formattedHistory });
-        const result = await chat.sendMessage(userMessage.trim());
-        responseText = result.response.text();
-
-        if (responseText) {
-          console.log(`[Gemini API] Resposta obtida com sucesso usando: ${modelName}`);
-          break;
-        }
-      } catch (err) {
-        console.warn(`[Gemini API] Falha no modelo ${modelName}:`, err.message);
-        errorsDetails.push(`${modelName}: ${err.message}`);
+        
+        result = await model.startChat({ history: sanitizeHistory(chatHistory) })
+          .sendMessage(userMessage.trim());
+          
+        console.log(`[Gemini API] Mensagem processada com sucesso via: ${modelName}`);
+        break; // Sai do loop imediatamente assim que a resposta der certo
+      } catch (error) {
+        console.warn(`[Gemini API] O modelo ${modelName} falhou ou não está disponível. Tentando o próximo...`);
+        lastError = error;
       }
     }
 
-    if (!responseText) {
-      throw new Error(`Não foi possível conectar. Detalhes dos erros: ${errorsDetails.join(" | ")}`);
+    // Se varrer toda a lista e nenhum modelo funcionar, lança o erro para o catch principal
+    if (!result) {
+      throw new Error(`Todos os modelos de fallback falharam. Último erro: ${lastError?.message}`);
     }
 
-    return res.status(200).json({ response: responseText });
-  } catch (error) {
-    console.error("Erro na Serverless Function /api/chat:", error);
-    return res.status(200).json({
-      response: `Erro ao conectar com o Gemini: ${error.message || "Erro interno no servidor."}`,
+    return res.status(200).json({ 
+      response: result.response.text(),
+      liveContext // <-- ADICIONADO: Enviando os dados reais para os cards do front-end
     });
+  } catch (error) {
+    console.error('Erro na Serverless Function /api/chat:', error);
+    return res.status(500).json({ error: 'Erro ao gerar resposta.' });
   }
 }

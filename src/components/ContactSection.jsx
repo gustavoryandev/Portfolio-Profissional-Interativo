@@ -34,8 +34,8 @@ const ContactSection = ({ lang = 'pt' }) => {
 
   if (submitted) {
     return (
-      <div className="bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 p-6 rounded-2xl shadow-lg w-full max-w-md mt-2 flex flex-col items-center text-center border border-green-200 dark:border-green-800 transition-all duration-300">
-        <CheckCircle size={48} className="mb-4 text-green-500" />
+      <div className="card-surface mt-2 flex w-full max-w-md flex-col items-center p-6 text-center">
+        <CheckCircle size={48} className="mb-4 text-amber-400" />
         <h3 className="text-xl font-bold mb-2">Sucesso!</h3>
         <p>{t.contact_success}</p>
       </div>
@@ -43,33 +43,33 @@ const ContactSection = ({ lang = 'pt' }) => {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white dark:bg-neutral-800 p-6 rounded-2xl shadow-xl w-full max-w-md mt-2 border border-neutral-200 dark:border-neutral-700 transition-all duration-300">
+    <form onSubmit={handleSubmit} className="card-surface mt-2 w-full max-w-md p-6">
       <div className="flex items-center gap-3 mb-4 text-neutral-900 dark:text-white">
         <Mail size={24} className="text-blue-500" />
-        <h3 className="font-bold text-lg">{t.contact_title}</h3>
+        <h3 className="card-heading">{t.contact_title}</h3>
       </div>
       <div className="space-y-4">
-        <input 
+        <input
           required 
           type="text" 
           placeholder={t.contact_name} 
-          className="w-full p-3 rounded-xl bg-neutral-100 dark:bg-neutral-900 border-none outline-none focus:ring-2 focus:ring-blue-500 text-neutral-900 dark:text-white transition-all" 
+          className="w-full rounded-xl border border-zinc-800 bg-zinc-950 p-3 text-white outline-none transition-all focus:border-amber-500/60" 
         />
         <input 
           required 
           type="email" 
           placeholder={t.contact_email} 
-          className="w-full p-3 rounded-xl bg-neutral-100 dark:bg-neutral-900 border-none outline-none focus:ring-2 focus:ring-blue-500 text-neutral-900 dark:text-white transition-all" 
+          className="w-full rounded-xl border border-zinc-800 bg-zinc-950 p-3 text-white outline-none transition-all focus:border-amber-500/60" 
         />
         <textarea 
           required 
           rows="3" 
           placeholder={t.contact_msg} 
-          className="w-full p-3 rounded-xl bg-neutral-100 dark:bg-neutral-900 border-none outline-none focus:ring-2 focus:ring-blue-500 text-neutral-900 dark:text-white transition-all resize-none"
+          className="w-full resize-none rounded-xl border border-zinc-800 bg-zinc-950 p-3 text-white outline-none transition-all focus:border-amber-500/60"
         ></textarea>
         <button 
           type="submit" 
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-colors flex items-center justify-center gap-2 shadow-lg shadow-blue-500/30"
+          className="flex w-full items-center justify-center gap-2 rounded-xl bg-amber-500 py-3 font-bold text-zinc-950 shadow-lg shadow-amber-500/20 transition-colors hover:bg-amber-400"
         >
           <Send size={18} /> {t.contact_send}
         </button>

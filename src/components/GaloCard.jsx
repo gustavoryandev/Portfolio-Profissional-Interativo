@@ -1,29 +1,15 @@
-const GaloCard = () => {
-  const { lang } = useContext(LanguageContext);
-  const t = translations[lang];
-  return (
-    <div className="bg-white text-black p-5 rounded-2xl shadow-xl w-full max-w-sm mt-2 border-4 border-black relative overflow-hidden">
-      <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 20px, #000 20px, #000 40px)' }}></div>
-      <div className="relative z-10 flex items-center gap-3 mb-4">
-        <Trophy className="text-black" size={24} />
-        <h3 className="font-bold uppercase tracking-wider">{t.galo_title}</h3>
-      </div>
-      <div className="relative z-10 flex items-center justify-between bg-neutral-100 p-4 rounded-xl border border-neutral-300">
-        <div className="text-center">
-          <div className="w-10 h-10 bg-black text-white rounded-full flex items-center justify-center font-bold mb-1 mx-auto shadow-md">CAM</div>
-          <p className="text-xs font-semibold">Galo</p>
-        </div>
-        <div className="text-center px-4">
-          <p className="text-sm font-bold bg-black text-white px-3 py-1 rounded-full">21:30</p>
-          <p className="text-xs text-neutral-500 mt-1 font-medium">Qua, 28/10</p>
-        </div>
-        <div className="text-center">
-          <div className="w-10 h-10 bg-red-600 text-black rounded-full flex items-center justify-center font-bold mb-1 mx-auto shadow-md">FLA</div>
-          <p className="text-xs font-semibold">Flamengo</p>
-        </div>
-      </div>
-    </div>
-  );
-};
+import { Trophy, ExternalLink } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
-export default GaloCard;
+export default function GaloCard() {
+  const { t } = useTranslation();
+  return <article className="card-surface relative w-full max-w-sm overflow-hidden p-5">
+    <div className="mb-4 flex items-center gap-3"><Trophy className="text-amber-400" size={22} /><h3 className="card-heading">{t('cards.galo.titulo')}</h3></div>
+    <div className="flex items-center justify-between rounded-xl border border-zinc-800 bg-zinc-950 p-4">
+      <div className="text-center"><div className="mx-auto mb-1 flex h-10 w-10 items-center justify-center rounded-full bg-black font-bold">CAM</div><p className="text-xs text-zinc-400">Galo</p></div>
+      <div className="text-center"><strong className="rounded-full bg-amber-500 px-3 py-1 text-sm text-zinc-950">21:30</strong><p className="mt-2 text-xs text-zinc-500">Qua, 28/10</p></div>
+      <div className="text-center"><div className="mx-auto mb-1 flex h-10 w-10 items-center justify-center rounded-full bg-red-600 font-bold">FLA</div><p className="text-xs text-zinc-400">Flamengo</p></div>
+    </div>
+    <a href="https://www.espn.com.br/futebol/time/_/id/874/atletico-mg" target="_blank" rel="noreferrer" className="mt-4 flex items-center gap-2 text-xs text-amber-400 hover:text-amber-300">Ver calendário <ExternalLink size={13} /></a>
+  </article>;
+}

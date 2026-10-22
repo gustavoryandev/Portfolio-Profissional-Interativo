@@ -1,86 +1,103 @@
-import React, { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { Send, Sparkles } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import Navbar from './components/Navbar';
-import Sidebar from './components/Sidebar';
 import MessageBubble from './components/MessageBubble';
 import sendMessage from './services/api';
 
 export default function App() {
   const { t, i18n } = useTranslation();
-  const [messages, setMessages] = useState([
-    {
-      sender: 'ai',
-      text: t('chat.boasVindas')
-    }
-  ]);
+  const [messages, setMessages] = useState([{ sender: 'ai', text: t('chat.boasVindas') }]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const messagesEndRef = useRef(null);
 
-  const handleSend = async (textToSend) => {
-    const query = textToSend || input;
-    if (!query.trim()) return;
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, loading]);
 
-    const newMessages = [...messages, { sender: 'user', text: query }];
-    setMessages(newMessages);
+  // CORREÇÃO APLICADA: 't' removido das dependências para não resetar o chat a cada re-render do React.
+  // Agora o chat só reseta/atualiza a mensagem de boas vindas se o IDIOMA (i18n.language) for alterado manualmente.
+  useEffect(() => {
+    setMessages([{ sender: 'ai', text: t('chat.boasVindas') }]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [i18n.language]);
+
+  const handleSend = async (suggestion = input) => {
+    const query = suggestion.trim();
+    if (!query || loading) return;
+    
+    const nextMessages = [...messages, { sender: 'user', text: query }];
+    setMessages(nextMessages);
     setInput('');
     setLoading(true);
-
     try {
-      const data = await sendMessage(query, i18n.language, newMessages);
-      setMessages([...newMessages, { sender: 'ai', text: data.response }]);
-    } catch (error) {
-      setMessages([
-        ...newMessages,
-        { sender: 'ai', text: 'Desculpe, ocorreu um erro ao processar sua pergunta.' }
-      ]);
+      const data = await sendMessage(query, i18n.language, nextMessages);
+      setMessages([...nextMessages, { 
+        sender: 'ai', 
+        text: data.response || data.error,
+        context: data.liveContext // <-- ADICIONADO: Guardando dados reais na mensagem
+      }]);
+    } catch {
+      setMessages([...nextMessages, {
+        sender: 'ai',
+        tone: 'error',
+        text: 'ERRO: não foi possível processar sua pergunta agora. Tente novamente em instantes.'
+      }]);
     } finally {
       setLoading(false);
     }
   };
 
+  const prompts = t('chat.sugestoes', { returnObjects: true });
+
   return (
-    <div className="flex h-screen bg-neutral-100 dark:bg-neutral-900 text-neutral-800 dark:text-neutral-100">
-      <Sidebar onSelectSuggestion={(sug) => handleSend(sug)} />
-      
-      <div className="flex-1 flex flex-col h-full overflow-hidden">
-        <Navbar />
-        
-        <main className="flex-1 overflow-y-auto p-4 max-w-4xl w-full mx-auto space-y-4">
-          {messages.map((msg, index) => (
-            <MessageBubble key={index} message={msg} />
-          ))}
+    <div className="flex h-screen flex-col bg-zinc-950 text-zinc-300">
+      <Navbar />
+      <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-6 overflow-y-auto px-4 py-8 sm:px-8">
+        <div className="space-y-6">
+          {messages.map((message, index) => <MessageBubble key={`${message.sender}-${index}`} message={message} />)}
           {loading && (
-            <div className="text-sm text-neutral-500 dark:text-neutral-400 animate-pulse">
-              {t('chat.pensando')}
+            <div className="flex items-center gap-3 font-mono text-sm text-amber-400">
+              <Sparkles size={16} />{t('chat.pensando')}
             </div>
           )}
-        </main>
-
-        <footer className="p-4 border-t border-neutral-200 dark:border-neutral-800 max-w-4xl w-full mx-auto">
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleSend();
-            }}
-            className="flex gap-2"
-          >
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder={t('chat.placeholder')}
-              className="flex-1 px-4 py-2 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          <div ref={messagesEndRef} />
+        </div>
+      </main>
+      
+      <footer className="border-t border-zinc-800 bg-zinc-950/95 px-4 py-4 backdrop-blur-xl">
+        <div className="mx-auto flex w-full max-w-4xl flex-col gap-3">
+          <div className="flex gap-2 overflow-x-auto pb-1">
+            {prompts.map((prompt) => (
+              <button 
+                key={prompt} 
+                type="button" 
+                onClick={() => handleSend(prompt)} 
+                className="shrink-0 rounded-full border border-zinc-700 bg-zinc-900 px-4 py-2 text-xs text-zinc-400 transition hover:border-amber-500/40 hover:text-amber-400"
+              >
+                {prompt}
+              </button>
+            ))}
+          </div>
+          <form onSubmit={(event) => { event.preventDefault(); handleSend(); }} className="flex items-center gap-3 rounded-2xl border border-zinc-800 bg-zinc-900 p-2 focus-within:border-amber-500/40">
+            <input 
+              value={input} 
+              onChange={(event) => setInput(event.target.value)} 
+              placeholder={t('chat.placeholder') || "✦ Digite uma pergunta sobre o Gustavo..."} 
+              disabled={loading} 
+              className="min-w-0 flex-1 bg-transparent px-3 py-2 text-sm text-white outline-none placeholder:text-zinc-600" 
             />
-            <button
-              type="submit"
-              disabled={loading}
-              className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50"
+            <button 
+              type="submit" 
+              disabled={loading || !input.trim()} 
+              className="rounded-xl bg-amber-500 p-3 text-zinc-950 transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-40"
             >
-              {t('chat.enviar')}
+              <Send size={18} />
             </button>
           </form>
-        </footer>
-      </div>
+        </div>
+      </footer>
     </div>
   );
 }
