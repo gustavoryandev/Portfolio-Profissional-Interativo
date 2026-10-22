@@ -4,78 +4,109 @@ import fs from 'fs';
 import path from 'path';
 import dotenv from 'dotenv';
 
-// Carrega as variáveis de ambiente localmente (em produção a Vercel gerencia isso)
 dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 
 const client = axios.create({ timeout: 8000 });
 const fallbackLanguage = 'I can only communicate in Portuguese or English. Please choose one of these languages.';
+const fallbackModels = [
+  'gemini-3.8-flash',
+  'gemini-3.7-flash',
+  'gemini-3.6-flash',
+  'gemini-3.1-flash',
+  'gemini-2.5-flash',
+  'gemini-2.0-flash'
+];
 
-// Função para ler arquivos de contexto (JSON)
-function readJson(fileName) {
-  const candidates = [
-    path.join(process.cwd(), 'src', 'data', fileName),
-    path.join(process.cwd(), 'src', 'i18n', fileName),
-    path.join(process.cwd(), 'data', fileName)
-  ];
+function modelPriority(name) {
+  const normalized = name.toLowerCase();
+  const familyScore = normalized.includes('flash') ? 0 : 100;
+  const version = normalized.match(/gemini-(\d+)(?:\.(\d+))?/);
+  const versionScore = version ? Number(version[1]) * 10 + Number(version[2] || 0) : 0;
+  const previewPenalty = normalized.includes('preview') ? 10 : 0;
+  return familyScore - versionScore + previewPenalty;
+}
 
-  for (const filePath of candidates) {
-    if (fs.existsSync(filePath)) {
-      return JSON.parse(fs.readFileSync(filePath, 'utf8'));
-    }
+async function discoverModels(apiKey) {
+  try {
+    const response = await client.get('https://generativelanguage.googleapis.com/v1beta/models', {
+      headers: { 'x-goog-api-key': apiKey },
+      params: { pageSize: 100 }
+    });
+    const models = response.data.models
+      ?.filter((model) => model.supportedGenerationMethods?.includes('generateContent'))
+      .map((model) => model.name.replace(/^models\//, ''))
+      .filter((name) => /^gemini-\d+(?:\.\d+)?-(?:flash|pro)(?:-(?:latest|preview|001))?$/i.test(name));
+
+    if (!models?.length) return [];
+    return [...new Set(models)].sort((left, right) => modelPriority(left) - modelPriority(right));
+  } catch (error) {
+    console.warn('[Gemini] Não foi possível descobrir modelos disponíveis:', error.message);
+    return [];
   }
+}
 
-  throw new Error(`Context file not found: ${fileName}`);
+function isRetryableModelError(error) {
+  const message = error instanceof Error ? error.message : '';
+  return [404, 429, 500, 502, 503, 504].includes(error?.status)
+    || message.includes('is not found')
+    || message.includes('high demand')
+    || message.includes('quota')
+    || message.includes('Developer instruction is not enabled');
+}
+
+function readJson(fileName) {
+  const directories = [
+    path.join(process.cwd(), 'src', 'data'),
+    path.join(process.cwd(), 'src', 'i18n'),
+    path.join(process.cwd(), 'data')
+  ];
+  const filePath = directories.map((directory) => path.join(directory, fileName)).find((candidate) => fs.existsSync(candidate));
+  if (!filePath) throw new Error(`Context file not found: ${fileName}`);
+  return JSON.parse(fs.readFileSync(filePath, 'utf8'));
 }
 
 async function fetchSpotify() {
   const { SPOTIFY_CLIENT_ID: id, SPOTIFY_CLIENT_SECRET: secret, SPOTIFY_REFRESH_TOKEN: refresh } = process.env;
   if (!id || !secret || !refresh) return { status: 'not_configured' };
 
-  try {
-    const token = await client.post('https://accounts.spotify.com/api/token', new URLSearchParams({
-      grant_type: 'refresh_token',
-      refresh_token: refresh
-    }).toString(), {
+  const tokenResponse = await client.post(
+    'https://accounts.spotify.com/api/token',
+    new URLSearchParams({ grant_type: 'refresh_token', refresh_token: refresh }).toString(),
+    {
       headers: {
         Authorization: `Basic ${Buffer.from(`${id}:${secret}`).toString('base64')}`,
         'Content-Type': 'application/x-www-form-urlencoded'
       }
-    });
-    const response = await client.get('https://api.spotify.com/v1/me/player', {
-      headers: { Authorization: `Bearer ${token.data.access_token}` }
-    });
-    const item = response.status === 204 ? null : response.data.item;
-    return {
-      status: 'ok',
-      playing: response.status !== 204 && response.data.is_playing,
-      track: item?.name,
-      artists: item?.artists?.map((artist) => artist.name)
-    };
-  } catch (error) {
-    throw new Error('Falha ao buscar dados do Spotify');
-  }
+    }
+  );
+  const response = await client.get('https://api.spotify.com/v1/me/player', {
+    headers: { Authorization: `Bearer ${tokenResponse.data.access_token}` }
+  });
+  const item = response.status === 204 ? null : response.data.item;
+  return {
+    status: 'ok',
+    playing: response.status !== 204 && response.data.is_playing,
+    track: item?.name,
+    artists: item?.artists?.map((artist) => artist.name)
+  };
 }
 
 async function fetchGithub() {
   const { GITHUB_USERNAME: username, GITHUB_TOKEN: token } = process.env;
   if (!username) return { status: 'not_configured' };
-  try {
-    const response = await client.get(`https://api.github.com/users/${encodeURIComponent(username)}/repos`, {
-      params: { sort: 'updated', per_page: 10 },
-      headers: {
-        Accept: 'application/vnd.github+json',
-        ...(token && token !== '******' ? { Authorization: `Bearer ${token}` } : {})
-      }
-    });
-    return {
-      status: 'ok',
-      repositories: response.data.map(({ name, description, language, stargazers_count: stars, html_url: url }) => ({
-        name, description, language, stars, url
-      }))
-    };
-  } catch (error) {
-     throw new Error('Falha ao buscar dados do GitHub');
-  }
+  const response = await client.get(`https://api.github.com/users/${encodeURIComponent(username)}/repos`, {
+    params: { sort: 'updated', per_page: 10 },
+    headers: {
+      Accept: 'application/vnd.github+json',
+      ...(token && token !== '******' ? { Authorization: `Bearer ${token}` } : {})
+    }
+  });
+  return {
+    status: 'ok',
+    repositories: response.data.map(({ name, description, language, stargazers_count: stars, html_url: url }) => ({
+      name, description, language, stars, url
+    }))
+  };
 }
 
 async function fetchWakatime() {
@@ -84,42 +115,33 @@ async function fetchWakatime() {
   const end = new Date();
   const start = new Date(end);
   start.setDate(end.getDate() - 7);
-  
-  try {
-    const response = await client.get('https://wakatime.com/api/v1/users/current/summaries', {
-      params: { start: start.toISOString().slice(0, 10), end: end.toISOString().slice(0, 10) },
-      auth: { username: key, password: '' }
-    });
-    return {
-      status: 'ok',
-      days: response.data.data?.map((day) => ({
-        date: day.range?.date,
-        totalSeconds: day.grand_total?.total_seconds,
-        readable: day.grand_total?.text
-      }))
-    };
-  } catch (error) {
-     throw new Error('Falha ao buscar dados do Wakatime');
-  }
+  const response = await client.get('https://wakatime.com/api/v1/users/current/summaries', {
+    params: { start: start.toISOString().slice(0, 10), end: end.toISOString().slice(0, 10) },
+    auth: { username: key, password: '' }
+  });
+  return {
+    status: 'ok',
+    days: response.data.data?.map((day) => ({
+      date: day.range?.date,
+      totalSeconds: day.grand_total?.total_seconds,
+      readable: day.grand_total?.text
+    }))
+  };
 }
 
 async function fetchCanvas() {
   const { CANVAS_API_TOKEN: token, CANVAS_BASE_URL: baseUrl } = process.env;
   if (!token || !baseUrl) return { status: 'not_configured' };
-  try {
-    const response = await client.get(`${baseUrl.replace(/\/$/, '')}/api/v1/courses`, {
-      params: { enrollment_state: 'active', per_page: 10 },
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    return {
-      status: 'ok',
-      courses: response.data.map(({ id, name, course_code: code, workflow_state: state }) => ({
-        id, name, code, state
-      }))
-    };
-  } catch (error) {
-    throw new Error('Falha ao buscar dados do Canvas');
-  }
+  const response = await client.get(`${baseUrl.replace(/\/$/, '')}/api/v1/courses`, {
+    params: { enrollment_state: 'active', per_page: 10 },
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  return {
+    status: 'ok',
+    courses: response.data.map(({ id, name, course_code: code, workflow_state: state }) => ({
+      id, name, code, state
+    }))
+  };
 }
 
 async function fetchLiveContext() {
@@ -128,31 +150,26 @@ async function fetchLiveContext() {
     try {
       return [name, await fetcher()];
     } catch (error) {
-      return [name, { status: 'error', message: error instanceof Error ? error.message : 'Unavailable' }];
+      console.warn(`[Live context] ${name} unavailable:`, error.message);
+      return [name, { status: 'error', message: 'Integration unavailable' }];
     }
   }));
   return Object.fromEntries(entries);
 }
 
-// CORREÇÃO APLICADA: Tratamento para evitar loop infinito com grouped.length > 0
 function sanitizeHistory(history) {
   if (!Array.isArray(history)) return [];
-  const messages = history.slice(-10).map((message) => ({
-    role: message.sender === 'user' ? 'user' : 'model',
-    text: message.text?.trim()
-  })).filter((message) => message.text);
-  
   const grouped = [];
-  for (const message of messages) {
+  for (const message of history.slice(-10)) {
+    const text = typeof message?.text === 'string' ? message.text.trim() : '';
+    if (!text) continue;
+    const role = message.sender === 'user' ? 'user' : 'model';
     const previous = grouped.at(-1);
-    if (previous?.role === message.role) previous.text += `\n${message.text}`;
-    else grouped.push(message);
+    if (previous?.role === role) previous.text += `\n${text}`;
+    else grouped.push({ role, text });
   }
-  
-  // Garantindo que a limpeza não quebre se o array esvaziar
-  while (grouped.length > 0 && grouped[0]?.role !== 'user') grouped.shift();
-  while (grouped.length > 0 && grouped.at(-1)?.role !== 'model') grouped.pop();
-  
+  while (grouped.length && grouped[0].role !== 'user') grouped.shift();
+  while (grouped.length && grouped.at(-1).role !== 'model') grouped.pop();
   return grouped.map(({ role, text }) => ({ role, parts: [{ text }] }));
 }
 
@@ -160,84 +177,111 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' });
 
   try {
-    const { userMessage, lang = 'pt', chatHistory = [] } = typeof req.body === 'string'
-      ? JSON.parse(req.body)
-      : req.body || {};
-      
-    if (!userMessage?.trim()) return res.status(400).json({ error: 'Mensagem do usuário é obrigatória.' });
-    if (!process.env.GEMINI_API_KEY) return res.status(500).json({ error: 'GEMINI_API_KEY não configurada.' });
+    const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body || {};
+    const { userMessage, lang = 'pt', chatHistory = [] } = body;
+    if (typeof userMessage !== 'string' || !userMessage.trim()) {
+      return res.status(400).json({ error: 'Mensagem do usuário é obrigatória.' });
+    }
+    if (!process.env.GEMINI_API_KEY) {
+      return res.status(500).json({ error: 'GEMINI_API_KEY não configurada.' });
+    }
 
+    const perfil = readJson('perfil.json');
     const pt = readJson('pt.json');
     const en = readJson('en.json');
     const liveContext = await fetchLiveContext();
-    
     const systemInstruction = `Você é o assistente virtual do portfólio de Gustavo Ryan Gomes Guedes.
-Responda de forma concisa, técnica e formal. Adapte-se para a informalidade SOMENTE se o usuário iniciar usando gírias.
-ATENÇÃO: O usuário selecionou o idioma da interface como "${lang === 'pt' ? 'Português' : 'Inglês'}". 
-Você DEVE responder EXCLUSIVAMENTE em ${lang === 'pt' ? 'Português' : 'Inglês'}, independente do idioma original da pergunta do usuário.
-Para qualquer outro idioma, responda exatamente: "${fallbackLanguage}"
-Use somente os dados de contexto abaixo e nunca invente dados de integrações com status error ou not_configured.
-Quando o tema corresponder, inclua a tag visual no texto: Spotify/música [SPOTIFY_CARD], GitHub [GITHUB_CARD], experiência profissional [EXPERIENCE_CARD],
-WakaTime [STATS_CARD], Canvas/PUC Minas [CANVAS_CARD], Atlético Mineiro/Galo [GALO_CARD],
-contato/contratação [CONTACT_FORM]. As tags devem ser literais e podem aparecer no meio da resposta.
+Responda de forma concisa, técnica e amigável no idioma da pergunta.
+Para qualquer idioma diferente de português ou inglês, responda exatamente: "${fallbackLanguage}"
+Use somente os dados fornecidos e não invente dados de integrações indisponíveis.
+Inclua as tags literais [SPOTIFY_CARD], [GITHUB_CARD], [STATS_CARD], [CANVAS_CARD], [GALO_CARD],
+[CONTACT_FORM], [PROJECTS_CARD] ou [EXPERIENCE_CARD] quando o assunto correspondente aparecer.
 
 PERFIL:
 ${JSON.stringify(perfil)}
 
-TRADUÇÕES PT:
-${JSON.stringify(pt)}
-
-TRADUÇÕES EN:
-${JSON.stringify(en)}
+TRADUÇÕES:
+${JSON.stringify({ pt, en })}
 
 DADOS AO VIVO:
 ${JSON.stringify(liveContext)}`;
 
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    
-    // Lista de modelos priorizados: do mais rápido/recente com cota, até os mais antigos como plano de segurança
-    const preferredModels = [
-      'gemini-3.8-flash',
-      'gemini-3.6-flash',
-      'gemini-3.1-flash',
-      'gemini-2.5-flash',
-      'gemini-2.0-flash',
-      'gemini-1.5-flash'
-    ];
+    const availableModels = await discoverModels(process.env.GEMINI_API_KEY);
+    const modelsToTry = [...new Set([...availableModels, ...fallbackModels])];
+    let result;
+    let selectedModel;
+    let lastGeminiError;
 
-    let result = null;
-    let lastError = null;
+    for (const modelName of modelsToTry) {
+      const model = genAI.getGenerativeModel({
+        model: modelName,
+        systemInstruction
+      });
 
-    // Sistema de Fallback: Tenta iterar sobre a lista até obter sucesso
-    for (const modelName of preferredModels) {
       try {
-        const model = genAI.getGenerativeModel({
-          model: modelName,
-          systemInstruction
-        });
-        
-        result = await model.startChat({ history: sanitizeHistory(chatHistory) })
-          .sendMessage(userMessage.trim());
-          
-        console.log(`[Gemini API] Mensagem processada com sucesso via: ${modelName}`);
-        break; // Sai do loop imediatamente assim que a resposta der certo
+        for (let attempt = 0; attempt < 2; attempt += 1) {
+          try {
+            result = await model.startChat({ history: sanitizeHistory(chatHistory) })
+              .sendMessage(userMessage.trim());
+            selectedModel = modelName;
+            break;
+          } catch (error) {
+            lastGeminiError = error;
+            if (error?.status === 503 && attempt === 0) {
+              await new Promise((resolve) => setTimeout(resolve, 800));
+              continue;
+            }
+            throw error;
+          }
+        }
+        if (result) break;
       } catch (error) {
-        console.warn(`[Gemini API] O modelo ${modelName} falhou ou não está disponível. Tentando o próximo...`);
-        lastError = error;
+        lastGeminiError = error;
+        if (!isRetryableModelError(error)) throw error;
+        console.warn(`[Gemini] Modelo ${modelName} indisponível; tentando o próximo.`);
       }
     }
 
-    // Se varrer toda a lista e nenhum modelo funcionar, lança o erro para o catch principal
     if (!result) {
-      throw new Error(`Todos os modelos de fallback falharam. Último erro: ${lastError?.message}`);
+      const error = new Error('Nenhum modelo Gemini disponível para processar a solicitação.');
+      error.cause = lastGeminiError;
+      error.status = lastGeminiError?.status;
+      throw error;
     }
 
-    return res.status(200).json({ 
+    return res.status(200).json({
       response: result.response.text(),
-      liveContext // <-- ADICIONADO: Enviando os dados reais para os cards do front-end
+      liveContext,
+      model: selectedModel
     });
   } catch (error) {
     console.error('Erro na Serverless Function /api/chat:', error);
+    const errorMessage = error instanceof Error ? error.message : '';
+    const causeMessage = error?.cause instanceof Error ? error.cause.message : '';
+    const completeErrorMessage = `${errorMessage} ${causeMessage}`;
+    const errorStatus = error?.status || error?.cause?.status;
+    const isInvalidKey = completeErrorMessage.includes('API_KEY_INVALID') || completeErrorMessage.includes('API key not valid');
+    const isModelUnavailable = completeErrorMessage.includes('is not found') || completeErrorMessage.includes('NOT_FOUND');
+    const isOverloaded = errorStatus === 503 || completeErrorMessage.includes('high demand');
+    const isQuotaExceeded = errorStatus === 429 || completeErrorMessage.includes('quota');
+
+    if (isInvalidKey) {
+      return res.status(503).json({ error: 'A chave GEMINI_API_KEY é inválida ou expirou. Gere uma nova chave no Google AI Studio.' });
+    }
+
+    if (isModelUnavailable) {
+      return res.status(503).json({ error: 'O modelo Gemini configurado não está disponível para esta chave.' });
+    }
+
+    if (isOverloaded) {
+      return res.status(503).json({ error: 'O Gemini está temporariamente sobrecarregado. Tente novamente em alguns segundos.' });
+    }
+
+    if (isQuotaExceeded) {
+      return res.status(503).json({ error: 'A cota diária do Gemini foi atingida. Tente novamente mais tarde ou configure um projeto com faturamento.' });
+    }
+
     return res.status(500).json({ error: 'Erro ao gerar resposta.' });
   }
 }

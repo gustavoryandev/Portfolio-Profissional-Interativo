@@ -12,11 +12,30 @@ export default function App() {
   const [messages, setMessages] = useState([{ sender: 'ai', text: t('chat.boasVindas') }]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const messagesEndRef = useRef(null);
+  const messagesContainerRef = useRef(null);
+  const shouldAutoScrollRef = useRef(true);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    const container = messagesContainerRef.current;
+    if (!container || !shouldAutoScrollRef.current) return undefined;
+
+    const frame = requestAnimationFrame(() => {
+      container.scrollTo({
+        top: container.scrollHeight,
+        behavior: 'smooth'
+      });
+    });
+
+    return () => cancelAnimationFrame(frame);
   }, [messages, loading]);
+
+  const handleMessagesScroll = () => {
+    const container = messagesContainerRef.current;
+    if (!container) return;
+
+    const distanceFromBottom = container.scrollHeight - container.scrollTop - container.clientHeight;
+    shouldAutoScrollRef.current = distanceFromBottom < 96;
+  };
 
   useEffect(() => {
     setMessages([{ sender: 'ai', text: t('chat.boasVindas') }]);
@@ -28,6 +47,7 @@ export default function App() {
     if (!query || loading) return;
 
     const nextMessages = [...messages, { sender: 'user', text: query }];
+    shouldAutoScrollRef.current = true;
     setMessages(nextMessages);
     setInput('');
     setLoading(true);
@@ -39,11 +59,11 @@ export default function App() {
         context: data.liveContext,
         lang: i18n.language
       }]);
-    } catch {
+    } catch (error) {
       setMessages([...nextMessages, {
         sender: 'ai',
         tone: 'error',
-        text: 'ERRO: não foi possível processar sua pergunta agora. Tente novamente em instantes.'
+        text: `ERRO: ${error.message || 'não foi possível processar sua pergunta agora. Tente novamente em instantes.'}`
       }]);
     } finally {
       setLoading(false);
@@ -59,7 +79,11 @@ export default function App() {
 
       <div className="relative z-10 flex flex-col h-screen">
         <Navbar />
-        <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-6 overflow-y-auto px-4 py-8 sm:px-8 pb-48 no-scrollbar">
+        <main
+          ref={messagesContainerRef}
+          onScroll={handleMessagesScroll}
+          className="mx-auto flex min-h-0 w-full max-w-4xl flex-1 flex-col gap-6 overflow-y-auto px-4 py-8 pb-48 no-scrollbar sm:px-8"
+        >
           <div className="space-y-6">
             {messages.map((message, index) => <MessageBubble key={`${message.sender}-${index}`} message={message} />)}
             {loading && (
@@ -76,7 +100,6 @@ export default function App() {
                 </div>
               </div>
             )}
-            <div ref={messagesEndRef} />
           </div>
         </main>
 
