@@ -13,29 +13,18 @@ export default function App() {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const messagesContainerRef = useRef(null);
-  const shouldAutoScrollRef = useRef(true);
 
   useEffect(() => {
-    const container = messagesContainerRef.current;
-    if (!container || !shouldAutoScrollRef.current) return undefined;
-
-    const frame = requestAnimationFrame(() => {
-      container.scrollTo({
-        top: container.scrollHeight,
-        behavior: 'smooth'
-      });
-    });
-
-    return () => cancelAnimationFrame(frame);
+    if (messagesContainerRef.current) {
+      // O setTimeout garante que novos cards renderizem antes de calcular a altura total do scroll
+      setTimeout(() => {
+        messagesContainerRef.current.scrollTo({
+          top: messagesContainerRef.current.scrollHeight,
+          behavior: 'smooth'
+        });
+      }, 100);
+    }
   }, [messages, loading]);
-
-  const handleMessagesScroll = () => {
-    const container = messagesContainerRef.current;
-    if (!container) return;
-
-    const distanceFromBottom = container.scrollHeight - container.scrollTop - container.clientHeight;
-    shouldAutoScrollRef.current = distanceFromBottom < 96;
-  };
 
   useEffect(() => {
     setMessages([{ sender: 'ai', text: t('chat.boasVindas') }]);
@@ -47,7 +36,6 @@ export default function App() {
     if (!query || loading) return;
 
     const nextMessages = [...messages, { sender: 'user', text: query }];
-    shouldAutoScrollRef.current = true;
     setMessages(nextMessages);
     setInput('');
     setLoading(true);
@@ -59,11 +47,11 @@ export default function App() {
         context: data.liveContext,
         lang: i18n.language
       }]);
-    } catch (error) {
+    } catch {
       setMessages([...nextMessages, {
         sender: 'ai',
         tone: 'error',
-        text: `ERRO: ${error.message || 'não foi possível processar sua pergunta agora. Tente novamente em instantes.'}`
+        text: 'ERRO: não foi possível processar sua pergunta agora. Tente novamente em instantes.'
       }]);
     } finally {
       setLoading(false);
@@ -79,10 +67,9 @@ export default function App() {
 
       <div className="relative z-10 flex flex-col h-screen">
         <Navbar />
-        <main
+        <main 
           ref={messagesContainerRef}
-          onScroll={handleMessagesScroll}
-          className="mx-auto flex min-h-0 w-full max-w-4xl flex-1 flex-col gap-6 overflow-y-auto px-4 py-8 pb-48 no-scrollbar sm:px-8"
+          className="mx-auto flex min-h-0 w-full max-w-4xl flex-1 flex-col gap-6 overflow-y-auto px-4 py-8 sm:px-8 pb-48 no-scrollbar"
         >
           <div className="space-y-6">
             {messages.map((message, index) => <MessageBubble key={`${message.sender}-${index}`} message={message} />)}
@@ -105,7 +92,7 @@ export default function App() {
 
         {/* Input Bar e Prompts Flutuantes */}
         <div className="fixed bottom-8 left-1/2 -translate-x-1/2 w-[95%] max-w-4xl z-20 flex flex-col gap-3">
-          <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
+          <div className="flex gap-2 overflow-x-auto pb-3 pt-1 px-1 custom-scrollbar">
             {prompts.map((prompt) => (
               <button
                 key={prompt}

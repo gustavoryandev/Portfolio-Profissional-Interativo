@@ -52,3 +52,13 @@ letter-spacing: 0.12em;
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 .animate-spin-slow { animation: spin 3s linear infinite; }
+
+/* Nova barra de rolagem customizada para os prompts */
+.custom-scrollbar {
+scrollbar-width: thin;
+scrollbar-color: rgba(245, 158, 11, 0.4) transparent;
+}
+.custom-scrollbar::-webkit-scrollbar { height: 6px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(245, 158, 11, 0.4); border-radius: 10px; }
+.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(245, 158, 11, 0.7); }
