@@ -10,7 +10,7 @@ export default function ExperienceCard() {
     <article className="card-surface w-full max-w-lg p-5">
       <header className="mb-5 flex items-center gap-3">
         <BriefcaseBusiness className="text-amber-400" size={20} />
-        <h3 className="card-heading">{t('EXPERIENCE / TIMELINE', 'EXPERIENCE / TIMELINE')}</h3>
+        <h3 className="card-heading">{t('cards.experiencia.titulo')}</h3>
       </header>
       <ol className="relative ml-2 border-l border-amber-500/40">
         {perfil.experiencias.map((experience) => (

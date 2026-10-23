@@ -58,10 +58,10 @@ export default function StatsCard({ context }) {
       {/* CABEÇALHO */}
       <div className="mb-6 text-center sm:text-left">
         <h3 className={`text-2xl font-black tracking-tight text-amber-500`}>
-          Tempo programando
+          {t('cards.wakatime.tempoProgramando')}
         </h3>
         <p className={`text-[12px] font-mono mt-1 ${darkMode ? 'text-zinc-400' : 'text-gray-500'}`}>
-          Últimos {summary.totalDays || 7} dias • wakatime.com/@gustavoryan
+          {t('cards.wakatime.ultimosDias', { count: summary.totalDays || 7 })} • wakatime.com/@43529b87-73e1-4546-a267-d2bf1489e108
         </p>
       </div>
 
@@ -69,10 +69,10 @@ export default function StatsCard({ context }) {
         <>
           {/* HEADER METRICS (4 Blocos) */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-            <HeaderBlock icon={<Clock />} label="Total" value={summary.totalFormatted} sub={`em ${languages.length} linguagens`} />
-            <HeaderBlock icon={<Terminal />} label="Média Diária" value={summary.dailyAverageFormatted} sub="nos dias com código" />
-            <HeaderBlock icon={<Calendar />} label="Dias Ativos" value={summary.activeDays} sub={`de ${summary.totalDays} dias`} />
-            <HeaderBlock icon={<Code2 />} label="Editor" value={summary.topEditorName} sub={`${summary.topEditorPercent}% do tempo`} />
+            <HeaderBlock icon={<Clock />} label={t('cards.wakatime.total')} value={summary.totalFormatted} sub={t('cards.wakatime.emLinguagens', { count: languages.length })} />
+            <HeaderBlock icon={<Terminal />} label={t('cards.wakatime.mediaDiaria')} value={summary.dailyAverageFormatted} sub={t('cards.wakatime.nosDiasComCodigo')} />
+            <HeaderBlock icon={<Calendar />} label={t('cards.wakatime.diasAtivos')} value={summary.activeDays} sub={t('cards.wakatime.deDias', { count: summary.totalDays })} />
+            <HeaderBlock icon={<Code2 />} label={t('cards.wakatime.editor')} value={summary.topEditorName} sub={t('cards.wakatime.percentualTempo', { percent: summary.topEditorPercent })} />
           </div>
 
           {/* GRID DE LINGUAGENS */}
@@ -102,7 +102,7 @@ export default function StatsCard({ context }) {
         </>
       ) : (
         <div className={`py-12 text-center text-sm font-medium rounded-xl border border-dashed ${darkMode ? 'text-zinc-500 border-zinc-800' : 'text-zinc-400 border-gray-300'}`}>
-          Métricas do WakaTime indisponíveis no momento.
+          {t('cards.wakatime.indisponivel')}
         </div>
       )}
       

@@ -1,10 +1,12 @@
 import React, { useContext } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ExternalLink, FolderGit2, Star, GitFork } from 'lucide-react';
 import { ThemeContext } from '../context/ThemeContext';
 import perfil from '../data/perfil.json';
 
 export default function ProjectsCard({ context }) {
   const { darkMode } = useContext(ThemeContext);
+  const { t } = useTranslation();
   
   // Tenta pegar os repositórios ao vivo da API do Github.
   // Se a API falhar, cai de volta para os projetos fixos do perfil.json
@@ -23,9 +25,9 @@ export default function ProjectsCard({ context }) {
             <FolderGit2 className="h-5 w-5" />
           </div>
           <div>
-            <h3 className={`text-[17px] font-bold leading-tight ${darkMode ? 'text-gray-100' : 'text-gray-900'}`}>Projetos em Destaque</h3>
+            <h3 className={`text-[17px] font-bold leading-tight ${darkMode ? 'text-gray-100' : 'text-gray-900'}`}>{t('cards.projetos.titulo')}</h3>
             <p className={`text-[12px] font-medium ${darkMode ? 'text-zinc-400' : 'text-gray-500'}`}>
-              {liveRepos ? 'Sincronizado ao vivo do GitHub' : 'Projetos selecionados'}
+              {liveRepos ? t('cards.projetos.sincronizado') : t('cards.projetos.selecionados')}
             </p>
           </div>
         </div>

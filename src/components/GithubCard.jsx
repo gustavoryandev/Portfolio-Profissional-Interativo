@@ -48,7 +48,7 @@ export default function GithubCard({ context, lang = 'pt' }) {
           </div>
           <div>
             <h3 className={`text-[19px] font-black tracking-tight flex items-center gap-2 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-              GitHub Stats
+              {t('cards.github.titulo')}
             </h3>
             <a 
               href={`https://github.com/${profile.login || 'gustavoryan-del'}`} 
@@ -65,7 +65,7 @@ export default function GithubCard({ context, lang = 'pt' }) {
           <div className={`hidden sm:flex items-center gap-2.5 rounded-full border px-3 py-1.5 ${darkMode ? 'bg-[#141414] border-[#222]' : 'bg-white border-gray-300'}`}>
             <img src={profile.avatarUrl} alt="Avatar" className="w-6 h-6 rounded-full border border-amber-500/30" />
             <span className={`text-[11px] font-bold tracking-wide uppercase ${darkMode ? 'text-zinc-400' : 'text-gray-600'}`}>
-              No GitHub desde {profile.joinedYear || '2024'}
+              {t('cards.github.noGitHubDesde', { year: profile.joinedYear || '2024' })}
             </span>
           </div>
         )}
@@ -73,29 +73,29 @@ export default function GithubCard({ context, lang = 'pt' }) {
 
       {isConfigured ? (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <StatBox icon={<Zap />} label="Contribuições" value={stats.contributions} sub="nos últimos 12 meses" />
-          <StatBox icon={<GitCommit />} label="Commits" value={stats.commits} sub="nos últimos 12 meses" />
-          <StatBox icon={<GitPullRequest />} label="Pull Requests" value={stats.prs} sub="no total" />
-          <StatBox icon={<CircleDot />} label="Issues" value={stats.issues} sub="no total" />
-          <StatBox icon={<Star />} label="Estrelas" value={stats.stars} sub={`em ${stats.repos} repositórios`} />
-          <StatBox icon={<GitFork />} label="Forks" value={stats.forks} sub={`em ${stats.repos} repositórios`} />
-          <StatBox icon={<Users />} label="Seguidores" value={stats.followers} sub={`seguindo ${stats.following}`} />
-          <StatBox icon={<BookOpen />} label="Repositórios" value={stats.repos} sub="públicos" />
-          <StatBox icon={<Flame />} label="Seq. Atual" value={stats.currentStreak !== null ? `${stats.currentStreak} dias` : null} sub="ativo hoje!" />
-          <StatBox icon={<Trophy />} label="Maior Seq." value={stats.longestStreak !== null ? `${stats.longestStreak} dias` : null} sub="recorde pessoal" />
-          <StatBox icon={<Calendar />} label="Melhor Dia" value={stats.bestDay?.count} sub="neste ano" />
-          <StatBox icon={<Eye />} label="Visitas" value={null} sub="ao perfil" />
+          <StatBox icon={<Zap />} label={t('cards.github.contribuicoes')} value={stats.contributions} sub={t('cards.github.ultimos12Meses')} />
+          <StatBox icon={<GitCommit />} label={t('cards.github.commits')} value={stats.commits} sub={t('cards.github.ultimos12Meses')} />
+          <StatBox icon={<GitPullRequest />} label={t('cards.github.pullRequests')} value={stats.prs} sub={t('cards.github.noTotal')} />
+          <StatBox icon={<CircleDot />} label={t('cards.github.issues')} value={stats.issues} sub={t('cards.github.noTotal')} />
+          <StatBox icon={<Star />} label={t('cards.github.estrelas')} value={stats.stars} sub={t('cards.github.emRepositorios', { count: stats.repos })} />
+          <StatBox icon={<GitFork />} label={t('cards.github.forks')} value={stats.forks} sub={t('cards.github.emRepositorios', { count: stats.repos })} />
+          <StatBox icon={<Users />} label={t('cards.github.seguidores')} value={stats.followers} sub={t('cards.github.seguindo', { count: stats.following })} />
+          <StatBox icon={<BookOpen />} label={t('cards.github.repositorios')} value={stats.repos} sub={t('cards.github.publicos')} />
+          <StatBox icon={<Flame />} label={t('cards.github.sequenciaAtual')} value={stats.currentStreak !== null ? t('cards.github.dias', { count: stats.currentStreak }) : null} sub={t('cards.github.ativoHoje')} />
+          <StatBox icon={<Trophy />} label={t('cards.github.maiorSequencia')} value={stats.longestStreak !== null ? t('cards.github.dias', { count: stats.longestStreak }) : null} sub={t('cards.github.recordePessoal')} />
+          <StatBox icon={<Calendar />} label={t('cards.github.melhorDia')} value={stats.bestDay?.count} sub={t('cards.github.nesteAno')} />
+          <StatBox icon={<Eye />} label={t('cards.github.visitas')} value={null} sub={t('cards.github.aoPerfil')} />
         </div>
       ) : (
         <div className={`py-12 text-center text-sm font-medium rounded-xl border border-dashed ${darkMode ? 'text-zinc-500 border-zinc-800' : 'text-zinc-400 border-gray-300'}`}>
-          Métricas do GitHub indisponíveis ou não configuradas.
+          {t('cards.github.indisponivel')}
         </div>
       )}
       
       <div className={`mt-6 flex items-center justify-between border-t pt-4 ${darkMode ? 'border-[#222]' : 'border-gray-200'}`}>
         <span className={`text-[11px] font-bold tracking-widest uppercase flex items-center gap-2 ${darkMode ? 'text-zinc-500' : 'text-gray-400'}`}>
           <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></div>
-          Sincronizado via GraphQL
+          {t('cards.github.sincronizado')}
         </span>
         <a 
           href={`https://github.com/${profile.login || 'gustavoryan-del'}`} 
@@ -103,7 +103,7 @@ export default function GithubCard({ context, lang = 'pt' }) {
           rel="noreferrer" 
           className="flex items-center gap-1.5 text-[12px] font-bold text-amber-500 transition-colors hover:text-amber-400"
         >
-          {lang === 'pt' ? 'Ver Perfil' : 'View Profile'} <ExternalLink size={14} />
+          {t('cards.github.verPerfil')} <ExternalLink size={14} />
         </a>
       </div>
     </article>
