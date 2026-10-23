@@ -10,6 +10,9 @@ const sendMessage = async (userMessage, lang, chatHistory = []) => {
     return response.data;
   } catch (error) {
     console.error("Erro na requisição para /api/chat:", error);
+    if (error.response?.data?.error) {
+      throw new Error(error.response.data.error);
+    }
     throw error;
   }
 };

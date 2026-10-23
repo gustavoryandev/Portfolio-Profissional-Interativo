@@ -11,6 +11,10 @@ export default function Navbar() {
     i18n.changeLanguage(lang);
   };
 
+  const cvFile = i18n.language.startsWith('en')
+    ? '/Gustavo Ryan Resume (English).pdf'
+    : '/Currículo Gustavo Ryan.pdf';
+
   return (
     <header className={`relative z-10 px-8 py-5 flex items-center justify-between border-b transition-colors duration-300 ${darkMode ? 'bg-[#0a0a0a]/60 border-[#1f1f1f] backdrop-blur-md' : 'bg-white/80 border-gray-200 backdrop-blur-md'}`}>
       
@@ -60,8 +64,8 @@ export default function Navbar() {
 
         {/* Download do CV */}
         <a
-          href="/cv-gustavo.pdf"
-          download="cv-gustavo.pdf"
+          href={cvFile}
+          download={cvFile}
           className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold transition-all border ${darkMode ? 'bg-transparent border-amber-500 text-amber-500 hover:bg-amber-500/10' : 'bg-white border-zinc-300 text-zinc-900 hover:bg-zinc-50 shadow-sm'}`}
         >
           <Download className="w-4 h-4" />

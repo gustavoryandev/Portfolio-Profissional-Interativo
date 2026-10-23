@@ -1,67 +1,89 @@
 {
-  "nome": "Gustavo Ryan Gomes Guedes",
-  "nomeCurto": "Gustavo",
-  "cargo": "Graduando em Engenharia de Software (Full-Stack)",
-  "instituicao": "PUC Minas",
-  "semestreAtual": 2,
-  "localizacao": "Belo Horizonte, MG - Brasil",
-  "email": "gustavoryan.guedes@gmail.com",
-  "github": "gustavoryan-del",
-  "linkedin": "https://linkedin.com/in/gustavo-ryan-guedes",
-  "time": "Clube Atlético Mineiro (Galo)",
-  "bio": {
-    "pt": "Sou graduando em Engenharia de Software pela Pontifícia Universidade Católica de Minas Gerais (PUC Minas) e busco ativamente minha primeira oportunidade no mercado. Tenho o ecossistema Java (Spring Boot) como principal stack back-end, além de conhecimentos em Python, React, Tailwind CSS e Engenharia de Prompt para IA Generativa.",
-    "en": "I am a Software Engineering undergraduate at PUC Minas actively seeking my first industry opportunity. My primary stack is Java with Spring Boot for backend, alongside Python, React, Tailwind CSS, and Prompt Engineering for Generative AI."
-  },
-  "futsalBio": {
-    "pt": "Prático futebol desde os 7 anos com passagem marcante pelo futsal do Colégio Santo Antônio. Essa trajetória desenvolveu minha disciplina, trabalho em equipe, raciocínio lógico e tomada de decisão sob pressão.",
-    "en": "I've played soccer since age 7 with competitive futsal experience at Colégio Santo Antônio, developing strong discipline, teamwork, logical reasoning, and quick decision-making under pressure."
-  },
-  "skills": [
-    { "nome": "Java", "nivel": "Avançado", "categoria": "Backend" },
-    { "nome": "Spring Boot", "nivel": "Intermediário", "categoria": "Backend" },
-    { "nome": "Python", "nivel": "Intermediário", "categoria": "Backend" },
-    { "nome": "JavaScript / React", "nivel": "Intermediário", "categoria": "Frontend" },
-    { "nome": "Tailwind CSS", "nivel": "Intermediário", "categoria": "Frontend" },
-    { "nome": "Git & GitHub", "nivel": "Avançado", "categoria": "Ferramentas" }
-  ],
-  "projetos": [
-    {
-      "id": "portfolio",
-      "chavesI18n": {
-        "titulo": "projetos.portfolio_proj_title",
-        "descricao": "projetos.portfolio_proj_desc"
-      },
-      "techs": ["React", "Vite", "Tailwind CSS", "Gemini API", "i18next"],
-      "githubUrl": "https://github.com/gustavoryan-del/portfolio-chat"
-    },
-    {
-      "id": "geosolar",
-      "chavesI18n": {
-        "titulo": "projetos.geosolar_proj_title",
-        "descricao": "projetos.geosolar_proj_desc"
-      },
-      "techs": ["Java", "Spring Boot", "Thymeleaf", "MVC"],
-      "githubUrl": "https://github.com/gustavoryan-del"
-    },
-    {
-      "id": "carrinho-cli",
-      "chavesI18n": {
-        "titulo": "projetos.carrinho_proj_title",
-        "descricao": "projetos.carrinho_proj_desc"
-      },
-      "techs": ["Java", "POO", "CLI", "ArrayList"],
-      "githubUrl": "https://github.com/gustavoryan-del"
-    }
-  ],
-  "experiencias": [
-    {
-      "id": "voluntario-puc",
-      "empresa": "PUC Minas",
-      "cargoI18n": "experiencias.voluntario_puc_role",
-      "descricaoI18n": "experiencias.voluntario_puc_desc",
-      "skillsI18n": "experiencias.voluntario_puc_skills",
-      "periodo": "2024"
-    }
-  ]
+"nome": "Gustavo Ryan Gomes Guedes",
+"nomeCurto": "Gustavo",
+"cargo": "Graduando em Engenharia de Software (Full-Stack)",
+"instituicao": "PUC Minas",
+"semestreAtual": 2,
+"localizacao": "Belo Horizonte, MG - Brasil",
+"email": "gryangomesguedes@gmail.com",
+"github": "gustavoryan-del",
+"linkedin": "https://linkedin.com/in/gustavo-ryan-guedes",
+"time": "Clube Atlético Mineiro (Galo)",
+"bio": {
+"pt": "Sou graduando em Engenharia de Software pela Pontifícia Universidade Católica de Minas Gerais (PUC Minas) e busco ativamente minha primeira oportunidade no mercado. Tenho o ecossistema Java (Spring Boot) como principal stack back-end, além de conhecimentos em Python, React, Tailwind CSS e Engenharia de Prompt para IA Generativa.",
+"en": "I am a Software Engineering undergraduate at PUC Minas actively seeking my first industry opportunity. My primary stack is Java with Spring Boot for backend, alongside Python, React, Tailwind CSS, and Prompt Engineering for Generative AI."
+},
+"futsalBio": {
+"pt": "Prático futebol desde os 7 anos com passagem marcante pelo futsal do Colégio Santo Antônio. Essa trajetória desenvolveu minha disciplina, trabalho em equipe, raciocínio lógico e tomada de decisão sob pressão.",
+"en": "I've played soccer since age 7 with competitive futsal experience at Colégio Santo Antônio, developing strong discipline, teamwork, logical reasoning, and quick decision-making under pressure."
+},
+"skills": [
+{ "nome": "Java", "nivel": "Avançado", "categoria": "Backend" },
+{ "nome": "Spring Boot", "nivel": "Intermediário", "categoria": "Backend" },
+{ "nome": "Python", "nivel": "Intermediário", "categoria": "Backend" },
+{ "nome": "JavaScript / React", "nivel": "Intermediário", "categoria": "Frontend" },
+{ "nome": "Tailwind CSS", "nivel": "Intermediário", "categoria": "Frontend" },
+{ "nome": "Git & GitHub", "nivel": "Avançado", "categoria": "Ferramentas" }
+],
+"disciplinas": {
+"cursando": [
+"Programação Modular (Teórica)",
+"Programação Modular (Laboratório)",
+"Arquitetura de Computadores",
+"Cálculo I",
+"Trabalho Interdisciplinar",
+"Interação Humano-Computador",
+"Metodologia de Extensão",
+"Introdução à Pesquisa",
+"Desenvolvimento e Integração de Aplicações Web"
+],
+"concluidas": [
+"Introdução a Algoritmos (Teórica)",
+"Introdução a Algoritmos (Laboratório)",
+"Computabilidade",
+"Desenvolvimento de Interfaces Web",
+"Filosofia: Lógica e Pensamento Crítico",
+"Fundamentos de Engenharia de Software",
+"Introdução à Computação"
+]
+},
+"projetos": [
+{
+"id": "portfolio",
+"chavesI18n": {
+"titulo": "projetos.portfolio_proj_title",
+"descricao": "projetos.portfolio_proj_desc"
+},
+"techs": ["React", "Vite", "Tailwind CSS", "Gemini API", "i18next"],
+"githubUrl": "https://github.com/gustavoryan-del/portfolio-chat"
+},
+{
+"id": "geosolar",
+"chavesI18n": {
+"titulo": "projetos.geosolar_proj_title",
+"descricao": "projetos.geosolar_proj_desc"
+},
+"techs": ["Java", "Spring Boot", "Thymeleaf", "MVC"],
+"githubUrl": "https://github.com/gustavoryan-del"
+},
+{
+"id": "carrinho-cli",
+"chavesI18n": {
+"titulo": "projetos.carrinho_proj_title",
+"descricao": "projetos.carrinho_proj_desc"
+},
+"techs": ["Java", "POO", "CLI", "ArrayList"],
+"githubUrl": "https://github.com/gustavoryan-del"
+}
+],
+"experiencias": [
+{
+"id": "voluntario-puc",
+"empresa": "PUC Minas",
+"cargoI18n": "experiencias.voluntario_puc_role",
+"descricaoI18n": "experiencias.voluntario_puc_desc",
+"skillsI18n": "experiencias.voluntario_puc_skills",
+"periodo": "2026-2026"
+}
+]
 }

@@ -12,10 +12,18 @@ export default function App() {
   const [messages, setMessages] = useState([{ sender: 'ai', text: t('chat.boasVindas') }]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const messagesEndRef = useRef(null);
+  const messagesContainerRef = useRef(null);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (messagesContainerRef.current) {
+      // O setTimeout garante que novos cards renderizem antes de calcular a altura total do scroll
+      setTimeout(() => {
+        messagesContainerRef.current.scrollTo({
+          top: messagesContainerRef.current.scrollHeight,
+          behavior: 'smooth'
+        });
+      }, 100);
+    }
   }, [messages, loading]);
 
   useEffect(() => {
@@ -59,7 +67,10 @@ export default function App() {
 
       <div className="relative z-10 flex flex-col h-screen">
         <Navbar />
-        <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-6 overflow-y-auto px-4 py-8 sm:px-8 pb-48 no-scrollbar">
+        <main 
+          ref={messagesContainerRef}
+          className="mx-auto flex min-h-0 w-full max-w-4xl flex-1 flex-col gap-6 overflow-y-auto px-4 py-8 sm:px-8 pb-48 no-scrollbar"
+        >
           <div className="space-y-6">
             {messages.map((message, index) => <MessageBubble key={`${message.sender}-${index}`} message={message} />)}
             {loading && (
@@ -76,13 +87,12 @@ export default function App() {
                 </div>
               </div>
             )}
-            <div ref={messagesEndRef} />
           </div>
         </main>
 
         {/* Input Bar e Prompts Flutuantes */}
         <div className="fixed bottom-8 left-1/2 -translate-x-1/2 w-[95%] max-w-4xl z-20 flex flex-col gap-3">
-          <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
+          <div className="flex gap-2 overflow-x-auto pb-3 pt-1 px-1 custom-scrollbar">
             {prompts.map((prompt) => (
               <button
                 key={prompt}
