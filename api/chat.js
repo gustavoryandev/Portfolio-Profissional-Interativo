@@ -6,51 +6,55 @@ import dotenv from 'dotenv';
 
 dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 
-// Timeout super rápido de 3.5s para evitar que as APIs atrasem o chat
-const client = axios.create({ timeout: 3500 });
+const client = axios.create({ timeout: 8000 });
+const fallbackLanguage = 'I can only communicate in Portuguese or English. Please choose one of these languages.';
 
-// CACHE GLOBAL: Lembra qual modelo funcionou para não pesquisar de novo!
-let cachedWorkingModel = null;
+const fallbackModels = [
+  'gemini-3.8-flash',
+  'gemini-3.7-flash',
+  'gemini-3.6-flash',
+  'gemini-3.1-flash',
+  'gemini-2.5-flash',
+  'gemini-2.0-flash',
+  'gemini-1.5-flash'
+];
 
-async function getBestAvailableModel(apiKey) {
-  if (cachedWorkingModel) return cachedWorkingModel; // Se já sabe qual funciona, usa direto (Instantâneo)
-
-  try {
-    // Pergunta pro Google quais modelos a sua chave específica pode usar
-    const response = await axios.get('https://generativelanguage.googleapis.com/v1beta/models', {
-      headers: { 'x-goog-api-key': apiKey },
-      timeout: 5000
-    });
-    
-    const models = response.data.models || [];
-    
-    // FILTRO RIGOROSO: Pega os modelos flash, mas BLOQUEIA modelos experimentais e "omni" que têm cota zero no plano gratuito!
-    const validModels = models
-      .map(m => m.name.replace('models/', ''))
-      .filter(name => 
-        name.includes('flash') && 
-        !name.includes('vision') &&
-        !name.includes('omni') && 
-        !name.includes('preview') && 
-        !name.includes('exp')
-      );
-    
-    if (validModels.length > 0) {
-      // Ordena decrescente para pegar a versão mais nova oficial (ex: 3.1 antes de 1.5)
-      validModels.sort((a, b) => b.localeCompare(a));
-      cachedWorkingModel = validModels[0];
-      console.log('[Gemini] Modelo Oficial detectado e salvo em cache:', cachedWorkingModel);
-      return cachedWorkingModel;
-    }
-  } catch (error) {
-    console.warn('[Gemini] Falha ao descobrir modelos:', error.message);
-  }
-  
-  // Fallback extremo
-  return 'gemini-1.5-flash'; 
+function modelPriority(name) {
+  const normalized = name.toLowerCase();
+  const familyScore = normalized.includes('flash') ? 0 : 100;
+  const version = normalized.match(/gemini-(\d+)(?:\.(\d+))?/);
+  const versionScore = version ? Number(version[1]) * 10 + Number(version[2] || 0) : 0;
+  const previewPenalty = normalized.includes('preview') ? 10 : 0;
+  return familyScore - versionScore + previewPenalty;
 }
 
-const fallbackLanguage = 'I can only communicate in Portuguese or English. Please choose one of these languages.';
+async function discoverModels(apiKey) {
+  try {
+    const response = await client.get('https://generativelanguage.googleapis.com/v1beta/models', {
+      headers: { 'x-goog-api-key': apiKey },
+      params: { pageSize: 100 }
+    });
+    const models = response.data.models
+      ?.filter((model) => model.supportedGenerationMethods?.includes('generateContent'))
+      .map((model) => model.name.replace(/^models\//, ''))
+      .filter((name) => /^gemini-\d+(?:\.\d+)?-(?:flash|pro)(?:-(?:latest|preview|001))?$/i.test(name));
+
+    if (!models?.length) return [];
+    return [...new Set(models)].sort((left, right) => modelPriority(left) - modelPriority(right));
+  } catch (error) {
+    console.warn('[Gemini] Não foi possível descobrir modelos disponíveis:', error.message);
+    return [];
+  }
+}
+
+function isRetryableModelError(error) {
+  const message = error instanceof Error ? error.message : '';
+  return [404, 429, 500, 502, 503, 504].includes(error?.status)
+    || message.includes('is not found')
+    || message.includes('high demand')
+    || message.includes('quota')
+    || message.includes('Developer instruction is not enabled');
+}
 
 function readJson(fileName) {
   const directories = [
@@ -66,7 +70,6 @@ function readJson(fileName) {
 async function fetchSpotify() {
   const { SPOTIFY_CLIENT_ID: id, SPOTIFY_CLIENT_SECRET: secret, SPOTIFY_REFRESH_TOKEN: refresh } = process.env;
   if (!id || !secret || !refresh) return { status: 'not_configured' };
-
   try {
     const tokenResponse = await client.post(
       'https://accounts.spotify.com/api/token',
@@ -88,116 +91,150 @@ async function fetchSpotify() {
       track: item?.name,
       artists: item?.artists?.map((artist) => artist.name)
     };
-  } catch (error) {
-    console.warn('[Spotify] Erro na API:', error.message);
-    return { status: 'error', message: 'Spotify indisponível' };
-  }
+  } catch (e) { return { status: 'error' }; }
 }
 
+// FETCH GITHUB SUPER RÁPIDO VIA GRAPHQL (Todas as métricas reais em 1 requisição leve)
 async function fetchGithub() {
   const { GITHUB_USERNAME: username, GITHUB_TOKEN: token } = process.env;
-  if (!username) return { status: 'not_configured' };
+  if (!username || !token || token === '******') return { status: 'not_configured' };
   
-  const headers = {
-    Accept: 'application/vnd.github+json',
-    ...(token && token !== '******' ? { Authorization: `Bearer ${token}` } : {})
-  };
-
   try {
-    const [userResponse, reposResponse] = await Promise.all([
-      client.get(`https://api.github.com/users/${encodeURIComponent(username)}`, { headers }),
-      client.get(`https://api.github.com/users/${encodeURIComponent(username)}/repos?sort=updated&per_page=20`, { headers })
-    ]);
+    const query = `
+      query {
+        user(login: "${username}") {
+          name login avatarUrl createdAt
+          followers { totalCount }
+          following { totalCount }
+          repositories(first: 100, ownerAffiliations: OWNER, isFork: false, privacy: PUBLIC) {
+            totalCount
+            nodes { stargazerCount forkCount }
+          }
+          pullRequests { totalCount }
+          issues { totalCount }
+          contributionsCollection {
+            totalCommitContributions
+            contributionCalendar {
+              totalContributions
+              weeks { contributionDays { contributionCount date } }
+            }
+          }
+        }
+      }
+    `;
 
-    const repos = reposResponse.data;
-    const totalStars = repos.reduce((acc, repo) => acc + (repo.stargazers_count || 0), 0);
+    const response = await client.post('https://api.github.com/graphql', { query }, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    const user = response.data.data.user;
+    const repos = user.repositories.nodes;
+    const stars = repos.reduce((acc, r) => acc + r.stargazerCount, 0);
+    const forks = repos.reduce((acc, r) => acc + r.forkCount, 0);
+    
+    // Processando as Ofensivas (Streaks) localmente bem rápido
+    const days = user.contributionsCollection.contributionCalendar.weeks.flatMap(w => w.contributionDays);
+    let longestStreak = 0, currentStreak = 0, tempStreak = 0;
+    let bestDay = { count: 0, date: null };
+
+    days.forEach(day => {
+      if (day.contributionCount > bestDay.count) bestDay = { count: day.contributionCount, date: day.date };
+      if (day.contributionCount > 0) {
+        tempStreak++;
+        longestStreak = Math.max(longestStreak, tempStreak);
+      } else { tempStreak = 0; }
+    });
+
+    for (let i = days.length - 1; i >= 0; i--) {
+      if (days[i].contributionCount > 0) currentStreak++;
+      else if (i < days.length - 1) break;
+    }
 
     return {
       status: 'ok',
-      profile: {
-        avatar: userResponse.data.avatar_url,
-        followers: userResponse.data.followers,
-        public_repos: userResponse.data.public_repos,
-        bio: userResponse.data.bio
-      },
-      stats: { totalStars },
-      repositories: repos
-        .filter(repo => !repo.fork)
-        .map(({ name, description, language, stargazers_count: stars, html_url: url, homepage }) => ({
-          name, description, language, stars, url, homepage
-        }))
-        .sort((a, b) => b.stars - a.stars)
+      profile: { login: user.login, name: user.name, avatarUrl: user.avatarUrl, joinedYear: new Date(user.createdAt).getFullYear() },
+      stats: {
+        followers: user.followers.totalCount, following: user.following.totalCount, repos: user.repositories.totalCount,
+        stars, forks, commits: user.contributionsCollection.totalCommitContributions,
+        contributions: user.contributionsCollection.contributionCalendar.totalContributions,
+        prs: user.pullRequests.totalCount, issues: user.issues.totalCount,
+        currentStreak, longestStreak, bestDay
+      }
     };
-  } catch (error) {
-    console.warn('[GitHub] Erro na API:', error.message);
-    return { status: 'error', message: 'GitHub indisponível' };
-  }
+  } catch (e) { return { status: 'error' }; }
 }
 
 async function fetchWakatime() {
   const { WAKATIME_API_KEY: key } = process.env;
   if (!key) return { status: 'not_configured' };
-  
   try {
     const end = new Date();
     const start = new Date(end);
     start.setDate(end.getDate() - 7);
+    
     const response = await client.get('https://wakatime.com/api/v1/users/current/summaries', {
       params: { start: start.toISOString().slice(0, 10), end: end.toISOString().slice(0, 10) },
       auth: { username: key, password: '' }
     });
+
+    const data = response.data.data || [];
+    let totalSeconds = 0;
+    let activeDays = 0;
+    const langMap = {};
+    const editorMap = {};
+
+    data.forEach(day => {
+      const secs = day.grand_total?.total_seconds || 0;
+      if (secs > 0) activeDays++;
+      totalSeconds += secs;
+
+      day.languages?.forEach(l => { langMap[l.name] = (langMap[l.name] || 0) + l.total_seconds; });
+      day.editors?.forEach(e => { editorMap[e.name] = (editorMap[e.name] || 0) + e.total_seconds; });
+    });
+
+    const formatTime = (secs) => `${Math.floor(secs / 3600)}h ${Math.floor((secs % 3600) / 60)}m`;
+    const sortedLangs = Object.entries(langMap).sort((a, b) => b[1] - a[1]).slice(0, 10).map(([name, secs]) => ({
+      name, seconds: secs, percent: ((secs / totalSeconds) * 100).toFixed(1), formatted: formatTime(secs)
+    }));
+    const topEditor = Object.entries(editorMap).sort((a, b) => b[1] - a[1])[0];
+
     return {
       status: 'ok',
-      days: response.data.data?.map((day) => ({
-        date: day.range?.date,
-        totalSeconds: day.grand_total?.total_seconds,
-        readable: day.grand_total?.text
-      }))
+      summary: {
+        totalFormatted: formatTime(totalSeconds),
+        dailyAverageFormatted: formatTime(activeDays > 0 ? totalSeconds / activeDays : 0),
+        activeDays,
+        totalDays: data.length,
+        topEditorName: topEditor ? topEditor[0] : '--',
+        topEditorPercent: topEditor ? ((topEditor[1] / totalSeconds) * 100).toFixed(1) : 0
+      },
+      languages: sortedLangs
     };
-  } catch (error) {
-    console.warn('[Wakatime] Erro na API:', error.message);
-    return { status: 'error', message: 'Wakatime indisponível' };
-  }
+  } catch (e) { return { status: 'error' }; }
 }
 
 async function fetchCanvas() {
   const { CANVAS_API_TOKEN: token, CANVAS_BASE_URL: baseUrl } = process.env;
   if (!token || !baseUrl) return { status: 'not_configured' };
-  
   try {
     const response = await client.get(`${baseUrl.replace(/\/$/, '')}/api/v1/courses`, {
-      params: { enrollment_state: 'active', per_page: 10 },
+      params: { enrollment_state: 'active', per_page: 5 },
       headers: { Authorization: `Bearer ${token}` }
     });
-    return {
-      status: 'ok',
-      courses: response.data.map(({ id, name, course_code: code, workflow_state: state }) => ({
-        id, name, code, state
-      }))
-    };
-  } catch (error) {
-    console.warn('[Canvas] Erro na API:', error.message);
-    return { status: 'error', message: 'Canvas indisponível' };
-  }
+    return { status: 'ok', courses: response.data.map(({ name, course_code: code, workflow_state: state }) => ({ name, code, state })) };
+  } catch (e) { return { status: 'error' }; }
 }
 
 async function fetchLiveContext() {
   const sources = { spotify: fetchSpotify, github: fetchGithub, wakatime: fetchWakatime, canvas: fetchCanvas };
-  const entries = await Promise.all(Object.entries(sources).map(async ([name, fetcher]) => {
-    try {
-      return [name, await fetcher()];
-    } catch (error) {
-      console.warn(`[Live context] ${name} falhou criticamente:`, error.message);
-      return [name, { status: 'error', message: 'Integration unavailable' }];
-    }
-  }));
+  const entries = await Promise.all(Object.entries(sources).map(async ([name, fetcher]) => [name, await fetcher()]));
   return Object.fromEntries(entries);
 }
 
 function sanitizeHistory(history) {
   if (!Array.isArray(history)) return [];
   const grouped = [];
-  for (const message of history.slice(-10)) {
+  for (const message of history.slice(-6)) {
     const text = typeof message?.text === 'string' ? message.text.trim() : '';
     if (!text) continue;
     const role = message.sender === 'user' ? 'user' : 'model';
@@ -217,68 +254,89 @@ export default async function handler(req, res) {
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body || {};
     const { userMessage, lang = 'pt', chatHistory = [] } = body;
     
-    if (typeof userMessage !== 'string' || !userMessage.trim()) {
-      return res.status(400).json({ error: 'Mensagem do usuário é obrigatória.' });
-    }
-    if (!process.env.GEMINI_API_KEY) {
-      return res.status(500).json({ error: 'GEMINI_API_KEY não configurada no servidor.' });
-    }
+    if (typeof userMessage !== 'string' || !userMessage.trim()) return res.status(400).json({ error: 'Mensagem inválida.' });
+    if (!process.env.GEMINI_API_KEY) return res.status(500).json({ error: 'GEMINI_API_KEY não configurada.' });
 
     const perfil = readJson('perfil.json');
-    const pt = readJson('pt.json');
-    const en = readJson('en.json');
     const liveContext = await fetchLiveContext();
 
+    // A MÁGICA DOS TOKENS: IA lê só esse resuminho, então nunca vai dar 429 Too Many Requests
+    const geminiContext = {
+      spotify: { status: liveContext.spotify?.status, track: liveContext.spotify?.track },
+      github: { status: liveContext.github?.status },
+      wakatime: { status: liveContext.wakatime?.status },
+      canvas: { status: liveContext.canvas?.status, activeCourses: liveContext.canvas?.courses?.length || 0 }
+    };
+
     const systemInstruction = `Você é o assistente virtual do portfólio de Gustavo Ryan Gomes Guedes.
-Responda de forma concisa, técnica e amigável no idioma da pergunta.
-Para qualquer idioma diferente de português ou inglês, responda exatamente: "${fallbackLanguage}"
-Use somente os dados fornecidos e não invente dados de integrações indisponíveis.
-Inclua as tags literais [SPOTIFY_CARD], [GITHUB_CARD], [STATS_CARD], [CANVAS_CARD], [GALO_CARD],
-[CONTACT_FORM], [PROJECTS_CARD] ou [EXPERIENCE_CARD] quando o assunto correspondente aparecer.
+Responda de forma concisa e amigável. Idiomas fora do escopo: "${fallbackLanguage}"
 
-PERFIL:
-${JSON.stringify(perfil)}
+REGRA DE CARDS VISUAIS (Sempre inclua a tag no meio do texto quando o assunto for abordado):
+- Faculdade, PUC Minas, Matérias, Estudos -> [CANVAS_CARD]
+- Trabalhos, Experiência Profissional, Voluntariado -> [EXPERIENCE_CARD]
+- Projetos de Programação -> [PROJECTS_CARD]
+- GitHub, Repositórios, Commits -> [GITHUB_CARD]
+- WakaTime, Tempo de código, Linguagens -> [STATS_CARD]
+- Música, Spotify -> [SPOTIFY_CARD]
+- Futebol, Galo -> [GALO_CARD]
+- Contato, Falar com Gustavo -> [CONTACT_FORM]
 
-TRADUÇÕES:
-${JSON.stringify({ pt, en })}
+ATENÇÃO CRÍTICA SOBRE A FACULDADE:
+1. Se perguntarem sobre os estudos, liste TODAS as matérias do 2º período de Engenharia de Software da PUC Minas que o Gustavo cursa. Use os dados do perfil completo!
+2. Esclareça brevemente no texto que o card abaixo exibe apenas as salas virtuais que estão ativamente sincronizadas na plataforma Canvas no momento.
+3. OBRIGATORIAMENTE inclua a tag [CANVAS_CARD].
 
-DADOS AO VIVO:
-${JSON.stringify(liveContext)}`;
+DADOS COMPLETOS DO PERFIL: ${JSON.stringify(perfil)}
+STATUS DAS APIS: ${JSON.stringify(geminiContext)}`;
 
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+    const availableModels = await discoverModels(process.env.GEMINI_API_KEY);
+    const modelsToTry = [...new Set([...availableModels, ...fallbackModels])];
     
-    // Descobre dinamicamente qual é o melhor modelo pra sua chave
-    const modelName = await getBestAvailableModel(process.env.GEMINI_API_KEY);
+    let result;
+    let selectedModel;
+    let lastGeminiError;
 
-    const model = genAI.getGenerativeModel({ 
-      model: modelName, 
-      systemInstruction 
-    });
+    for (const modelName of modelsToTry) {
+      const model = genAI.getGenerativeModel({ model: modelName, systemInstruction });
+      try {
+        for (let attempt = 0; attempt < 2; attempt += 1) {
+          try {
+            result = await model.startChat({ history: sanitizeHistory(chatHistory) }).sendMessage(userMessage.trim());
+            selectedModel = modelName;
+            break;
+          } catch (error) {
+            lastGeminiError = error;
+            if (error?.status === 503 && attempt === 0) {
+              await new Promise((resolve) => setTimeout(resolve, 800));
+              continue;
+            }
+            throw error;
+          }
+        }
+        if (result) break;
+      } catch (error) {
+        lastGeminiError = error;
+        if (!isRetryableModelError(error)) throw error;
+        console.warn(`[Gemini] Modelo ${modelName} indisponível; tentando o próximo.`);
+      }
+    }
 
-    const result = await model.startChat({ history: sanitizeHistory(chatHistory) })
-      .sendMessage(userMessage.trim());
+    if (!result) {
+      throw lastGeminiError || new Error('Nenhum modelo Gemini disponível.');
+    }
 
     return res.status(200).json({
       response: result.response.text(),
-      liveContext,
-      model: modelName
+      liveContext, 
+      model: selectedModel
     });
-
   } catch (error) {
-    console.error('Erro na API do Gemini:', error);
-    
-    const errorMessage = error instanceof Error ? error.message : '';
-    const status = error?.status;
-    
-    if (errorMessage.includes('API_KEY_INVALID')) {
-      return res.status(503).json({ error: 'Sua chave de API do Gemini expirou ou é inválida.' });
-    }
-    
-    // Tratamento específico para o Erro 429 (Cota Excedida)
-    if (status === 429 || errorMessage.includes('quota') || errorMessage.includes('Too Many Requests')) {
-      return res.status(503).json({ error: 'LIMITE ATINGIDO: A cota gratuita da IA acabou. Por favor, gere uma nova chave de API ou aguarde 24h.' });
-    }
-    
-    return res.status(503).json({ error: 'Os servidores da IA estão ocupados. Tente novamente em instantes!' });
+    console.error('Erro na Serverless /api/chat:', error.message);
+    const errStr = error.message + ' ' + (error?.cause?.message || '');
+    if (errStr.includes('API_KEY_INVALID')) return res.status(503).json({ error: 'Chave Gemini inválida.' });
+    if (error?.status === 503 || errStr.includes('high demand')) return res.status(503).json({ error: 'O Gemini está temporariamente sobrecarregado.' });
+    if (error?.status === 429 || errStr.includes('quota')) return res.status(503).json({ error: 'A cota diária do Gemini foi atingida.' });
+    return res.status(500).json({ error: 'Erro ao gerar resposta. Tente novamente em instantes.' });
   }
 }
