@@ -9,6 +9,7 @@ import GaloCard from './GaloCard';
 import ContactSection from './ContactSection';
 import ProjectsCard from './ProjectsCard';
 import ExperienceCard from './ExperienceCard';
+import RepositoriesCard from './RepositoriesCards';
 
 const cards = {
   '[SPOTIFY_CARD]': SpotifyCard,
@@ -18,17 +19,17 @@ const cards = {
   '[GALO_CARD]': GaloCard,
   '[CONTACT_FORM]': ContactSection,
   '[PROJECTS_CARD]': ProjectsCard,
-  '[EXPERIENCE_CARD]': ExperienceCard
+  '[EXPERIENCE_CARD]': ExperienceCard,
+  '[REPOSITORIES_CARD]': RepositoriesCard
 };
 
 export default function MessageBubble({ message }) {
   const { darkMode } = useContext(ThemeContext);
   const isUser = message?.sender === 'user';
-  
-  // Regex corrigida para identificar as tags dos cards corretamente
-  const parts = (message?.text || '').split(
-    /(\[(?:SPOTIFY|GITHUB|STATS|CANVAS|GALO|PROJECTS|EXPERIENCE)_CARD\]|\[CONTACT_FORM\])/g
-  );
+  const parts = (message?.text || '').split(/(\[(?:SPOTIFY|GITHUB|STATS|CANVAS|GALO|PROJECTS|EXPERIENCE|REPOSITORIES)_CARD\]|\[CONTACT_FORM\])/g);
+
+// ... existing code ...
+
 
   return (
     <div className={`flex w-full ${isUser ? 'justify-end' : 'justify-start'} gap-3 my-2`}>

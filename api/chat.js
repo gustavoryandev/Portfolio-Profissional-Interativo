@@ -81,20 +81,48 @@ async function fetchSpotify() {
         }
       }
     );
-    const response = await client.get('https://api.spotify.com/v1/me/player', {
-      headers: { Authorization: `Bearer ${tokenResponse.data.access_token}` }
+    
+    const token = tokenResponse.data.access_token;
+    const headers = { Authorization: `Bearer ${token}` };
+
+    // Dispara as 4 consultas simultaneamente para carregar o novo layout
+    const [currentRes, recentRes, tracksRes, artistsRes] = await Promise.allSettled([
+      client.get('https://api.spotify.com/v1/me/player/currently-playing', { headers }),
+      client.get('https://api.spotify.com/v1/me/player/recently-played?limit=15', { headers }),
+      client.get('https://api.spotify.com/v1/me/top/tracks?limit=5&time_range=short_term', { headers }),
+      client.get('https://api.spotify.com/v1/me/top/artists?limit=5&time_range=short_term', { headers })
+    ]);
+
+    const formatTrack = (t) => ({
+      name: t.name,
+      artists: t.artists.map(a => a.name).join(', '),
+      image: t.album.images[2]?.url || t.album.images[0]?.url,
+      url: t.external_urls.spotify,
+      explicit: t.explicit
     });
-    const item = response.status === 204 ? null : response.data.item;
-    return {
-      status: 'ok',
-      playing: response.status !== 204 && response.data.is_playing,
-      track: item?.name,
-      artists: item?.artists?.map((artist) => artist.name)
-    };
+
+    let current = null;
+    if (currentRes.status === 'fulfilled' && currentRes.value.status === 200 && currentRes.value.data.item) {
+      current = formatTrack(currentRes.value.data.item);
+      current.isPlaying = currentRes.value.data.is_playing;
+    }
+
+    const recentRaw = recentRes.status === 'fulfilled' && recentRes.value.data.items ? recentRes.value.data.items.map(i => formatTrack(i.track)) : [];
+    const recent = recentRaw.filter((t, i, arr) => i === 0 || t.name !== arr[i-1].name).slice(0, 5);
+    
+    const topTracks = tracksRes.status === 'fulfilled' && tracksRes.value.data.items ? tracksRes.value.data.items.map(formatTrack) : [];
+    
+    const topArtists = artistsRes.status === 'fulfilled' && artistsRes.value.data.items ? artistsRes.value.data.items.map(a => ({
+      name: a.name,
+      image: a.images[2]?.url || a.images[0]?.url,
+      url: a.external_urls.spotify
+    })) : [];
+
+    return { status: 'ok', current, recent, topTracks, topArtists };
   } catch (e) { return { status: 'error' }; }
 }
 
-// FETCH GITHUB SUPER RÁPIDO VIA GRAPHQL (Todas as métricas reais em 1 requisição leve)
+// FETCH GITHUB SUPER RÁPIDO VIA GRAPHQL (Agora trazendo dados para o RepositoriesCard)
 async function fetchGithub() {
   const { GITHUB_USERNAME: username, GITHUB_TOKEN: token } = process.env;
   if (!username || !token || token === '******') return { status: 'not_configured' };
@@ -106,9 +134,16 @@ async function fetchGithub() {
           name login avatarUrl createdAt
           followers { totalCount }
           following { totalCount }
-          repositories(first: 100, ownerAffiliations: OWNER, isFork: false, privacy: PUBLIC) {
+          repositories(first: 10, ownerAffiliations: OWNER, isFork: false, privacy: PUBLIC, orderBy: {field: STARGAZERS, direction: DESC}) {
             totalCount
-            nodes { stargazerCount forkCount }
+            nodes { 
+              name 
+              description 
+              url 
+              stargazerCount 
+              forkCount 
+              primaryLanguage { name }
+            }
           }
           pullRequests { totalCount }
           issues { totalCount }
@@ -129,6 +164,7 @@ async function fetchGithub() {
 
     const user = response.data.data.user;
     const repos = user.repositories.nodes;
+    
     const stars = repos.reduce((acc, r) => acc + r.stargazerCount, 0);
     const forks = repos.reduce((acc, r) => acc + r.forkCount, 0);
     
@@ -150,6 +186,16 @@ async function fetchGithub() {
       else if (i < days.length - 1) break;
     }
 
+    // Formatando os repositórios para enviar ao frontend
+    const formattedRepos = repos.map(repo => ({
+      name: repo.name,
+      description: repo.description,
+      url: repo.url,
+      stars: repo.stargazerCount,
+      forks: repo.forkCount,
+      language: repo.primaryLanguage ? repo.primaryLanguage.name : null
+    }));
+
     return {
       status: 'ok',
       profile: { login: user.login, name: user.name, avatarUrl: user.avatarUrl, joinedYear: new Date(user.createdAt).getFullYear() },
@@ -159,10 +205,13 @@ async function fetchGithub() {
         contributions: user.contributionsCollection.contributionCalendar.totalContributions,
         prs: user.pullRequests.totalCount, issues: user.issues.totalCount,
         currentStreak, longestStreak, bestDay
-      }
+      },
+      // A mágica acontece aqui: enviando a lista de repositórios ao frontend!
+      repositories: formattedRepos 
     };
   } catch (e) { return { status: 'error' }; }
 }
+
 
 async function fetchWakatime() {
   const { WAKATIME_API_KEY: key } = process.env;
@@ -171,7 +220,7 @@ async function fetchWakatime() {
     const end = new Date();
     const start = new Date(end);
     start.setDate(end.getDate() - 7);
-    
+
     const response = await client.get('https://wakatime.com/api/v1/users/current/summaries', {
       params: { start: start.toISOString().slice(0, 10), end: end.toISOString().slice(0, 10) },
       auth: { username: key, password: '' }
@@ -253,7 +302,7 @@ export default async function handler(req, res) {
   try {
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body || {};
     const { userMessage, lang = 'pt', chatHistory = [] } = body;
-    
+
     if (typeof userMessage !== 'string' || !userMessage.trim()) return res.status(400).json({ error: 'Mensagem inválida.' });
     if (!process.env.GEMINI_API_KEY) return res.status(500).json({ error: 'GEMINI_API_KEY não configurada.' });
 
@@ -262,7 +311,7 @@ export default async function handler(req, res) {
 
     // A MÁGICA DOS TOKENS: IA lê só esse resuminho, então nunca vai dar 429 Too Many Requests
     const geminiContext = {
-      spotify: { status: liveContext.spotify?.status, track: liveContext.spotify?.track },
+      spotify: { status: liveContext.spotify?.status, playing: liveContext.spotify?.current?.name || 'offline' },
       github: { status: liveContext.github?.status },
       wakatime: { status: liveContext.wakatime?.status },
       canvas: { status: liveContext.canvas?.status, activeCourses: liveContext.canvas?.courses?.length || 0 }
@@ -274,12 +323,15 @@ Responda de forma concisa e amigável. Idiomas fora do escopo: "${fallbackLangua
 REGRA DE CARDS VISUAIS (Sempre inclua a tag no meio do texto quando o assunto for abordado):
 - Faculdade, PUC Minas, Matérias, Estudos -> [CANVAS_CARD]
 - Trabalhos, Experiência Profissional, Voluntariado -> [EXPERIENCE_CARD]
-- Projetos de Programação -> [PROJECTS_CARD]
-- GitHub, Repositórios, Commits -> [GITHUB_CARD]
+- Projetos de Programação em destaque no Portfólio -> [PROJECTS_CARD]
+- Lista de Repositórios do GitHub (projetos ao vivo na nuvem) -> [REPOSITORIES_CARD]
+- Perfil do GitHub (Estatísticas, Followers) -> [GITHUB_CARD]
 - WakaTime, Tempo de código, Linguagens -> [STATS_CARD]
 - Música, Spotify -> [SPOTIFY_CARD]
 - Futebol, Galo -> [GALO_CARD]
 - Contato, Falar com Gustavo -> [CONTACT_FORM]
+
+DICA: Use [PROJECTS_CARD] para falar dos projetos consolidados do portfólio, e [REPOSITORIES_CARD] para listar os repositórios reais do GitHub sincronizados pela API.
 
 ATENÇÃO CRÍTICA SOBRE A FACULDADE:
 1. Se perguntarem sobre os estudos, liste TODAS as matérias do 2º período de Engenharia de Software da PUC Minas que o Gustavo cursa. Use os dados do perfil completo!
@@ -292,7 +344,7 @@ STATUS DAS APIS: ${JSON.stringify(geminiContext)}`;
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     const availableModels = await discoverModels(process.env.GEMINI_API_KEY);
     const modelsToTry = [...new Set([...availableModels, ...fallbackModels])];
-    
+
     let result;
     let selectedModel;
     let lastGeminiError;
@@ -328,7 +380,7 @@ STATUS DAS APIS: ${JSON.stringify(geminiContext)}`;
 
     return res.status(200).json({
       response: result.response.text(),
-      liveContext, 
+      liveContext,
       model: selectedModel
     });
   } catch (error) {
@@ -339,4 +391,5 @@ STATUS DAS APIS: ${JSON.stringify(geminiContext)}`;
     if (error?.status === 429 || errStr.includes('quota')) return res.status(503).json({ error: 'A cota diária do Gemini foi atingida.' });
     return res.status(500).json({ error: 'Erro ao gerar resposta. Tente novamente em instantes.' });
   }
+
 }
