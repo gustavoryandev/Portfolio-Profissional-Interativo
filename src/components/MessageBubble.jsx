@@ -10,6 +10,7 @@ import ContactSection from './ContactSection';
 import ProjectsCard from './ProjectsCard';
 import ExperienceCard from './ExperienceCard';
 import RepositoriesCard from './RepositoriesCards';
+import GithubActivityCard from './GithubActivityCard';
 
 const cards = {
   '[SPOTIFY_CARD]': SpotifyCard,
@@ -20,13 +21,14 @@ const cards = {
   '[CONTACT_FORM]': ContactSection,
   '[PROJECTS_CARD]': ProjectsCard,
   '[EXPERIENCE_CARD]': ExperienceCard,
-  '[REPOSITORIES_CARD]': RepositoriesCard
+  '[REPOSITORIES_CARD]': RepositoriesCard,
+  '[GITHUB_ACTIVITY_CARD]': GithubActivityCard
 };
 
 export default function MessageBubble({ message }) {
   const { darkMode } = useContext(ThemeContext);
   const isUser = message?.sender === 'user';
-  const parts = (message?.text || '').split(/(\[(?:SPOTIFY|GITHUB|STATS|CANVAS|GALO|PROJECTS|EXPERIENCE|REPOSITORIES)_CARD\]|\[CONTACT_FORM\])/g);
+  const parts = (message?.text || '').split(/(\[(?:SPOTIFY|GITHUB|STATS|CANVAS|GALO|PROJECTS|EXPERIENCE|REPOSITORIES|GITHUB_ACTIVITY)_CARD\]|\[CONTACT_FORM\])/g);
 
 // ... existing code ...
 

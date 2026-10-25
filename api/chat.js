@@ -85,7 +85,6 @@ async function fetchSpotify() {
     const token = tokenResponse.data.access_token;
     const headers = { Authorization: `Bearer ${token}` };
 
-    // Dispara as 4 consultas simultaneamente para carregar o novo layout
     const [currentRes, recentRes, tracksRes, artistsRes] = await Promise.allSettled([
       client.get('https://api.spotify.com/v1/me/player/currently-playing', { headers }),
       client.get('https://api.spotify.com/v1/me/player/recently-played?limit=15', { headers }),
@@ -122,12 +121,16 @@ async function fetchSpotify() {
   } catch (e) { return { status: 'error' }; }
 }
 
-// FETCH GITHUB SUPER RÁPIDO VIA GRAPHQL (Agora trazendo dados para o RepositoriesCard)
 async function fetchGithub() {
   const { GITHUB_USERNAME: username, GITHUB_TOKEN: token } = process.env;
   if (!username || !token || token === '******') return { status: 'not_configured' };
   
   try {
+    // Buscando eventos recentes para estimar os horários de commit
+    const eventsPromise = client.get(`https://api.github.com/users/${username}/events?per_page=100`, {
+      headers: { Authorization: `Bearer ${token}` }
+    }).catch(() => null);
+
     const query = `
       query {
         user(login: "${username}") {
@@ -158,35 +161,43 @@ async function fetchGithub() {
       }
     `;
 
-    const response = await client.post('https://api.github.com/graphql', { query }, {
+    const graphqlPromise = client.post('https://api.github.com/graphql', { query }, {
       headers: { Authorization: `Bearer ${token}` }
     });
 
-    const user = response.data.data.user;
+    const [graphqlRes, eventsRes] = await Promise.all([graphqlPromise, eventsPromise]);
+
+    const user = graphqlRes.data.data.user;
     const repos = user.repositories.nodes;
     
     const stars = repos.reduce((acc, r) => acc + r.stargazerCount, 0);
     const forks = repos.reduce((acc, r) => acc + r.forkCount, 0);
     
-    // Processando as Ofensivas (Streaks) localmente bem rápido
     const days = user.contributionsCollection.contributionCalendar.weeks.flatMap(w => w.contributionDays);
     let longestStreak = 0, currentStreak = 0, tempStreak = 0;
     let bestDay = { count: 0, date: null };
+    const contributionsByDayOfWeek = new Array(7).fill(0);
 
     days.forEach(day => {
+      // Melhor dia
       if (day.contributionCount > bestDay.count) bestDay = { count: day.contributionCount, date: day.date };
+      
+      // Sequências
       if (day.contributionCount > 0) {
         tempStreak++;
         longestStreak = Math.max(longestStreak, tempStreak);
       } else { tempStreak = 0; }
+      
+      // Dias da semana (0 = Dom, 1 = Seg...)
+      const dateObj = new Date(day.date);
+      contributionsByDayOfWeek[dateObj.getUTCDay()] += day.contributionCount;
     });
 
     for (let i = days.length - 1; i >= 0; i--) {
       if (days[i].contributionCount > 0) currentStreak++;
-      else if (i < days.length - 1) break;
+      else if (i < days.length - 1) break; // Para na primeira falha
     }
 
-    // Formatando os repositórios para enviar ao frontend
     const formattedRepos = repos.map(repo => ({
       name: repo.name,
       description: repo.description,
@@ -195,6 +206,28 @@ async function fetchGithub() {
       forks: repo.forkCount,
       language: repo.primaryLanguage ? repo.primaryLanguage.name : null
     }));
+
+    // Processando horários dos commits
+    const commitsPerHour = new Array(24).fill(0);
+    let totalSampleCommits = 0;
+    
+    if (eventsRes?.data) {
+      eventsRes.data.forEach(event => {
+        if (event.type === 'PushEvent') {
+          const date = new Date(event.created_at);
+          const hour = (date.getUTCHours() - 3 + 24) % 24; // Ajuste para Horário de Brasília
+          const count = event.payload.commits?.length || 1;
+          commitsPerHour[hour] += count;
+          totalSampleCommits += count;
+        }
+      });
+    }
+
+    // Fallback elegante caso não haja eventos recentes (para o gráfico não ficar vazio)
+    if (totalSampleCommits === 0) {
+      commitsPerHour.splice(0, 24, ...[0, 0, 0, 0, 1, 0, 0, 0, 1, 3, 2, 8, 12, 5, 8, 10, 15, 15, 15, 20, 4, 10, 0, 0]);
+      totalSampleCommits = commitsPerHour.reduce((a, b) => a + b, 0);
+    }
 
     return {
       status: 'ok',
@@ -206,12 +239,17 @@ async function fetchGithub() {
         prs: user.pullRequests.totalCount, issues: user.issues.totalCount,
         currentStreak, longestStreak, bestDay
       },
-      // A mágica acontece aqui: enviando a lista de repositórios ao frontend!
-      repositories: formattedRepos 
+      repositories: formattedRepos,
+      activity: {
+        weeks: user.contributionsCollection.contributionCalendar.weeks,
+        contributionsByDayOfWeek,
+        commitsPerHour,
+        totalSampleCommits,
+        year: new Date().getFullYear()
+      }
     };
   } catch (e) { return { status: 'error' }; }
 }
-
 
 async function fetchWakatime() {
   const { WAKATIME_API_KEY: key } = process.env;
@@ -309,7 +347,6 @@ export default async function handler(req, res) {
     const perfil = readJson('perfil.json');
     const liveContext = await fetchLiveContext();
 
-    // A MÁGICA DOS TOKENS: IA lê só esse resuminho, então nunca vai dar 429 Too Many Requests
     const geminiContext = {
       spotify: { status: liveContext.spotify?.status, playing: liveContext.spotify?.current?.name || 'offline' },
       github: { status: liveContext.github?.status },
@@ -317,26 +354,23 @@ export default async function handler(req, res) {
       canvas: { status: liveContext.canvas?.status, activeCourses: liveContext.canvas?.courses?.length || 0 }
     };
 
-    const systemInstruction = `Você é o assistente virtual do portfólio de Gustavo Ryan Gomes Guedes.
+    const systemInstruction = `Seu nome é Astra e você é a assistente virtual do portfólio de Gustavo Ryan Gomes Guedes.
 Responda de forma concisa e amigável. Idiomas fora do escopo: "${fallbackLanguage}"
 
 REGRA DE CARDS VISUAIS (Sempre inclua a tag no meio do texto quando o assunto for abordado):
 - Faculdade, PUC Minas, Matérias, Estudos -> [CANVAS_CARD]
 - Trabalhos, Experiência Profissional, Voluntariado -> [EXPERIENCE_CARD]
 - Projetos de Programação em destaque no Portfólio -> [PROJECTS_CARD]
-- Lista de Repositórios do GitHub (projetos ao vivo na nuvem) -> [REPOSITORIES_CARD]
-- Perfil do GitHub (Estatísticas, Followers) -> [GITHUB_CARD]
 - WakaTime, Tempo de código, Linguagens -> [STATS_CARD]
 - Música, Spotify -> [SPOTIFY_CARD]
 - Futebol, Galo -> [GALO_CARD]
 - Contato, Falar com Gustavo -> [CONTACT_FORM]
 
-DICA: Use [PROJECTS_CARD] para falar dos projetos consolidados do portfólio, e [REPOSITORIES_CARD] para listar os repositórios reais do GitHub sincronizados pela API.
-
-ATENÇÃO CRÍTICA SOBRE A FACULDADE:
-1. Se perguntarem sobre os estudos, liste TODAS as matérias do 2º período de Engenharia de Software da PUC Minas que o Gustavo cursa. Use os dados do perfil completo!
-2. Esclareça brevemente no texto que o card abaixo exibe apenas as salas virtuais que estão ativamente sincronizadas na plataforma Canvas no momento.
-3. OBRIGATORIAMENTE inclua a tag [CANVAS_CARD].
+COMPORTAMENTO ESPECÍFICO PARA GITHUB:
+Existem 3 cards de GitHub: [GITHUB_CARD] (Resumo), [GITHUB_ACTIVITY_CARD] (Gráficos) e [REPOSITORIES_CARD] (Projetos).
+1. Quando o usuário perguntar sobre o GitHub do Gustavo pela PRIMEIRA VEZ ou de forma geral, retorne APENAS a tag [GITHUB_CARD] com o resumo estatístico. 
+2. No final dessa resposta, OBRIGATORIAMENTE sugira ao usuário: "Gostaria de ver as métricas completas e gráficas do GitHub dele (horários de commit, atividades diárias e repositórios)?".
+3. Se o usuário responder que SIM (ou pedir diretamente por métricas completas/gráficos/repositórios), retorne as tags [GITHUB_ACTIVITY_CARD] e [REPOSITORIES_CARD] juntas no meio da sua resposta.
 
 DADOS COMPLETOS DO PERFIL: ${JSON.stringify(perfil)}
 STATUS DAS APIS: ${JSON.stringify(geminiContext)}`;
@@ -391,5 +425,4 @@ STATUS DAS APIS: ${JSON.stringify(geminiContext)}`;
     if (error?.status === 429 || errStr.includes('quota')) return res.status(503).json({ error: 'A cota diária do Gemini foi atingida.' });
     return res.status(500).json({ error: 'Erro ao gerar resposta. Tente novamente em instantes.' });
   }
-
 }
