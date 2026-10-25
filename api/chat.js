@@ -28,11 +28,13 @@ function modelPriority(name) {
   return familyScore - versionScore + previewPenalty;
 }
 
+// 1. TIMEOUT REDUZIDO NA DESCOBERTA DE MODELOS
 async function discoverModels(apiKey) {
   try {
     const response = await client.get('https://generativelanguage.googleapis.com/v1beta/models', {
       headers: { 'x-goog-api-key': apiKey },
-      params: { pageSize: 100 }
+      params: { pageSize: 100 },
+      timeout: 4000
     });
     const models = response.data.models
       ?.filter((model) => model.supportedGenerationMethods?.includes('generateContent'))
@@ -47,15 +49,23 @@ async function discoverModels(apiKey) {
   }
 }
 
+// 2. TRATAMENTO DE TIMEOUTS E ERROS DE REDE
 function isRetryableModelError(error) {
   const message = error instanceof Error ? error.message : '';
+  const lower = message.toLowerCase();
   return [404, 429, 500, 502, 503, 504].includes(error?.status)
     || message.includes('is not found')
     || message.includes('high demand')
     || message.includes('quota')
-    || message.includes('Developer instruction is not enabled');
+    || message.includes('Developer instruction is not enabled')
+    || error?.name === 'AbortError'
+    || lower.includes('abort')
+    || lower.includes('timeout')
+    || lower.includes('fetch failed');
 }
 
+// 3. CACHE DO PERFIL JSON
+const jsonCache = new Map();
 function readJson(fileName) {
   const directories = [
     path.join(process.cwd(), 'src', 'data'),
@@ -64,8 +74,105 @@ function readJson(fileName) {
   ];
   const filePath = directories.map((directory) => path.join(directory, fileName)).find((candidate) => fs.existsSync(candidate));
   if (!filePath) throw new Error(`Context file not found: ${fileName}`);
-  return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+
+  const mtime = fs.statSync(filePath).mtimeMs;
+  const cached = jsonCache.get(filePath);
+  if (cached && cached.mtime === mtime) return cached.data;
+
+  const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+  jsonCache.set(filePath, { mtime, data });
+  return data;
 }
+
+// ==========================================
+// SISTEMA DE CACHES DE ALTA PERFORMANCE
+// ==========================================
+
+const LIVE_TTL = {
+  spotify: 15 * 1000,
+  github: 10 * 60 * 1000,
+  wakatime: 10 * 60 * 1000,
+  canvas: 10 * 60 * 1000,
+  galo: 2 * 60 * 1000
+};
+const LIVE_ERROR_TTL = 10 * 1000;
+const liveCache = new Map(); 
+
+async function cachedSource(name, fetcher) {
+  const now = Date.now();
+  const entry = liveCache.get(name);
+
+  if (entry?.data && entry.expires > now) return entry.data;
+  if (entry?.promise) return entry.promise;
+
+  const promise = (async () => {
+    let data;
+    try {
+      data = await fetcher();
+    } catch {
+      data = { status: 'error' };
+    }
+
+    const previous = liveCache.get(name)?.data;
+    if (data.status === 'error' && previous?.status === 'ok') {
+      liveCache.set(name, { data: previous, expires: Date.now() + LIVE_ERROR_TTL });
+      return previous;
+    }
+
+    const ttl = data.status === 'error' ? LIVE_ERROR_TTL : (LIVE_TTL[name] ?? 60 * 1000);
+    liveCache.set(name, { data, expires: Date.now() + ttl });
+    return data;
+  })();
+
+  liveCache.set(name, { ...entry, promise });
+  return promise;
+}
+
+let spotifyTokenCache = { token: null, expires: 0 };
+async function getSpotifyToken(id, secret, refresh) {
+  if (spotifyTokenCache.token && spotifyTokenCache.expires > Date.now()) return spotifyTokenCache.token;
+
+  const tokenResponse = await client.post(
+    'https://accounts.spotify.com/api/token',
+    new URLSearchParams({ grant_type: 'refresh_token', refresh_token: refresh }).toString(),
+    {
+      headers: {
+        Authorization: `Basic ${Buffer.from(`${id}:${secret}`).toString('base64')}`,
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
+    }
+  );
+
+  spotifyTokenCache = {
+    token: tokenResponse.data.access_token,
+    expires: Date.now() + ((tokenResponse.data.expires_in || 3600) - 60) * 1000
+  };
+  return spotifyTokenCache.token;
+}
+
+let modelListCache = { list: null, expires: 0 };
+async function getModelList(apiKey) {
+  if (modelListCache.list && modelListCache.expires > Date.now()) return modelListCache.list;
+
+  const discovered = await discoverModels(apiKey);
+  const list = [...new Set([...discovered, ...fallbackModels])];
+  modelListCache = { list, expires: Date.now() + (discovered.length ? 60 * 60 * 1000 : 60 * 1000) };
+  return list;
+}
+
+const modelCooldown = new Map();
+function cooldownMs(error) {
+  const message = error instanceof Error ? error.message : '';
+  if (error?.status === 404 || message.includes('is not found') || message.includes('Developer instruction is not enabled')) return 60 * 60 * 1000;
+  if (error?.status === 429 || message.includes('quota')) return 5 * 60 * 1000;
+  return 60 * 1000;
+}
+
+const GEMINI_TIMEOUT_MS = 15000; 
+
+// ==========================================
+// INTEGRAÇÕES (FETCHERS)
+// ==========================================
 
 async function fetchSpotify() {
   const id = process.env.SPOTIFY_CLIENT_ID?.trim();
@@ -74,18 +181,7 @@ async function fetchSpotify() {
 
   if (!id || !secret || !refresh) return { status: 'not_configured' };
   try {
-    const tokenResponse = await client.post(
-      'https://accounts.spotify.com/api/token',
-      new URLSearchParams({ grant_type: 'refresh_token', refresh_token: refresh }).toString(),
-      {
-        headers: {
-          Authorization: `Basic ${Buffer.from(`${id}:${secret}`).toString('base64')}`,
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      }
-    );
-    
-    const token = tokenResponse.data.access_token;
+    const token = await getSpotifyToken(id, secret, refresh);
     const headers = { Authorization: `Bearer ${token}` };
 
     const [currentRes, recentRes, tracksRes, artistsRes] = await Promise.allSettled([
@@ -299,15 +395,14 @@ async function fetchWakatime() {
   } catch (e) { return { status: 'error' }; }
 }
 
-// ---------- GALO ----------
 const GALO_TEAM_ID = '7632';
 const GALO_FALLBACK_LOGO = 'https://a.espncdn.com/i/teamlogos/default-team-logo-500.png';
 const GALO_ESPN_HEADERS = {
   'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
   Accept: 'application/json'
 };
-const GALO_LIVE_WINDOW_MS = 4 * 60 * 60 * 1000; // jogo "ao vivo" por no máximo 4h após o início
-const GALO_PRE_GRACE_MS = 30 * 60 * 1000;       // tolerância de 30min se a ESPN atrasar o status
+const GALO_LIVE_WINDOW_MS = 4 * 60 * 60 * 1000; 
+const GALO_PRE_GRACE_MS = 30 * 60 * 1000;       
 
 function getEventState(event) {
   return event.competitions?.[0]?.status?.type?.state || event.status?.type?.state || null;
@@ -332,14 +427,12 @@ async function fetchGalo() {
     const base = `https://site.api.espn.com/apis/site/v2/sports/soccer/all/teams/${GALO_TEAM_ID}/schedule`;
     const baseWeb = `https://site.web.api.espn.com/apis/site/v2/sports/soccer/all/teams/${GALO_TEAM_ID}/schedule`;
 
-    // fixture=true traz os jogos futuros (o endpoint sem o parâmetro traz principalmente resultados).
     const lists = await Promise.all([
       fetchEspnEvents(`${base}?fixture=true`),
       fetchEspnEvents(`${baseWeb}?fixture=true`),
       fetchEspnEvents(base)
     ]);
 
-    // Junta tudo e remove duplicados pelo id do jogo
     const byId = new Map();
     for (const event of lists.flat()) {
       if (event?.id && !byId.has(event.id)) byId.set(event.id, event);
@@ -350,8 +443,6 @@ async function fetchGalo() {
 
     const now = Date.now();
 
-    // Só vale como "próximo/ao vivo" se o status da ESPN E o relógio concordarem.
-    // Isso evita mostrar jogos antigos que a ESPN deixou com status 'pre' desatualizado.
     const isUpcomingOrLive = (event) => {
       const state = getEventState(event);
       const statusName = getEventStatusName(event);
@@ -365,7 +456,6 @@ async function fetchGalo() {
 
     let validEvents = events.filter(isUpcomingOrLive);
 
-    // Fallback: se não há jogos futuros (fim de temporada), mostra o último jogo já realizado
     if (validEvents.length === 0) {
       const past = events.filter((e) => new Date(e.date).getTime() <= now);
       if (past.length > 0) validEvents = [past[past.length - 1]];
@@ -382,7 +472,6 @@ async function fetchGalo() {
       const away = competitors.find((c) => c.homeAway === 'away') || {};
       const isHome = String(home.team?.id) === GALO_TEAM_ID;
 
-      // 'pre' = ainda vai acontecer | 'in' = ao vivo | 'post' = já terminou (só no fallback)
       const state = isUpcomingOrLive(game) ? getEventState(game) : 'post';
 
       return {
@@ -411,18 +500,15 @@ async function fetchGalo() {
   }
 }
 
-// ---------- CANVAS ----------
 async function fetchCanvas() {
   const token = process.env.CANVAS_API_TOKEN?.trim();
   let baseUrl = process.env.CANVAS_BASE_URL?.trim();
   if (!token || !baseUrl) return { status: 'not_configured' };
 
-  // Normaliza a URL: remove "/" final, "/api/v1" repetido e garante https://
   baseUrl = baseUrl.replace(/\/+$/, '').replace(/\/api\/v1$/i, '');
   if (!/^https?:\/\//i.test(baseUrl)) baseUrl = `https://${baseUrl}`;
 
   try {
-    // include[]=term traz as datas do período letivo; per_page maior evita cortar disciplinas úteis
     const url = `${baseUrl}/api/v1/courses?enrollment_state=active&include[]=term&per_page=50`;
     const response = await client.get(url, { headers: { Authorization: `Bearer ${token}` } });
 
@@ -433,7 +519,6 @@ async function fetchCanvas() {
 
     const now = Date.now();
 
-    // Cursos com acesso restrito por data vêm sem "name"; cursos de períodos encerrados também aparecem como "active"
     const named = response.data.filter((c) => c?.name && !c.access_restricted_by_date);
 
     const isCurrent = (c) => {
@@ -445,7 +530,7 @@ async function fetchCanvas() {
     };
 
     let courses = named.filter(isCurrent);
-    if (courses.length === 0) courses = named.filter((c) => c.workflow_state === 'available'); // fallback
+    if (courses.length === 0) courses = named.filter((c) => c.workflow_state === 'available');
 
     return {
       status: 'ok',
@@ -462,9 +547,15 @@ async function fetchCanvas() {
   }
 }
 
+// ==========================================
+// ORQUESTRADOR CENTRAL
+// ==========================================
+
 async function fetchLiveContext() {
   const sources = { spotify: fetchSpotify, github: fetchGithub, wakatime: fetchWakatime, canvas: fetchCanvas, galo: fetchGalo };
-  const entries = await Promise.all(Object.entries(sources).map(async ([name, fetcher]) => [name, await fetcher()]));
+  const entries = await Promise.all(
+    Object.entries(sources).map(async ([name, fetcher]) => [name, await cachedSource(name, fetcher)])
+  );
   return Object.fromEntries(entries);
 }
 
@@ -492,10 +583,14 @@ export default async function handler(req, res) {
     const { userMessage, lang = 'pt', chatHistory = [] } = body;
 
     if (typeof userMessage !== 'string' || !userMessage.trim()) return res.status(400).json({ error: 'Mensagem inválida.' });
-    if (!process.env.GEMINI_API_KEY) return res.status(500).json({ error: 'GEMINI_API_KEY não configurada.' });
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) return res.status(500).json({ error: 'GEMINI_API_KEY não configurada.' });
 
-    const perfil = readJson('perfil.json');
-    const liveContext = await fetchLiveContext();
+    const [perfil, liveContext, modelsToTry] = await Promise.all([
+      Promise.resolve().then(() => readJson('perfil.json')),
+      fetchLiveContext(),
+      getModelList(apiKey)
+    ]);
 
     const geminiContext = {
       spotify: { status: liveContext.spotify?.status, playing: liveContext.spotify?.current?.name || 'offline' },
@@ -531,20 +626,24 @@ COMPORTAMENTO ESPECÍFICO PARA JOGOS DO GALO:
 DADOS COMPLETOS DO PERFIL: ${JSON.stringify(perfil)}
 STATUS DAS APIS: ${JSON.stringify(geminiContext)}`;
 
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const availableModels = await discoverModels(process.env.GEMINI_API_KEY);
-    const modelsToTry = [...new Set([...availableModels, ...fallbackModels])];
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const history = sanitizeHistory(chatHistory);
+    const message = userMessage.trim();
+
+    const nowTs = Date.now();
+    const healthy = modelsToTry.filter((name) => (modelCooldown.get(name) || 0) <= nowTs);
+    const queue = healthy.length ? healthy : modelsToTry;
 
     let result;
     let selectedModel;
     let lastGeminiError;
 
-    for (const modelName of modelsToTry) {
-      const model = genAI.getGenerativeModel({ model: modelName, systemInstruction });
+    for (const modelName of queue) {
+      const model = genAI.getGenerativeModel({ model: modelName, systemInstruction }, { timeout: GEMINI_TIMEOUT_MS });
       try {
         for (let attempt = 0; attempt < 2; attempt += 1) {
           try {
-            result = await model.startChat({ history: sanitizeHistory(chatHistory) }).sendMessage(userMessage.trim());
+            result = await model.startChat({ history }).sendMessage(message);
             selectedModel = modelName;
             break;
           } catch (error) {
@@ -560,6 +659,7 @@ STATUS DAS APIS: ${JSON.stringify(geminiContext)}`;
       } catch (error) {
         lastGeminiError = error;
         if (!isRetryableModelError(error)) throw error;
+        modelCooldown.set(modelName, Date.now() + cooldownMs(error));
         console.warn(`[Gemini] Modelo ${modelName} indisponível; tentando o próximo.`);
       }
     }
