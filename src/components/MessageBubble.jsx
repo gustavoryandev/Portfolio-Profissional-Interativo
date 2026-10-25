@@ -11,6 +11,7 @@ import ProjectsCard from './ProjectsCard';
 import ExperienceCard from './ExperienceCard';
 import RepositoriesCard from './RepositoriesCards';
 import GithubActivityCard from './GithubActivityCard';
+import ChessCard from './ChessCard';
 
 const cards = {
   '[SPOTIFY_CARD]': SpotifyCard,
@@ -22,7 +23,8 @@ const cards = {
   '[PROJECTS_CARD]': ProjectsCard,
   '[EXPERIENCE_CARD]': ExperienceCard,
   '[REPOSITORIES_CARD]': RepositoriesCard,
-  '[GITHUB_ACTIVITY_CARD]': GithubActivityCard
+  '[GITHUB_ACTIVITY_CARD]': GithubActivityCard,
+  '[CHESS_CARD]': ChessCard
 };
 
 export default function MessageBubble({ message }) {
@@ -30,7 +32,7 @@ export default function MessageBubble({ message }) {
   const isUser = message?.sender === 'user';
   
   // REGEX MELHORADO: Agora captura tags de galo com limite, ex: [GALO_CARD:5] ou [GALO_CARD:ALL]
-  const parts = (message?.text || '').split(/(\[(?:SPOTIFY|GITHUB|STATS|CANVAS|PROJECTS|EXPERIENCE|REPOSITORIES|GITHUB_ACTIVITY)_CARD\]|\[GALO_CARD(?::\d+|:ALL)?\]|\[CONTACT_FORM\])/g);
+  const parts = (message?.text || '').split(/(\[(?:SPOTIFY|GITHUB|STATS|CANVAS|PROJECTS|EXPERIENCE|REPOSITORIES|GITHUB_ACTIVITY|CHESS)_CARD\]|\[GALO_CARD(?::\d+|:ALL)?\]|\[CONTACT_FORM\])/g);
 
   return (
     <div className={`flex w-full ${isUser ? 'justify-end' : 'justify-start'} gap-3 my-2`}>

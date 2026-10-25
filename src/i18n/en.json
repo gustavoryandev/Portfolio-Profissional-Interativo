@@ -11,7 +11,8 @@
       "What technologies does he know?",
       "What is he studying at PUC Minas?",
       "Show his GitHub and Wakatime metrics",
-      "When is Galo's next match?"
+      "When is Galo's next match?",
+      "What is his chess rating?"
     ],
     "fallbackIdioma": "I can only communicate in Portuguese or English. Please choose one of these languages."
   },
@@ -95,6 +96,47 @@
       "titulo": "Clube Atlético Mineiro (Galo)",
       "proximoJogo": "Next Match",
       "competicao": "Tournament"
+    },
+    "chess": {
+      "titulo": "Chess.com Profile",
+      "noChessDesde": "On Chess.com since {{year}}",
+      "visto": "Last seen {{when}}",
+      "partidas": "Games",
+      "somandoModos": "across all modes",
+      "taxaVitoria": "Win rate",
+      "vitorias": "Wins",
+      "empates": "Draws",
+      "derrotas": "Losses",
+      "ratings": "Rating by mode",
+      "modos": {
+        "rapid": "Rapid",
+        "blitz": "Blitz",
+        "bullet": "Bullet",
+        "daily": "Daily"
+      },
+      "melhor": "Best",
+      "partidasModo": "{{count}} games",
+      "seguidores": "Followers",
+      "problemas": "Puzzles",
+      "melhorRating": "best rating",
+      "puzzleRush": "Puzzle Rush",
+      "melhorPontuacao": "best score",
+      "fide": "FIDE",
+      "ratingOficial": "official rating",
+      "ultimasPartidas": "Recent games",
+      "semPartidas": "No recent games found.",
+      "contra": "vs",
+      "brancas": "White",
+      "pretas": "Black",
+      "precisao": "accuracy",
+      "resultado": {
+        "win": "W",
+        "loss": "L",
+        "draw": "D"
+      },
+      "sincronizado": "Synced via Chess.com API",
+      "verPerfil": "View Profile",
+      "indisponivel": "Chess.com data is currently unavailable."
     }
   },
   "contato": {

@@ -93,7 +93,8 @@ const LIVE_TTL = {
   github: 10 * 60 * 1000,
   wakatime: 10 * 60 * 1000,
   canvas: 10 * 60 * 1000,
-  galo: 2 * 60 * 1000
+  galo: 2 * 60 * 1000,
+  chess: 5 * 60 * 1000
 };
 const LIVE_ERROR_TTL = 10 * 1000;
 const liveCache = new Map(); 
@@ -548,11 +549,167 @@ async function fetchCanvas() {
 }
 
 // ==========================================
+// CHESS.COM
+// ==========================================
+
+const CHESS_DEFAULT_USERNAME = 'seunome6679';
+const CHESS_MODES = ['rapid', 'blitz', 'bullet', 'daily'];
+const CHESS_DRAW_RESULTS = new Set(['agreed', 'repetition', 'stalemate', 'insufficient', '50move', 'timevsinsufficient']);
+const CHESS_HEADERS = {
+  // O chess.com pede um User-Agent identificável
+  'User-Agent': 'Portfolio-Profissional-Interativo/1.0',
+  Accept: 'application/json'
+};
+
+const epochToIso = (seconds) => (seconds ? new Date(seconds * 1000).toISOString() : null);
+
+function chessOpeningName(game) {
+  const ecoUrl = game.eco || game.pgn?.match(/\[ECOUrl "([^"]+)"\]/)?.[1];
+  if (!ecoUrl) return null;
+  const slug = ecoUrl.split('/').pop() || '';
+  // O slug termina com os lances (ex: "...-Variation-6.Be3-e5"); cortamos a partir do primeiro lance numerado
+  const name = slug.replace(/-\d+\..*$/, '').replace(/-/g, ' ').trim();
+  return name || null;
+}
+
+function formatChessGame(game, username) {
+  const isWhite = game.white?.username?.toLowerCase() === username;
+  const me = isWhite ? game.white : game.black;
+  const opponent = isWhite ? game.black : game.white;
+  const raw = me?.result;
+  const result = raw === 'win' ? 'win' : CHESS_DRAW_RESULTS.has(raw) ? 'draw' : 'loss';
+  const accuracy = game.accuracies?.[isWhite ? 'white' : 'black'];
+
+  return {
+    url: game.url,
+    date: epochToIso(game.end_time),
+    result,
+    color: isWhite ? 'white' : 'black',
+    timeClass: game.time_class,
+    rated: Boolean(game.rated),
+    opponent: opponent?.username || '?',
+    opponentRating: opponent?.rating ?? null,
+    myRating: me?.rating ?? null,
+    accuracy: typeof accuracy === 'number' ? Math.round(accuracy * 10) / 10 : null,
+    opening: chessOpeningName(game)
+  };
+}
+
+async function fetchChess() {
+  const username = (process.env.CHESS_USERNAME || CHESS_DEFAULT_USERNAME).trim().toLowerCase();
+  const base = `https://api.chess.com/pub/player/${encodeURIComponent(username)}`;
+  const get = (url) => client.get(url, { headers: CHESS_HEADERS }).then((response) => response.data);
+
+  try {
+    const [profileRes, statsRes, archivesRes] = await Promise.allSettled([
+      get(base),
+      get(`${base}/stats`),
+      get(`${base}/games/archives`)
+    ]);
+
+    // Sem perfil não há card
+    if (profileRes.status !== 'fulfilled') {
+      console.error('[Chess API Error]:', profileRes.reason?.response?.status, profileRes.reason?.message);
+      return { status: 'error' };
+    }
+
+    const profileData = profileRes.value;
+    const stats = statsRes.status === 'fulfilled' ? statsRes.value : {};
+
+    // ---- Ratings e recordes por modo ----
+    const ratings = CHESS_MODES
+      .map((mode) => {
+        const s = stats[`chess_${mode}`];
+        if (!s || s.last?.rating == null) return null;
+        const wins = s.record?.win || 0;
+        const losses = s.record?.loss || 0;
+        const draws = s.record?.draw || 0;
+        const games = wins + losses + draws;
+        return {
+          mode,
+          rating: s.last.rating,
+          best: s.best?.rating ?? null,
+          bestDate: epochToIso(s.best?.date),
+          wins,
+          losses,
+          draws,
+          games,
+          winRate: games ? Math.round((wins / games) * 1000) / 10 : null
+        };
+      })
+      .filter(Boolean)
+      .sort((a, b) => b.games - a.games);
+
+    // ---- Totais (taxa de vitória geral = vitórias / todas as partidas) ----
+    const totals = ratings.reduce(
+      (acc, r) => ({ wins: acc.wins + r.wins, losses: acc.losses + r.losses, draws: acc.draws + r.draws }),
+      { wins: 0, losses: 0, draws: 0 }
+    );
+    totals.games = totals.wins + totals.losses + totals.draws;
+    totals.winRate = totals.games ? Math.round((totals.wins / totals.games) * 1000) / 10 : null;
+
+    // ---- Últimas partidas (mês atual; se tiver poucas, completa com o mês anterior) ----
+    const archiveUrls = archivesRes.status === 'fulfilled' ? archivesRes.value?.archives || [] : [];
+    const rawGames = [];
+    for (const url of archiveUrls.slice(-2).reverse()) {
+      try {
+        const data = await get(url);
+        rawGames.push(...(data.games || []));
+      } catch (error) {
+        console.warn('[Chess] Falha ao ler arquivo de partidas:', error.message);
+      }
+      if (rawGames.length >= 5) break;
+    }
+
+    const recent = rawGames
+      .sort((a, b) => (b.end_time || 0) - (a.end_time || 0))
+      .slice(0, 5)
+      .map((game) => formatChessGame(game, username));
+
+    const countryCode = profileData.country?.split('/').pop() || null;
+
+    return {
+      status: 'ok',
+      profile: {
+        username: profileData.username || username,
+        name: profileData.name || null,
+        title: profileData.title || null,
+        avatar: profileData.avatar || null,
+        url: profileData.url || `https://www.chess.com/member/${username}`,
+        country: countryCode,
+        followers: profileData.followers ?? null,
+        joinedYear: profileData.joined ? new Date(profileData.joined * 1000).getFullYear() : null,
+        lastOnline: epochToIso(profileData.last_online),
+        isStreamer: Boolean(profileData.is_streamer)
+      },
+      ratings,
+      totals,
+      puzzles: {
+        tactics: stats.tactics?.highest?.rating ?? null,
+        rush: stats.puzzle_rush?.best?.score ?? null
+      },
+      fide: stats.fide ?? null,
+      recent
+    };
+  } catch (e) {
+    console.error('[Chess API Error]:', e.response?.status, e.message);
+    return { status: 'error' };
+  }
+}
+
+// ==========================================
 // ORQUESTRADOR CENTRAL
 // ==========================================
 
 async function fetchLiveContext() {
-  const sources = { spotify: fetchSpotify, github: fetchGithub, wakatime: fetchWakatime, canvas: fetchCanvas, galo: fetchGalo };
+  const sources = {
+    spotify: fetchSpotify,
+    github: fetchGithub,
+    wakatime: fetchWakatime,
+    canvas: fetchCanvas,
+    galo: fetchGalo,
+    chess: fetchChess
+  };
   const entries = await Promise.all(
     Object.entries(sources).map(async ([name, fetcher]) => [name, await cachedSource(name, fetcher)])
   );
@@ -597,7 +754,8 @@ export default async function handler(req, res) {
       github: { status: liveContext.github?.status },
       wakatime: { status: liveContext.wakatime?.status },
       canvas: { status: liveContext.canvas?.status, activeCourses: liveContext.canvas?.courses?.length || 0 },
-      galo: { status: liveContext.galo?.status, upcomingGames: liveContext.galo?.games?.length || 0 }
+      galo: { status: liveContext.galo?.status, upcomingGames: liveContext.galo?.games?.length || 0 },
+      chess: { status: liveContext.chess?.status }
     };
 
     const systemInstruction = `Seu nome é Astra e você é a assistente virtual do portfólio de Gustavo Ryan Gomes Guedes.
@@ -610,12 +768,13 @@ REGRA DE CARDS VISUAIS (Sempre inclua a tag no meio do texto quando o assunto fo
 - WakaTime, Tempo de código, Linguagens -> [STATS_CARD]
 - Música, Spotify -> [SPOTIFY_CARD]
 - Contato, Falar com Gustavo -> [CONTACT_FORM]
+- Xadrez, Chess.com, Rating, Partidas de xadrez, Taxa de vitória no xadrez -> [CHESS_CARD]
 
 COMPORTAMENTO ESPECÍFICO PARA GITHUB:
 Existem 3 cards de GitHub: [GITHUB_CARD] (Resumo), [GITHUB_ACTIVITY_CARD] (Gráficos) e [REPOSITORIES_CARD] (Projetos).
 1. Quando o usuário perguntar sobre o GitHub pela PRIMEIRA VEZ ou de forma geral, retorne APENAS a tag [GITHUB_CARD]. 
 2. No final dessa resposta, OBRIGATORIAMENTE sugira: "Gostaria de ver as métricas completas e gráficas do GitHub dele?".
-3. Se o usuário responder SIM (ou pedir diretamente por métricas completas/repositórios), retorne as tags [GITHUB_ACTIVITY_CARD] e [REPOSITORIES_CARD].
+3. Se o usuário responder SIM (ou pedir diretamente por métricas completas/repositórios), retorne OBRIGATORIAMENTE as 3 tags JUNTAS na mesma resposta: [GITHUB_CARD], [GITHUB_ACTIVITY_CARD] e [REPOSITORIES_CARD]. NUNCA envie os gráficos e repositórios sem incluir também o [GITHUB_CARD].
 
 COMPORTAMENTO ESPECÍFICO PARA JOGOS DO GALO:
 - O Card de jogos possui paginação dinâmica pela IA através da tag:
