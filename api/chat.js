@@ -9,15 +9,25 @@ dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 const client = axios.create({ timeout: 8000 });
 const fallbackLanguage = 'I can only communicate in Portuguese or English. Please choose one of these languages.';
 
+// Modelos ativos na API (ai.google.dev/gemini-api/docs/deprecations, atualizado em 22/10/2026).
+// Removidos: gemini-3.7-flash (alias sem seleção no AI Studio), gemini-3.1-flash (nome inexistente),
+// gemini-2.0-flash (desligado em 1/6/2026) e gemini-1.5-flash (desligado).
 const fallbackModels = [
-  'gemini-3.8-flash',
-  'gemini-3.7-flash',
-  'gemini-3.6-flash',
-  'gemini-3.1-flash',
-  'gemini-2.5-flash',
-  'gemini-2.0-flash',
-  'gemini-1.5-flash'
+  'gemini-3.8-flash',       // GA desde 2/9/2026; recomendado para novos projetos
+  'gemini-3.6-flash',       // GA desde 21/7/2026; sem data de desligamento
+  'gemini-3.5-flash-lite',  // GA desde 21/7/2026; mais leve e rápido
+  'gemini-3.1-flash-lite',  // GA; desligamento previsto para 7/5/2027
+  'gemini-2.5-flash'        // Não descontinuado, mas restrito a contas com uso anterior; último recurso
 ];
+
+const GEMINI_TIMEOUT_MS = 15000;
+const GENERATION_CONFIG = { temperature: 0.8, maxOutputTokens: 1024 };
+// Tempo máximo que o prompt espera pelos dados ao vivo (cache frio). Depois disso usa o que já está em cache.
+const LIVE_PROMPT_WAIT_MS = 1500;
+// Tempo máximo que a primeira requisição espera pela descoberta de modelos (cache frio).
+const DISCOVERY_WAIT_MS = 1200;
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 function modelPriority(name) {
   const normalized = name.toLowerCase();
@@ -28,7 +38,6 @@ function modelPriority(name) {
   return familyScore - versionScore + previewPenalty;
 }
 
-// 1. TIMEOUT REDUZIDO NA DESCOBERTA DE MODELOS
 async function discoverModels(apiKey) {
   try {
     const response = await client.get('https://generativelanguage.googleapis.com/v1beta/models', {
@@ -49,7 +58,6 @@ async function discoverModels(apiKey) {
   }
 }
 
-// 2. TRATAMENTO DE TIMEOUTS E ERROS DE REDE
 function isRetryableModelError(error) {
   const message = error instanceof Error ? error.message : '';
   const lower = message.toLowerCase();
@@ -64,8 +72,13 @@ function isRetryableModelError(error) {
     || lower.includes('fetch failed');
 }
 
-// 3. CACHE DO PERFIL JSON
+// ==========================================
+// CACHE DO PERFIL
+// ==========================================
+
 const jsonCache = new Map();
+const profileTextCache = new WeakMap();
+
 function readJson(fileName) {
   const directories = [
     path.join(process.cwd(), 'src', 'data'),
@@ -84,8 +97,18 @@ function readJson(fileName) {
   return data;
 }
 
+// Serializa o perfil uma única vez por versão do objeto em cache
+function profileText(profile) {
+  let text = profileTextCache.get(profile);
+  if (text === undefined) {
+    text = JSON.stringify(profile);
+    profileTextCache.set(profile, text);
+  }
+  return text;
+}
+
 // ==========================================
-// SISTEMA DE CACHES DE ALTA PERFORMANCE
+// CACHES DE ALTA PERFORMANCE
 // ==========================================
 
 const LIVE_TTL = {
@@ -97,7 +120,7 @@ const LIVE_TTL = {
   chess: 5 * 60 * 1000
 };
 const LIVE_ERROR_TTL = 10 * 1000;
-const liveCache = new Map(); 
+const liveCache = new Map();
 
 async function cachedSource(name, fetcher) {
   const now = Date.now();
@@ -129,6 +152,13 @@ async function cachedSource(name, fetcher) {
   return promise;
 }
 
+// Snapshot instantâneo do cache, sem disparar requisições
+function peekLiveContext() {
+  return Object.fromEntries(
+    Object.keys(LIVE_TTL).map((name) => [name, liveCache.get(name)?.data ?? { status: 'unknown' }])
+  );
+}
+
 let spotifyTokenCache = { token: null, expires: 0 };
 async function getSpotifyToken(id, secret, refresh) {
   if (spotifyTokenCache.token && spotifyTokenCache.expires > Date.now()) return spotifyTokenCache.token;
@@ -151,14 +181,41 @@ async function getSpotifyToken(id, secret, refresh) {
   return spotifyTokenCache.token;
 }
 
-let modelListCache = { list: null, expires: 0 };
-async function getModelList(apiKey) {
-  if (modelListCache.list && modelListCache.expires > Date.now()) return modelListCache.list;
+// ==========================================
+// LISTA DE MODELOS (sem bloquear a resposta)
+// ==========================================
 
-  const discovered = await discoverModels(apiKey);
-  const list = [...new Set([...discovered, ...fallbackModels])];
-  modelListCache = { list, expires: Date.now() + (discovered.length ? 60 * 60 * 1000 : 60 * 1000) };
-  return list;
+let modelListCache = { list: null, expires: 0 };
+let discoveryInFlight = null;
+
+// Deduplica descobertas concorrentes
+function refreshModelList(apiKey) {
+  if (discoveryInFlight) return discoveryInFlight;
+  discoveryInFlight = discoverModels(apiKey)
+    .then((discovered) => {
+      const list = [...new Set([...discovered, ...fallbackModels])];
+      modelListCache = { list, expires: Date.now() + (discovered.length ? 60 * 60 * 1000 : 60 * 1000) };
+      return list;
+    })
+    .finally(() => {
+      discoveryInFlight = null;
+    });
+  return discoveryInFlight;
+}
+
+async function getModelList(apiKey) {
+  const { list, expires } = modelListCache;
+  if (list && expires > Date.now()) return list;
+
+  const pending = refreshModelList(apiKey);
+  if (list) {
+    // Cache expirado: usa a lista antiga e atualiza em segundo plano
+    pending.catch(() => {});
+    return list;
+  }
+  // Cache frio: espera só um pouco pela descoberta; se demorar, usa a ordem de fallback
+  await Promise.race([pending, sleep(DISCOVERY_WAIT_MS)]);
+  return modelListCache.list || fallbackModels;
 }
 
 const modelCooldown = new Map();
@@ -168,8 +225,6 @@ function cooldownMs(error) {
   if (error?.status === 429 || message.includes('quota')) return 5 * 60 * 1000;
   return 60 * 1000;
 }
-
-const GEMINI_TIMEOUT_MS = 15000; 
 
 // ==========================================
 // INTEGRAÇÕES (FETCHERS)
@@ -208,9 +263,9 @@ async function fetchSpotify() {
 
     const recentRaw = recentRes.status === 'fulfilled' && recentRes.value.data.items ? recentRes.value.data.items.map(i => formatTrack(i.track)) : [];
     const recent = recentRaw.filter((t, i, arr) => i === 0 || t.name !== arr[i-1].name).slice(0, 5);
-    
+
     const topTracks = tracksRes.status === 'fulfilled' && tracksRes.value.data.items ? tracksRes.value.data.items.map(formatTrack) : [];
-    
+
     const topArtists = artistsRes.status === 'fulfilled' && artistsRes.value.data.items ? artistsRes.value.data.items.map(a => ({
       name: a.name,
       image: a.images[2]?.url || a.images[0]?.url,
@@ -220,61 +275,113 @@ async function fetchSpotify() {
     return { status: 'ok', current, recent, topTracks, topArtists };
   } catch (e) {
     console.error('[Spotify API Error]:', e.response?.data || e.message);
-    return { status: 'error' }; 
+    return { status: 'error' };
   }
 }
+
+// Linguagens por bytes de código (mesma fonte do GitHub Stats). Usa o token do
+// servidor e pagina os repositórios públicos próprios. Se falhar, devolve null
+// e só o card de linguagens fica indisponível; o resto do GitHub continua.
+const GITHUB_LANGUAGES_QUERY = `
+  query ($username: String!, $cursor: String) {
+    user(login: $username) {
+      repositories(first: 100, after: $cursor, ownerAffiliations: OWNER, isFork: false, privacy: PUBLIC) {
+        pageInfo { hasNextPage endCursor }
+        nodes {
+          name
+          languages(first: 20, orderBy: { field: SIZE, direction: DESC }) {
+            edges { size node { name color } }
+          }
+        }
+      }
+    }
+  }
+`;
+
+async function fetchGithubLanguages(username, token) {
+  try {
+    const totals = new Map();
+    let cursor = null;
+    for (let page = 0; page < 10; page++) {
+      const response = await client.post(
+        'https://api.github.com/graphql',
+        { query: GITHUB_LANGUAGES_QUERY, variables: { username, cursor } },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      const repos = response.data?.data?.user?.repositories;
+      if (!repos) return null;
+
+      repos.nodes.forEach((repo) => {
+        (repo.languages?.edges || []).forEach(({ size, node }) => {
+          const entry = totals.get(node.name) || { name: node.name, color: node.color || null, value: 0 };
+          entry.value += size;
+          totals.set(node.name, entry);
+        });
+      });
+
+      if (!repos.pageInfo.hasNextPage) break;
+      cursor = repos.pageInfo.endCursor;
+    }
+
+    const total = [...totals.values()].reduce((sum, item) => sum + item.value, 0);
+    const items = [...totals.values()]
+      .sort((a, b) => b.value - a.value || a.name.localeCompare(b.name))
+      .map((item) => ({ ...item, percent: total ? (item.value / total) * 100 : 0 }));
+    return { total, items };
+  } catch (error) {
+    console.warn('[GitHub] Falha ao ler linguagens:', error.response?.status || error.message);
+    return null;
+  }
+}
+
+const GITHUB_MAIN_QUERY = `
+  query ($login: String!) {
+    user(login: $login) {
+      name login avatarUrl createdAt
+      followers { totalCount }
+      following { totalCount }
+      repositories(first: 10, ownerAffiliations: OWNER, isFork: false, privacy: PUBLIC, orderBy: {field: STARGAZERS, direction: DESC}) {
+        totalCount
+        nodes {
+          name
+          description
+          url
+          stargazerCount
+          forkCount
+          primaryLanguage { name }
+        }
+      }
+      pullRequests { totalCount }
+      issues { totalCount }
+      contributionsCollection {
+        totalCommitContributions
+        contributionCalendar {
+          totalContributions
+          weeks { contributionDays { contributionCount date } }
+        }
+      }
+    }
+  }
+`;
 
 async function fetchGithub() {
   const { GITHUB_USERNAME: username, GITHUB_TOKEN: token } = process.env;
   if (!username || !token || token === '******') return { status: 'not_configured' };
-  
+
   try {
-    const eventsPromise = client.get(`https://api.github.com/users/${username}/events?per_page=100`, {
-      headers: { Authorization: `Bearer ${token}` }
-    }).catch(() => null);
+    const auth = { headers: { Authorization: `Bearer ${token}` } };
+    const eventsPromise = client.get(`https://api.github.com/users/${username}/events?per_page=100`, auth).catch(() => null);
+    const graphqlPromise = client.post('https://api.github.com/graphql', { query: GITHUB_MAIN_QUERY, variables: { login: username } }, auth);
+    const languagesPromise = fetchGithubLanguages(username, token);
 
-    const query = `
-      query {
-        user(login: "${username}") {
-          name login avatarUrl createdAt
-          followers { totalCount }
-          following { totalCount }
-          repositories(first: 10, ownerAffiliations: OWNER, isFork: false, privacy: PUBLIC, orderBy: {field: STARGAZERS, direction: DESC}) {
-            totalCount
-            nodes { 
-              name 
-              description 
-              url 
-              stargazerCount 
-              forkCount 
-              primaryLanguage { name }
-            }
-          }
-          pullRequests { totalCount }
-          issues { totalCount }
-          contributionsCollection {
-            totalCommitContributions
-            contributionCalendar {
-              totalContributions
-              weeks { contributionDays { contributionCount date } }
-            }
-          }
-        }
-      }
-    `;
-
-    const graphqlPromise = client.post('https://api.github.com/graphql', { query }, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-
-    const [graphqlRes, eventsRes] = await Promise.all([graphqlPromise, eventsPromise]);
+    const [graphqlRes, eventsRes, languages] = await Promise.all([graphqlPromise, eventsPromise, languagesPromise]);
 
     const user = graphqlRes.data.data.user;
     const repos = user.repositories.nodes;
-    
+
     const stars = repos.reduce((acc, r) => acc + r.stargazerCount, 0);
     const forks = repos.reduce((acc, r) => acc + r.forkCount, 0);
-    
+
     const days = user.contributionsCollection.contributionCalendar.weeks.flatMap(w => w.contributionDays);
     let longestStreak = 0, currentStreak = 0, tempStreak = 0;
     let bestDay = { count: 0, date: null };
@@ -286,7 +393,7 @@ async function fetchGithub() {
         tempStreak++;
         longestStreak = Math.max(longestStreak, tempStreak);
       } else { tempStreak = 0; }
-      
+
       const dateObj = new Date(day.date);
       contributionsByDayOfWeek[dateObj.getUTCDay()] += day.contributionCount;
     });
@@ -307,12 +414,12 @@ async function fetchGithub() {
 
     const commitsPerHour = new Array(24).fill(0);
     let totalSampleCommits = 0;
-    
+
     if (eventsRes?.data) {
       eventsRes.data.forEach(event => {
         if (event.type === 'PushEvent') {
           const date = new Date(event.created_at);
-          const hour = (date.getUTCHours() - 3 + 24) % 24; 
+          const hour = (date.getUTCHours() - 3 + 24) % 24;
           const count = event.payload.commits?.length || 1;
           commitsPerHour[hour] += count;
           totalSampleCommits += count;
@@ -342,7 +449,8 @@ async function fetchGithub() {
         commitsPerHour,
         totalSampleCommits,
         year: new Date().getFullYear()
-      }
+      },
+      languages
     };
   } catch (e) { return { status: 'error' }; }
 }
@@ -402,8 +510,8 @@ const GALO_ESPN_HEADERS = {
   'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
   Accept: 'application/json'
 };
-const GALO_LIVE_WINDOW_MS = 4 * 60 * 60 * 1000; 
-const GALO_PRE_GRACE_MS = 30 * 60 * 1000;       
+const GALO_LIVE_WINDOW_MS = 4 * 60 * 60 * 1000;
+const GALO_PRE_GRACE_MS = 30 * 60 * 1000;
 
 function getEventState(event) {
   return event.competitions?.[0]?.status?.type?.state || event.status?.type?.state || null;
@@ -648,18 +756,10 @@ async function fetchChess() {
     totals.games = totals.wins + totals.losses + totals.draws;
     totals.winRate = totals.games ? Math.round((totals.wins / totals.games) * 1000) / 10 : null;
 
-    // ---- Últimas partidas (mês atual; se tiver poucas, completa com o mês anterior) ----
+    // ---- Últimas partidas: os dois arquivos mais recentes em paralelo (antes eram sequenciais) ----
     const archiveUrls = archivesRes.status === 'fulfilled' ? archivesRes.value?.archives || [] : [];
-    const rawGames = [];
-    for (const url of archiveUrls.slice(-2).reverse()) {
-      try {
-        const data = await get(url);
-        rawGames.push(...(data.games || []));
-      } catch (error) {
-        console.warn('[Chess] Falha ao ler arquivo de partidas:', error.message);
-      }
-      if (rawGames.length >= 5) break;
-    }
+    const latestArchives = await Promise.allSettled(archiveUrls.slice(-2).reverse().map(get));
+    const rawGames = latestArchives.flatMap((r) => (r.status === 'fulfilled' ? r.value?.games || [] : []));
 
     const recent = rawGames
       .sort((a, b) => (b.end_time || 0) - (a.end_time || 0))
@@ -701,19 +801,19 @@ async function fetchChess() {
 // ORQUESTRADOR CENTRAL
 // ==========================================
 
-async function fetchLiveContext() {
-  const sources = {
-    spotify: fetchSpotify,
-    github: fetchGithub,
-    wakatime: fetchWakatime,
-    canvas: fetchCanvas,
-    galo: fetchGalo,
-    chess: fetchChess
-  };
-  const entries = await Promise.all(
-    Object.entries(sources).map(async ([name, fetcher]) => [name, await cachedSource(name, fetcher)])
-  );
-  return Object.fromEntries(entries);
+const LIVE_FETCHERS = {
+  spotify: fetchSpotify,
+  github: fetchGithub,
+  wakatime: fetchWakatime,
+  canvas: fetchCanvas,
+  galo: fetchGalo,
+  chess: fetchChess
+};
+
+function fetchLiveContext() {
+  return Promise.all(
+    Object.entries(LIVE_FETCHERS).map(async ([name, fetcher]) => [name, await cachedSource(name, fetcher)])
+  ).then((entries) => Object.fromEntries(entries));
 }
 
 function sanitizeHistory(history) {
@@ -732,30 +832,82 @@ function sanitizeHistory(history) {
   return grouped.map(({ role, text }) => ({ role, parts: [{ text }] }));
 }
 
+// ==========================================
+// FALLBACK DE MODELOS (com cooldown e 1 retry em 503)
+// ==========================================
+
+async function attemptModel(modelName, run) {
+  for (let attempt = 0; ; attempt += 1) {
+    try {
+      return await run(modelName);
+    } catch (error) {
+      if (error?.status === 503 && attempt === 0) {
+        await sleep(800);
+        continue;
+      }
+      throw error;
+    }
+  }
+}
+
+async function runWithFallback(modelsToTry, run) {
+  const now = Date.now();
+  const healthy = modelsToTry.filter((name) => (modelCooldown.get(name) || 0) <= now);
+  const queue = healthy.length ? healthy : modelsToTry;
+
+  let lastError;
+  for (const modelName of queue) {
+    try {
+      return { value: await attemptModel(modelName, run), model: modelName };
+    } catch (error) {
+      lastError = error;
+      if (!isRetryableModelError(error)) throw error;
+      modelCooldown.set(modelName, Date.now() + cooldownMs(error));
+      console.warn(`[Gemini] Modelo ${modelName} indisponível; tentando o próximo.`);
+    }
+  }
+  throw lastError || new Error('Nenhum modelo Gemini disponível.');
+}
+
+function chunkText(chunk) {
+  try {
+    return chunk.text();
+  } catch {
+    return ''; // chunks sem texto (ex.: bloqueio de segurança) são ignorados
+  }
+}
+
+// ==========================================
+// HANDLER
+// ==========================================
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' });
 
   try {
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body || {};
-    const { userMessage, lang = 'pt', chatHistory = [] } = body;
+    const { userMessage, chatHistory = [] } = body;
+    const stream = body.stream === true; // opt-in: resposta NDJSON; padrão continua JSON
 
     if (typeof userMessage !== 'string' || !userMessage.trim()) return res.status(400).json({ error: 'Mensagem inválida.' });
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) return res.status(500).json({ error: 'GEMINI_API_KEY não configurada.' });
 
-    const [perfil, liveContext, modelsToTry] = await Promise.all([
-      Promise.resolve().then(() => readJson('perfil.json')),
-      fetchLiveContext(),
-      getModelList(apiKey)
-    ]);
+    // Dados ao vivo começam já; o modelo não espera por eles além de LIVE_PROMPT_WAIT_MS
+    const livePromise = fetchLiveContext();
+    const perfil = readJson('perfil.json');
+    const modelsToTry = await getModelList(apiKey);
+
+    const early = await Promise.race([livePromise, sleep(LIVE_PROMPT_WAIT_MS).then(() => null)]);
+    const live = early ?? peekLiveContext();
 
     const geminiContext = {
-      spotify: { status: liveContext.spotify?.status, playing: liveContext.spotify?.current?.name || 'offline' },
-      github: { status: liveContext.github?.status },
-      wakatime: { status: liveContext.wakatime?.status },
-      canvas: { status: liveContext.canvas?.status, activeCourses: liveContext.canvas?.courses?.length || 0 },
-      galo: { status: liveContext.galo?.status, upcomingGames: liveContext.galo?.games?.length || 0 },
-      chess: { status: liveContext.chess?.status }
+      spotify: { status: live.spotify?.status, playing: live.spotify?.current?.name || 'offline' },
+      github: { status: live.github?.status },
+      wakatime: { status: live.wakatime?.status },
+      canvas: { status: live.canvas?.status, activeCourses: live.canvas?.courses?.length || 0 },
+      galo: { status: live.galo?.status, upcomingGames: live.galo?.games?.length || 0 },
+      chess: { status: live.chess?.status }
     };
 
     const systemInstruction = `Seu nome é Astra e você é a assistente virtual do portfólio de Gustavo Ryan Gomes Guedes.
@@ -771,10 +923,10 @@ REGRA DE CARDS VISUAIS (Sempre inclua a tag no meio do texto quando o assunto fo
 - Xadrez, Chess.com, Rating, Partidas de xadrez, Taxa de vitória no xadrez -> [CHESS_CARD]
 
 COMPORTAMENTO ESPECÍFICO PARA GITHUB:
-Existem 3 cards de GitHub: [GITHUB_CARD] (Resumo), [GITHUB_ACTIVITY_CARD] (Gráficos) e [REPOSITORIES_CARD] (Projetos).
-1. Quando o usuário perguntar sobre o GitHub pela PRIMEIRA VEZ ou de forma geral, retorne APENAS a tag [GITHUB_CARD]. 
+Existem 4 cards de GitHub: [GITHUB_CARD] (Resumo), [GITHUB_ACTIVITY_CARD] (Gráficos), [GITHUB_LANGUAGES_CARD] (Linguagens) e [REPOSITORIES_CARD] (Projetos).
+1. Quando o usuário perguntar sobre o GitHub pela PRIMEIRA VEZ ou de forma geral, retorne APENAS a tag [GITHUB_CARD].
 2. No final dessa resposta, OBRIGATORIAMENTE sugira: "Gostaria de ver as métricas completas e gráficas do GitHub dele?".
-3. Se o usuário responder SIM (ou pedir diretamente por métricas completas/repositórios), retorne OBRIGATORIAMENTE as 3 tags JUNTAS na mesma resposta: [GITHUB_CARD], [GITHUB_ACTIVITY_CARD] e [REPOSITORIES_CARD]. NUNCA envie os gráficos e repositórios sem incluir também o [GITHUB_CARD].
+3. Se o usuário responder SIM (ou pedir diretamente por métricas completas/repositórios), retorne OBRIGATORIAMENTE as 4 tags JUNTAS na mesma resposta: [GITHUB_CARD], [GITHUB_ACTIVITY_CARD], [GITHUB_LANGUAGES_CARD] e [REPOSITORIES_CARD]. NUNCA envie os gráficos e repositórios sem incluir também o [GITHUB_CARD].
 
 COMPORTAMENTO ESPECÍFICO PARA JOGOS DO GALO:
 - O Card de jogos possui paginação dinâmica pela IA através da tag:
@@ -782,58 +934,63 @@ COMPORTAMENTO ESPECÍFICO PARA JOGOS DO GALO:
 2. QUANTIDADE ESPECÍFICA (Mostrar N jogos): Se o usuário pedir um número (ex: 5 jogos), use a tag [GALO_CARD:N] (ex: [GALO_CARD:5]).
 3. MOSTRAR TODOS: Se o usuário pedir "todos", "mais" ou "o resto" (sem especificar quantidade), use a tag [GALO_CARD:ALL].
 
-DADOS COMPLETOS DO PERFIL: ${JSON.stringify(perfil)}
+DADOS COMPLETOS DO PERFIL: ${profileText(perfil)}
 STATUS DAS APIS: ${JSON.stringify(geminiContext)}`;
 
     const genAI = new GoogleGenerativeAI(apiKey);
     const history = sanitizeHistory(chatHistory);
     const message = userMessage.trim();
 
-    const nowTs = Date.now();
-    const healthy = modelsToTry.filter((name) => (modelCooldown.get(name) || 0) <= nowTs);
-    const queue = healthy.length ? healthy : modelsToTry;
+    const openChat = (modelName) => genAI
+      .getGenerativeModel(
+        { model: modelName, systemInstruction, generationConfig: GENERATION_CONFIG },
+        { timeout: GEMINI_TIMEOUT_MS }
+      )
+      .startChat({ history });
 
-    let result;
-    let selectedModel;
-    let lastGeminiError;
-
-    for (const modelName of queue) {
-      const model = genAI.getGenerativeModel({ model: modelName, systemInstruction }, { timeout: GEMINI_TIMEOUT_MS });
-      try {
-        for (let attempt = 0; attempt < 2; attempt += 1) {
-          try {
-            result = await model.startChat({ history }).sendMessage(message);
-            selectedModel = modelName;
-            break;
-          } catch (error) {
-            lastGeminiError = error;
-            if (error?.status === 503 && attempt === 0) {
-              await new Promise((resolve) => setTimeout(resolve, 800));
-              continue;
-            }
-            throw error;
-          }
-        }
-        if (result) break;
-      } catch (error) {
-        lastGeminiError = error;
-        if (!isRetryableModelError(error)) throw error;
-        modelCooldown.set(modelName, Date.now() + cooldownMs(error));
-        console.warn(`[Gemini] Modelo ${modelName} indisponível; tentando o próximo.`);
-      }
+    // ---- Modo padrão (JSON, compatível com o cliente atual) ----
+    if (!stream) {
+      const { value: text, model } = await runWithFallback(modelsToTry, async (name) => {
+        const result = await openChat(name).sendMessage(message);
+        return result.response.text();
+      });
+      const liveContext = await livePromise;
+      return res.status(200).json({ response: text, liveContext, model });
     }
 
-    if (!result) {
-      throw lastGeminiError || new Error('Nenhum modelo Gemini disponível.');
-    }
-
-    return res.status(200).json({
-      response: result.response.text(),
-      liveContext,
-      model: selectedModel
+    // ---- Modo streaming (NDJSON): só o início da resposta entra no fallback ----
+    const { value: opened, model } = await runWithFallback(modelsToTry, async (name) => {
+      const { stream: chunks, response } = await openChat(name).sendMessageStream(message);
+      response.catch(() => {}); // evita rejeição não tratada se o stream falhar
+      const iterator = chunks[Symbol.asyncIterator]();
+      return { iterator, first: await iterator.next() };
     });
+
+    const liveContext = await livePromise;
+    res.statusCode = 200;
+    res.setHeader('Content-Type', 'application/x-ndjson; charset=utf-8');
+    res.setHeader('Cache-Control', 'no-cache, no-transform');
+    res.setHeader('X-Accel-Buffering', 'no');
+    const write = (payload) => res.write(`${JSON.stringify(payload)}\n`);
+
+    write({ type: 'meta', model, liveContext });
+    try {
+      let chunk = opened.first;
+      while (!chunk.done) {
+        const text = chunkText(chunk.value);
+        if (text) write({ type: 'delta', text });
+        chunk = await opened.iterator.next();
+      }
+      write({ type: 'done' });
+    } catch (error) {
+      console.error('Erro durante streaming Gemini:', error.message);
+      write({ type: 'error', error: 'Erro ao gerar resposta. Tente novamente em instantes.' });
+    }
+    return res.end();
   } catch (error) {
     console.error('Erro na Serverless /api/chat:', error.message);
+    if (res.headersSent) return res.end();
+
     const errStr = error.message + ' ' + (error?.cause?.message || '');
     if (errStr.includes('API_KEY_INVALID')) return res.status(503).json({ error: 'Chave Gemini inválida.' });
     if (error?.status === 503 || errStr.includes('high demand')) return res.status(503).json({ error: 'O Gemini está temporariamente sobrecarregado.' });
