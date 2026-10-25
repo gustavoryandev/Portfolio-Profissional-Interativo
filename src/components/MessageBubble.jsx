@@ -17,7 +17,7 @@ const cards = {
   '[GITHUB_CARD]': GithubCard,
   '[STATS_CARD]': StatsCard,
   '[CANVAS_CARD]': CanvasCard,
-  '[GALO_CARD]': GaloCard,
+  '[GALO_CARD]': GaloCard, // Opcional aqui pois trataremos customizado no regex
   '[CONTACT_FORM]': ContactSection,
   '[PROJECTS_CARD]': ProjectsCard,
   '[EXPERIENCE_CARD]': ExperienceCard,
@@ -28,14 +28,12 @@ const cards = {
 export default function MessageBubble({ message }) {
   const { darkMode } = useContext(ThemeContext);
   const isUser = message?.sender === 'user';
-  const parts = (message?.text || '').split(/(\[(?:SPOTIFY|GITHUB|STATS|CANVAS|GALO|PROJECTS|EXPERIENCE|REPOSITORIES|GITHUB_ACTIVITY)_CARD\]|\[CONTACT_FORM\])/g);
-
-// ... existing code ...
-
+  
+  // REGEX MELHORADO: Agora captura tags de galo com limite, ex: [GALO_CARD:5] ou [GALO_CARD:ALL]
+  const parts = (message?.text || '').split(/(\[(?:SPOTIFY|GITHUB|STATS|CANVAS|PROJECTS|EXPERIENCE|REPOSITORIES|GITHUB_ACTIVITY)_CARD\]|\[GALO_CARD(?::\d+|:ALL)?\]|\[CONTACT_FORM\])/g);
 
   return (
     <div className={`flex w-full ${isUser ? 'justify-end' : 'justify-start'} gap-3 my-2`}>
-      {/* Avatar do assistente */}
       {!isUser && (
         <div className="w-10 h-10 rounded-full flex shrink-0 items-center justify-center mt-2 bg-transparent text-amber-500">
           <Sparkles className="w-5 h-5" />
@@ -44,11 +42,8 @@ export default function MessageBubble({ message }) {
 
       <div className={`max-w-[80%] ${isUser ? 'ml-auto' : ''}`}>
         {isUser ? (
-          // Balão da Mensagem do Usuário
           <div className={`px-6 py-4 rounded-3xl rounded-tr-sm text-[15px] font-medium leading-relaxed border ${
-            darkMode 
-              ? 'bg-[#1a1a1a] text-white border-amber-500/60' 
-              : 'bg-[#1a1a1a] text-white border-amber-500 shadow-md'
+            darkMode ? 'bg-[#1a1a1a] text-white border-amber-500/60' : 'bg-[#1a1a1a] text-white border-amber-500 shadow-md'
           }`}>
             {parts.map((part, index) => {
               if (!part) return null;
@@ -57,11 +52,7 @@ export default function MessageBubble({ message }) {
                 <span className="whitespace-pre-wrap" key={`${part}-${index}`}>
                   {boldParts.map((bPart, bIndex) => {
                     if (bPart.startsWith('**') && bPart.endsWith('**')) {
-                      return (
-                        <strong key={bIndex} className="text-amber-400 font-bold">
-                          {bPart.slice(2, -2)}
-                        </strong>
-                      );
+                      return <strong key={bIndex} className="text-amber-400 font-bold">{bPart.slice(2, -2)}</strong>;
                     }
                     return bPart;
                   })}
@@ -70,39 +61,39 @@ export default function MessageBubble({ message }) {
             })}
           </div>
         ) : (
-          // Balão da Mensagem do Bot / Assistente
           <div className={`px-7 py-6 rounded-[2rem] rounded-tl-sm w-full border ${
-            darkMode 
-              ? 'bg-[#141414] border-[#2a2a2a] text-zinc-300' 
-              : 'bg-white border-gray-100 text-gray-700 shadow-lg shadow-gray-200/50'
+            darkMode ? 'bg-[#141414] border-[#2a2a2a] text-zinc-300' : 'bg-white border-gray-100 text-gray-700 shadow-lg shadow-gray-200/50'
           }`}>
             {parts.map((part, index) => {
-              const Card = cards[part];
+              let Card = cards[part];
+              let limitProp = undefined;
               
-              // Se for um card, renderiza o componente correspondente
+              // Verifica se é o card do Galo para extrair o limit
+              if (part.startsWith('[GALO_CARD')) {
+                Card = GaloCard;
+                const match = part.match(/\[GALO_CARD:(ALL|\d+)\]/);
+                if (match) {
+                   limitProp = match[1] === 'ALL' ? null : parseInt(match[1]);
+                } else {
+                   limitProp = 3; // Padrão
+                }
+              }
+
               if (Card) {
                 return (
                   <div className="my-4" key={`${part}-${index}`}>
-                    <Card context={message.context} lang={message.lang || 'pt'} />
+                    <Card context={message.context} lang={message.lang || 'pt'} limit={limitProp} />
                   </div>
                 );
               }
 
-              // Se for texto normal, formata negritos (**texto**)
               if (part) {
                 const boldParts = part.split(/(\*\*.*?\*\*)/g);
                 return (
                   <span className="whitespace-pre-wrap" key={`${part}-${index}`}>
                     {boldParts.map((bPart, bIndex) => {
                       if (bPart.startsWith('**') && bPart.endsWith('**')) {
-                        return (
-                          <strong 
-                            key={bIndex} 
-                            className={darkMode ? 'text-zinc-100 font-bold' : 'text-zinc-900 font-bold'}
-                          >
-                            {bPart.slice(2, -2)}
-                          </strong>
-                        );
+                        return <strong key={bIndex} className={darkMode ? 'text-zinc-100 font-bold' : 'text-zinc-900 font-bold'}>{bPart.slice(2, -2)}</strong>;
                       }
                       return bPart;
                     })}
@@ -115,7 +106,6 @@ export default function MessageBubble({ message }) {
         )}
       </div>
 
-      {/* Avatar do usuário */}
       {isUser && (
         <div className="w-10 h-10 rounded-full flex shrink-0 items-center justify-center mt-2 bg-transparent text-amber-500">
           <User className="w-5 h-5" />

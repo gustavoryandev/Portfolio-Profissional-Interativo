@@ -68,7 +68,10 @@ function readJson(fileName) {
 }
 
 async function fetchSpotify() {
-  const { SPOTIFY_CLIENT_ID: id, SPOTIFY_CLIENT_SECRET: secret, SPOTIFY_REFRESH_TOKEN: refresh } = process.env;
+  const id = process.env.SPOTIFY_CLIENT_ID?.trim();
+  const secret = process.env.SPOTIFY_CLIENT_SECRET?.trim();
+  const refresh = process.env.SPOTIFY_REFRESH_TOKEN?.trim();
+
   if (!id || !secret || !refresh) return { status: 'not_configured' };
   try {
     const tokenResponse = await client.post(
@@ -118,7 +121,10 @@ async function fetchSpotify() {
     })) : [];
 
     return { status: 'ok', current, recent, topTracks, topArtists };
-  } catch (e) { return { status: 'error' }; }
+  } catch (e) {
+    console.error('[Spotify API Error]:', e.response?.data || e.message);
+    return { status: 'error' }; 
+  }
 }
 
 async function fetchGithub() {
@@ -126,7 +132,6 @@ async function fetchGithub() {
   if (!username || !token || token === '******') return { status: 'not_configured' };
   
   try {
-    // Buscando eventos recentes para estimar os horários de commit
     const eventsPromise = client.get(`https://api.github.com/users/${username}/events?per_page=100`, {
       headers: { Authorization: `Bearer ${token}` }
     }).catch(() => null);
@@ -179,23 +184,19 @@ async function fetchGithub() {
     const contributionsByDayOfWeek = new Array(7).fill(0);
 
     days.forEach(day => {
-      // Melhor dia
       if (day.contributionCount > bestDay.count) bestDay = { count: day.contributionCount, date: day.date };
-      
-      // Sequências
       if (day.contributionCount > 0) {
         tempStreak++;
         longestStreak = Math.max(longestStreak, tempStreak);
       } else { tempStreak = 0; }
       
-      // Dias da semana (0 = Dom, 1 = Seg...)
       const dateObj = new Date(day.date);
       contributionsByDayOfWeek[dateObj.getUTCDay()] += day.contributionCount;
     });
 
     for (let i = days.length - 1; i >= 0; i--) {
       if (days[i].contributionCount > 0) currentStreak++;
-      else if (i < days.length - 1) break; // Para na primeira falha
+      else if (i < days.length - 1) break;
     }
 
     const formattedRepos = repos.map(repo => ({
@@ -207,7 +208,6 @@ async function fetchGithub() {
       language: repo.primaryLanguage ? repo.primaryLanguage.name : null
     }));
 
-    // Processando horários dos commits
     const commitsPerHour = new Array(24).fill(0);
     let totalSampleCommits = 0;
     
@@ -215,7 +215,7 @@ async function fetchGithub() {
       eventsRes.data.forEach(event => {
         if (event.type === 'PushEvent') {
           const date = new Date(event.created_at);
-          const hour = (date.getUTCHours() - 3 + 24) % 24; // Ajuste para Horário de Brasília
+          const hour = (date.getUTCHours() - 3 + 24) % 24; 
           const count = event.payload.commits?.length || 1;
           commitsPerHour[hour] += count;
           totalSampleCommits += count;
@@ -223,7 +223,6 @@ async function fetchGithub() {
       });
     }
 
-    // Fallback elegante caso não haja eventos recentes (para o gráfico não ficar vazio)
     if (totalSampleCommits === 0) {
       commitsPerHour.splice(0, 24, ...[0, 0, 0, 0, 1, 0, 0, 0, 1, 3, 2, 8, 12, 5, 8, 10, 15, 15, 15, 20, 4, 10, 0, 0]);
       totalSampleCommits = commitsPerHour.reduce((a, b) => a + b, 0);
@@ -300,20 +299,171 @@ async function fetchWakatime() {
   } catch (e) { return { status: 'error' }; }
 }
 
-async function fetchCanvas() {
-  const { CANVAS_API_TOKEN: token, CANVAS_BASE_URL: baseUrl } = process.env;
-  if (!token || !baseUrl) return { status: 'not_configured' };
+// ---------- GALO ----------
+const GALO_TEAM_ID = '7632';
+const GALO_FALLBACK_LOGO = 'https://a.espncdn.com/i/teamlogos/default-team-logo-500.png';
+const GALO_ESPN_HEADERS = {
+  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+  Accept: 'application/json'
+};
+const GALO_LIVE_WINDOW_MS = 4 * 60 * 60 * 1000; // jogo "ao vivo" por no máximo 4h após o início
+const GALO_PRE_GRACE_MS = 30 * 60 * 1000;       // tolerância de 30min se a ESPN atrasar o status
+
+function getEventState(event) {
+  return event.competitions?.[0]?.status?.type?.state || event.status?.type?.state || null;
+}
+
+function getEventStatusName(event) {
+  return event.competitions?.[0]?.status?.type?.name || event.status?.type?.name || '';
+}
+
+async function fetchEspnEvents(url) {
   try {
-    const response = await client.get(`${baseUrl.replace(/\/$/, '')}/api/v1/courses`, {
-      params: { enrollment_state: 'active', per_page: 5 },
-      headers: { Authorization: `Bearer ${token}` }
+    const response = await client.get(url, { headers: GALO_ESPN_HEADERS });
+    return response.data?.events || [];
+  } catch (error) {
+    console.warn('[Galo] Falha ao consultar', url, '-', error.message);
+    return [];
+  }
+}
+
+async function fetchGalo() {
+  try {
+    const base = `https://site.api.espn.com/apis/site/v2/sports/soccer/all/teams/${GALO_TEAM_ID}/schedule`;
+    const baseWeb = `https://site.web.api.espn.com/apis/site/v2/sports/soccer/all/teams/${GALO_TEAM_ID}/schedule`;
+
+    // fixture=true traz os jogos futuros (o endpoint sem o parâmetro traz principalmente resultados).
+    const lists = await Promise.all([
+      fetchEspnEvents(`${base}?fixture=true`),
+      fetchEspnEvents(`${baseWeb}?fixture=true`),
+      fetchEspnEvents(base)
+    ]);
+
+    // Junta tudo e remove duplicados pelo id do jogo
+    const byId = new Map();
+    for (const event of lists.flat()) {
+      if (event?.id && !byId.has(event.id)) byId.set(event.id, event);
+    }
+    const events = [...byId.values()]
+      .filter((e) => !Number.isNaN(new Date(e.date).getTime()))
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+    const now = Date.now();
+
+    // Só vale como "próximo/ao vivo" se o status da ESPN E o relógio concordarem.
+    // Isso evita mostrar jogos antigos que a ESPN deixou com status 'pre' desatualizado.
+    const isUpcomingOrLive = (event) => {
+      const state = getEventState(event);
+      const statusName = getEventStatusName(event);
+      if (/POSTPONED|CANCELED|CANCELLED|SUSPENDED|ABANDONED/i.test(statusName)) return false;
+
+      const start = new Date(event.date).getTime();
+      if (state === 'in') return now - start <= GALO_LIVE_WINDOW_MS;
+      if (state === 'pre') return start >= now - GALO_PRE_GRACE_MS;
+      return false;
+    };
+
+    let validEvents = events.filter(isUpcomingOrLive);
+
+    // Fallback: se não há jogos futuros (fim de temporada), mostra o último jogo já realizado
+    if (validEvents.length === 0) {
+      const past = events.filter((e) => new Date(e.date).getTime() <= now);
+      if (past.length > 0) validEvents = [past[past.length - 1]];
+    }
+
+    if (validEvents.length === 0) return { status: 'ok', games: [] };
+
+    const getLogo = (teamData) => teamData?.team?.logos?.[0]?.href || GALO_FALLBACK_LOGO;
+
+    const games = validEvents.slice(0, 15).map((game) => {
+      const comp = game.competitions?.[0] || {};
+      const competitors = comp.competitors || [];
+      const home = competitors.find((c) => c.homeAway === 'home') || {};
+      const away = competitors.find((c) => c.homeAway === 'away') || {};
+      const isHome = String(home.team?.id) === GALO_TEAM_ID;
+
+      // 'pre' = ainda vai acontecer | 'in' = ao vivo | 'post' = já terminou (só no fallback)
+      const state = isUpcomingOrLive(game) ? getEventState(game) : 'post';
+
+      return {
+        id: game.id,
+        date: game.date,
+        state,
+        league: game.league?.name || game.season?.displayName || 'Campeonato',
+        leagueLogo: game.league?.logos?.[0]?.href || null,
+        venue: comp.venue?.fullName || 'A definir',
+        home: {
+          name: home.team?.shortDisplayName || home.team?.displayName || home.team?.name || 'Casa',
+          logo: getLogo(home)
+        },
+        away: {
+          name: away.team?.shortDisplayName || away.team?.displayName || away.team?.name || 'Fora',
+          logo: getLogo(away)
+        },
+        isHome
+      };
     });
-    return { status: 'ok', courses: response.data.map(({ name, course_code: code, workflow_state: state }) => ({ name, code, state })) };
-  } catch (e) { return { status: 'error' }; }
+
+    return { status: 'ok', games };
+  } catch (e) {
+    console.error('[Galo API Error]:', e.message);
+    return { status: 'error' };
+  }
+}
+
+// ---------- CANVAS ----------
+async function fetchCanvas() {
+  const token = process.env.CANVAS_API_TOKEN?.trim();
+  let baseUrl = process.env.CANVAS_BASE_URL?.trim();
+  if (!token || !baseUrl) return { status: 'not_configured' };
+
+  // Normaliza a URL: remove "/" final, "/api/v1" repetido e garante https://
+  baseUrl = baseUrl.replace(/\/+$/, '').replace(/\/api\/v1$/i, '');
+  if (!/^https?:\/\//i.test(baseUrl)) baseUrl = `https://${baseUrl}`;
+
+  try {
+    // include[]=term traz as datas do período letivo; per_page maior evita cortar disciplinas úteis
+    const url = `${baseUrl}/api/v1/courses?enrollment_state=active&include[]=term&per_page=50`;
+    const response = await client.get(url, { headers: { Authorization: `Bearer ${token}` } });
+
+    if (!Array.isArray(response.data)) {
+      console.error('[Canvas] Resposta inesperada (verifique CANVAS_BASE_URL):', typeof response.data);
+      return { status: 'error' };
+    }
+
+    const now = Date.now();
+
+    // Cursos com acesso restrito por data vêm sem "name"; cursos de períodos encerrados também aparecem como "active"
+    const named = response.data.filter((c) => c?.name && !c.access_restricted_by_date);
+
+    const isCurrent = (c) => {
+      const end = c.end_at || c.term?.end_at;
+      const start = c.start_at || c.term?.start_at;
+      if (end && new Date(end).getTime() < now) return false;
+      if (start && new Date(start).getTime() > now) return false;
+      return c.workflow_state === 'available';
+    };
+
+    let courses = named.filter(isCurrent);
+    if (courses.length === 0) courses = named.filter((c) => c.workflow_state === 'available'); // fallback
+
+    return {
+      status: 'ok',
+      courses: courses.slice(0, 10).map((c) => ({
+        name: c.name,
+        code: c.course_code,
+        state: c.workflow_state,
+        term: c.term?.name || null
+      }))
+    };
+  } catch (e) {
+    console.error('[Canvas API Error]:', e.response?.status, e.response?.data?.errors || e.message);
+    return { status: 'error' };
+  }
 }
 
 async function fetchLiveContext() {
-  const sources = { spotify: fetchSpotify, github: fetchGithub, wakatime: fetchWakatime, canvas: fetchCanvas };
+  const sources = { spotify: fetchSpotify, github: fetchGithub, wakatime: fetchWakatime, canvas: fetchCanvas, galo: fetchGalo };
   const entries = await Promise.all(Object.entries(sources).map(async ([name, fetcher]) => [name, await fetcher()]));
   return Object.fromEntries(entries);
 }
@@ -351,7 +501,8 @@ export default async function handler(req, res) {
       spotify: { status: liveContext.spotify?.status, playing: liveContext.spotify?.current?.name || 'offline' },
       github: { status: liveContext.github?.status },
       wakatime: { status: liveContext.wakatime?.status },
-      canvas: { status: liveContext.canvas?.status, activeCourses: liveContext.canvas?.courses?.length || 0 }
+      canvas: { status: liveContext.canvas?.status, activeCourses: liveContext.canvas?.courses?.length || 0 },
+      galo: { status: liveContext.galo?.status, upcomingGames: liveContext.galo?.games?.length || 0 }
     };
 
     const systemInstruction = `Seu nome é Astra e você é a assistente virtual do portfólio de Gustavo Ryan Gomes Guedes.
@@ -363,14 +514,19 @@ REGRA DE CARDS VISUAIS (Sempre inclua a tag no meio do texto quando o assunto fo
 - Projetos de Programação em destaque no Portfólio -> [PROJECTS_CARD]
 - WakaTime, Tempo de código, Linguagens -> [STATS_CARD]
 - Música, Spotify -> [SPOTIFY_CARD]
-- Futebol, Galo -> [GALO_CARD]
 - Contato, Falar com Gustavo -> [CONTACT_FORM]
 
 COMPORTAMENTO ESPECÍFICO PARA GITHUB:
 Existem 3 cards de GitHub: [GITHUB_CARD] (Resumo), [GITHUB_ACTIVITY_CARD] (Gráficos) e [REPOSITORIES_CARD] (Projetos).
-1. Quando o usuário perguntar sobre o GitHub do Gustavo pela PRIMEIRA VEZ ou de forma geral, retorne APENAS a tag [GITHUB_CARD] com o resumo estatístico. 
-2. No final dessa resposta, OBRIGATORIAMENTE sugira ao usuário: "Gostaria de ver as métricas completas e gráficas do GitHub dele (horários de commit, atividades diárias e repositórios)?".
-3. Se o usuário responder que SIM (ou pedir diretamente por métricas completas/gráficos/repositórios), retorne as tags [GITHUB_ACTIVITY_CARD] e [REPOSITORIES_CARD] juntas no meio da sua resposta.
+1. Quando o usuário perguntar sobre o GitHub pela PRIMEIRA VEZ ou de forma geral, retorne APENAS a tag [GITHUB_CARD]. 
+2. No final dessa resposta, OBRIGATORIAMENTE sugira: "Gostaria de ver as métricas completas e gráficas do GitHub dele?".
+3. Se o usuário responder SIM (ou pedir diretamente por métricas completas/repositórios), retorne as tags [GITHUB_ACTIVITY_CARD] e [REPOSITORIES_CARD].
+
+COMPORTAMENTO ESPECÍFICO PARA JOGOS DO GALO:
+- O Card de jogos possui paginação dinâmica pela IA através da tag:
+1. PADRÃO (Mostrar 3 jogos): Use apenas [GALO_CARD]. IMPORTANTE: Ao usar a tag padrão, sempre pergunte no final se o usuário "gostaria de ver mais jogos".
+2. QUANTIDADE ESPECÍFICA (Mostrar N jogos): Se o usuário pedir um número (ex: 5 jogos), use a tag [GALO_CARD:N] (ex: [GALO_CARD:5]).
+3. MOSTRAR TODOS: Se o usuário pedir "todos", "mais" ou "o resto" (sem especificar quantidade), use a tag [GALO_CARD:ALL].
 
 DADOS COMPLETOS DO PERFIL: ${JSON.stringify(perfil)}
 STATUS DAS APIS: ${JSON.stringify(geminiContext)}`;
