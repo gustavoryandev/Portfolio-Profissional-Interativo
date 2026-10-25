@@ -1,111 +1,232 @@
-import React, { useContext } from 'react';
+import React, { memo, useContext, useMemo } from 'react';
 import { BookOpen, ExternalLink, GraduationCap, LayoutDashboard, Clock } from 'lucide-react';
 import { ThemeContext } from '../context/ThemeContext';
 
+const CANVAS_URL = 'https://pucminas.instructure.com/';
+const FONT_SANS = "Inter, 'Geist Sans', Roboto, system-ui, sans-serif";
+const FONT_MONO = "'JetBrains Mono', 'Fira Code', ui-monospace, monospace";
+const MAX_VISIBLE = 4;
+
 const translations = {
-  pt: { 
-    canvas_title: 'PUC Minas (Canvas)', 
+  pt: {
+    canvas_title: 'PUC Minas (Canvas)',
+    student_fallback: 'Aluno: Gustavo Ryan (Eng. Software)',
     overview: 'Visão Geral',
     active_courses: 'Disciplinas ativas',
+    situation: 'Situação',
     status: 'Status Regular',
+    unverified: 'Não verificado',
     access: 'Acessar Ambiente Virtual',
     course_active: 'EM CURSO',
-    empty: 'Nenhuma disciplina ativa no momento.'
+    empty: 'Nenhuma disciplina ativa no momento.',
+    unavailable: 'Dados do Canvas indisponíveis no momento.',
+    synced: 'Sincronizado ao vivo',
+    more: (n) => `+${n} disciplina${n > 1 ? 's' : ''}`,
+    open: 'Abrir Canvas em nova aba',
   },
-  en: { 
-    canvas_title: 'PUC Minas (Canvas)', 
+  en: {
+    canvas_title: 'PUC Minas (Canvas)',
+    student_fallback: 'Student: Gustavo Ryan (Software Eng.)',
     overview: 'Overview',
     active_courses: 'Active courses',
+    situation: 'Status',
     status: 'Regular Status',
+    unverified: 'Not verified',
     access: 'Access Virtual Environment',
     course_active: 'IN PROGRESS',
-    empty: 'No active courses at the moment.'
-  }
+    empty: 'No active courses at the moment.',
+    unavailable: 'Canvas data is unavailable at the moment.',
+    synced: 'Synced live',
+    more: (n) => `+${n} course${n > 1 ? 's' : ''}`,
+    open: 'Open Canvas in a new tab',
+  },
 };
+
+// Tokens do design system Alvinegro + Gold (mesmos do GithubActivityCard)
+const UI = {
+  dark: {
+    panel: 'border-[#2a2a2a] bg-[#0f0f0f] text-white shadow-lg shadow-black/50',
+    surface: 'border-[#2a2a2a] bg-[#141414]',
+    divider: 'border-[#2a2a2a]',
+    text: 'text-white',
+    sub: 'text-zinc-400',
+    muted: 'text-zinc-500',
+    accentText: 'text-[#FFD700]',
+    accentHover: 'hover:text-[#FFD700]',
+    accentBorderHover: 'hover:border-[#FFD700]/40',
+    iconTile: 'border-[#2a2a2a] bg-[#1e1e1e] text-[#FFD700]/80',
+    iconTileHover: 'group-hover:text-[#FFD700]',
+    linkButton: 'border-[#2a2a2a] bg-[#1a1a1a] text-zinc-400 hover:text-[#FFD700]',
+    badge: 'border-[#FFD700]/30 bg-[#FFD700]/10 text-[#FFD700]',
+    dot: 'bg-[#FFD700]',
+    dotPing: 'bg-[#FFD700]',
+    dashed: 'border-zinc-800 bg-[#141414] text-zinc-500',
+  },
+  light: {
+    panel: 'border-[#E5E7EB] bg-white text-[#121212] shadow-md',
+    surface: 'border-[#E5E7EB] bg-[#F9FAFB]',
+    divider: 'border-[#E5E7EB]',
+    text: 'text-[#121212]',
+    sub: 'text-gray-600',
+    muted: 'text-gray-500',
+    accentText: 'text-[#A16207]',
+    accentHover: 'hover:text-[#A16207]',
+    accentBorderHover: 'hover:border-[#D4AF37]/60',
+    iconTile: 'border-[#E5E7EB] bg-white text-[#A16207]',
+    iconTileHover: 'group-hover:text-[#A16207]',
+    linkButton: 'border-[#E5E7EB] bg-white text-gray-500 hover:text-[#A16207]',
+    badge: 'border-[#D4AF37]/50 bg-[#FFF8D6] text-[#A16207]',
+    dot: 'bg-[#D4AF37]',
+    dotPing: 'bg-[#D4AF37]',
+    dashed: 'border-gray-300 bg-gray-50 text-gray-500',
+  },
+};
+
+// Disciplina individual (memoizada: não re-renderiza ao trocar o tema de outra parte)
+const CourseRow = memo(function CourseRow({ course, ui, badgeLabel }) {
+  return (
+    <div
+      className={`group flex items-center justify-between gap-3 rounded-xl border p-3 transition-all duration-200 ${ui.surface} ${ui.accentBorderHover}`}
+    >
+      <div className="flex min-w-0 items-center gap-3.5">
+        <div
+          aria-hidden="true"
+          className={`shrink-0 rounded-lg border p-2.5 transition-colors ${ui.iconTile} ${ui.iconTileHover}`}
+        >
+          <BookOpen className="h-5 w-5" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className={`truncate text-[14px] font-bold ${ui.text}`}>{course.name}</p>
+          {course.code && (
+            <p className={`truncate text-[12px] ${ui.muted}`} style={{ fontFamily: FONT_MONO }}>
+              {course.code}
+            </p>
+          )}
+        </div>
+      </div>
+      <span
+        className={`hidden shrink-0 rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider sm:inline-block ${ui.badge}`}
+      >
+        {badgeLabel}
+      </span>
+    </div>
+  );
+});
 
 export default function CanvasCard({ lang = 'pt', context }) {
   const { darkMode } = useContext(ThemeContext);
   const t = translations[lang] || translations.pt;
-  
-  // Mapeando dados em tempo real da API do Canvas
-  const courses = context?.canvas?.courses || [];
-  const activeCount = courses.length;
+  const ui = darkMode ? UI.dark : UI.light;
+
+  const canvas = context?.canvas;
+  const isConfigured = canvas?.status === 'ok';
+  const courses = useMemo(() => (Array.isArray(canvas?.courses) ? canvas.courses : []), [canvas?.courses]);
+  const visible = courses.slice(0, MAX_VISIBLE);
+  const hiddenCount = courses.length - visible.length;
+
+  // Aluno vem do backend; se não vier, usa o texto anterior
+  const studentLine = canvas?.student
+    ? [canvas.student.name, canvas.student.course].filter(Boolean).join(' • ')
+    : t.student_fallback;
+
+  const titleId = 'canvas-card-title';
 
   return (
-    <div className={`my-2 w-full max-w-2xl rounded-2xl border p-5 transition-colors duration-300 ${darkMode ? 'bg-[#0f0f0f] border-amber-500/20' : 'bg-white border-gray-200 shadow-sm'}`}>
-      
-      {/* Header do Card */}
-      <div className="mb-6 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="rounded-lg p-2.5 bg-zinc-950 text-amber-500 shadow-sm border border-zinc-800">
+    <article
+      aria-labelledby={titleId}
+      className={`my-2 w-full max-w-2xl rounded-2xl border p-5 transition-colors duration-300 ${ui.panel}`}
+      style={{ fontFamily: FONT_SANS }}
+    >
+      {/* Cabeçalho */}
+      <header className="mb-6 flex items-center justify-between gap-4">
+        <div className="flex min-w-0 items-center gap-3">
+          <div className={`shrink-0 rounded-lg border p-2.5 ${ui.iconTile}`} aria-hidden="true">
             <GraduationCap className="h-5 w-5" />
           </div>
-          <div>
-            <h3 className={`text-[17px] font-bold ${darkMode ? 'text-gray-100' : 'text-gray-900'}`}>{t.canvas_title}</h3>
-            <p className={`text-[12px] font-medium ${darkMode ? 'text-zinc-400' : 'text-gray-500'}`}>Aluno: Gustavo Ryan (Eng. Software)</p>
+          <div className="min-w-0">
+            <h3 id={titleId} className={`truncate text-[17px] font-bold ${ui.text}`}>
+              {t.canvas_title}
+            </h3>
+            <p className={`truncate text-[12px] font-medium ${ui.sub}`}>{studentLine}</p>
           </div>
         </div>
-        <a href="https://pucminas.instructure.com/" target="_blank" rel="noreferrer" className={`hidden sm:flex rounded-lg p-2 transition-colors ${darkMode ? 'bg-[#1a1a1a] text-gray-400 hover:text-amber-400 border border-[#2a2a2a]' : 'bg-gray-50 text-gray-500 hover:text-amber-500 border border-gray-200'}`}>
-          <LayoutDashboard className="h-4 w-4" />
+        <a
+          href={CANVAS_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={t.open}
+          title={t.open}
+          className={`hidden rounded-lg border p-2 transition-colors sm:flex focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFD700]/60 ${ui.linkButton}`}
+        >
+          <LayoutDashboard className="h-4 w-4" aria-hidden="true" />
         </a>
-      </div>
+      </header>
 
-      {/* KPI Cards (Métricas Rápidas) */}
-      <div className="grid grid-cols-2 gap-3 mb-5">
-        <div className={`rounded-xl border p-3.5 flex flex-col justify-center transition-colors ${darkMode ? 'bg-[#1a1a1a] border-[#2a2a2a]' : 'bg-gray-50 border-gray-100'}`}>
-          <span className={`text-[11px] font-bold uppercase tracking-wider ${darkMode ? 'text-zinc-500' : 'text-gray-500'}`}>{t.overview}</span>
-          <div className="mt-1 flex items-baseline gap-2">
-            <span className={`text-2xl font-black ${darkMode ? 'text-white' : 'text-gray-900'}`}>{activeCount}</span>
-            <span className={`text-[12px] font-medium ${darkMode ? 'text-zinc-400' : 'text-gray-500'}`}>{t.active_courses}</span>
-          </div>
+      {!isConfigured ? (
+        <div className={`rounded-xl border border-dashed py-10 text-center text-sm font-medium ${ui.dashed}`}>
+          {t.unavailable}
         </div>
-        
-        <div className={`rounded-xl border p-3.5 flex flex-col justify-center transition-colors ${darkMode ? 'bg-[#1a1a1a] border-[#2a2a2a]' : 'bg-gray-50 border-gray-100'}`}>
-          <span className={`text-[11px] font-bold uppercase tracking-wider ${darkMode ? 'text-zinc-500' : 'text-gray-500'}`}>Situação</span>
-          <div className="mt-1.5 flex items-center gap-2">
-            <div className="relative flex h-3 w-3">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
-            </div>
-            <span className={`text-[13px] font-bold ${darkMode ? 'text-emerald-400' : 'text-emerald-600'}`}>{t.status}</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Lista de Disciplinas */}
-      <div className="flex flex-col gap-2.5">
-        {courses.length > 0 ? courses.slice(0, 4).map((course, i) => (
-          <div key={course.id || i} className={`group flex items-center justify-between rounded-xl border p-3 transition-all hover:border-amber-500/30 ${darkMode ? 'bg-[#141414] border-[#2a2a2a]' : 'bg-white border-gray-100 hover:shadow-md'}`}>
-            <div className="flex items-center gap-3.5 overflow-hidden">
-              <div className={`shrink-0 rounded-lg p-2.5 transition-colors ${darkMode ? 'bg-[#222] text-amber-500/70 group-hover:text-amber-500' : 'bg-amber-50 text-amber-600 group-hover:bg-amber-100'}`}>
-                <BookOpen className="h-5 w-5" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className={`truncate text-[14px] font-bold ${darkMode ? 'text-gray-200' : 'text-gray-800'}`}>{course.name}</p>
-                <p className={`truncate text-[12px] ${darkMode ? 'text-zinc-500' : 'text-gray-500'}`}>{course.code}</p>
+      ) : (
+        <>
+          {/* Métricas rápidas */}
+          <div className="mb-5 grid grid-cols-2 gap-3">
+            <div className={`flex flex-col justify-center rounded-xl border p-3.5 ${ui.surface}`}>
+              <span className={`text-[11px] font-bold uppercase tracking-wider ${ui.muted}`}>{t.overview}</span>
+              <div className="mt-1 flex items-baseline gap-2">
+                <span className={`text-2xl font-black tabular-nums ${ui.text}`}>{courses.length}</span>
+                <span className={`text-[12px] font-medium ${ui.sub}`}>{t.active_courses}</span>
               </div>
             </div>
-            <span className="hidden sm:inline-block ml-3 shrink-0 rounded-full border border-emerald-800/30 bg-emerald-900/20 px-2.5 py-1 text-[10px] font-bold text-emerald-400 uppercase tracking-wider">
-              {t.course_active}
-            </span>
-          </div>
-        )) : (
-          <div className={`py-6 text-center text-sm rounded-xl border border-dashed ${darkMode ? 'text-zinc-500 border-zinc-800 bg-[#141414]' : 'text-zinc-400 border-gray-200 bg-gray-50'}`}>
-            {t.empty}
-          </div>
-        )}
-      </div>
 
-      {/* Footer do Card */}
-      <div className={`mt-5 flex items-center justify-between border-t pt-4 ${darkMode ? 'border-[#2a2a2a]' : 'border-gray-200'}`}>
+            <div className={`flex flex-col justify-center rounded-xl border p-3.5 ${ui.surface}`}>
+              <span className={`text-[11px] font-bold uppercase tracking-wider ${ui.muted}`}>{t.situation}</span>
+              <div className="mt-1.5 flex items-center gap-2">
+                <span className="relative flex h-3 w-3" aria-hidden="true">
+                  <span className={`absolute inline-flex h-full w-full animate-ping rounded-full opacity-75 motion-reduce:animate-none ${ui.dotPing}`} />
+                  <span className={`relative inline-flex h-3 w-3 rounded-full ${ui.dot}`} />
+                </span>
+                <span className={`text-[13px] font-bold ${ui.accentText}`}>
+                  {canvas?.regular === false ? t.unverified : t.status}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Disciplinas */}
+          <ul className="m-0 flex list-none flex-col gap-2.5 p-0">
+            {visible.length > 0 ? (
+              visible.map((course, i) => (
+                <li key={course.id ?? `${course.code}-${i}`}>
+                  <CourseRow course={course} ui={ui} badgeLabel={t.course_active} />
+                </li>
+              ))
+            ) : (
+              <li className={`rounded-xl border border-dashed py-6 text-center text-sm ${ui.dashed}`}>
+                {t.empty}
+              </li>
+            )}
+            {hiddenCount > 0 && (
+              <li className={`pt-1 text-center text-[12px] font-medium ${ui.muted}`}>{t.more(hiddenCount)}</li>
+            )}
+          </ul>
+        </>
+      )}
+
+      {/* Rodapé */}
+      <footer className={`mt-5 flex items-center justify-between gap-3 border-t pt-4 ${ui.divider}`}>
         <div className="flex items-center gap-1.5">
-            <Clock size={14} className={darkMode ? 'text-zinc-500' : 'text-gray-400'} />
-            <span className={`text-[12px] font-medium ${darkMode ? 'text-zinc-500' : 'text-gray-400'}`}>Sincronizado ao vivo</span>
+          <Clock size={14} className={ui.muted} aria-hidden="true" />
+          <span className={`text-[12px] font-medium ${ui.muted}`}>{t.synced}</span>
         </div>
-        <a href="https://pucminas.instructure.com/" target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-[13px] font-bold text-amber-500 transition-colors hover:text-amber-400">
-          {t.access} <ExternalLink size={14} />
+        <a
+          href={CANVAS_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={`flex items-center gap-1.5 text-[13px] font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFD700]/60 ${ui.accentText} ${ui.accentHover}`}
+        >
+          {t.access} <ExternalLink size={14} aria-hidden="true" />
         </a>
-      </div>
-    </div>
+      </footer>
+    </article>
   );
 }

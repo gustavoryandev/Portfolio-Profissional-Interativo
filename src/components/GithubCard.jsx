@@ -1,109 +1,203 @@
 import React, { useContext } from 'react';
-import { 
-  Github, ExternalLink, Zap, GitCommit, GitPullRequest, 
-  CircleDot, Star, GitFork, Users, BookOpen, Flame, Trophy, Calendar, Eye 
+import {
+  Github, ExternalLink, Zap, GitCommit, GitPullRequest,
+  CircleDot, Star, GitFork, Users, BookOpen, Flame, Trophy, Calendar, Eye
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { ThemeContext } from '../context/ThemeContext';
 
-export default function GithubCard({ context, lang = 'pt' }) {
-  const { t } = useTranslation();
-  const { darkMode } = useContext(ThemeContext);
-  
-  const github = context?.github;
-  const profile = github?.profile || {};
-  const stats = github?.stats || {};
-  const isConfigured = github?.status === 'ok';
+const FONT_SANS = "Inter, 'Geist Sans', Roboto, system-ui, sans-serif";
+const FONT_MONO = "'JetBrains Mono', 'Fira Code', ui-monospace, monospace";
 
-  // Caixa de Métrica alinhada ao visual "Grid" do terminal
-  const StatBox = ({ icon, label, value, sub }) => (
-    <div className={`flex flex-col rounded-xl p-3.5 transition-colors border ${
-      darkMode 
-        ? 'bg-[#141414] border-[#222222] hover:border-amber-500/40' 
-        : 'bg-white border-gray-200 hover:border-amber-500/50 shadow-sm'
-    }`}>
-      <div className={`flex items-center gap-1.5 text-[10px] font-bold tracking-widest uppercase mb-1.5 ${darkMode ? 'text-zinc-400' : 'text-gray-500'}`}>
-        {React.cloneElement(icon, { size: 14, className: 'text-amber-500' })}
-        {label}
+// Tokens do design system Alvinegro + Gold
+const THEME = {
+  dark: {
+    page: '#0A0A0A',
+    card: '#1E1E1E',
+    border: '#2A2A2A',
+    hoverBorder: '#FFD700',
+    text: '#FFFFFF',
+    muted: '#A3A3A3',
+    accent: '#FFD700',
+    iconBg: '#0A0A0A',
+    iconFg: '#FFD700',
+    ring: '#FFD700',
+    shadow: '0 20px 40px -12px rgba(0,0,0,0.6)',
+  },
+  light: {
+    page: '#F4F4F5',
+    card: '#FFFFFF',
+    border: '#E5E7EB',
+    hoverBorder: '#D4AF37',
+    text: '#121212',
+    muted: '#52525B',
+    accent: '#D4AF37',
+    iconBg: '#0A0A0A',
+    iconFg: '#D4AF37',
+    ring: '#121212',
+    shadow: '0 10px 25px -8px rgba(18,18,18,0.15)',
+  },
+};
+
+// Métrica individual: selo com ícone, rótulo, valor e legenda
+function StatBox({ icon, label, value, sub, t }) {
+  return (
+    <div
+      className="group flex flex-col rounded-xl p-4 border transition-all duration-300 hover:-translate-y-0.5"
+      style={{
+        background: t.card,
+        borderColor: t.border,
+        boxShadow: t.shadow,
+      }}
+      onMouseEnter={(e) => (e.currentTarget.style.borderColor = t.hoverBorder)}
+      onMouseLeave={(e) => (e.currentTarget.style.borderColor = t.border)}
+    >
+      <div className="flex items-center gap-2 mb-3">
+        <span
+          className="flex h-7 w-7 items-center justify-center rounded-full"
+          style={{ background: t.iconBg, color: t.iconFg }}
+        >
+          {React.cloneElement(icon, { size: 13, strokeWidth: 2.5 })}
+        </span>
+        <span
+          className="text-[10px] font-bold tracking-[0.18em] uppercase"
+          style={{ color: t.muted, fontFamily: FONT_SANS }}
+        >
+          {label}
+        </span>
       </div>
-      <strong className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+
+      <strong
+        className="text-2xl font-black tabular-nums leading-none"
+        style={{ color: t.text, fontFamily: FONT_SANS }}
+      >
         {value ?? '--'}
       </strong>
-      <p className={`mt-0.5 text-[11px] font-medium leading-tight ${darkMode ? 'text-zinc-500' : 'text-gray-400'}`}>
+
+      <p
+        className="mt-1.5 text-[11px] font-medium leading-tight"
+        style={{ color: t.muted, fontFamily: FONT_SANS }}
+      >
         {sub}
       </p>
     </div>
   );
+}
+
+export default function GithubCard({ context, lang = 'pt' }) {
+  const { t: tr } = useTranslation();
+  const { darkMode } = useContext(ThemeContext);
+  const t = darkMode ? THEME.dark : THEME.light;
+
+  const github = context?.github;
+  const profile = github?.profile || {};
+  const stats = github?.stats || {};
+  const isConfigured = github?.status === 'ok';
+  const login = profile.login || 'gustavoryan-del';
+  const profileUrl = `https://github.com/${login}`;
 
   return (
-    <article className={`my-3 w-full max-w-[700px] rounded-2xl border p-6 transition-colors duration-300 ${
-      darkMode ? 'bg-[#0a0a0a] border-amber-500/20 shadow-lg shadow-black/50' : 'bg-gray-50 border-gray-200 shadow-md'
-    }`}>
-      
-      {/* HEADER ESTILO TERMINAL */}
-      <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="rounded-lg p-2.5 bg-black text-amber-500 border border-zinc-800 shadow-md">
-            <Github className="h-7 w-7" />
+    <article
+      className="relative my-3 w-full max-w-[700px] overflow-hidden rounded-2xl border p-6 transition-colors duration-300"
+      style={{
+        background: t.page,
+        borderColor: t.border,
+        boxShadow: t.shadow,
+        fontFamily: FONT_SANS,
+      }}
+    >
+      {/* Faixa de acento no topo */}
+      <div className="absolute inset-x-0 top-0 h-1.5" style={{ background: t.accent }} />
+
+      {/* HEADER */}
+      <div className="mb-6 mt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3.5">
+          <div
+            className="flex h-12 w-12 items-center justify-center rounded-xl shadow-md"
+            style={{ background: THEME.dark.iconBg, color: THEME.dark.accent }}
+          >
+            <Github className="h-6 w-6" />
           </div>
           <div>
-            <h3 className={`text-[19px] font-black tracking-tight flex items-center gap-2 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-              {t('cards.github.titulo')}
+            <h3 className="text-lg font-black tracking-tight" style={{ color: t.text }}>
+              {tr('cards.github.titulo')}
             </h3>
-            <a 
-              href={`https://github.com/${profile.login || 'gustavoryan-del'}`} 
-              target="_blank" 
+            <a
+              href={profileUrl}
+              target="_blank"
               rel="noreferrer"
-              className={`text-[12px] font-mono font-medium hover:text-amber-500 transition-colors ${darkMode ? 'text-zinc-400' : 'text-gray-500'}`}
+              className="text-[12px] transition-colors"
+              style={{ color: t.muted, fontFamily: FONT_MONO }}
             >
-              github.com/{profile.login || 'gustavoryan-del'}
+              github.com/{login}
             </a>
           </div>
         </div>
-        
+
         {isConfigured && profile.avatarUrl && (
-          <div className={`hidden sm:flex items-center gap-2.5 rounded-full border px-3 py-1.5 ${darkMode ? 'bg-[#141414] border-[#222]' : 'bg-white border-gray-300'}`}>
-            <img src={profile.avatarUrl} alt="Avatar" className="w-6 h-6 rounded-full border border-amber-500/30" />
-            <span className={`text-[11px] font-bold tracking-wide uppercase ${darkMode ? 'text-zinc-400' : 'text-gray-600'}`}>
-              {t('cards.github.noGitHubDesde', { year: profile.joinedYear || '2024' })}
+          <div
+            className="hidden sm:flex items-center gap-2.5 rounded-full border py-1 pl-1 pr-3.5"
+            style={{ background: t.card, borderColor: t.border }}
+          >
+            <img
+              src={profile.avatarUrl}
+              alt="Avatar"
+              className="w-7 h-7 rounded-full ring-2"
+              style={{ '--tw-ring-color': t.ring }}
+            />
+            <span
+              className="text-[10px] font-bold tracking-[0.15em] uppercase"
+              style={{ color: t.muted }}
+            >
+              {tr('cards.github.noGitHubDesde', { year: profile.joinedYear || '2024' })}
             </span>
           </div>
         )}
       </div>
 
+      {/* MÉTRICAS */}
       {isConfigured ? (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <StatBox icon={<Zap />} label={t('cards.github.contribuicoes')} value={stats.contributions} sub={t('cards.github.ultimos12Meses')} />
-          <StatBox icon={<GitCommit />} label={t('cards.github.commits')} value={stats.commits} sub={t('cards.github.ultimos12Meses')} />
-          <StatBox icon={<GitPullRequest />} label={t('cards.github.pullRequests')} value={stats.prs} sub={t('cards.github.noTotal')} />
-          <StatBox icon={<CircleDot />} label={t('cards.github.issues')} value={stats.issues} sub={t('cards.github.noTotal')} />
-          <StatBox icon={<Star />} label={t('cards.github.estrelas')} value={stats.stars} sub={t('cards.github.emRepositorios', { count: stats.repos })} />
-          <StatBox icon={<GitFork />} label={t('cards.github.forks')} value={stats.forks} sub={t('cards.github.emRepositorios', { count: stats.repos })} />
-          <StatBox icon={<Users />} label={t('cards.github.seguidores')} value={stats.followers} sub={t('cards.github.seguindo', { count: stats.following })} />
-          <StatBox icon={<BookOpen />} label={t('cards.github.repositorios')} value={stats.repos} sub={t('cards.github.publicos')} />
-          <StatBox icon={<Flame />} label={t('cards.github.sequenciaAtual')} value={stats.currentStreak !== null ? t('cards.github.dias', { count: stats.currentStreak }) : null} sub={t('cards.github.ativoHoje')} />
-          <StatBox icon={<Trophy />} label={t('cards.github.maiorSequencia')} value={stats.longestStreak !== null ? t('cards.github.dias', { count: stats.longestStreak }) : null} sub={t('cards.github.recordePessoal')} />
-          <StatBox icon={<Calendar />} label={t('cards.github.melhorDia')} value={stats.bestDay?.count} sub={t('cards.github.nesteAno')} />
-          <StatBox icon={<Eye />} label={t('cards.github.visitas')} value={null} sub={t('cards.github.aoPerfil')} />
+          <StatBox t={t} icon={<Zap />} label={tr('cards.github.contribuicoes')} value={stats.contributions} sub={tr('cards.github.ultimos12Meses')} />
+          <StatBox t={t} icon={<GitCommit />} label={tr('cards.github.commits')} value={stats.commits} sub={tr('cards.github.ultimos12Meses')} />
+          <StatBox t={t} icon={<GitPullRequest />} label={tr('cards.github.pullRequests')} value={stats.prs} sub={tr('cards.github.noTotal')} />
+          <StatBox t={t} icon={<CircleDot />} label={tr('cards.github.issues')} value={stats.issues} sub={tr('cards.github.noTotal')} />
+          <StatBox t={t} icon={<Star />} label={tr('cards.github.estrelas')} value={stats.stars} sub={tr('cards.github.emRepositorios', { count: stats.repos })} />
+          <StatBox t={t} icon={<GitFork />} label={tr('cards.github.forks')} value={stats.forks} sub={tr('cards.github.emRepositorios', { count: stats.repos })} />
+          <StatBox t={t} icon={<Users />} label={tr('cards.github.seguidores')} value={stats.followers} sub={tr('cards.github.seguindo', { count: stats.following })} />
+          <StatBox t={t} icon={<BookOpen />} label={tr('cards.github.repositorios')} value={stats.repos} sub={tr('cards.github.publicos')} />
+          <StatBox t={t} icon={<Flame />} label={tr('cards.github.sequenciaAtual')} value={stats.currentStreak !== null ? tr('cards.github.dias', { count: stats.currentStreak }) : null} sub={tr('cards.github.ativoHoje')} />
+          <StatBox t={t} icon={<Trophy />} label={tr('cards.github.maiorSequencia')} value={stats.longestStreak !== null ? tr('cards.github.dias', { count: stats.longestStreak }) : null} sub={tr('cards.github.recordePessoal')} />
+          <StatBox t={t} icon={<Calendar />} label={tr('cards.github.melhorDia')} value={stats.bestDay?.count} sub={tr('cards.github.nesteAno')} />
+          <StatBox t={t} icon={<Eye />} label={tr('cards.github.visitas')} value={null} sub={tr('cards.github.aoPerfil')} />
         </div>
       ) : (
-        <div className={`py-12 text-center text-sm font-medium rounded-xl border border-dashed ${darkMode ? 'text-zinc-500 border-zinc-800' : 'text-zinc-400 border-gray-300'}`}>
-          {t('cards.github.indisponivel')}
+        <div
+          className="py-12 text-center text-sm font-medium rounded-xl border border-dashed"
+          style={{ color: t.muted, borderColor: t.border }}
+        >
+          {tr('cards.github.indisponivel')}
         </div>
       )}
-      
-      <div className={`mt-6 flex items-center justify-between border-t pt-4 ${darkMode ? 'border-[#222]' : 'border-gray-200'}`}>
-        <span className={`text-[11px] font-bold tracking-widest uppercase flex items-center gap-2 ${darkMode ? 'text-zinc-500' : 'text-gray-400'}`}>
-          <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></div>
-          {t('cards.github.sincronizado')}
-        </span>
-        <a 
-          href={`https://github.com/${profile.login || 'gustavoryan-del'}`} 
-          target="_blank" 
-          rel="noreferrer" 
-          className="flex items-center gap-1.5 text-[12px] font-bold text-amber-500 transition-colors hover:text-amber-400"
+
+      {/* RODAPÉ */}
+      <div className="mt-6 flex items-center justify-between border-t pt-4" style={{ borderColor: t.border }}>
+        <span
+          className="flex items-center gap-2 text-[10px] font-bold tracking-[0.18em] uppercase"
+          style={{ color: t.muted }}
         >
-          {t('cards.github.verPerfil')} <ExternalLink size={14} />
+          <span className="h-1.5 w-1.5 rounded-full animate-pulse" style={{ background: t.accent }} />
+          {tr('cards.github.sincronizado')}
+        </span>
+        <a
+          href={profileUrl}
+          target="_blank"
+          rel="noreferrer"
+          className="flex items-center gap-1.5 text-[12px] font-bold transition-colors"
+          style={{ color: t.text }}
+        >
+          {tr('cards.github.verPerfil')}
+          <ExternalLink size={14} style={{ color: t.accent }} />
         </a>
       </div>
     </article>

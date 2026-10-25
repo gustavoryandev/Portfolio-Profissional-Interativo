@@ -1,5 +1,6 @@
-import { Sparkles, User } from 'lucide-react';
-import { useContext, useMemo } from 'react';
+// src/components/MessageBubble.jsx
+import { memo, useContext, useMemo, useState } from 'react';
+import { AlertTriangle, Check, Copy, Sparkles, User } from 'lucide-react';
 import { ThemeContext } from '../context/ThemeContext';
 import SpotifyCard from './SpotifyCard';
 import GithubCard from './GithubCard';
@@ -26,7 +27,7 @@ const cards = {
   '[REPOSITORIES_CARD]': RepositoriesCard,
   '[GITHUB_ACTIVITY_CARD]': GithubActivityCard,
   '[GITHUB_LANGUAGES_CARD]': GithubLanguagesCard,
-  '[CHESS_CARD]': ChessCard
+  '[CHESS_CARD]': ChessCard,
 };
 
 // [GALO_CARD], [GALO_CARD:5] ou [GALO_CARD:ALL]; sem número mostra 3 jogos
@@ -37,9 +38,45 @@ const escapeRegExp = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 // Grupo de captura: os pedaços ímpares do split são sempre tags.
 const TAG_SPLIT = new RegExp(
-  `(${[...Object.keys(cards).map(escapeRegExp), GALO_PATTERN].join('|')})`
+  `(${[...Object.keys(cards).map(escapeRegExp), GALO_PATTERN].join('|')})`,
 );
 
+// Bloco de código cercado por ``` (com linguagem opcional)
+const FENCE = /```([\w+-]*)[ \t]*\n([\s\S]*?)```/g;
+// Código inline `assim`, negrito **assim**
+const INLINE = /(`[^`\n]+`|\*\*[^\n]+?\*\*)/;
+const BULLET = /^\s*[-*•]\s+/;
+
+// Tokens do design system Alvinegro + Gold
+const UI = {
+  dark: {
+    ai: 'border-transparent bg-[#1E1E1E] text-white shadow-lg shadow-black/40',
+    user: 'border-transparent bg-[#2A2A2A] text-white',
+    bold: 'font-bold text-white',
+    bullet: 'bg-[#FFD700]',
+    avatar: 'border-[#2A2A2A] bg-[#1E1E1E] text-[#FFD700]',
+    userAvatar: 'border-[#2A2A2A] bg-[#2A2A2A] text-white',
+    error: 'border-red-500/50 bg-[#1E1E1E] text-red-200',
+    errorIcon: 'text-red-400',
+    copy: 'text-zinc-400 hover:text-[#FFD700] focus-visible:ring-[#FFD700]/60',
+  },
+  light: {
+    ai: 'border-[#E5E7EB] bg-white text-[#121212] shadow-sm',
+    user: 'border-transparent bg-[#0A0A0A] text-white',
+    bold: 'font-bold text-[#121212]',
+    bullet: 'bg-[#D4AF37]',
+    avatar: 'border-[#E5E7EB] bg-white text-[#A16207]',
+    userAvatar: 'border-transparent bg-[#0A0A0A] text-white',
+    error: 'border-red-300 bg-red-50 text-red-900',
+    errorIcon: 'text-red-600',
+    copy: 'text-gray-500 hover:text-[#A16207] focus-visible:ring-[#D4AF37]/60',
+  },
+};
+
+const INLINE_CODE = 'rounded bg-[#0A0A0A] px-1.5 py-0.5 font-mono text-[0.85em] text-white';
+const FONT_MONO = "'JetBrains Mono', 'Fira Code', ui-monospace, monospace";
+
+// Mesma lógica de antes: [TAG] vira card; resto é texto
 function resolveCard(tag) {
   const galo = GALO_TAG.exec(tag);
   if (galo) {
@@ -50,17 +87,7 @@ function resolveCard(tag) {
   return Component ? { Component, limit: undefined } : null;
 }
 
-// Negrito com **texto**, dentro de um trecho de texto
-function renderInline(text, boldClass) {
-  return text.split(/(\*\*.*?\*\*)/g).map((piece, index) =>
-    piece.length >= 4 && piece.startsWith('**') && piece.endsWith('**')
-      ? <strong key={index} className={boldClass}>{piece.slice(2, -2)}</strong>
-      : piece
-  );
-}
-
-// Texto e cards, em ordem. Quebras de linha encostadas num card são removidas
-// para não criar espaço em branco extra acima ou abaixo dele.
+// Texto e cards, em ordem. Quebras de linha encostadas num card são removidas.
 function splitMessage(text) {
   const pieces = text.split(TAG_SPLIT);
   return pieces
@@ -74,65 +101,169 @@ function splitMessage(text) {
     .filter((segment) => segment.type === 'card' || segment.value);
 }
 
-export default function MessageBubble({ message }) {
+// Separa blocos de código cercados do texto comum
+function parseBlocks(text) {
+  const blocks = [];
+  let last = 0;
+  for (const match of text.matchAll(FENCE)) {
+    if (match.index > last) blocks.push({ type: 'text', value: text.slice(last, match.index) });
+    blocks.push({ type: 'code', lang: match[1], value: match[2].replace(/\n$/, '') });
+    last = match.index + match[0].length;
+  }
+  if (last < text.length) blocks.push({ type: 'text', value: text.slice(last) });
+
+  return blocks
+    .map((block) => (block.type === 'text' ? { ...block, value: block.value.replace(/^\n+|\n+$/g, '') } : block))
+    .filter((block) => block.type === 'code' || block.value.trim());
+}
+
+// Negrito e código inline dentro de um trecho. Índices ímpares são sempre os trechos marcados.
+function renderInline(text, boldClass) {
+  return text.split(new RegExp(INLINE.source, 'g')).map((piece, index) => {
+    if (!piece) return null;
+    if (index % 2 === 0) return piece;
+    if (piece.startsWith('`')) return <code key={index} className={INLINE_CODE}>{piece.slice(1, -1)}</code>;
+    return <strong key={index} className={boldClass}>{piece.slice(2, -2)}</strong>;
+  });
+}
+
+// Parágrafos e listas
+function renderText(value, ui, keyPrefix) {
+  return value.split(/\n{2,}/).map((para, p) => {
+    const lines = para.split('\n').filter((line) => line.trim());
+    if (!lines.length) return null;
+    const key = `${keyPrefix}-${p}`;
+
+    if (lines.every((line) => BULLET.test(line))) {
+      return (
+        <ul key={key} className="my-3 space-y-2">
+          {lines.map((line, i) => (
+            <li key={i} className="flex gap-3 text-[15px] leading-relaxed">
+              <span aria-hidden="true" className={`mt-[0.6em] h-1.5 w-1.5 shrink-0 rounded-full ${ui.bullet}`} />
+              <span className="min-w-0 break-words">{renderInline(line.replace(BULLET, ''), ui.bold)}</span>
+            </li>
+          ))}
+        </ul>
+      );
+    }
+
+    return (
+      <p key={key} className="my-3 whitespace-pre-wrap break-words text-[15px] leading-relaxed first:mt-0 last:mb-0">
+        {renderInline(para, ui.bold)}
+      </p>
+    );
+  });
+}
+
+// Bloco de código: fundo #0A0A0A, texto branco, monoespaçado, nos dois temas
+function CodeBlock({ lang, code }) {
+  const [copied, setCopied] = useState(false);
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      // Clipboard indisponível: o usuário ainda pode selecionar o texto
+    }
+  };
+
+  return (
+    <div className="my-4 overflow-hidden rounded-xl border border-white/10 bg-[#0A0A0A]">
+      <div className="flex items-center justify-between border-b border-white/10 px-4 py-2">
+        <span className="font-mono text-[11px] uppercase tracking-wider text-zinc-400" style={{ fontFamily: FONT_MONO }}>
+          {lang || 'code'}
+        </span>
+        <button
+          type="button"
+          onClick={copy}
+          aria-label={copied ? 'Copiado' : 'Copiar código'}
+          className="flex items-center gap-1.5 rounded px-2 py-1 font-mono text-[11px] text-zinc-400 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFD700]/60"
+          style={{ fontFamily: FONT_MONO }}
+        >
+          {copied ? <Check size={12} aria-hidden="true" /> : <Copy size={12} aria-hidden="true" />}
+          {copied ? 'copiado' : 'copiar'}
+        </button>
+      </div>
+      <pre className="overflow-x-auto p-4 text-[13px] leading-relaxed text-white" style={{ fontFamily: FONT_MONO }}>
+        <code>{code}</code>
+      </pre>
+    </div>
+  );
+}
+
+function Avatar({ ui, isUser, children }) {
+  return (
+    <div
+      aria-hidden="true"
+      className={`mt-2 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border ${isUser ? ui.userAvatar : ui.avatar}`}
+    >
+      {children}
+    </div>
+  );
+}
+
+function MessageBubble({ message }) {
   const { darkMode } = useContext(ThemeContext);
+  const ui = darkMode ? UI.dark : UI.light;
   const isUser = message?.sender === 'user';
+  const isError = message?.tone === 'error';
   const text = message?.text || '';
 
   const segments = useMemo(() => (isUser ? [] : splitMessage(text)), [isUser, text]);
 
-  return (
-    <div className={`flex w-full ${isUser ? 'justify-end' : 'justify-start'} gap-3 my-2`}>
-      {!isUser && (
-        <div className="w-10 h-10 rounded-full flex shrink-0 items-center justify-center mt-2 bg-transparent text-amber-500">
-          <Sparkles className="w-5 h-5" />
+  if (isUser) {
+    return (
+      <div className="my-2 flex w-full justify-end gap-3">
+        <div className="ml-auto max-w-[80%]">
+          <div className={`rounded-3xl rounded-tr-sm border px-6 py-4 text-[15px] font-medium leading-relaxed ${ui.user}`}>
+            <p className="whitespace-pre-wrap break-words">{renderInline(text, 'font-bold')}</p>
+          </div>
         </div>
-      )}
-
-      <div className={`max-w-[80%] ${isUser ? 'ml-auto' : ''}`}>
-        {isUser ? (
-          <div className={`px-6 py-4 rounded-3xl rounded-tr-sm text-[15px] font-medium leading-relaxed border ${
-            darkMode ? 'bg-[#1a1a1a] text-white border-amber-500/60' : 'bg-[#1a1a1a] text-white border-amber-500 shadow-md'
-          }`}>
-            <span className="whitespace-pre-wrap">
-              {renderInline(text, 'text-amber-400 font-bold')}
-            </span>
-          </div>
-        ) : (
-          <div className={`px-7 py-6 rounded-[2rem] rounded-tl-sm w-full border ${
-            darkMode ? 'bg-[#141414] border-[#2a2a2a] text-zinc-300' : 'bg-white border-gray-100 text-gray-700 shadow-lg shadow-gray-200/50'
-          }`}>
-            {segments.map((segment, index) => {
-              if (segment.type === 'text') {
-                return (
-                  <span className="whitespace-pre-wrap" key={index}>
-                    {renderInline(
-                      segment.value,
-                      darkMode ? 'text-zinc-100 font-bold' : 'text-zinc-900 font-bold'
-                    )}
-                  </span>
-                );
-              }
-
-              const card = resolveCard(segment.tag);
-              if (!card) return <span key={index}>{segment.tag}</span>;
-
-              const { Component, limit } = card;
-              return (
-                <div className="my-4" key={index}>
-                  <Component context={message.context} lang={message.lang || 'pt'} limit={limit} />
-                </div>
-              );
-            })}
-          </div>
-        )}
+        <Avatar ui={ui} isUser>
+          <User className="h-[18px] w-[18px]" />
+        </Avatar>
       </div>
+    );
+  }
 
-      {isUser && (
-        <div className="w-10 h-10 rounded-full flex shrink-0 items-center justify-center mt-2 bg-transparent text-amber-500">
-          <User className="w-5 h-5" />
+  return (
+    <div className="my-2 flex w-full justify-start gap-3">
+      <Avatar ui={ui}>
+        {isError
+          ? <AlertTriangle className={`h-[18px] w-[18px] ${ui.errorIcon}`} />
+          : <Sparkles className="h-[18px] w-[18px]" />}
+      </Avatar>
+
+      <div className="max-w-[80%]">
+        <div
+          role={isError ? 'alert' : undefined}
+          className={`w-full rounded-[1.5rem] rounded-tl-sm border px-6 py-5 ${isError ? ui.error : ui.ai}`}
+        >
+          {segments.map((segment, index) => {
+            if (segment.type === 'text') {
+              return parseBlocks(segment.value).map((block, bi) =>
+                block.type === 'code'
+                  ? <CodeBlock key={`${index}-${bi}`} lang={block.lang} code={block.value} />
+                  : <div key={`${index}-${bi}`}>{renderText(block.value, ui, `${index}-${bi}`)}</div>,
+              );
+            }
+
+            const card = resolveCard(segment.tag);
+            if (!card) return <span key={index}>{segment.tag}</span>;
+
+            const { Component, limit } = card;
+            return (
+              <div className="my-4" key={index}>
+                <Component context={message.context} lang={message.lang || 'pt'} limit={limit} />
+              </div>
+            );
+          })}
         </div>
-      )}
+      </div>
     </div>
   );
 }
+
+export default memo(MessageBubble);

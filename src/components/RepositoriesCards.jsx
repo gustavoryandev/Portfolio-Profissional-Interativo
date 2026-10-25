@@ -1,89 +1,232 @@
-import React, { useContext } from 'react';
+// src/components/RepositoriesCard.jsx
+import { memo, useContext, useMemo } from 'react';
 import { ExternalLink, GitFork, Star, Github } from 'lucide-react';
 import { ThemeContext } from '../context/ThemeContext';
 
-export default function RepositoriesCard({ context }) {
-  const { darkMode } = useContext(ThemeContext);
-  
-  // Tenta pegar os repositórios ao vivo da API do Github enviados pelo backend
-  const liveRepos = context?.github?.repositories || [];
-  const displayRepos = liveRepos.slice(0, 4);
+const FONT_SANS = "Inter, 'Geist Sans', Roboto, system-ui, sans-serif";
+const FONT_MONO = "'JetBrains Mono', 'Fira Code', ui-monospace, monospace";
+const MAX_VISIBLE = 4;
+const FALLBACK_LANG_COLOR = '#8b949e';
+const HEX = /^#[0-9a-f]{6}$/i;
+const GITHUB_USER = 'gustavoryan-del';
+const REPOS_URL = `https://github.com/${GITHUB_USER}?tab=repositories`;
+
+const copy = {
+  pt: {
+    title: 'Repositórios recentes',
+    subtitle: 'Sincronizado ao vivo do GitHub',
+    empty: 'Nenhum repositório listado no momento.',
+    viewOnGithub: 'Ver no GitHub',
+    openAll: 'Abrir todos os repositórios no GitHub (nova aba)',
+    openRepo: (name) => `Abrir ${name} no GitHub (nova aba)`,
+    avatarAlt: (login) => `Foto de perfil de ${login}`,
+    stars: 'estrelas',
+    forks: 'forks',
+  },
+  en: {
+    title: 'Recent repositories',
+    subtitle: 'Synced live from GitHub',
+    empty: 'No repositories listed at the moment.',
+    viewOnGithub: 'View on GitHub',
+    openAll: 'Open all repositories on GitHub (new tab)',
+    openRepo: (name) => `Open ${name} on GitHub (new tab)`,
+    avatarAlt: (login) => `Profile photo of ${login}`,
+    stars: 'stars',
+    forks: 'forks',
+  },
+};
+
+// Tokens do design system Alvinegro + Gold
+const UI = {
+  dark: {
+    panel: 'border-[#2A2A2A] bg-[#0A0A0A] text-white shadow-lg shadow-black/50',
+    card: 'border-[#2A2A2A] bg-[#1E1E1E] hover:border-[#FFD700]/50',
+    title: 'text-white',
+    sub: 'text-[#A3A3A3]',
+    muted: 'text-zinc-500',
+    accent: 'text-[#FFD700]',
+    accentBg: 'bg-[#FFD700]/10 border-[#FFD700]/30 text-[#FFD700]',
+    neutralBadge: 'border-[#2A2A2A] bg-[#2A2A2A] text-[#E5E5E5]',
+    iconTile: 'border-[#2A2A2A] bg-[#1E1E1E] text-[#FFD700]',
+    linkButton: 'border-[#2A2A2A] bg-[#1E1E1E] text-[#A3A3A3] hover:text-[#FFD700]',
+    avatarRing: 'ring-[#FFD700]/60',
+    dashed: 'border-[#2A2A2A] bg-[#1E1E1E] text-[#A3A3A3]',
+    divider: 'border-[#2A2A2A]',
+  },
+  light: {
+    panel: 'border-[#E5E7EB] bg-[#F4F4F5] text-[#121212] shadow-md',
+    card: 'border-[#E5E7EB] bg-[#FFFFFF] hover:border-[#D4AF37]/60',
+    title: 'text-[#121212]',
+    sub: 'text-gray-600',
+    muted: 'text-gray-500',
+    accent: 'text-[#A16207]',
+    accentBg: 'bg-[#FFF8D6] border-[#D4AF37]/50 text-[#A16207]',
+    neutralBadge: 'border-[#E5E7EB] bg-[#F4F4F5] text-[#121212]',
+    iconTile: 'border-[#E5E7EB] bg-[#FFFFFF] text-[#A16207]',
+    linkButton: 'border-[#E5E7EB] bg-[#FFFFFF] text-gray-600 hover:text-[#A16207]',
+    avatarRing: 'ring-[#121212]/20',
+    dashed: 'border-[#E5E7EB] bg-[#FFFFFF] text-gray-500',
+    divider: 'border-[#E5E7EB]',
+  },
+};
+
+// Avatar vem do perfil já carregado pelo backend; sem ele, não renderiza nada
+function ProfileAvatar({ src, login, ui, size = 'md' }) {
+  if (!src) return null;
+  const dimension = size === 'sm' ? 'h-7 w-7' : 'h-10 w-10';
+  return (
+    <img
+      src={src}
+      alt={copy.pt.avatarAlt(login)}
+      loading="lazy"
+      decoding="async"
+      className={`shrink-0 rounded-full object-cover ring-2 ${dimension} ${ui.avatarRing}`}
+    />
+  );
+}
+
+// Um repositório: componente próprio e memorizado para não re-renderizar a lista inteira
+const RepoItem = memo(function RepoItem({ repo, ui, t, langColor }) {
+  const href = repo.url || `https://github.com/${GITHUB_USER}/${repo.name}`;
+  const stars = Number(repo.stars) || 0;
+  const forks = Number(repo.forks) || 0;
 
   return (
-    <div className={`my-2 w-full max-w-lg rounded-2xl border p-5 transition-colors duration-300 ${darkMode ? 'bg-[#0f0f0f] border-amber-500/20' : 'bg-white border-gray-200 shadow-sm'}`}>
-      
-      <div className="mb-5 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="rounded-lg p-2 bg-zinc-950 text-amber-500 shadow-sm border border-zinc-800">
-            <Github className="h-5 w-5" />
-          </div>
-          <div>
-            <h3 className={`text-[17px] font-bold leading-tight ${darkMode ? 'text-gray-100' : 'text-gray-900'}`}>Repositórios Recentes</h3>
-            <p className={`text-[12px] font-medium ${darkMode ? 'text-zinc-400' : 'text-gray-500'}`}>
-              Sincronizado ao vivo do GitHub
-            </p>
-          </div>
-        </div>
-        <a href="https://github.com/gustavoryan-del?tab=repositories" target="_blank" rel="noreferrer" className={`hidden sm:flex rounded-lg p-2 transition-colors ${darkMode ? 'bg-[#1a1a1a] text-gray-400 hover:text-amber-400 border border-[#2a2a2a]' : 'bg-gray-50 text-gray-500 hover:text-amber-500 border border-gray-200'}`}>
-          <ExternalLink className="h-4 w-4" />
-        </a>
-      </div>
-
-      <div className="space-y-3">
-        {displayRepos.length > 0 ? (
-          displayRepos.map((repo, index) => (
-            <a
-              key={repo.name || index}
-              href={repo.url || `https://github.com/gustavoryan-del/${repo.name}`}
-              target="_blank"
-              rel="noreferrer"
-              className={`group block rounded-xl border p-3.5 transition-all hover:shadow-md ${darkMode ? 'bg-[#141414] border-[#2a2a2a] hover:border-amber-500/40' : 'bg-white border-gray-100 hover:border-amber-400/50'}`}
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <h4 className={`truncate text-[15px] font-bold ${darkMode ? 'text-gray-200' : 'text-gray-800'}`}>
-                      {repo.name}
-                    </h4>
-                    {repo.stars > 0 && (
-                      <span className="flex items-center gap-1 text-[11px] font-bold text-amber-500 bg-amber-500/10 px-1.5 py-0.5 rounded-full border border-amber-500/20">
-                        <Star size={10} className="fill-amber-500" /> {repo.stars}
-                      </span>
-                    )}
-                    {repo.forks > 0 && (
-                      <span className="flex items-center gap-1 text-[11px] font-bold text-blue-500 bg-blue-500/10 px-1.5 py-0.5 rounded-full border border-blue-500/20">
-                        <GitFork size={10} className="fill-blue-500" /> {repo.forks}
-                      </span>
-                    )}
-                  </div>
-                  
-                  {repo.description && (
-                    <p className={`mt-1 line-clamp-2 text-[12px] ${darkMode ? 'text-zinc-500' : 'text-gray-500'}`}>
-                      {repo.description}
-                    </p>
-                  )}
-                </div>
-                <ExternalLink size={16} className={`shrink-0 transition-colors ${darkMode ? 'text-zinc-600 group-hover:text-amber-400' : 'text-gray-400 group-hover:text-amber-500'}`} />
-              </div>
-              
-              {repo.language && (
-                <div className="mt-3 flex flex-wrap gap-2">
-                  <span className={`rounded-full border px-2.5 py-1 text-[10px] font-bold tracking-wide ${darkMode ? 'border-zinc-800 bg-[#1f1f1f] text-zinc-300' : 'border-gray-200 bg-gray-50 text-gray-600'}`}>
-                    {repo.language}
-                  </span>
-                </div>
+    <li>
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={t.openRepo(repo.name)}
+        className={`group block rounded-xl border p-3.5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFD700]/60 ${ui.card}`}
+      >
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <h4 className={`min-w-0 truncate text-[15px] font-bold ${ui.title}`}>{repo.name}</h4>
+              {stars > 0 && (
+                <span className={`flex items-center gap-1 rounded-full border px-1.5 py-0.5 text-[11px] font-bold tabular-nums ${ui.accentBg}`}>
+                  <Star size={10} className="fill-current" aria-hidden="true" />
+                  <span className="sr-only">{t.stars}:</span>
+                  {stars}
+                </span>
               )}
-            </a>
-          ))
-        ) : (
-          <div className={`py-6 text-center text-sm rounded-xl border border-dashed flex flex-col items-center gap-2 ${darkMode ? 'text-zinc-500 border-zinc-800 bg-[#141414]' : 'text-zinc-400 border-gray-200 bg-gray-50'}`}>
-            <p>Nenhum repositório listado no momento.</p>
-            <a href="https://github.com/gustavoryan-del?tab=repositories" target="_blank" rel="noreferrer" className="text-amber-500 font-bold hover:underline">
-              Ver no GitHub
-            </a>
+              {forks > 0 && (
+                <span className={`flex items-center gap-1 rounded-full border px-1.5 py-0.5 text-[11px] font-bold tabular-nums ${ui.neutralBadge}`}>
+                  <GitFork size={10} aria-hidden="true" />
+                  <span className="sr-only">{t.forks}:</span>
+                  {forks}
+                </span>
+              )}
+            </div>
+
+            {repo.description && (
+              <p className={`mt-1 line-clamp-2 text-[12px] ${ui.muted}`}>{repo.description}</p>
+            )}
+          </div>
+          <ExternalLink
+            size={16}
+            aria-hidden="true"
+            className={`mt-0.5 shrink-0 transition-colors ${ui.muted} group-hover:${ui.accent.replace('text-', 'text-')}`}
+          />
+        </div>
+
+        {repo.language && (
+          <div className="mt-3 flex flex-wrap gap-2">
+            <span
+              className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-bold tracking-wide ${ui.neutralBadge}`}
+              style={{ fontFamily: FONT_MONO }}
+            >
+              <span
+                aria-hidden="true"
+                className="h-2 w-2 rounded-full"
+                style={{ backgroundColor: langColor }}
+              />
+              {repo.language}
+            </span>
           </div>
         )}
-      </div>
-    </div>
+      </a>
+    </li>
+  );
+});
+
+export default function RepositoriesCard({ context, lang = 'pt' }) {
+  const { darkMode } = useContext(ThemeContext);
+  const ui = darkMode ? UI.dark : UI.light;
+  const t = copy[lang] || copy.pt;
+
+  const github = context?.github;
+  const profile = github?.profile || {};
+  const login = profile.login || GITHUB_USER;
+  const avatarSrc = profile.avatarUrl;
+
+  // Mantém a ordem recebida do backend e limita a quantidade exibida
+  const repos = useMemo(
+    () => (Array.isArray(github?.repositories) ? github.repositories.slice(0, MAX_VISIBLE) : []),
+    [github?.repositories],
+  );
+
+  const headingId = 'repos-card-title';
+  const sectionClass = `my-2 w-full max-w-lg rounded-2xl border p-5 transition-colors duration-300 ${ui.panel}`;
+
+  const headerAvatar = (
+    <ProfileAvatar src={avatarSrc} login={login} ui={ui} />
+  );
+
+  return (
+    <section aria-labelledby={headingId} className={sectionClass} style={{ fontFamily: FONT_SANS }}>
+      <header className="mb-5 flex items-center justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-3">
+          {headerAvatar ?? (
+            <div className={`shrink-0 rounded-lg border p-2 ${ui.iconTile}`} aria-hidden="true">
+              <Github className="h-5 w-5" />
+            </div>
+          )}
+          <div className="min-w-0">
+            <h3 id={headingId} className={`truncate text-[17px] font-bold leading-tight ${ui.title}`}>
+              {t.title}
+            </h3>
+            <p className={`truncate text-[12px] font-medium ${ui.sub}`}>{t.subtitle}</p>
+          </div>
+        </div>
+        <a
+          href={REPOS_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={t.openAll}
+          title={t.openAll}
+          className={`hidden rounded-lg border p-2 transition-colors sm:flex focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFD700]/60 ${ui.linkButton}`}
+        >
+          <ExternalLink className="h-4 w-4" aria-hidden="true" />
+        </a>
+      </header>
+
+      {repos.length > 0 ? (
+        <ul className="m-0 flex list-none flex-col gap-3 p-0">
+          {repos.map((repo, index) => (
+            <RepoItem
+              key={repo.id ?? repo.name ?? index}
+              repo={repo}
+              ui={ui}
+              t={t}
+              langColor={HEX.test(repo.languageColor) ? repo.languageColor : FALLBACK_LANG_COLOR}
+            />
+          ))}
+        </ul>
+      ) : (
+        <div className={`flex flex-col items-center gap-2 rounded-xl border border-dashed py-6 text-center text-sm ${ui.dashed}`}>
+          <p>{t.empty}</p>
+          <a
+            href={REPOS_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`font-bold underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFD700]/60 ${ui.accent}`}
+          >
+            {t.viewOnGithub}
+          </a>
+        </div>
+      )}
+    </section>
   );
 }

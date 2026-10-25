@@ -1,4 +1,4 @@
-import React, { useContext, useMemo, useState } from 'react';
+import { memo, useContext, useEffect, useMemo, useState } from 'react';
 import { Flame, Moon, Sun, Sunrise, Sunset } from 'lucide-react';
 import { ThemeContext } from '../context/ThemeContext';
 
@@ -46,7 +46,7 @@ const TRANSLATIONS = {
     manha: 'Manhã',
     tarde: 'Tarde',
     noite: 'Noite',
-    weekDays: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom']
+    weekDays: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'],
   },
   en: {
     activity: 'activity',
@@ -88,27 +88,96 @@ const TRANSLATIONS = {
     manha: 'Morning',
     tarde: 'Afternoon',
     noite: 'Evening',
-    weekDays: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-  }
+    weekDays: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+  },
 };
 
 const PERIODS = [
-  { key: 'madrugada', from: 0, to: 5, icon: Moon, color: 'text-indigo-400', bg: 'bg-indigo-500' },
-  { key: 'manha', from: 6, to: 11, icon: Sunrise, color: 'text-amber-500', bg: 'bg-amber-500' },
-  { key: 'tarde', from: 12, to: 17, icon: Sun, color: 'text-orange-500', bg: 'bg-orange-500' },
-  { key: 'noite', from: 18, to: 23, icon: Sunset, color: 'text-emerald-500', bg: 'bg-emerald-500' }
+  { key: 'madrugada', from: 0, to: 5, icon: Moon },
+  { key: 'manha', from: 6, to: 11, icon: Sunrise },
+  { key: 'tarde', from: 12, to: 17, icon: Sun },
+  { key: 'noite', from: 18, to: 23, icon: Sunset },
 ];
 
 const TIME_ZONE = 'America/Sao_Paulo';
-const CELL = 11; // px
-const GAP = 3;   // px
-const PITCH = CELL + GAP;
+const PITCH = 11 + 3; // célula + gap, em px
+const EMPTY = [];
+const NO_STREAK = { length: 0, start: null, end: null };
+const KEY_STEPS = { ArrowUp: -1, ArrowDown: 1, ArrowLeft: -7, ArrowRight: 7 };
+const WEEK_ORDER = [1, 2, 3, 4, 5, 6, 0]; // segunda primeiro
+const LEVEL_KEYS = [0, 1, 2, 3, 4];
 
 /* =====================================================================
-   Datas (no fuso de Brasília, como no GitHubStats)
+   Tokens de cor por tema (amarelo nos gráficos e atividade)
    ===================================================================== */
-const dateKey = (date = new Date()) =>
-  new Intl.DateTimeFormat('en-CA', { timeZone: TIME_ZONE, year: 'numeric', month: '2-digit', day: '2-digit' }).format(date);
+const UI = {
+  dark: {
+    panel: 'border-[#2a2a2a] bg-[#0f0f0f] text-gray-200',
+    surface: 'bg-[#141414] border-[#2a2a2a]',
+    divider: 'border-[#2a2a2a]',
+    muted: 'text-zinc-500',
+    sub: 'text-zinc-500',
+    label: 'text-gray-400',
+    caption: 'text-zinc-400',
+    heading: 'text-gray-300',
+    strong: 'text-gray-300',
+    dayLabel: 'text-zinc-400',
+    dayLabelActive: 'text-gray-200',
+    dot: 'text-zinc-600',
+    accentText: 'text-[#FFD700]',
+    badge: 'border-[#FFD700]/30 bg-[#FFD700]/10 text-[#FFD700]',
+    ringAccent: 'ring-[#FFD700]/50',
+    focus: 'focus-visible:ring-[#FFD700]/60',
+    track: 'bg-[#161b22]',
+    barTrack: 'bg-zinc-800',
+    bar: 'bg-[#B8960B]',
+    peak: 'bg-[#FFD700]',
+    levels: ['bg-[#161b22]', 'bg-[#4a3f00]', 'bg-[#7a6400]', 'bg-[#b8960b]', 'bg-[#ffd700]'],
+    emptyBox: 'border-zinc-800 text-zinc-500',
+    tooltip: 'border-[#2a2a2a] bg-[#0f0f0f] text-gray-200',
+    scrollbar: `.custom-scrollbar::-webkit-scrollbar { height: 6px; }
+      .custom-scrollbar::-webkit-scrollbar-track { background: #141414; border-radius: 4px; }
+      .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(113, 113, 122, 0.4); border-radius: 4px; }
+      .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #71717a; }`,
+  },
+  light: {
+    panel: 'border-gray-200 bg-white text-gray-800',
+    surface: 'bg-gray-50 border-gray-100',
+    divider: 'border-gray-200',
+    muted: 'text-gray-400',
+    sub: 'text-gray-500',
+    label: 'text-gray-500',
+    caption: 'text-gray-500',
+    heading: 'text-gray-600',
+    strong: 'text-gray-600',
+    dayLabel: 'text-gray-500',
+    dayLabelActive: 'text-gray-800',
+    dot: 'text-gray-300',
+    accentText: 'text-[#A16207]',
+    badge: 'border-[#D4AF37]/50 bg-[#FFF8D6] text-[#A16207]',
+    ringAccent: 'ring-[#D4AF37]/60',
+    focus: 'focus-visible:ring-[#D4AF37]/60',
+    track: 'bg-gray-200',
+    barTrack: 'bg-gray-200',
+    bar: 'bg-[#E9C75A]',
+    peak: 'bg-[#D4AF37]',
+    levels: ['bg-gray-100', 'bg-[#FEF3C7]', 'bg-[#FDE68A]', 'bg-[#FACC15]', 'bg-[#D4AF37]'],
+    emptyBox: 'border-gray-300 text-zinc-400',
+    tooltip: 'border-gray-200 bg-white text-gray-800',
+    scrollbar: `.custom-scrollbar::-webkit-scrollbar { height: 6px; }
+      .custom-scrollbar::-webkit-scrollbar-track { background: #f9fafb; border-radius: 4px; }
+      .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(156, 163, 175, 0.4); border-radius: 4px; }
+      .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #9ca3af; }`,
+  },
+};
+
+/* =====================================================================
+   Datas (fuso de Brasília)
+   ===================================================================== */
+const DATE_KEY = new Intl.DateTimeFormat('en-CA', {
+  timeZone: TIME_ZONE, year: 'numeric', month: '2-digit', day: '2-digit',
+});
+const todayKey = () => DATE_KEY.format(new Date());
 
 const noon = (key) => new Date(`${key}T12:00:00Z`);
 
@@ -120,64 +189,69 @@ function addDays(key, days) {
 
 // 0 = domingo ... 6 = sábado
 const weekdayOf = (key) => noon(key).getUTCDay();
+const indexOfMax = (values) => values.reduce((best, v, i) => (v > values[best] ? i : best), 0);
+const clamp = (n, min, max) => Math.min(max, Math.max(min, n));
 
-const indexOfMax = (values) =>
-  values.reduce((best, value, index) => (value > values[best] ? index : best), 0);
+/* =====================================================================
+   Formatadores (criados uma vez por idioma)
+   ===================================================================== */
+const formatterCache = new Map();
 
-function useFormatters(locale) {
-  return useMemo(() => {
-    const isEn = locale === 'en-US';
-    const number = new Intl.NumberFormat(locale);
-    const percent = new Intl.NumberFormat(locale, { maximumFractionDigits: 1 });
-    const dayMonth = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short', timeZone: 'UTC' });
-    const full = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
-    const month = new Intl.DateTimeFormat(locale, { month: 'short', timeZone: 'UTC' });
-    const weekdayLong = new Intl.DateTimeFormat(locale, { weekday: 'long', timeZone: 'UTC' });
-    const hour12 = new Intl.DateTimeFormat('en-US', { hour: 'numeric', timeZone: 'UTC' });
-    const strip = (text) => text.replace(/\.$/, '');
+function getFormatters(locale) {
+  if (formatterCache.has(locale)) return formatterCache.get(locale);
 
-    return {
-      number: (value) => number.format(Math.round(value)),
-      percent: (value) => `${percent.format(value)}%`,
-      dayMonth: (key) => (key ? strip(dayMonth.format(noon(key))) : ''),
-      date: (key) => (key ? strip(full.format(noon(key))) : ''),
-      month: (key) => strip(month.format(noon(key))),
-      // 4 jan 2026 foi um domingo: índice 0 = domingo
-      weekdayLong: (index) => weekdayLong.format(new Date(Date.UTC(2026, 0, 4 + index, 12))),
-      // 20 -> "20h" (pt) / "8 PM" (en)
-      hour: (h) => (isEn ? hour12.format(new Date(Date.UTC(2000, 0, 1, h % 24))) : `${h % 24}h`)
-    };
-  }, [locale]);
+  const isEn = locale === 'en-US';
+  const number = new Intl.NumberFormat(locale);
+  const percent = new Intl.NumberFormat(locale, { maximumFractionDigits: 1 });
+  const dayMonth = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short', timeZone: 'UTC' });
+  const full = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+  const month = new Intl.DateTimeFormat(locale, { month: 'short', timeZone: 'UTC' });
+  const weekdayLong = new Intl.DateTimeFormat(locale, { weekday: 'long', timeZone: 'UTC' });
+  const hour12 = new Intl.DateTimeFormat('en-US', { hour: 'numeric', timeZone: 'UTC' });
+  const strip = (text) => text.replace(/\.$/, '');
+
+  const formatters = {
+    number: (value) => number.format(Math.round(value)),
+    percent: (value) => `${percent.format(value)}%`,
+    dayMonth: (key) => (key ? strip(dayMonth.format(noon(key))) : ''),
+    date: (key) => (key ? strip(full.format(noon(key))) : ''),
+    month: (key) => strip(month.format(noon(key))),
+    // 4 jan 2026 foi domingo: índice 0 = domingo
+    weekdayLong: (index) => weekdayLong.format(new Date(Date.UTC(2026, 0, 4 + index, 12))),
+    // 20 -> "20h" (pt) / "8 PM" (en)
+    hour: (h) => (isEn ? hour12.format(new Date(Date.UTC(2000, 0, 1, h % 24))) : `${h % 24}h`),
+  };
+
+  formatterCache.set(locale, formatters);
+  return formatters;
 }
 
 /* =====================================================================
-   Resumo do calendário: sequências (com datas), níveis por quartil,
-   melhor dia, dias da semana e meses
+   Resumo do calendário: sequências, níveis por quartil, melhor dia,
+   dias da semana e meses
    ===================================================================== */
-const NO_STREAK = { length: 0, start: null, end: null };
-
 function summarizeCalendar(weeks, today) {
   const columns = [];
-  weeks.forEach((week) => {
-    const real = (week?.contributionDays || [])
+  for (const week of weeks) {
+    const days = (week?.contributionDays || [])
       .filter((d) => d?.date && d.date <= today)
       .map((d) => ({ date: d.date, count: d.contributionCount || 0 }))
-      .sort((a, b) => (a.date < b.date ? -1 : 1));
-    if (!real.length) return;
-    // A primeira semana pode vir incompleta: o "pad" mantém cada dia na linha certa
-    columns.push({ pad: weekdayOf(real[0].date), days: real });
-  });
+      .sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
+    // "pad" alinha a primeira semana incompleta na linha certa
+    if (days.length) columns.push({ pad: weekdayOf(days[0].date), days });
+  }
+  columns.sort((a, b) => (a.days[0].date < b.days[0].date ? -1 : 1));
 
-  // Níveis 1-4 pelos quartis dos dias com contribuição (igual ao GitHub)
+  // Níveis 1-4 pelos quartis dos dias com contribuição (como o GitHub)
   const positives = columns.flatMap((c) => c.days).map((d) => d.count).filter((n) => n > 0).sort((a, b) => a - b);
-  const at = (q) => positives[Math.floor((positives.length - 1) * q)] ?? 0;
-  const [q1, q2, q3] = [at(0.25), at(0.5), at(0.75)];
-  const level = (n) => (n <= 0 ? 0 : n <= q1 ? 1 : n <= q2 ? 2 : n <= q3 ? 3 : 4);
+  const quantile = (q) => positives[Math.floor((positives.length - 1) * q)] ?? 0;
+  const [q1, q2, q3] = [quantile(0.25), quantile(0.5), quantile(0.75)];
+  const levelOf = (n) => (n <= 0 ? 0 : n <= q1 ? 1 : n <= q2 ? 2 : n <= q3 ? 3 : 4);
 
   let index = 0;
-  columns.forEach((column) => {
-    column.days = column.days.map((d) => ({ ...d, level: level(d.count), index: index++ }));
-  });
+  for (const column of columns) {
+    column.days = column.days.map((d) => ({ ...d, level: levelOf(d.count), index: index++ }));
+  }
   const cells = columns.flatMap((c) => c.days);
 
   let total = 0;
@@ -186,42 +260,40 @@ function summarizeCalendar(weeks, today) {
   let longest = NO_STREAK;
   const weekdays = new Array(7).fill(0);
 
-  cells.forEach((day) => {
+  for (const day of cells) {
     total += day.count;
     weekdays[weekdayOf(day.date)] += day.count;
     if (day.count <= 0) {
       run = null;
-      return;
+      continue;
     }
     if (!best || day.count > best.count) best = day;
     run = run && addDays(run.end, 1) === day.date
       ? { ...run, end: day.date, length: run.length + 1 }
       : { start: day.date, end: day.date, length: 1 };
     if (run.length > longest.length) longest = run;
-  });
+  }
 
   // Sequência atual: termina hoje ou ontem (hoje ainda pode ganhar contribuições)
-  let current = NO_STREAK;
   let i = cells.length - 1;
-  if (cells[i]?.date === today && cells[i].count <= 0) i--;
-  if (cells[i] && cells[i].count > 0 && cells[i].date >= addDays(today, -1)) {
+  if (i >= 0 && cells[i].date === today && cells[i].count <= 0) i--;
+  let current = NO_STREAK;
+  if (i >= 0 && cells[i].count > 0 && cells[i].date >= addDays(today, -1)) {
     const end = cells[i].date;
-    let start = end;
     let length = 0;
-    while (i >= 0 && cells[i].count > 0 && addDays(cells[i].date, length) === end) {
-      start = cells[i].date;
+    while (i >= 0 && cells[i].count > 0 && cells[i].date === addDays(end, -length)) {
       length++;
       i--;
     }
-    current = { length, start, end };
+    current = { length, start: addDays(end, 1 - length), end };
   }
 
-  // Mês no topo da coluna em que ele começa (some se ficar espremido)
+  // Mês no topo da coluna em que começa (some se ficar espremido)
   const starts = [];
-  columns.forEach((column, colIndex) => {
+  columns.forEach((column, c) => {
     const month = column.days[0].date.slice(0, 7);
-    if (colIndex === 0 || month !== columns[colIndex - 1].days[0].date.slice(0, 7)) {
-      starts.push({ index: colIndex, date: column.days[0].date });
+    if (c === 0 || month !== columns[c - 1].days[0].date.slice(0, 7)) {
+      starts.push({ index: c, date: column.days[0].date });
     }
   });
   const months = starts.filter((m, k) => !starts[k + 1] || starts[k + 1].index - m.index >= 3);
@@ -229,12 +301,22 @@ function summarizeCalendar(weeks, today) {
   return { columns, cells, months, total, best, longest, current, weekdays };
 }
 
+const describeCell = (cell, t, f) =>
+  cell.count > 0
+    ? { bold: `${f.number(cell.count)} ${cell.count === 1 ? t.contributionIn : t.contributionsIn}`, rest: f.date(cell.date) }
+    : { bold: t.noContributionsIn, rest: f.date(cell.date) };
+
+const streakRange = (streak, withYear, t, f, today) => {
+  if (!streak.length) return t.noStreak;
+  const end = streak.end === today ? t.today : withYear ? f.date(streak.end) : f.dayMonth(streak.end);
+  return `${f.dayMonth(streak.start)} – ${end}`;
+};
+
 /* =====================================================================
    Colunas (contribuições por ano, commits por hora)
-   O maior valor fica destacado. Mouse, toque ou setas <- -> mostram o
-   valor de cada coluna na linha de leitura.
+   Maior valor destacado. Mouse, toque ou setas <- -> mostram o valor.
    ===================================================================== */
-function Columns({ items, value, readout, axis, cap, caption, colClass = 'flex-1', gap = 2, barClass, peakClass, darkMode }) {
+function Columns({ items, value, readout, axis, cap, caption, colClass = 'flex-1', gap = 2, ui }) {
   const [active, setActive] = useState(null);
   const values = items.map(value);
   const max = Math.max(...values, 0) || 1;
@@ -243,14 +325,14 @@ function Columns({ items, value, readout, axis, cap, caption, colClass = 'flex-1
 
   const onKeyDown = (event) => {
     const step = { ArrowRight: 1, ArrowLeft: -1 }[event.key];
-    if (!step) return;
+    if (!step || !items.length) return;
     event.preventDefault();
-    setActive((current) => Math.min(items.length - 1, Math.max(0, (current ?? peak) + step)));
+    setActive((current) => clamp((current ?? peak) + step, 0, items.length - 1));
   };
 
   return (
     <figure className="m-0">
-      <figcaption aria-hidden="true" className={`mb-2 min-h-[1.25rem] text-center text-xs ${darkMode ? 'text-zinc-400' : 'text-gray-500'}`}>
+      <figcaption aria-hidden="true" className={`mb-2 min-h-[1.25rem] text-center text-xs ${ui.caption}`}>
         {readout(items[shown], shown)}
       </figcaption>
 
@@ -260,8 +342,8 @@ function Columns({ items, value, readout, axis, cap, caption, colClass = 'flex-1
         tabIndex={0}
         onKeyDown={onKeyDown}
         onBlur={() => setActive(null)}
-        onPointerLeave={() => setActive(null)}
-        className={`flex h-[150px] items-end justify-center border-b pt-6 outline-none focus-visible:ring-1 focus-visible:ring-emerald-500/60 ${darkMode ? 'border-[#2a2a2a]' : 'border-gray-200'}`}
+        onPointerLeave={(e) => { if (e.pointerType === 'mouse') setActive(null); }}
+        className={`flex h-[150px] items-end justify-center border-b pt-6 outline-none ${ui.focus} ${ui.divider}`}
         style={{ gap }}
       >
         {items.map((item, index) => {
@@ -275,11 +357,11 @@ function Columns({ items, value, readout, axis, cap, caption, colClass = 'flex-1
               onPointerDown={() => setActive(index)}
             >
               <div
-                className={`relative min-h-[2px] w-full rounded-t-[2px] transition-opacity duration-200 ${isPeak ? peakClass : barClass} ${index === shown ? 'opacity-100' : 'opacity-60'}`}
+                className={`relative min-h-[2px] w-full rounded-t-[2px] transition-opacity duration-200 ${isPeak ? ui.peak : ui.bar} ${index === shown ? 'opacity-100' : 'opacity-60'}`}
                 style={{ height }}
               >
                 {isPeak && (
-                  <span className={`absolute -top-6 left-1/2 -translate-x-1/2 whitespace-nowrap rounded border px-1.5 py-0.5 text-[0.7rem] font-bold ${darkMode ? 'border-[#2a2a2a] bg-[#0f0f0f] text-gray-200' : 'border-gray-200 bg-white text-gray-800'}`}>
+                  <span className={`absolute -top-6 left-1/2 -translate-x-1/2 whitespace-nowrap rounded border px-1.5 py-0.5 text-[0.7rem] font-bold ${ui.tooltip}`}>
                     {cap(item)}
                   </span>
                 )}
@@ -289,7 +371,7 @@ function Columns({ items, value, readout, axis, cap, caption, colClass = 'flex-1
         })}
       </div>
 
-      <div aria-hidden="true" className={`mt-1.5 flex justify-center text-[0.7rem] font-medium ${darkMode ? 'text-zinc-500' : 'text-gray-400'}`} style={{ gap }}>
+      <div aria-hidden="true" className={`mt-1.5 flex justify-center text-[0.7rem] font-medium ${ui.muted}`} style={{ gap }}>
         {items.map((item, index) => (
           <span key={index} className={`relative h-4 ${colClass}`}>
             <span className="absolute left-1/2 -translate-x-1/2 whitespace-nowrap">{axis(item, index)}</span>
@@ -310,27 +392,186 @@ function Columns({ items, value, readout, axis, cap, caption, colClass = 'flex-1
 }
 
 /* =====================================================================
+   Calendário: estado isolado, para o hover não re-renderizar o card
+   inteiro. Um único listener no grid (delegação via data-index).
+   ===================================================================== */
+const Calendar = memo(function Calendar({ summary, ui, t, f }) {
+  const [active, setActive] = useState(null);
+  const [tip, setTip] = useState(null); // { i, x, y } só para mouse
+  const { cells, columns, months } = summary;
+
+  // Tooltip fixo some ao rolar a página (não acompanha o scroll)
+  useEffect(() => {
+    if (!tip) return undefined;
+    const clear = () => setTip(null);
+    window.addEventListener('scroll', clear, { capture: true, passive: true });
+    return () => window.removeEventListener('scroll', clear, { capture: true });
+  }, [tip]);
+
+  const current = active !== null ? cells[active] : null;
+  const readout = current
+    ? describeCell(current, t, f)
+    : summary.best ? { ...describeCell(summary.best, t, f), prefix: t.bestDay } : null;
+  const tipCell = tip ? cells[tip.i] : null;
+
+  const onPointerOver = (event) => {
+    const raw = event.target.dataset?.index;
+    if (raw === undefined) return;
+    const i = Number(raw);
+    setActive(i);
+    if (event.pointerType === 'mouse') {
+      const rect = event.target.getBoundingClientRect();
+      setTip({ i, x: rect.left + rect.width / 2, y: rect.top - 8 });
+    } else {
+      setTip(null);
+    }
+  };
+
+  const onPointerLeave = (event) => {
+    if (event.pointerType === 'mouse') {
+      setActive(null);
+      setTip(null);
+    }
+  };
+
+  const reset = () => {
+    setActive(null);
+    setTip(null);
+  };
+
+  const onKeyDown = (event) => {
+    const step = KEY_STEPS[event.key];
+    if (!step || !cells.length) return;
+    event.preventDefault();
+    // Sem seleção, parte do melhor dia (ou do último)
+    const base = active ?? summary.best?.index ?? cells.length - 1;
+    setActive(clamp(base + step, 0, cells.length - 1));
+  };
+
+  return (
+    <>
+      <figure className="m-0 mb-10">
+        <div className={`mb-3 flex flex-wrap items-center justify-between gap-4 text-sm ${ui.caption}`}>
+          <span>{f.number(summary.total)} {t.contrib12months}</span>
+          <div aria-hidden="true" className="flex items-center gap-1 text-[0.7rem]">
+            {t.less}
+            {LEVEL_KEYS.map((level) => (
+              <div key={level} className={`h-[11px] w-[11px] rounded-[2px] ${ui.levels[level]}`} />
+            ))}
+            {t.more}
+          </div>
+        </div>
+
+        <div className={`rounded-lg border p-4 ${ui.surface}`}>
+          <div className="custom-scrollbar flex gap-2 overflow-x-auto pb-2">
+            {/* Rótulos Seg / Qua / Sex */}
+            <div aria-hidden="true" className="shrink-0 pt-5" style={{ width: 28 }}>
+              <div className={`relative text-[10px] leading-[11px] ${ui.muted}`} style={{ height: 7 * PITCH - 3 }}>
+                {[1, 3, 5].map((day) => (
+                  <span key={day} className="absolute left-0" style={{ top: day * PITCH }}>{t.weekDays[day - 1]}</span>
+                ))}
+              </div>
+            </div>
+
+            <div className="shrink-0">
+              {/* Rótulos dos meses */}
+              <div aria-hidden="true" className={`relative mb-1 h-4 text-[10px] ${ui.muted}`} style={{ width: columns.length * PITCH }}>
+                {months.map((m) => (
+                  <span key={m.date} className="absolute top-0" style={{ left: m.index * PITCH }}>{f.month(m.date)}</span>
+                ))}
+              </div>
+
+              <div
+                role="img"
+                aria-label={`${t.calendarLabel}: ${f.number(summary.total)} ${t.contributions}`}
+                tabIndex={0}
+                onKeyDown={onKeyDown}
+                onPointerOver={onPointerOver}
+                onPointerLeave={onPointerLeave}
+                onBlur={reset}
+                className={`flex gap-[3px] outline-none ${ui.focus}`}
+              >
+                {columns.map((column, c) => (
+                  <div key={c} className="flex shrink-0 flex-col gap-[3px]">
+                    {Array.from({ length: column.pad }, (_, k) => (
+                      <div key={`pad-${k}`} className="invisible h-[11px] w-[11px]" />
+                    ))}
+                    {column.days.map((cell) => (
+                      <div
+                        key={cell.date}
+                        data-index={cell.index}
+                        className={`relative z-0 h-[11px] w-[11px] cursor-pointer rounded-[2px] transition-all duration-200 hover:z-10 hover:scale-150 hover:shadow-lg hover:ring-1 hover:ring-white ${ui.levels[cell.level]} ${cell.index === active ? 'z-10 scale-150 ring-1 ring-white' : ''}`}
+                      />
+                    ))}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Linha de leitura: melhor dia por padrão, ou o dia tocado/focado */}
+        <figcaption aria-live="polite" className={`mt-3 min-h-[1.25rem] text-center text-xs ${ui.muted}`}>
+          {readout && (
+            <>
+              {readout.prefix && <>{readout.prefix} </>}
+              <span className={`font-semibold ${ui.strong}`}>{readout.bold}</span> {readout.rest}
+            </>
+          )}
+        </figcaption>
+      </figure>
+
+      {tip && tipCell && (
+        <div
+          className="pointer-events-none fixed z-[100] -translate-x-1/2 -translate-y-full whitespace-nowrap rounded border border-zinc-700 bg-zinc-900 px-3 py-1.5 text-[11px] text-gray-100 shadow-2xl"
+          style={{ top: tip.y, left: tip.x }}
+        >
+          <strong className="text-white">{describeCell(tipCell, t, f).bold}</strong> {describeCell(tipCell, t, f).rest}
+          <div className="absolute left-1/2 top-full -translate-x-1/2 border-[5px] border-transparent border-t-zinc-700" />
+          <div className="absolute left-1/2 top-full -translate-x-1/2 border-[4px] border-transparent border-t-zinc-900" />
+        </div>
+      )}
+    </>
+  );
+});
+
+/* =====================================================================
+   Caixa de resumo (total / sequência atual / maior sequência)
+   ===================================================================== */
+function SummaryStat({ ui, icon, value, unit, label, note }) {
+  return (
+    <div className={`flex flex-col items-center rounded-xl border px-4 py-5 text-center transition-all duration-200 hover:-translate-y-0.5 ${ui.surface}`}>
+      {icon}
+      <span className="flex items-baseline gap-1 text-3xl font-bold leading-[1.1] md:text-[2rem]">
+        {value}
+        {unit && <span className="text-[1.2rem]">{unit}</span>}
+      </span>
+      <span className={`mt-2 text-xs font-semibold ${ui.label}`}>{label}</span>
+      <span className={`mt-1 text-[0.7rem] ${ui.muted}`}>{note}</span>
+    </div>
+  );
+}
+
+/* =====================================================================
    Componente principal
    ===================================================================== */
 export default function GithubActivityCard({ context, lang = 'pt' }) {
   const { darkMode } = useContext(ThemeContext);
-  const [tooltip, setTooltip] = useState({ visible: false, x: 0, y: 0, cell: null });
-  const [active, setActive] = useState(null);
-
   const t = TRANSLATIONS[lang] || TRANSLATIONS.pt;
   const locale = lang === 'en' ? 'en-US' : 'pt-BR';
-  const f = useFormatters(locale);
+  const f = getFormatters(locale);
+  const ui = darkMode ? UI.dark : UI.light;
 
   const github = context?.github;
   const stats = github?.stats || {};
   const activity = github?.activity || {};
-  const weeks = activity.weeks || [];
+  const weeks = activity.weeks || EMPTY;
 
-  const today = useMemo(() => dateKey(), []);
+  const [today] = useState(todayKey);
   const summary = useMemo(() => summarizeCalendar(weeks, today), [weeks, today]);
   const hasCalendar = summary.cells.length > 0;
 
-  /* ---------- Anos: dados completos do backend, ou o calendário agrupado por ano ---------- */
+  /* ---------- Anos ---------- */
   const yearsData = useMemo(() => {
     if (Array.isArray(activity.years) && activity.years.length > 0) {
       return { items: activity.years.map(({ year, total }) => ({ year, total })), complete: true };
@@ -345,11 +586,15 @@ export default function GithubActivityCard({ context, lang = 'pt' }) {
 
   /* ---------- Horários dos commits ---------- */
   const commitsPerHour = useMemo(() => {
-    const raw = Array.isArray(activity.commitsPerHour) ? activity.commitsPerHour : [];
+    const raw = Array.isArray(activity.commitsPerHour) ? activity.commitsPerHour : EMPTY;
     return Array.from({ length: 24 }, (_, h) => Number(raw[h]) || 0);
   }, [activity.commitsPerHour]);
+
   const hoursTotal = commitsPerHour.reduce((sum, n) => sum + n, 0);
-  const hourItems = commitsPerHour.map((count) => ({ count, pct: hoursTotal ? (count / hoursTotal) * 100 : 0 }));
+  const hourItems = useMemo(
+    () => commitsPerHour.map((count) => ({ count, pct: hoursTotal ? (count / hoursTotal) * 100 : 0 })),
+    [commitsPerHour, hoursTotal],
+  );
   const peakHour = indexOfMax(commitsPerHour);
 
   const periods = PERIODS.map((p) => {
@@ -358,29 +603,9 @@ export default function GithubActivityCard({ context, lang = 'pt' }) {
   });
   const topPeriod = periods[indexOfMax(periods.map((p) => p.pct))];
 
-  /* ---------- Cores (tema escuro oficial do GitHub) ---------- */
-  const LEVEL_BG = darkMode
-    ? ['bg-[#161b22]', 'bg-[#0e4429]', 'bg-[#006d32]', 'bg-[#26a641]', 'bg-[#39d353]']
-    : ['bg-gray-100', 'bg-emerald-200', 'bg-emerald-300', 'bg-emerald-400', 'bg-emerald-500'];
-  const chartBarColor = darkMode ? 'bg-[#006d32]' : 'bg-emerald-500';
-  const chartPeakColor = darkMode ? 'bg-[#39d353]' : 'bg-emerald-400';
-
-  const muted = darkMode ? 'text-zinc-500' : 'text-gray-400';
-  const label = darkMode ? 'text-gray-400' : 'text-gray-500';
-  const surface = darkMode ? 'bg-[#141414] border-[#2a2a2a]' : 'bg-gray-50 border-gray-100';
-
   /* ---------- Textos derivados ---------- */
   const unit = (n) => (n === 1 ? t.day : t.days);
-  const describe = (cell) =>
-    cell.count > 0
-      ? { bold: `${f.number(cell.count)} ${cell.count === 1 ? t.contributionIn : t.contributionsIn}`, rest: f.date(cell.date) }
-      : { bold: t.noContributionsIn, rest: f.date(cell.date) };
-
-  const streakRange = (streak, withYear) => {
-    if (!streak.length) return t.noStreak;
-    const end = streak.end === today ? t.today : withYear ? f.date(streak.end) : f.dayMonth(streak.end);
-    return `${f.dayMonth(streak.start)} – ${end}`;
-  };
+  const hourSpan = (from, to) => `${f.hour(from)}–${f.hour(to)}`;
 
   const currentStreak = hasCalendar ? summary.current : { length: stats.currentStreak || 0 };
   const longestStreak = hasCalendar ? summary.longest : { length: stats.longestStreak || 0 };
@@ -390,10 +615,6 @@ export default function GithubActivityCard({ context, lang = 'pt' }) {
   const totalValue = allTime ?? calendarTotal;
   const totalNote = allTime !== null ? `${t.since} ${yearsData.items[0]?.year} – ${t.today}` : t.lastYear;
 
-  const bestCell = summary.best;
-  const readoutCell = active !== null ? summary.cells[active] : null;
-  const readout = readoutCell ? describe(readoutCell) : bestCell ? { ...describe(bestCell), prefix: t.bestDay } : null;
-
   /* ---------- Dias da semana (domingo = 0) ---------- */
   const weekdays = hasCalendar
     ? summary.weekdays
@@ -401,156 +622,56 @@ export default function GithubActivityCard({ context, lang = 'pt' }) {
   const weekdaysTotal = weekdays.reduce((sum, n) => sum + n, 0);
   const maxDay = Math.max(...weekdays, 1);
   const peakDay = indexOfMax(weekdays);
-  const WEEK_ORDER = [1, 2, 3, 4, 5, 6, 0]; // segunda primeiro
-
-  /* ---------- Interações do calendário ---------- */
-  const onCellEnter = (event, cell) => {
-    setActive(cell.index);
-    if (event.pointerType === 'mouse') {
-      const rect = event.currentTarget.getBoundingClientRect();
-      setTooltip({ visible: true, x: rect.left + rect.width / 2, y: rect.top - 8, cell });
-    }
-  };
-
-  const hideCalendarHints = () => {
-    setActive(null);
-    setTooltip((prev) => ({ ...prev, visible: false }));
-  };
-
-  const onCalendarKeyDown = (event) => {
-    const step = { ArrowUp: -1, ArrowDown: 1, ArrowLeft: -7, ArrowRight: 7 }[event.key];
-    if (!step) return;
-    event.preventDefault();
-    setActive((current) => {
-      const next = (current ?? summary.cells.length - 1) + step;
-      return next < 0 || next >= summary.cells.length ? current ?? summary.cells.length - 1 : next;
-    });
-  };
-
-  const hourSpan = (from, to) => `${f.hour(from)}–${f.hour(to)}`;
 
   /* ---------- Sem dados do GitHub ---------- */
   if (github?.status !== 'ok') {
     return (
-      <div className={`mx-auto my-6 w-full max-w-[850px] rounded-xl border p-6 shadow-lg transition-colors duration-300 ${darkMode ? 'border-[#2a2a2a] bg-[#0f0f0f]' : 'border-gray-200 bg-white'}`}>
-        <div className={`rounded-xl border border-dashed py-12 text-center text-sm font-medium ${darkMode ? 'border-zinc-800 text-zinc-500' : 'border-gray-300 text-zinc-400'}`}>
+      <div className={`mx-auto my-6 w-full max-w-[850px] rounded-xl border p-6 shadow-lg transition-colors duration-300 ${ui.panel}`}>
+        <div className={`rounded-xl border border-dashed py-12 text-center text-sm font-medium ${ui.emptyBox}`}>
           {t.unavailable}
         </div>
       </div>
     );
   }
 
-  const sectionTitle = `mb-6 flex items-center gap-2 text-[0.85rem] font-semibold uppercase tracking-[0.05em] ${darkMode ? 'text-gray-300' : 'text-gray-600'}`;
-  const blockTitle = `mb-4 block text-xs font-semibold uppercase tracking-wider ${darkMode ? 'text-zinc-500' : 'text-gray-500'}`;
+  const sectionTitle = `mb-6 flex items-center gap-2 text-[0.85rem] font-semibold uppercase tracking-[0.05em] ${ui.heading}`;
+  const blockTitle = `mb-4 block text-xs font-semibold uppercase tracking-wider ${ui.sub}`;
 
   return (
-    <div className={`mx-auto my-6 w-full max-w-[850px] rounded-xl border p-6 shadow-lg transition-colors duration-300 ${darkMode ? 'border-[#2a2a2a] bg-[#0f0f0f] text-gray-200' : 'border-gray-200 bg-white text-gray-800'}`}>
+    <div className={`mx-auto my-6 w-full max-w-[850px] rounded-xl border p-6 shadow-lg transition-colors duration-300 ${ui.panel}`}>
+      <style>{ui.scrollbar}</style>
 
       {/* ===================== SEÇÃO 1: Atividade ===================== */}
       <div className="mb-8">
         <h3 className={sectionTitle}>
-          <span className="font-bold text-emerald-500">#</span> {t.activity}
+          <span className={`font-bold ${ui.accentText}`}>#</span> {t.activity}
         </h3>
 
-        {/* Total | Sequência atual | Maior sequência (com intervalos de datas) */}
         <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-3">
-          <div className={`flex flex-col items-center rounded-xl border px-4 py-5 text-center transition-all duration-200 hover:-translate-y-0.5 ${surface}`}>
-            <span className="flex items-baseline gap-1 text-3xl font-bold leading-[1.1] md:text-[2rem]">{f.number(totalValue)}</span>
-            <span className={`mt-2 text-xs font-semibold ${label}`}>{t.totalContributions}</span>
-            <span className={`mt-1 text-[0.7rem] ${muted}`}>{totalNote}</span>
-          </div>
-
-          <div className={`flex flex-col items-center rounded-xl border px-4 py-5 text-center transition-all duration-200 hover:-translate-y-0.5 ${surface}`}>
-            <Flame className="mb-1 text-orange-500" size={26} />
-            <span className="flex items-baseline gap-1 text-3xl font-bold leading-[1.1] md:text-[2rem]">
-              {f.number(currentStreak.length)} <span className="text-[1.2rem]">{unit(currentStreak.length)}</span>
-            </span>
-            <span className={`mt-2 text-xs font-semibold ${label}`}>{t.currentStreak}</span>
-            <span className={`mt-1 text-[0.7rem] ${muted}`}>{hasCalendar ? streakRange(currentStreak, false) : t.daysInRow}</span>
-          </div>
-
-          <div className={`flex flex-col items-center rounded-xl border px-4 py-5 text-center transition-all duration-200 hover:-translate-y-0.5 ${surface}`}>
-            <div className="flex items-baseline gap-1 text-3xl font-bold leading-[1.1] md:text-[2rem]">
-              {f.number(longestStreak.length)} <span className="text-[1.2rem]">{unit(longestStreak.length)}</span>
-            </div>
-            <span className={`mt-2 text-xs font-semibold ${label}`}>{t.longestStreak}</span>
-            <span className={`mt-1 text-[0.7rem] ${muted}`}>{hasCalendar ? streakRange(longestStreak, true) : t.record}</span>
-          </div>
+          <SummaryStat
+            ui={ui}
+            value={f.number(totalValue)}
+            label={t.totalContributions}
+            note={totalNote}
+          />
+          <SummaryStat
+            ui={ui}
+            icon={<Flame className={`mb-1 ${ui.accentText}`} size={26} />}
+            value={f.number(currentStreak.length)}
+            unit={unit(currentStreak.length)}
+            label={t.currentStreak}
+            note={hasCalendar ? streakRange(currentStreak, false, t, f, today) : t.daysInRow}
+          />
+          <SummaryStat
+            ui={ui}
+            value={f.number(longestStreak.length)}
+            unit={unit(longestStreak.length)}
+            label={t.longestStreak}
+            note={hasCalendar ? streakRange(longestStreak, true, t, f, today) : t.record}
+          />
         </div>
 
-        {/* Calendário 12 meses, com meses, dias da semana e leitura por toque/teclado */}
-        {hasCalendar && (
-          <figure className="m-0 mb-10">
-            <div className={`mb-3 flex flex-wrap items-center justify-between gap-4 text-sm ${darkMode ? 'text-zinc-400' : 'text-gray-500'}`}>
-              <span>{f.number(summary.total)} {t.contrib12months}</span>
-              <div aria-hidden="true" className="flex items-center gap-1 text-[0.7rem]">
-                {t.less}
-                {[0, 1, 2, 3, 4].map((level) => (
-                  <div key={level} className={`h-[11px] w-[11px] rounded-[2px] ${LEVEL_BG[level]}`} />
-                ))}
-                {t.more}
-              </div>
-            </div>
-
-            <div className={`rounded-lg border p-4 ${surface}`}>
-              <div className="custom-scrollbar flex gap-2 overflow-x-auto pb-2">
-                {/* Rótulos Seg / Qua / Sex */}
-                <div aria-hidden="true" className="shrink-0 pt-5" style={{ width: 28 }}>
-                  <div className={`relative text-[10px] leading-[11px] ${muted}`} style={{ height: 7 * PITCH - GAP }}>
-                    {[1, 3, 5].map((day) => (
-                      <span key={day} className="absolute left-0" style={{ top: day * PITCH }}>{t.weekDays[day - 1]}</span>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="shrink-0">
-                  {/* Rótulos dos meses */}
-                  <div aria-hidden="true" className={`relative mb-1 h-4 text-[10px] ${muted}`} style={{ width: summary.columns.length * PITCH }}>
-                    {summary.months.map((m) => (
-                      <span key={m.date} className="absolute top-0" style={{ left: m.index * PITCH }}>{f.month(m.date)}</span>
-                    ))}
-                  </div>
-
-                  <div
-                    role="img"
-                    aria-label={`${t.calendarLabel}: ${f.number(summary.total)} ${t.contributions}`}
-                    tabIndex={0}
-                    onKeyDown={onCalendarKeyDown}
-                    onPointerLeave={hideCalendarHints}
-                    onBlur={hideCalendarHints}
-                    className="flex gap-[3px] outline-none focus-visible:ring-1 focus-visible:ring-emerald-500/60"
-                  >
-                    {summary.columns.map((column, cIdx) => (
-                      <div key={cIdx} className="flex shrink-0 flex-col gap-[3px]">
-                        {Array.from({ length: column.pad }, (_, k) => (
-                          <div key={`pad-${k}`} className="h-[11px] w-[11px]" style={{ visibility: 'hidden' }} />
-                        ))}
-                        {column.days.map((cell) => (
-                          <div
-                            key={cell.date}
-                            onPointerEnter={(event) => onCellEnter(event, cell)}
-                            onPointerDown={() => setActive(cell.index)}
-                            className={`relative z-0 h-[11px] w-[11px] cursor-pointer rounded-[2px] transition-all duration-200 hover:z-10 hover:scale-150 hover:shadow-lg hover:ring-1 hover:ring-white ${LEVEL_BG[cell.level]} ${cell.index === active ? 'z-10 scale-150 ring-1 ring-white' : ''}`}
-                          />
-                        ))}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Linha de leitura: melhor dia por padrão, ou o dia tocado/focado */}
-            <figcaption aria-live="polite" className={`mt-3 min-h-[1.25rem] text-center text-xs ${muted}`}>
-              {readout && (
-                <>
-                  {readout.prefix && <>{readout.prefix} </>}
-                  <span className={`font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>{readout.bold}</span> {readout.rest}
-                </>
-              )}
-            </figcaption>
-          </figure>
-        )}
+        {hasCalendar && <Calendar summary={summary} ui={ui} t={t} f={f} />}
 
         {/* Por ano + por dia da semana */}
         <div className="grid grid-cols-1 gap-10 md:grid-cols-2 md:gap-8">
@@ -569,12 +690,10 @@ export default function GithubActivityCard({ context, lang = 'pt' }) {
               caption={t.contribByYear}
               colClass="max-w-[60px] flex-1"
               gap={12}
-              barClass={chartBarColor}
-              peakClass={chartPeakColor}
-              darkMode={darkMode}
+              ui={ui}
             />
             {!yearsData.complete && (
-              <p className={`mt-2 text-center text-[0.65rem] ${muted}`}>{t.windowNote}</p>
+              <p className={`mt-2 text-center text-[0.65rem] ${ui.muted}`}>{t.windowNote}</p>
             )}
           </div>
 
@@ -591,13 +710,13 @@ export default function GithubActivityCard({ context, lang = 'pt' }) {
                     title={`${f.weekdayLong(day)} · ${f.number(count)} · ${f.percent(share)}`}
                     className="flex items-center gap-3 text-[0.8rem]"
                   >
-                    <span className={`w-8 font-medium ${isPeak ? (darkMode ? 'text-gray-200' : 'text-gray-800') : (darkMode ? 'text-zinc-400' : 'text-gray-500')}`}>
+                    <span className={`w-8 font-medium ${isPeak ? ui.dayLabelActive : ui.dayLabel}`}>
                       {t.weekDays[idx]}
                     </span>
-                    <div className={`h-[8px] flex-1 overflow-hidden rounded ${darkMode ? 'bg-[#161b22]' : 'bg-gray-200'}`}>
-                      <div className={`h-full rounded ${isPeak ? chartPeakColor : chartBarColor}`} style={{ width: `${(count / maxDay) * 100}%` }} />
+                    <div className={`h-[8px] flex-1 overflow-hidden rounded ${ui.track}`}>
+                      <div className={`h-full rounded ${isPeak ? ui.peak : ui.bar}`} style={{ width: `${(count / maxDay) * 100}%` }} />
                     </div>
-                    <span className={`w-10 text-right font-semibold ${isPeak ? 'text-emerald-500' : darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                    <span className={`w-10 text-right font-semibold ${isPeak ? ui.accentText : ui.strong}`}>
                       {f.number(count)}
                     </span>
                   </li>
@@ -609,9 +728,9 @@ export default function GithubActivityCard({ context, lang = 'pt' }) {
       </div>
 
       {/* ===================== SEÇÃO 2: Horários dos commits ===================== */}
-      <div className={`mb-4 mt-12 border-t border-dashed pt-8 ${darkMode ? 'border-[#2a2a2a]' : 'border-gray-200'}`}>
+      <div className={`mb-4 mt-12 border-t border-dashed pt-8 ${ui.divider}`}>
         <h3 className={sectionTitle}>
-          <span className="font-bold text-emerald-500">#</span> {t.commitTimes}
+          <span className={`font-bold ${ui.accentText}`}>#</span> {t.commitTimes}
         </h3>
 
         {hoursTotal > 0 ? (
@@ -619,9 +738,9 @@ export default function GithubActivityCard({ context, lang = 'pt' }) {
             <div className="mb-10">
               <div className="mb-6 text-center">
                 <p className="text-[1.1rem] font-bold">
-                  {t.peakAt} {f.hour(peakHour)} <span className={`font-normal ${darkMode ? 'text-zinc-600' : 'text-gray-300'}`}>•</span> {f.percent(topPeriod.pct)} {t.commitsAreFrom} {topPeriod.label.toLowerCase()}
+                  {t.peakAt} {f.hour(peakHour)} <span className={`font-normal ${ui.dot}`}>•</span> {f.percent(topPeriod.pct)} {t.commitsAreFrom} {topPeriod.label.toLowerCase()}
                 </p>
-                <p className={`mt-1 text-xs ${darkMode ? 'text-zinc-500' : 'text-gray-500'}`}>
+                <p className={`mt-1 text-xs ${ui.sub}`}>
                   {hourSpan(peakHour, peakHour + 1)} • {f.percent(hourItems[peakHour].pct)} ≈ {f.number(commitsPerHour[peakHour])} {t.commits}
                 </p>
               </div>
@@ -637,9 +756,7 @@ export default function GithubActivityCard({ context, lang = 'pt' }) {
                 caption={t.commitTimes}
                 colClass="flex-1"
                 gap={2}
-                barClass={chartBarColor}
-                peakClass={chartPeakColor}
-                darkMode={darkMode}
+                ui={ui}
               />
             </div>
 
@@ -651,61 +768,41 @@ export default function GithubActivityCard({ context, lang = 'pt' }) {
                 return (
                   <div
                     key={period.key}
-                    className={`flex flex-col rounded-lg border p-4 transition-all duration-200 hover:-translate-y-0.5 ${surface} ${isTop ? 'ring-1 ring-emerald-500/50' : ''}`}
+                    className={`flex flex-col rounded-lg border p-4 transition-all duration-200 hover:-translate-y-0.5 ${ui.surface} ${isTop ? `ring-1 ${ui.ringAccent}` : ''}`}
                   >
                     <div className="mb-3 flex items-center gap-2">
-                      <Icon size={21} className={period.color} />
+                      <Icon size={21} className={ui.accentText} />
                       <div className="min-w-0 flex-1">
                         <div className="text-[0.8rem] font-semibold">{period.label}</div>
-                        <div className={`mt-[0.1rem] text-[0.7rem] ${muted}`}>{hourSpan(period.from, (period.to + 1) % 24)}</div>
+                        <div className={`mt-[0.1rem] text-[0.7rem] ${ui.muted}`}>{hourSpan(period.from, (period.to + 1) % 24)}</div>
                       </div>
                       {isTop && (
-                        <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-1.5 py-0.5 text-[9px] font-bold uppercase text-emerald-500">
+                        <span className={`rounded-full border px-1.5 py-0.5 text-[9px] font-bold uppercase ${ui.badge}`}>
                           {t.peak}
                         </span>
                       )}
                     </div>
                     <div className="mb-2 text-[1.3rem] font-bold">{f.percent(period.pct)}</div>
-                    <div className={`h-[6px] overflow-hidden rounded-full ${darkMode ? 'bg-zinc-800' : 'bg-gray-200'}`}>
-                      <div className={`h-full rounded-full ${period.bg}`} style={{ width: `${period.pct}%` }} />
+                    <div className={`h-[6px] overflow-hidden rounded-full ${ui.barTrack}`}>
+                      <div className={`h-full rounded-full ${ui.bar}`} style={{ width: `${period.pct}%` }} />
                     </div>
-                    <div className={`mt-2 text-[0.7rem] ${muted}`}>≈ {f.number(period.count)} {t.commits}</div>
+                    <div className={`mt-2 text-[0.7rem] ${ui.muted}`}>≈ {f.number(period.count)} {t.commits}</div>
                   </div>
                 );
               })}
             </div>
 
-            <p className={`mt-8 text-center text-[0.7rem] font-medium ${muted}`}>
+            <p className={`mt-8 text-center text-[0.7rem] font-medium ${ui.muted}`}>
               {t.estimation}
               {activity.totalSampleCommits ? ` • ${f.number(activity.totalSampleCommits)} ${t.commits} (${t.sample})` : ''}
             </p>
           </>
         ) : (
-          <div className={`rounded-xl border border-dashed py-10 text-center text-sm font-medium ${darkMode ? 'border-zinc-800 text-zinc-500' : 'border-gray-300 text-zinc-400'}`}>
+          <div className={`rounded-xl border border-dashed py-10 text-center text-sm font-medium ${ui.emptyBox}`}>
             {t.noCommits}
           </div>
         )}
       </div>
-
-      {/* Tooltip do mouse (toque e teclado usam a linha de leitura) */}
-      {tooltip.visible && tooltip.cell && (
-        <div
-          className="pointer-events-none fixed z-[100] -translate-x-1/2 -translate-y-full whitespace-nowrap rounded border border-zinc-700 bg-zinc-900 px-3 py-1.5 text-[11px] text-gray-100 shadow-2xl"
-          style={{ top: tooltip.y, left: tooltip.x }}
-        >
-          <strong className="text-white">{describe(tooltip.cell).bold}</strong> {describe(tooltip.cell).rest}
-          <div className="absolute left-1/2 top-full -translate-x-1/2 border-[5px] border-transparent border-t-zinc-700"></div>
-          <div className="absolute left-1/2 top-full -translate-x-1/2 border-[4px] border-transparent border-t-zinc-900"></div>
-        </div>
-      )}
-
-      {/* Estilos mínimos para a barra de rolagem */}
-      <style>{`
-        .custom-scrollbar::-webkit-scrollbar { height: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: ${darkMode ? '#141414' : '#f9fafb'}; border-radius: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: ${darkMode ? 'rgba(113, 113, 122, 0.4)' : 'rgba(156, 163, 175, 0.4)'}; border-radius: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: ${darkMode ? '#71717a' : '#9ca3af'}; }
-      `}</style>
     </div>
   );
 }
