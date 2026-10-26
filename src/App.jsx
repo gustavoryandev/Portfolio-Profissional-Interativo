@@ -1,13 +1,30 @@
 // src/App.jsx
 import { useEffect, useRef, useState, useContext } from 'react';
-import { Send, Sparkles } from 'lucide-react';
+import { Send, Sparkles, Volume2, VolumeX } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import Navbar from './components/Navbar';
 import MessageBubble from './components/MessageBubble';
+import VoiceButton from './components/VoiceButton';
 import sendMessage from './services/api';
+import { isSynthesisSupported, speak, stopSpeaking } from './services/speech';
+import { useSpeechRecognition } from './hooks/useVoice';
 import { ThemeContext } from './context/ThemeContext';
 
 const FONT_SANS = "Inter, 'Geist Sans', Roboto, system-ui, sans-serif";
+
+// Código de erro de voz -> chave de tradução
+const VOICE_ERROR_KEYS = {
+  unsupported: 'voz.erros.naoSuportado',
+  insecure: 'voz.erros.inseguro',
+  denied: 'voz.erros.permissao',
+  system: 'voz.erros.sistema',
+  service: 'voz.erros.servico',
+  noMic: 'voz.erros.semMicrofone',
+  busy: 'voz.erros.emUso',
+  noSpeech: 'voz.erros.semFala',
+  network: 'voz.erros.rede',
+  generic: 'voz.erros.generico',
+};
 
 // Tokens do design system Alvinegro + Gold
 const UI = {
@@ -24,6 +41,12 @@ const UI = {
     typingBubble: 'border-transparent bg-[#1E1E1E]',
     dot: 'bg-zinc-500',
     focusRing: 'focus-visible:ring-[#FFD700]/60',
+    mic: 'text-zinc-400 hover:bg-white/5 hover:text-[#FFD700]',
+    micActive: 'bg-red-500 text-white hover:bg-red-600',
+    speakerOn: 'text-[#FFD700] hover:bg-white/5',
+    speakerOff: 'text-zinc-500 hover:bg-white/5 hover:text-white',
+    statusText: 'text-zinc-300',
+    errorText: 'text-red-300',
   },
   light: {
     page: 'bg-[#F4F4F5] text-[#121212]',
@@ -38,6 +61,12 @@ const UI = {
     typingBubble: 'border-[#E5E7EB] bg-white shadow-sm',
     dot: 'bg-gray-400',
     focusRing: 'focus-visible:ring-[#D4AF37]/60',
+    mic: 'text-zinc-500 hover:bg-black/5 hover:text-[#A16207]',
+    micActive: 'bg-red-500 text-white hover:bg-red-600',
+    speakerOn: 'text-[#A16207] hover:bg-black/5',
+    speakerOff: 'text-zinc-400 hover:bg-black/5 hover:text-black',
+    statusText: 'text-zinc-700',
+    errorText: 'text-red-600',
   },
 };
 
@@ -80,12 +109,22 @@ export default function App() {
   const { darkMode } = useContext(ThemeContext);
   const ui = darkMode ? UI.dark : UI.light;
 
-  const [messages, setMessages] = useState(() => [{ sender: 'ai', text: t('chat.boasVindas') }]);
+  const [messages, setMessages] = useState(() => [{ id: 'welcome', sender: 'ai', text: t('chat.boasVindas') }]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [voiceReplies, setVoiceReplies] = useState(true);
   const messagesContainerRef = useRef(null);
   const inputRef = useRef(null);
   const wasLoading = useRef(false);
+  const idCounter = useRef(0);
+
+  const nextId = () => `msg-${++idCounter.current}`;
+
+  // Reconhecimento de voz: ao terminar a fala, envia automaticamente
+  const voice = useSpeechRecognition({
+    lang: i18n.language,
+    onFinal: (text) => handleSend(text, { viaVoice: true }),
+  });
 
   // Rola até a última mensagem. O timeout espera os cards renderizarem; limpar evita efeito tardio.
   useEffect(() => {
@@ -105,28 +144,42 @@ export default function App() {
 
   // Ao trocar de idioma, reinicia a conversa com a saudação no novo idioma
   useEffect(() => {
-    setMessages([{ sender: 'ai', text: t('chat.boasVindas') }]);
+    stopSpeaking();
+    voice.abort();
+    setMessages([{ id: 'welcome', sender: 'ai', text: t('chat.boasVindas') }]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [i18n.language]);
 
-  const handleSend = async (suggestion = input) => {
+  const handleSend = async (suggestion = input, { viaVoice = false } = {}) => {
     const query = suggestion.trim();
     if (!query || loading) return;
 
-    const nextMessages = [...messages, { sender: 'user', text: query }];
+    voice.abort();
+    stopSpeaking();
+
+    const nextMessages = [...messages, { id: nextId(), sender: 'user', text: query }];
     setMessages(nextMessages);
     setInput('');
     setLoading(true);
     try {
-      const data = await sendMessage(query, i18n.language, nextMessages);
+      // O campo "id" é só da interface: não vai para o backend
+      const history = nextMessages.map(({ id, ...message }) => message);
+      const data = await sendMessage(query, i18n.language, history);
+      const id = nextId();
       setMessages([...nextMessages, {
+        id,
         sender: 'ai',
         text: data.response || data.error,
         context: data.liveContext,
         lang: i18n.language,
       }]);
+      // Pergunta por voz recebe resposta em voz (se ativado)
+      if (viaVoice && voiceReplies && data.response) {
+        speak(id, data.response, i18n.language);
+      }
     } catch {
       setMessages([...nextMessages, {
+        id: nextId(),
         sender: 'ai',
         tone: 'error',
         text: t('chat.erro', {
@@ -137,6 +190,20 @@ export default function App() {
       setLoading(false);
     }
   };
+
+  const handleMicClick = () => {
+    if (voice.listening) voice.stop();
+    else voice.start();
+  };
+
+  const toggleVoiceReplies = () => {
+    if (voiceReplies) stopSpeaking();
+    setVoiceReplies(!voiceReplies);
+  };
+
+  const voiceErrorMessage = voice.error
+    ? t(VOICE_ERROR_KEYS[voice.error] ?? VOICE_ERROR_KEYS.generic)
+    : null;
 
   const rawPrompts = t('chat.sugestoes', { returnObjects: true });
   const prompts = Array.isArray(rawPrompts) ? rawPrompts : [];
@@ -188,7 +255,7 @@ export default function App() {
                   key={index}
                   type="button"
                   onClick={() => handleSend(prompt)}
-                  disabled={loading}
+                  disabled={loading || voice.listening}
                   className={`shrink-0 rounded-full border px-4 py-2 text-[13px] font-medium backdrop-blur-md transition-colors disabled:opacity-50 ${ui.chip} ${ui.focusRing} focus-visible:outline-none focus-visible:ring-2`}
                 >
                   {prompt}
@@ -197,28 +264,63 @@ export default function App() {
             </div>
           )}
 
+          {/* Status da gravação ou erro de voz */}
+          {voice.listening && (
+            <p role="status" className={`flex items-center gap-2 px-3 text-xs font-semibold ${ui.statusText}`}>
+              <span aria-hidden="true" className="h-2 w-2 animate-pulse rounded-full bg-red-500 motion-reduce:animate-none" />
+              {t('voz.ouvindo')}
+            </p>
+          )}
+          {!voice.listening && voiceErrorMessage && (
+            <p role="alert" className={`px-3 text-xs font-medium ${ui.errorText}`}>
+              {voiceErrorMessage}
+            </p>
+          )}
+
           <form
             onSubmit={(event) => { event.preventDefault(); handleSend(); }}
-            className={`flex items-center gap-3 rounded-full p-2 transition-all duration-300 focus-within:ring-2 ${ui.bar} ${ui.ring}`}
+            className={`flex items-center gap-2 rounded-full p-2 transition-all duration-300 focus-within:ring-2 sm:gap-3 ${ui.bar} ${ui.ring}`}
           >
-            <div className={`pl-4 ${ui.accentIcon}`} aria-hidden="true">
+            <div className={`hidden pl-4 sm:block ${ui.accentIcon}`} aria-hidden="true">
               <Sparkles size={20} />
             </div>
             <input
               ref={inputRef}
               id="chat-input"
               aria-label={t('chat.placeholder') || 'Pergunte sobre o Gustavo'}
-              value={input}
+              value={voice.listening ? voice.interim : input}
               onChange={(event) => setInput(event.target.value)}
+              readOnly={voice.listening}
               placeholder={t('chat.placeholder') || 'Digite uma pergunta sobre o Gustavo...'}
               disabled={loading}
               autoComplete="off"
-              className={`min-w-0 flex-1 bg-transparent px-2 py-3 text-[15px] font-medium outline-none disabled:opacity-60 ${ui.input}`}
+              className={`min-w-0 flex-1 bg-transparent py-3 pl-4 pr-2 text-[15px] font-medium outline-none sm:pl-2 disabled:opacity-60 ${ui.input}`}
             />
+
+            <VoiceButton
+              listening={voice.listening}
+              disabled={loading}
+              onClick={handleMicClick}
+              label={voice.listening ? t('voz.pararGravacao') : t('voz.falar')}
+              ui={ui}
+            />
+
+            {isSynthesisSupported && (
+              <button
+                type="button"
+                onClick={toggleVoiceReplies}
+                aria-label={t('voz.respostasEmVoz')}
+                title={t('voz.respostasEmVoz')}
+                className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 ${voiceReplies ? ui.speakerOn : ui.speakerOff} ${ui.focusRing}`}
+              >
+                {voiceReplies ? <Volume2 size={18} aria-hidden="true" /> : <VolumeX size={18} aria-hidden="true" />}
+              </button>
+            )}
+
             <button
               type="submit"
               disabled={loading || !input.trim()}
-              className={`flex items-center gap-2 rounded-full px-6 py-3 text-sm font-bold transition-all sm:px-8 disabled:cursor-not-allowed disabled:opacity-50 ${ui.send} ${ui.focusRing} focus-visible:outline-none focus-visible:ring-2`}
+              className={`flex shrink-0 items-center gap-2 rounded-full px-4 py-3 text-sm font-bold transition-all sm:px-8 disabled:cursor-not-allowed disabled:opacity-50 ${ui.send} ${ui.focusRing} focus-visible:outline-none focus-visible:ring-2`}
             >
               {t('chat.enviar')} <Send size={16} aria-hidden="true" />
             </button>

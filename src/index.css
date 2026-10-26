@@ -62,3 +62,42 @@ scrollbar-color: rgba(245, 158, 11, 0.4) transparent;
 .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
 .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(245, 158, 11, 0.4); border-radius: 10px; }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(245, 158, 11, 0.7); }
+
+/* ----- Voz: gravação e reprodução ----- */
+
+/* Anel pulsante do botão do microfone enquanto grava */
+@keyframes voice-ring {
+  0% { transform: scale(1); opacity: 0.55; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+.voice-ring {
+  background: rgb(239 68 68 / 0.45);
+  animation: voice-ring 1.4s ease-out infinite;
+}
+
+/* Ondas animadas enquanto a resposta é lida */
+@keyframes voice-bar {
+  0%, 100% { transform: scaleY(0.35); }
+  50% { transform: scaleY(1); }
+}
+.voice-bars {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 12px;
+}
+.voice-bars > span {
+  width: 3px;
+  height: 100%;
+  border-radius: 2px;
+  background: currentColor;
+  transform-origin: bottom;
+  animation: voice-bar 0.9s ease-in-out infinite;
+}
+.voice-bars > span:nth-child(2) { animation-delay: 0.15s; }
+.voice-bars > span:nth-child(3) { animation-delay: 0.3s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .voice-ring { animation: none; opacity: 0.35; transform: none; }
+  .voice-bars > span { animation: none; transform: scaleY(0.7); }
+}

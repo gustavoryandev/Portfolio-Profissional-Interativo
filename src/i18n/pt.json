@@ -16,6 +16,28 @@
     ],
     "fallbackIdioma": "I can only communicate in Portuguese or English. Please choose one of these languages."
   },
+  "voz": {
+    "falar": "Falar com o assistente",
+    "pararGravacao": "Parar gravação",
+    "ouvindo": "Ouvindo... fale agora",
+    "ouvir": "Ouvir",
+    "ouvirResposta": "Ouvir resposta",
+    "parar": "Parar",
+    "pararAudio": "Parar áudio",
+    "respostasEmVoz": "Respostas em voz",
+    "erros": {
+      "naoSuportado": "Seu navegador não suporta reconhecimento de voz. Use Chrome, Edge ou Safari, ou escreva sua pergunta.",
+      "inseguro": "O microfone só funciona em conexão segura (HTTPS ou localhost).",
+      "permissao": "O navegador não está autorizando o microfone para este site. Clique no ícone de cadeado ou de microfone na barra de endereço, permita o acesso e recarregue a página.",
+      "sistema": "O sistema operacional está bloqueando o microfone para o navegador. No Windows, verifique Configurações > Privacidade > Microfone (incluindo a opção para aplicativos de área de trabalho). No macOS, verifique Ajustes do Sistema > Privacidade e Segurança > Microfone.",
+      "servico": "O navegador bloqueou o serviço de reconhecimento de voz, mesmo com o microfone disponível. Tente Chrome ou Edge e desative extensões ou bloqueadores que impeçam o envio de áudio.",
+      "semMicrofone": "Nenhum microfone foi encontrado. Verifique se ele está conectado e selecionado nas configurações de som.",
+      "emUso": "O microfone está sendo usado por outro aplicativo. Feche-o e tente de novo.",
+      "semFala": "Não ouvi nada. Toque no microfone e tente de novo.",
+      "rede": "Falha de rede no reconhecimento de voz. Verifique sua conexão.",
+      "generico": "Não foi possível capturar sua voz. Tente novamente."
+    }
+  },
   "navbar": {
     "baixarCv": "Baixar CV",
     "idioma": "Idioma",

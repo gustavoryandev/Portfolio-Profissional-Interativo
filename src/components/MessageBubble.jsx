@@ -1,7 +1,10 @@
 // src/components/MessageBubble.jsx
 import { memo, useContext, useMemo, useState } from 'react';
-import { AlertTriangle, Check, Copy, Sparkles, User } from 'lucide-react';
+import { AlertTriangle, Check, Copy, Sparkles, User, Volume2, VolumeX } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { ThemeContext } from '../context/ThemeContext';
+import { isSynthesisSupported, speak, stopSpeaking, toSpeechText } from '../services/speech';
+import { useActiveSpeechId } from '../hooks/useVoice';
 import SpotifyCard from './SpotifyCard';
 import GithubCard from './GithubCard';
 import StatsCard from './StatsCard';
@@ -59,6 +62,8 @@ const UI = {
     error: 'border-red-500/50 bg-[#1E1E1E] text-red-200',
     errorIcon: 'text-red-400',
     copy: 'text-zinc-400 hover:text-[#FFD700] focus-visible:ring-[#FFD700]/60',
+    speak: 'border-white/10 text-zinc-300 hover:border-[#FFD700]/60 hover:text-[#FFD700]',
+    focusRing: 'focus-visible:ring-[#FFD700]/60',
   },
   light: {
     ai: 'border-[#E5E7EB] bg-white text-[#121212] shadow-sm',
@@ -70,6 +75,8 @@ const UI = {
     error: 'border-red-300 bg-red-50 text-red-900',
     errorIcon: 'text-red-600',
     copy: 'text-gray-500 hover:text-[#A16207] focus-visible:ring-[#D4AF37]/60',
+    speak: 'border-[#E5E7EB] text-[#121212] hover:border-[#D4AF37] hover:text-[#A16207]',
+    focusRing: 'focus-visible:ring-[#D4AF37]/60',
   },
 };
 
@@ -204,6 +211,39 @@ function Avatar({ ui, isUser, children }) {
   );
 }
 
+// Animação de "ondas" enquanto a mensagem é lida
+function VoiceBars() {
+  return (
+    <span aria-hidden="true" className="voice-bars">
+      <span />
+      <span />
+      <span />
+    </span>
+  );
+}
+
+// Botão ouvir/parar de uma resposta da IA
+function SpeakButton({ id, text, lang, ui }) {
+  const { t } = useTranslation();
+  const activeId = useActiveSpeechId();
+  const speaking = activeId === id;
+
+  return (
+    <div className="mt-4 flex items-center">
+      <button
+        type="button"
+        onClick={() => (speaking ? stopSpeaking() : speak(id, text, lang))}
+        aria-label={speaking ? t('voz.pararAudio') : t('voz.ouvirResposta')}
+        className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 ${ui.speak} ${ui.focusRing}`}
+      >
+        {speaking ? <VolumeX size={14} aria-hidden="true" /> : <Volume2 size={14} aria-hidden="true" />}
+        <span>{speaking ? t('voz.parar') : t('voz.ouvir')}</span>
+        {speaking && <VoiceBars />}
+      </button>
+    </div>
+  );
+}
+
 function MessageBubble({ message }) {
   const { darkMode } = useContext(ThemeContext);
   const ui = darkMode ? UI.dark : UI.light;
@@ -227,6 +267,9 @@ function MessageBubble({ message }) {
       </div>
     );
   }
+
+  // Só respostas válidas, com texto falável, ganham o botão de áudio
+  const canSpeak = isSynthesisSupported && !isError && Boolean(message?.id) && toSpeechText(text).length > 0;
 
   return (
     <div className="my-2 flex w-full justify-start gap-3">
@@ -260,6 +303,10 @@ function MessageBubble({ message }) {
               </div>
             );
           })}
+
+          {canSpeak && (
+            <SpeakButton id={message.id} text={text} lang={message.lang || 'pt'} ui={ui} />
+          )}
         </div>
       </div>
     </div>
