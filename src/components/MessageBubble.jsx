@@ -17,6 +17,8 @@ import RepositoriesCard from './RepositoriesCards';
 import GithubActivityCard from './GithubActivityCard';
 import GithubLanguagesCard from './GithubLanguagesCard';
 import ChessCard from './ChessCard';
+import LiveDataNotice from './LiveDataNotice';
+import { CARD_SOURCES, mergeLiveContext } from '../services/liveContext';
 
 // Tags fixas que viram cards. Esta é a única lista: a regex abaixo é derivada dela.
 const cards = {
@@ -244,7 +246,9 @@ function SpeakButton({ id, text, lang, ui }) {
   );
 }
 
-function MessageBubble({ message }) {
+function MessageBubble({ message, liveContext = {}, refreshing = [], onRefresh }) {
+  const { i18n } = useTranslation();
+  const uiLanguage = i18n.language.startsWith('en') ? 'en' : 'pt';
   const { darkMode } = useContext(ThemeContext);
   const ui = darkMode ? UI.dark : UI.light;
   const isUser = message?.sender === 'user';
@@ -252,6 +256,8 @@ function MessageBubble({ message }) {
   const text = message?.text || '';
 
   const segments = useMemo(() => (isUser ? [] : splitMessage(text)), [isUser, text]);
+  const context = useMemo(() => mergeLiveContext(message?.context, liveContext), [message?.context, liveContext]);
+  const hasCards = segments.some(segment => segment.type === 'card');
 
   if (isUser) {
     return (
@@ -272,14 +278,14 @@ function MessageBubble({ message }) {
   const canSpeak = isSynthesisSupported && !isError && Boolean(message?.id) && toSpeechText(text).length > 0;
 
   return (
-    <div className="my-2 flex w-full justify-start gap-3">
+    <div className={`my-2 flex w-full justify-start gap-3 ${hasCards ? 'message-row-with-cards' : ''}`}>
       <Avatar ui={ui}>
         {isError
           ? <AlertTriangle className={`h-[18px] w-[18px] ${ui.errorIcon}`} />
           : <Sparkles className="h-[18px] w-[18px]" />}
       </Avatar>
 
-      <div className="min-w-0 max-w-[calc(100%-3.25rem)]">
+      <div className={hasCards ? 'message-content message-with-cards' : 'message-content'}>
         <div
           role={isError ? 'alert' : undefined}
           className={`w-full rounded-xl rounded-tl-sm border px-4 py-4 ${isError ? ui.error : ui.ai}`}
@@ -297,9 +303,13 @@ function MessageBubble({ message }) {
             if (!card) return <span key={index}>{segment.tag}</span>;
 
             const { Component, limit } = card;
+            const source = CARD_SOURCES[segment.tag.slice(1, -1).split(':')[0]];
+            const data = context[source];
             return (
               <div className="my-4" key={index}>
-                <Component context={message.context} lang={message.lang || 'pt'} limit={limit} />
+                {source && <LiveDataNotice data={data} pending={refreshing.includes(source)}
+                  onRetry={onRefresh ? () => onRefresh([source], true) : undefined} lang={uiLanguage} />}
+                {(!source || data?.status === 'ok') && <Component context={context} lang={uiLanguage} limit={limit} />}
               </div>
             );
           })}
@@ -314,4 +324,3 @@ function MessageBubble({ message }) {
 }
 
 export default memo(MessageBubble);
-

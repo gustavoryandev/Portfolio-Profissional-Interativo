@@ -244,12 +244,12 @@ scrollbar-color: rgba(245, 158, 11, 0.4) transparent;
   .skills-grid { grid-template-columns: 1fr; }
 }
 
-/* Keep text legible over the photographic background in the light theme. */
+/* Supplied light-theme backgrounds, with a subtle veil for text contrast. */
 :root:not(.dark) .site-header {
-  background: linear-gradient(90deg, #ffffffed, #ffffffd9), url('/hero-blue.png') center / cover;
+  background: linear-gradient(90deg, #ffffffb3, #ffffff33), url('/header-light.png') center / cover;
 }
 :root:not(.dark) .chat-messages {
-  background: linear-gradient(#f4f7fbea, #ffffffef), url('/hero-blue.png') center / cover;
+  background: linear-gradient(#ffffff26, #ffffff40), url('/hero-light.png') center / cover;
 }
 
 /* Card system: scoped to portfolio cards; navigation and chat controls keep their layout. */
@@ -321,4 +321,29 @@ scrollbar-color: rgba(245, 158, 11, 0.4) transparent;
 }
 @media (prefers-reduced-motion: reduce) {
   .portfolio-card *, .project-tile, .reference-card, .detail-card { animation: none !important; transition: none !important; }
+}
+
+/* Cards have an explicit flex allocation: inline-size containment cannot collapse the bubble. */
+.message-content { min-width: 0; max-width: calc(100% - 3.25rem); }
+.message-with-cards { flex: 1 1 0%; width: 0; max-width: none; }
+.message-with-cards > div { min-width: 0; }
+.chat-heading, .chat-composer { flex-shrink: 0; }
+.chat-messages { overscroll-behavior: contain; scroll-padding-bottom: 24px; }
+.chat-messages > .space-y-6 { flex: 0 0 auto; min-width: 0; padding-bottom: 8px; }
+.live-data-notice { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 12px; margin-bottom: 10px; border: 1px solid var(--line); border-radius: 8px; color: var(--muted); background: var(--panel-soft); font-size: 12px; }
+.live-data-notice button { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+.spotify-card a { min-width: 0; }
+.spotify-card .card-grid-wide { align-items: start; }
+@container portfolio-card (max-width: 480px) {
+  .match-team { flex-direction: column; align-items: center; gap: 8px; }
+  .match-team img { order: -1; }
+  .match-team span { text-align: center; font-size: 12px; }
+}
+@media (max-width: 639px) {
+  .message-with-cards > div { padding: 10px; }
+}
+@media (max-width: 639px) {
+  .message-row-with-cards { gap: 0; }
+  .message-row-with-cards > [aria-hidden="true"] { display: none; }
+  .message-with-cards > div { padding: 8px; }
 }

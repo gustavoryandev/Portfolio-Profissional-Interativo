@@ -100,7 +100,7 @@ const Countdown = ({ dateStr, t, darkMode }) => {
 export default function GaloCard({ context, lang = 'pt', limit = 3 }) {
   const { darkMode } = useContext(ThemeContext);
   const t = translations[lang] || translations.pt;
-  
+
   const games = context?.galo?.games?.slice(0, limit) || [];
 
   // Tradutor de Ligas (A API da ESPN costuma retornar os nomes padrão em inglês)
@@ -118,18 +118,18 @@ export default function GaloCard({ context, lang = 'pt', limit = 3 }) {
   const formatMatchDate = (dateStr) => {
     const d = new Date(dateStr);
     const locale = lang === 'pt' ? 'pt-BR' : 'en-US';
-    
+
     // Dia da semana curto (seg, ter / mon, tue)
     let weekday = new Intl.DateTimeFormat(locale, { weekday: 'short' }).format(d).replace('.', '').toLowerCase();
-    
+
     // Formato de data (DD/MM ou MM/DD dependendo do idioma)
     const dayMonth = lang === 'pt'
       ? `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}`
       : `${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getDate().toString().padStart(2, '0')}`;
-    
+
     // Hora (24h para pt, 12h para en)
     const time = new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit' }).format(d);
-    
+
     return `${weekday} • ${dayMonth} • ${time}`;
   };
 
@@ -140,14 +140,14 @@ export default function GaloCard({ context, lang = 'pt', limit = 3 }) {
     const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
 
     const dayStr = d === 1 ? t.day : t.days;
-    
+
     if (d === 0) return `${h} ${t.h}`;
     return `${d} ${dayStr} ${t.and} ${h} ${t.h}`;
   };
 
   return (
     <div className={`portfolio-card match-card my-4 w-full max-w-2xl rounded-xl border p-5 transition-colors duration-300 ${darkMode ? 'bg-[#050E17] border-sky-500/20' : 'bg-white border-gray-200 shadow-sm'}`}>
-      
+
       {/* Cabeçalho */}
       <div className="flex items-center gap-4 mb-6">
         <div className={`rounded-lg p-2 flex items-center justify-center border shadow-sm ${darkMode ? 'bg-zinc-950 border-[var(--line)]' : 'bg-gray-50 border-gray-200'}`}>
@@ -163,10 +163,10 @@ export default function GaloCard({ context, lang = 'pt', limit = 3 }) {
       <div className="space-y-4">
         {games.length > 0 ? games.map((game, idx) => {
           const isNextMatch = idx === 0 && game.state === 'pre';
-          
+
           return (
             <div key={game.id} className={`match-row relative flex items-stretch rounded-xl border transition-colors ${darkMode ? 'bg-[#0B192B] border-[#163A59]' : 'bg-gray-50 border-gray-100'}`}>
-              
+
               {/* Lado Esquerdo - Liga e Troféu */}
               <div className={`flex flex-col items-center justify-center match-league w-20 shrink-0 px-2 py-4 border-r border-dashed ${darkMode ? 'border-[#333]' : 'border-gray-200'}`}>
                 <p className={`text-[9px] font-bold text-center uppercase mb-3 leading-tight ${darkMode ? 'text-[var(--muted)]' : 'text-gray-500'}`}>
@@ -177,19 +177,19 @@ export default function GaloCard({ context, lang = 'pt', limit = 3 }) {
 
               {/* Lado Direito - Times e Infos */}
               <div className="match-body min-w-0 flex-1 flex flex-col p-4">
-                
+
                 {/* Placar / Times */}
                 <div className="flex items-center justify-center gap-3 md:gap-5 mb-4">
-                  <div className="flex items-center gap-3 w-2/5 justify-end">
-                    <span className={`text-[14px] md:text-[16px] font-bold text-right truncate ${darkMode ? 'text-gray-200' : 'text-gray-800'}`}>{game.home.name}</span>
-                    <img src={game.home.logo} alt={game.home.name} className="w-8 h-8 object-contain drop-shadow-sm" />
+                  <div className="match-team flex min-w-0 flex-1 items-center gap-3 justify-end">
+                    <span className={`text-[14px] md:text-[16px] font-bold text-right break-words ${darkMode ? 'text-gray-200' : 'text-gray-800'}`}>{game.home.name}</span>
+                    <img src={game.home.logo} alt={game.home.name} className="w-10 h-10 shrink-0 object-contain drop-shadow-sm" />
                   </div>
-                  
+
                   <div className={`text-[11px] font-bold ${darkMode ? 'text-[var(--muted)]' : 'text-gray-400'}`}>X</div>
-                  
-                  <div className="flex items-center gap-3 w-2/5 justify-start">
-                    <img src={game.away.logo} alt={game.away.name} className="w-8 h-8 object-contain drop-shadow-sm" />
-                    <span className={`text-[14px] md:text-[16px] font-bold text-left truncate ${darkMode ? 'text-gray-200' : 'text-gray-800'}`}>{game.away.name}</span>
+
+                  <div className="match-team flex min-w-0 flex-1 items-center gap-3 justify-start">
+                    <img src={game.away.logo} alt={game.away.name} className="w-10 h-10 shrink-0 object-contain drop-shadow-sm" />
+                    <span className={`text-[14px] md:text-[16px] font-bold text-left break-words ${darkMode ? 'text-gray-200' : 'text-gray-800'}`}>{game.away.name}</span>
                   </div>
                 </div>
 
@@ -221,7 +221,7 @@ export default function GaloCard({ context, lang = 'pt', limit = 3 }) {
                     </span>
                   </div>
                 )}
-                
+
               </div>
             </div>
           );
@@ -235,10 +235,10 @@ export default function GaloCard({ context, lang = 'pt', limit = 3 }) {
       {/* Footer Link */}
       {games.length > 0 && (
         <div className="mt-5 flex justify-end">
-          <a 
-            href="https://www.espn.com.br/futebol/time/calendario/_/id/7632/atletico-mg" 
-            target="_blank" 
-            rel="noreferrer" 
+          <a
+            href="https://www.espn.com.br/futebol/time/calendario/_/id/7632/atletico-mg"
+            target="_blank"
+            rel="noreferrer"
             className="flex items-center gap-1.5 text-[11px] font-bold text-sky-500 hover:text-sky-400 uppercase tracking-wider transition-colors"
           >
             {t.viewTable} <ExternalLink size={12} />

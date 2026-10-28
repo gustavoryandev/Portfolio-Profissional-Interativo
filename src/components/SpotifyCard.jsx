@@ -8,8 +8,9 @@ const SpotifyLogo = ({ className }) => (
   </svg>
 );
 
-export default function SpotifyCard({ context }) {
+export default function SpotifyCard({ context, lang = 'pt' }) {
   const { darkMode } = useContext(ThemeContext);
+  const en = lang.startsWith('en');
 
   const spotify = context?.spotify || {};
   const { current, recent = [], topTracks = [], topArtists = [] } = spotify;
@@ -22,56 +23,56 @@ export default function SpotifyCard({ context }) {
         {items.length > 0 ? items.map((item, idx) => (
           <a key={idx} href={item.url} target="_blank" rel="noreferrer" className="flex items-center gap-3 group">
             <span className={`w-3 text-right text-[13px] font-bold ${darkMode ? 'text-white' : 'text-black'}`}>{idx + 1}</span>
-            <img src={item.image} alt={item.name} className={`w-11 h-11 object-cover shadow-sm ${isArtist ? 'rounded-full' : 'rounded-md'}`} />
-            <div className="flex flex-col overflow-hidden min-w-0">
-              <span className={`truncate text-[13px] font-bold transition-colors ${darkMode ? 'text-white group-hover:text-[#1DB954]' : 'text-black group-hover:text-[#1DB954]'}`}>{item.name}</span>
+            <img src={item.image} alt={item.name} className={`w-11 h-11 shrink-0 object-cover shadow-sm ${isArtist ? 'rounded-full' : 'rounded-md'}`} />
+            <div className="flex min-w-0 flex-1 flex-col">
+              <span className={`break-words text-[13px] font-bold transition-colors ${darkMode ? 'text-white group-hover:text-[#1DB954]' : 'text-black group-hover:text-[#1DB954]'}`}>{item.name}</span>
               {!isArtist && (
-                <div className="flex items-center gap-1.5 mt-0.5">
+                <div className="flex min-w-0 items-start gap-1.5 mt-0.5">
                   {item.explicit && <span className={`shrink-0 text-[8px] px-1 py-[1px] rounded-[3px] font-semibold flex items-center justify-center ${darkMode ? 'bg-zinc-300 text-zinc-900' : 'bg-zinc-600 text-white'}`}>E</span>}
-                  <span className={`truncate text-[11px] font-medium ${darkMode ? 'text-zinc-400' : 'text-gray-500'}`}>{item.artists}</span>
+                  <span className={`break-words text-[11px] font-medium ${darkMode ? 'text-zinc-400' : 'text-gray-500'}`}>{item.artists}</span>
                 </div>
               )}
             </div>
           </a>
         )) : (
-          <p className={`text-center text-[12px] italic mt-4 ${darkMode ? 'text-[var(--muted)]' : 'text-gray-400'}`}>Ainda sem dados suficientes.</p>
+          <p className={`text-center text-[12px] italic mt-4 ${darkMode ? 'text-[var(--muted)]' : 'text-gray-400'}`}>{en ? 'Not enough data yet.' : 'Ainda sem dados suficientes.'}</p>
         )}
       </div>
     </div>
   );
 
   return (
-    <div className={`portfolio-card my-4 w-full max-w-4xl rounded-xl border p-6 md:p-8 transition-colors duration-300 relative ${darkMode ? 'bg-[#050E17] border-[var(--line)]/80 shadow-sm' : 'bg-white border-gray-200 shadow-sm'}`}>
-      
+    <div className={`portfolio-card spotify-card my-4 w-full max-w-4xl rounded-xl border p-6 md:p-8 transition-colors duration-300 relative ${darkMode ? 'bg-[#050E17] border-[var(--line)] shadow-sm' : 'bg-white border-gray-200 shadow-sm'}`}>
+
       {/* Cabeçalho */}
-      <h2 className={`text-center text-xl md:text-xl font-semibold mb-5 ${darkMode ? 'text-white' : 'text-black'}`}>Gustavo's Spotify Data</h2>
-      
+      <h2 className={`text-center text-xl md:text-xl font-semibold mb-5 ${darkMode ? 'text-white' : 'text-black'}`}>{en ? 'Gustavo’s Spotify' : 'Spotify do Gustavo'}</h2>
+
       {/* Música Atual (Currently Listening To) */}
       <div className="flex flex-col items-center mb-5">
-        <h3 className={`text-[14px] font-bold mb-4 ${darkMode ? 'text-white' : 'text-black'}`}>Currently Listening To</h3>
+        <h3 className={`text-[14px] font-bold mb-4 ${darkMode ? 'text-white' : 'text-black'}`}>{en ? 'Currently listening to' : 'Ouvindo agora'}</h3>
         {current ? (
            <a href={current.url} target="_blank" rel="noreferrer" className="flex flex-col items-center group">
                <img src={current.image} alt={current.name} className="w-16 h-16 rounded-md shadow-md mb-3 group-hover:scale-105 transition-transform" />
                <span className={`font-bold text-[15px] text-center ${darkMode ? 'text-white group-hover:text-[#1DB954]' : 'text-black group-hover:text-[#1DB954]'}`}>{current.name}</span>
-               <div className="flex items-center gap-1.5 mt-0.5">
+               <div className="flex min-w-0 items-start gap-1.5 mt-0.5">
                   {current.explicit && <span className={`shrink-0 text-[8px] px-1 py-[1px] rounded-[3px] font-semibold flex items-center justify-center ${darkMode ? 'bg-zinc-300 text-zinc-900' : 'bg-zinc-600 text-white'}`}>E</span>}
                   <span className={`text-[12px] font-medium text-center ${darkMode ? 'text-zinc-400' : 'text-gray-500'}`}>{current.artists}</span>
                </div>
            </a>
         ) : (
-           <span className={`text-[14px] font-medium ${darkMode ? 'text-[var(--muted)]' : 'text-gray-400'}`}>Nothing</span>
+           <span className={`text-[14px] font-medium ${darkMode ? 'text-[var(--muted)]' : 'text-gray-400'}`}>{en ? 'Nothing playing right now.' : 'Nenhuma música tocando agora.'}</span>
         )}
       </div>
 
       {/* Grade de Listas em 3 Colunas */}
       <div className="card-grid card-grid-wide grid grid-cols-1 gap-5">
-         <ListSection title="Recently Played Tracks" items={recent} />
-         <ListSection title="Top Tracks" items={topTracks} />
-         <ListSection title="Top Artists" items={topArtists} isArtist />
+         <ListSection title={en ? 'Recently played' : 'Reproduzidas recentemente'} items={recent} />
+         <ListSection title={en ? 'Top tracks' : 'Músicas favoritas'} items={topTracks} />
+         <ListSection title={en ? 'Top artists' : 'Artistas favoritos'} items={topArtists} isArtist />
       </div>
 
       {/* Rodapé da Identidade Visual */}
-      <div className="mt-5 flex justify-between items-end border-t pt-5 border-[var(--line)]/50">
+      <div className="mt-5 flex justify-between items-end border-t pt-5 border-[var(--line)]">
          <SpotifyLogo className="w-7 h-7 text-[#1DB954]" />
          <span className={`text-[10px] font-bold tracking-[0.2em] ${darkMode ? 'text-[var(--muted)]' : 'text-gray-400'}`}>GUSTAVORYAN.AI</span>
       </div>

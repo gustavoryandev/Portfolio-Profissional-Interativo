@@ -120,7 +120,7 @@ export default function GithubLanguages({ context, lang = 'pt' }) {
   const sectionClass = `portfolio-card mx-auto my-6 w-full max-w-[850px] rounded-xl border p-6 transition-colors duration-300 ${ui.panel}`;
   const headingId = 'gh-languages-title';
 
-  if (github?.status !== 'ok') {
+  if (github?.status !== 'ok' || github.languages == null) {
     return (
       <section className={sectionClass} style={{ fontFamily: FONT_SANS }}>
         <div className={`rounded-xl border border-dashed py-12 text-center text-sm font-medium ${ui.dashed}`}>

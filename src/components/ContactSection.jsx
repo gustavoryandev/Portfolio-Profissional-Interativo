@@ -50,25 +50,25 @@ const ContactSection = ({ lang = 'pt' }) => {
       </div>
       <div className="space-y-4">
         <input
-          required 
-          type="text" 
-          placeholder={t.contact_name} aria-label={t.contact_name} 
-          className="w-full rounded-xl border border-[var(--line)] bg-[var(--panel-soft)] p-3 text-[var(--ink)] outline-none transition-all focus:border-sky-500/60" 
+          required
+          type="text"
+          placeholder={t.contact_name} aria-label={t.contact_name}
+          className="w-full rounded-xl border border-[var(--line)] bg-[var(--panel-soft)] p-3 text-[var(--ink)] outline-none transition-all focus:border-sky-500/60"
         />
-        <input 
-          required 
-          type="email" 
-          placeholder={t.contact_email} aria-label={t.contact_email} 
-          className="w-full rounded-xl border border-[var(--line)] bg-[var(--panel-soft)] p-3 text-[var(--ink)] outline-none transition-all focus:border-sky-500/60" 
+        <input
+          required
+          type="email"
+          placeholder={t.contact_email} aria-label={t.contact_email}
+          className="w-full rounded-xl border border-[var(--line)] bg-[var(--panel-soft)] p-3 text-[var(--ink)] outline-none transition-all focus:border-sky-500/60"
         />
-        <textarea 
-          required 
-          rows="3" 
-          placeholder={t.contact_msg} aria-label={t.contact_msg} 
+        <textarea
+          required
+          rows="3"
+          placeholder={t.contact_msg} aria-label={t.contact_msg}
           className="w-full resize-none rounded-xl border border-[var(--line)] bg-[var(--panel-soft)] p-3 text-[var(--ink)] outline-none transition-all focus:border-sky-500/60"
         ></textarea>
-        <button 
-          type="submit" 
+        <button
+          type="submit"
           className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 font-semibold text-white shadow-lg shadow-sky-500/20 transition-colors hover:bg-blue-500"
         >
           <Send size={18} /> {t.contact_send}

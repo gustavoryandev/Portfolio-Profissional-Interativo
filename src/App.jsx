@@ -12,6 +12,8 @@ import sendMessage from './services/api';
 import { isSynthesisSupported, speak, stopSpeaking } from './services/speech';
 import { useSpeechRecognition } from './hooks/useVoice';
 import { ThemeContext } from './context/ThemeContext';
+import useLiveContext from './hooks/useLiveContext';
+import { sourcesForText } from './services/liveContext';
 
 const FONT_SANS = "Inter, 'Geist Sans', Roboto, system-ui, sans-serif";
 
@@ -122,6 +124,10 @@ export default function App() {
   const inputRef = useRef(null);
   const wasLoading = useRef(false);
   const idCounter = useRef(0);
+  const messagesRef = useRef(messages);
+  const sendingRef = useRef(false);
+  const conversationRef = useRef({ chatContext: null, model: null });
+  const live = useLiveContext();
 
   const nextId = () => `msg-${++idCounter.current}`;
 
@@ -139,7 +145,7 @@ export default function App() {
       container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
     }, 100);
     return () => clearTimeout(id);
-  }, [messages, loading]);
+  }, [messages.length, loading]);
 
   // Devolve o foco ao input quando a resposta chega (não rouba foco na montagem)
   useEffect(() => {
@@ -147,51 +153,64 @@ export default function App() {
     wasLoading.current = loading;
   }, [loading]);
 
-  // Ao trocar de idioma, reinicia a conversa com a saudação no novo idioma
+  // Language changes affect UI/voice only; the conversation and in-flight request survive.
   useEffect(() => {
     stopSpeaking();
     voice.abort();
-    setMessages([{ id: 'welcome', sender: 'ai', text: t('chat.boasVindas') }]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [i18n.language]);
 
+  const appendMessage = message => {
+    messagesRef.current = [...messagesRef.current, message];
+    setMessages(messagesRef.current);
+  };
+
   const handleSend = async (suggestion = input, { viaVoice = false } = {}) => {
     const query = suggestion.trim();
-    if (!query || loading) return;
+    if (!query || sendingRef.current) return;
+    sendingRef.current = true;
+    const requestLanguage = i18n.language;
 
     voice.abort();
     stopSpeaking();
 
-    const nextMessages = [...messages, { id: nextId(), sender: 'user', text: query }];
-    setMessages(nextMessages);
+    appendMessage({ id: nextId(), sender: 'user', text: query, lang: requestLanguage });
     setInput('');
     setLoading(true);
     try {
       // O campo "id" é só da interface: não vai para o backend
-      const history = nextMessages.map(({ id, ...message }) => message);
-      const data = await sendMessage(query, i18n.language, history);
+      const history = messagesRef.current.map(({ sender, text }) => ({ sender, text }));
+      const data = await sendMessage(query, requestLanguage, history, conversationRef.current.chatContext);
+      conversationRef.current = {
+        chatContext: data.chatContext ?? conversationRef.current.chatContext,
+        model: data.model ?? conversationRef.current.model,
+      };
       const id = nextId();
-      setMessages([...nextMessages, {
+      appendMessage({
         id,
         sender: 'ai',
         text: data.response || data.error,
         context: data.liveContext,
-        lang: i18n.language,
-      }]);
+        lang: requestLanguage,
+        model: data.model,
+      });
+      live.absorb(data.liveContext);
+      void live.refresh(sourcesForText(data.response));
       // Pergunta por voz recebe resposta em voz (se ativado)
       if (viaVoice && voiceReplies && data.response) {
-        speak(id, data.response, i18n.language);
+        speak(id, data.response, requestLanguage);
       }
     } catch {
-      setMessages([...nextMessages, {
+      appendMessage({
         id: nextId(),
         sender: 'ai',
         tone: 'error',
         text: t('chat.erro', {
           defaultValue: 'ERRO: não foi possível processar sua pergunta agora. Tente novamente em instantes.',
         }),
-      }]);
+      });
     } finally {
+      sendingRef.current = false;
       setLoading(false);
     }
   };
@@ -243,15 +262,15 @@ export default function App() {
           className="chat-messages custom-scrollbar flex min-h-0 w-full flex-1 flex-col gap-6 overflow-y-auto p-4 sm:p-6"
         >
           <div className="space-y-6">
-            {messages.map((message, index) => (
-              <div className="chat-msg-in" key={`${message.sender}-${index}`}>
-                <MessageBubble message={message} />
+            {messages.map(message => (
+              <div className="chat-msg-in" key={message.id}>
+                <MessageBubble message={message} liveContext={live.context} refreshing={live.refreshing} onRefresh={live.refresh} />
               </div>
             ))}
             {loading && (
               <TypingIndicator
                 ui={ui}
-                label={t('chat.digitando', { defaultValue: 'Gerando resposta' })}
+                label={t('chat.digitando', { defaultValue: en ? 'Generating reply' : 'Gerando resposta' })}
               />
             )}
           </div>

@@ -4,6 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import { createHash } from 'crypto';
 import dotenv from 'dotenv';
+import { createLiveCache, sourceFailure } from '../server/liveCache.js';
 
 dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 
@@ -123,42 +124,7 @@ const LIVE_TTL = {
   galo: 2 * 60 * 1000,
   chess: 5 * 60 * 1000
 };
-const LIVE_ERROR_TTL = 10 * 1000;
-const liveCache = new Map();
-
-async function cachedSource(name, fetcher) {
-  const now = Date.now();
-  const entry = liveCache.get(name);
-
-  if (entry?.data && entry.expires > now) return entry.data;
-  if (entry?.promise) return entry.promise;
-
-  const promise = (async () => {
-    let data;
-    try {
-      data = await fetcher();
-    } catch {
-      data = { status: 'error' };
-    }
-
-        const previous = liveCache.get(name)?.data;
-    if (data.status === 'error' && previous?.status === 'ok') {
-      const hold = data.reason === 'rate_limited' ? (LIVE_TTL[name] ?? 60 * 1000) : LIVE_ERROR_TTL;
-      liveCache.set(name, { data: previous, expires: Date.now() + hold });
-      return previous;
-    }
-
-    let ttl = LIVE_TTL[name] ?? 60 * 1000;
-    if (data.status === 'error') {
-      ttl = data.reason === 'rate_limited' ? (LIVE_TTL[name] ?? 60 * 1000) : LIVE_ERROR_TTL;
-    }
-    liveCache.set(name, { data, expires: Date.now() + ttl });
-    return data;
-  })();
-
-  liveCache.set(name, { ...entry, promise });
-  return promise;
-}
+const { entries: liveCache, get: cachedSource } = createLiveCache(LIVE_TTL);
 
 // Snapshot instantâneo do cache, sem disparar requisições
 function peekLiveContext() {
@@ -413,11 +379,7 @@ async function fetchReadmes(login, names, token) {
 
 // Separa limite de requisições, usuário inexistente e falha genérica
 function githubFailure(error) {
-  const status = error?.response?.status;
-  const rateLimited = status === 429 || error?.response?.headers?.['x-ratelimit-remaining'] === '0';
-  if (rateLimited) return { status: 'error', reason: 'rate_limited' };
-  if (status === 401) return { status: 'error', reason: 'unauthorized' };
-  return { status: 'error', reason: 'unavailable' };
+  return sourceFailure(error);
 }
 
 async function fetchGithub() {
@@ -534,6 +496,7 @@ async function fetchGithub() {
       languages,
       readmes, // usado só pela IA; o handler remove antes de enviar ao cliente
       coverage: {
+        events: eventsRes ? 'ok' : 'unavailable',
         repositoriesListed: repositories.length,
         repositoriesTotal: user.repositories.totalCount,
         starsPartial,
@@ -596,7 +559,7 @@ async function fetchWakatime() {
       },
       languages: sortedLangs
     };
-  } catch (e) { return { status: 'error' }; }
+  } catch (e) { return sourceFailure(e); }
 }
 
 const GALO_TEAM_ID = '7632';
@@ -905,9 +868,9 @@ const LIVE_FETCHERS = {
   chess: fetchChess
 };
 
-function fetchLiveContext() {
+function fetchLiveContext(sources = Object.keys(LIVE_FETCHERS), options = {}) {
   return Promise.all(
-    Object.entries(LIVE_FETCHERS).map(async ([name, fetcher]) => [name, await cachedSource(name, fetcher)])
+    sources.map(async name => [name, await cachedSource(name, LIVE_FETCHERS[name], options)])
   ).then((entries) => Object.fromEntries(entries));
 }
 
@@ -1231,6 +1194,15 @@ export default async function handler(req, res) {
 
   try {
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body || {};
+    if (body.action === 'refreshContext') {
+      if (!Array.isArray(body.sources) || !body.sources.length || body.sources.length > 6
+        || body.sources.some(name => typeof name !== 'string' || !Object.hasOwn(LIVE_FETCHERS, name))) {
+        return res.status(400).json({ error: 'Fontes inválidas.' });
+      }
+      res.setHeader('Cache-Control', 'no-store');
+      const liveContext = forClient(await fetchLiveContext([...new Set(body.sources)], { retryFailed: true }));
+      return res.status(200).json({ liveContext });
+    }
     const { userMessage, chatHistory = [] } = body;
     const stream = body.stream === true; // opt-in: resposta NDJSON; padrão continua JSON
 
