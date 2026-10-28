@@ -1,3 +1,4 @@
+import LanguageIcon from './LanguageIcon';
 import React, { useContext } from 'react';
 import { Terminal, Clock, Calendar, Code2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -6,19 +7,19 @@ import { ThemeContext } from '../context/ThemeContext';
 // Tokens alinhados ao GithubActivityCard
 const UI = {
   dark: {
-    panel: 'border-[#2a2a2a] bg-[#0f0f0f] text-gray-200',
-    surface: 'bg-[#141414] border-[#2a2a2a]',
-    surfaceHover: 'hover:bg-[#1a1a1a]',
-    divider: 'border-[#2a2a2a]',
+    panel: 'border-[#163A59] bg-[#050E17] text-gray-200',
+    surface: 'bg-[#0B192B] border-[#163A59]',
+    surfaceHover: 'hover:bg-[#10243a]',
+    divider: 'border-[#163A59]',
     text: 'text-white',
     strong: 'text-white',
     label: 'text-zinc-400',
-    muted: 'text-zinc-500',
-    accentText: 'text-[#FFD700]',
-    accent: '#FFD700',
-    track: '#222222',
-    emptyBox: 'border-zinc-800 text-zinc-500',
-    shadow: 'shadow-lg shadow-black/50',
+    muted: 'text-[var(--muted)]',
+    accentText: 'text-[#38BDF8]',
+    accent: '#38BDF8',
+    track: '#163A59',
+    emptyBox: 'border-[var(--line)] text-[var(--muted)]',
+    shadow: 'shadow-sm',
   },
   light: {
     panel: 'border-gray-200 bg-white text-gray-800',
@@ -29,8 +30,8 @@ const UI = {
     strong: 'text-gray-900',
     label: 'text-gray-500',
     muted: 'text-gray-500',
-    accentText: 'text-[#A16207]',
-    accent: '#D4AF37',
+    accentText: 'text-[#0369A1]',
+    accent: '#0D6EFD',
     track: '#e5e7eb',
     emptyBox: 'border-gray-300 text-zinc-400',
     shadow: 'shadow-lg',
@@ -45,7 +46,7 @@ function HeaderBlock({ icon, label, value, sub, ui }) {
         {React.cloneElement(icon, { size: 12, className: ui.accentText, 'aria-hidden': true })}
         {label}
       </div>
-      <strong className={`text-[17px] font-black tabular-nums ${ui.strong}`}>{value || '--'}</strong>
+      <strong className={`text-[17px] font-semibold tabular-nums ${ui.strong}`}>{value || '--'}</strong>
       <p className={`mt-0.5 text-[11px] ${ui.muted}`}>{sub}</p>
     </div>
   );
@@ -92,10 +93,10 @@ export default function StatsCard({ context }) {
   const isConfigured = wakatime?.status === 'ok';
 
   return (
-    <article className={`my-3 w-full max-w-[800px] rounded-xl border p-6 transition-colors duration-300 ${ui.panel} ${ui.shadow}`}>
+    <article className={`portfolio-card my-3 w-full max-w-[800px] rounded-xl border p-6 transition-colors duration-300 ${ui.panel} ${ui.shadow}`}>
       {/* CABEÇALHO */}
       <div className="mb-6 text-center sm:text-left">
-        <h3 className={`flex items-center justify-center gap-2 text-2xl font-black tracking-tight sm:justify-start ${ui.strong}`}>
+        <h3 className={`flex items-center justify-center gap-2 text-xl font-semibold tracking-tight sm:justify-start ${ui.strong}`}>
           <Clock size={22} className={ui.accentText} aria-hidden="true" />
           {t('cards.wakatime.tempoProgramando')}
         </h3>
@@ -107,7 +108,7 @@ export default function StatsCard({ context }) {
       {isConfigured ? (
         <>
           {/* MÉTRICAS (4 blocos) */}
-          <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">
+          <div className="mb-6 card-grid grid grid-cols-2 gap-3 md:grid-cols-4">
             <HeaderBlock ui={ui} icon={<Clock />} label={t('cards.wakatime.total')} value={summary.totalFormatted} sub={t('cards.wakatime.emLinguagens', { count: languages.length })} />
             <HeaderBlock ui={ui} icon={<Terminal />} label={t('cards.wakatime.mediaDiaria')} value={summary.dailyAverageFormatted} sub={t('cards.wakatime.nosDiasComCodigo')} />
             <HeaderBlock ui={ui} icon={<Calendar />} label={t('cards.wakatime.diasAtivos')} value={summary.activeDays} sub={t('cards.wakatime.deDias', { count: summary.totalDays })} />
@@ -115,7 +116,7 @@ export default function StatsCard({ context }) {
           </div>
 
           {/* LINGUAGENS */}
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5">
+          <div className="card-grid grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5">
             {languages.map((lang, index) => (
               <div
                 key={`${lang.name}-${index}`}
@@ -123,8 +124,8 @@ export default function StatsCard({ context }) {
               >
                 <div className="relative mb-3 flex items-center justify-center">
                   <CircularProgress percent={lang.percent} ui={ui} label={`${lang.name}: ${lang.percent}%`} />
-                  <span className={`absolute text-[18px] font-black ${ui.strong}`} aria-hidden="true">
-                    {lang.name.charAt(0)}
+                  <span className={`absolute text-[18px] font-semibold ${ui.strong}`} aria-hidden="true">
+                    <LanguageIcon name={lang.name} size={22} />
                   </span>
                 </div>
                 <strong className={`w-full truncate text-center text-[13px] font-bold ${ui.strong}`}>

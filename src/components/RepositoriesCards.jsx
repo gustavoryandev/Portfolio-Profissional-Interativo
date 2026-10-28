@@ -1,3 +1,4 @@
+import LanguageIcon from './LanguageIcon';
 // src/components/RepositoriesCard.jsx
 import { memo, useContext, useMemo } from 'react';
 import { ExternalLink, GitFork, Star, Github } from 'lucide-react';
@@ -36,34 +37,34 @@ const copy = {
   },
 };
 
-// Tokens do design system Alvinegro + Gold
+// Tokens do design system Alvinegro + Azul
 const UI = {
   dark: {
-    panel: 'border-[#2A2A2A] bg-[#0A0A0A] text-white shadow-lg shadow-black/50',
-    card: 'border-[#2A2A2A] bg-[#1E1E1E] hover:border-[#FFD700]/50',
+    panel: 'border-[#163A59] bg-[#050E17] text-white shadow-sm',
+    card: 'border-[#163A59] bg-[#0B192B] hover:border-[#38BDF8]/50',
     title: 'text-white',
-    sub: 'text-[#A3A3A3]',
-    muted: 'text-zinc-500',
-    accent: 'text-[#FFD700]',
-    accentBg: 'bg-[#FFD700]/10 border-[#FFD700]/30 text-[#FFD700]',
-    neutralBadge: 'border-[#2A2A2A] bg-[#2A2A2A] text-[#E5E5E5]',
-    iconTile: 'border-[#2A2A2A] bg-[#1E1E1E] text-[#FFD700]',
-    linkButton: 'border-[#2A2A2A] bg-[#1E1E1E] text-[#A3A3A3] hover:text-[#FFD700]',
-    avatarRing: 'ring-[#FFD700]/60',
-    dashed: 'border-[#2A2A2A] bg-[#1E1E1E] text-[#A3A3A3]',
-    divider: 'border-[#2A2A2A]',
+    sub: 'text-[#A5BDDF]',
+    muted: 'text-[var(--muted)]',
+    accent: 'text-[#38BDF8]',
+    accentBg: 'bg-[#38BDF8]/10 border-[#38BDF8]/30 text-[#38BDF8]',
+    neutralBadge: 'border-[#163A59] bg-[#163A59] text-[#E5E5E5]',
+    iconTile: 'border-[#163A59] bg-[#0B192B] text-[#38BDF8]',
+    linkButton: 'border-[#163A59] bg-[#0B192B] text-[#A5BDDF] hover:text-[#38BDF8]',
+    avatarRing: 'ring-[#38BDF8]/60',
+    dashed: 'border-[#163A59] bg-[#0B192B] text-[#A5BDDF]',
+    divider: 'border-[#163A59]',
   },
   light: {
     panel: 'border-[#E5E7EB] bg-[#F4F4F5] text-[#121212] shadow-md',
-    card: 'border-[#E5E7EB] bg-[#FFFFFF] hover:border-[#D4AF37]/60',
+    card: 'border-[#E5E7EB] bg-[#FFFFFF] hover:border-[#0D6EFD]/60',
     title: 'text-[#121212]',
     sub: 'text-gray-600',
     muted: 'text-gray-500',
-    accent: 'text-[#A16207]',
-    accentBg: 'bg-[#FFF8D6] border-[#D4AF37]/50 text-[#A16207]',
+    accent: 'text-[#0369A1]',
+    accentBg: 'bg-[#EFF6FF] border-[#0D6EFD]/50 text-[#0369A1]',
     neutralBadge: 'border-[#E5E7EB] bg-[#F4F4F5] text-[#121212]',
-    iconTile: 'border-[#E5E7EB] bg-[#FFFFFF] text-[#A16207]',
-    linkButton: 'border-[#E5E7EB] bg-[#FFFFFF] text-gray-600 hover:text-[#A16207]',
+    iconTile: 'border-[#E5E7EB] bg-[#FFFFFF] text-[#0369A1]',
+    linkButton: 'border-[#E5E7EB] bg-[#FFFFFF] text-gray-600 hover:text-[#0369A1]',
     avatarRing: 'ring-[#121212]/20',
     dashed: 'border-[#E5E7EB] bg-[#FFFFFF] text-gray-500',
     divider: 'border-[#E5E7EB]',
@@ -98,7 +99,7 @@ const RepoItem = memo(function RepoItem({ repo, ui, t, langColor }) {
         target="_blank"
         rel="noopener noreferrer"
         aria-label={t.openRepo(repo.name)}
-        className={`group block rounded-xl border p-3.5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFD700]/60 ${ui.card}`}
+        className={`group block rounded-xl border p-3.5 transition-all duration-200 hover:border-sky-500/60 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#38BDF8]/60 ${ui.card}`}
       >
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
@@ -137,11 +138,7 @@ const RepoItem = memo(function RepoItem({ repo, ui, t, langColor }) {
               className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-bold tracking-wide ${ui.neutralBadge}`}
               style={{ fontFamily: FONT_MONO }}
             >
-              <span
-                aria-hidden="true"
-                className="h-2 w-2 rounded-full"
-                style={{ backgroundColor: langColor }}
-              />
+              <LanguageIcon name={repo.language} size={14} color={langColor} />
               {repo.language}
             </span>
           </div>
@@ -168,7 +165,7 @@ export default function RepositoriesCard({ context, lang = 'pt' }) {
   );
 
   const headingId = 'repos-card-title';
-  const sectionClass = `my-2 w-full max-w-lg rounded-2xl border p-5 transition-colors duration-300 ${ui.panel}`;
+  const sectionClass = `portfolio-card my-2 w-full max-w-lg rounded-xl border p-5 transition-colors duration-300 ${ui.panel}`;
 
   const headerAvatar = (
     <ProfileAvatar src={avatarSrc} login={login} ui={ui} />
@@ -196,7 +193,7 @@ export default function RepositoriesCard({ context, lang = 'pt' }) {
           rel="noopener noreferrer"
           aria-label={t.openAll}
           title={t.openAll}
-          className={`hidden rounded-lg border p-2 transition-colors sm:flex focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFD700]/60 ${ui.linkButton}`}
+          className={`hidden rounded-lg border p-2 transition-colors sm:flex focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#38BDF8]/60 ${ui.linkButton}`}
         >
           <ExternalLink className="h-4 w-4" aria-hidden="true" />
         </a>
@@ -221,7 +218,7 @@ export default function RepositoriesCard({ context, lang = 'pt' }) {
             href={REPOS_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className={`font-bold underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFD700]/60 ${ui.accent}`}
+            className={`font-bold underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#38BDF8]/60 ${ui.accent}`}
           >
             {t.viewOnGithub}
           </a>

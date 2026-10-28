@@ -42,25 +42,25 @@ const translations = {
   },
 };
 
-// Tokens do design system Alvinegro + Gold (mesmos do GithubActivityCard)
+// Tokens do design system Alvinegro + Azul (mesmos do GithubActivityCard)
 const UI = {
   dark: {
-    panel: 'border-[#2a2a2a] bg-[#0f0f0f] text-white shadow-lg shadow-black/50',
-    surface: 'border-[#2a2a2a] bg-[#141414]',
-    divider: 'border-[#2a2a2a]',
+    panel: 'border-[#163A59] bg-[#050E17] text-white shadow-sm',
+    surface: 'border-[#163A59] bg-[#0B192B]',
+    divider: 'border-[#163A59]',
     text: 'text-white',
     sub: 'text-zinc-400',
-    muted: 'text-zinc-500',
-    accentText: 'text-[#FFD700]',
-    accentHover: 'hover:text-[#FFD700]',
-    accentBorderHover: 'hover:border-[#FFD700]/40',
-    iconTile: 'border-[#2a2a2a] bg-[#1e1e1e] text-[#FFD700]/80',
-    iconTileHover: 'group-hover:text-[#FFD700]',
-    linkButton: 'border-[#2a2a2a] bg-[#1a1a1a] text-zinc-400 hover:text-[#FFD700]',
-    badge: 'border-[#FFD700]/30 bg-[#FFD700]/10 text-[#FFD700]',
-    dot: 'bg-[#FFD700]',
-    dotPing: 'bg-[#FFD700]',
-    dashed: 'border-zinc-800 bg-[#141414] text-zinc-500',
+    muted: 'text-[var(--muted)]',
+    accentText: 'text-[#38BDF8]',
+    accentHover: 'hover:text-[#38BDF8]',
+    accentBorderHover: 'hover:border-[#38BDF8]/40',
+    iconTile: 'border-[#163A59] bg-[#0B192B] text-[#38BDF8]/80',
+    iconTileHover: 'group-hover:text-[#38BDF8]',
+    linkButton: 'border-[#163A59] bg-[#10243a] text-zinc-400 hover:text-[#38BDF8]',
+    badge: 'border-[#38BDF8]/30 bg-[#38BDF8]/10 text-[#38BDF8]',
+    dot: 'bg-[#38BDF8]',
+    dotPing: 'bg-[#38BDF8]',
+    dashed: 'border-[var(--line)] bg-[#0B192B] text-[var(--muted)]',
   },
   light: {
     panel: 'border-[#E5E7EB] bg-white text-[#121212] shadow-md',
@@ -69,15 +69,15 @@ const UI = {
     text: 'text-[#121212]',
     sub: 'text-gray-600',
     muted: 'text-gray-500',
-    accentText: 'text-[#A16207]',
-    accentHover: 'hover:text-[#A16207]',
-    accentBorderHover: 'hover:border-[#D4AF37]/60',
-    iconTile: 'border-[#E5E7EB] bg-white text-[#A16207]',
-    iconTileHover: 'group-hover:text-[#A16207]',
-    linkButton: 'border-[#E5E7EB] bg-white text-gray-500 hover:text-[#A16207]',
-    badge: 'border-[#D4AF37]/50 bg-[#FFF8D6] text-[#A16207]',
-    dot: 'bg-[#D4AF37]',
-    dotPing: 'bg-[#D4AF37]',
+    accentText: 'text-[#0369A1]',
+    accentHover: 'hover:text-[#0369A1]',
+    accentBorderHover: 'hover:border-[#0D6EFD]/60',
+    iconTile: 'border-[#E5E7EB] bg-white text-[#0369A1]',
+    iconTileHover: 'group-hover:text-[#0369A1]',
+    linkButton: 'border-[#E5E7EB] bg-white text-gray-500 hover:text-[#0369A1]',
+    badge: 'border-[#0D6EFD]/50 bg-[#EFF6FF] text-[#0369A1]',
+    dot: 'bg-[#0D6EFD]',
+    dotPing: 'bg-[#0D6EFD]',
     dashed: 'border-gray-300 bg-gray-50 text-gray-500',
   },
 };
@@ -134,7 +134,7 @@ export default function CanvasCard({ lang = 'pt', context }) {
   return (
     <article
       aria-labelledby={titleId}
-      className={`my-2 w-full max-w-2xl rounded-2xl border p-5 transition-colors duration-300 ${ui.panel}`}
+      className={`portfolio-card my-2 w-full max-w-2xl rounded-xl border p-5 transition-colors duration-300 ${ui.panel}`}
       style={{ fontFamily: FONT_SANS }}
     >
       {/* Cabeçalho */}
@@ -156,7 +156,7 @@ export default function CanvasCard({ lang = 'pt', context }) {
           rel="noopener noreferrer"
           aria-label={t.open}
           title={t.open}
-          className={`hidden rounded-lg border p-2 transition-colors sm:flex focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFD700]/60 ${ui.linkButton}`}
+          className={`hidden rounded-lg border p-2 transition-colors sm:flex focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#38BDF8]/60 ${ui.linkButton}`}
         >
           <LayoutDashboard className="h-4 w-4" aria-hidden="true" />
         </a>
@@ -169,11 +169,11 @@ export default function CanvasCard({ lang = 'pt', context }) {
       ) : (
         <>
           {/* Métricas rápidas */}
-          <div className="mb-5 grid grid-cols-2 gap-3">
+          <div className="mb-5 card-grid grid grid-cols-2 gap-3">
             <div className={`flex flex-col justify-center rounded-xl border p-3.5 ${ui.surface}`}>
               <span className={`text-[11px] font-bold uppercase tracking-wider ${ui.muted}`}>{t.overview}</span>
               <div className="mt-1 flex items-baseline gap-2">
-                <span className={`text-2xl font-black tabular-nums ${ui.text}`}>{courses.length}</span>
+                <span className={`text-xl font-semibold tabular-nums ${ui.text}`}>{courses.length}</span>
                 <span className={`text-[12px] font-medium ${ui.sub}`}>{t.active_courses}</span>
               </div>
             </div>
@@ -222,7 +222,7 @@ export default function CanvasCard({ lang = 'pt', context }) {
           href={CANVAS_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className={`flex items-center gap-1.5 text-[13px] font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFD700]/60 ${ui.accentText} ${ui.accentHover}`}
+          className={`flex items-center gap-1.5 text-[13px] font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#38BDF8]/60 ${ui.accentText} ${ui.accentHover}`}
         >
           {t.access} <ExternalLink size={14} aria-hidden="true" />
         </a>

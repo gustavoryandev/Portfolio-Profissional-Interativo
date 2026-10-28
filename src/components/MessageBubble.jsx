@@ -50,33 +50,33 @@ const FENCE = /```([\w+-]*)[ \t]*\n([\s\S]*?)```/g;
 const INLINE = /(`[^`\n]+`|\*\*[^\n]+?\*\*)/;
 const BULLET = /^\s*[-*•]\s+/;
 
-// Tokens do design system Alvinegro + Gold
+// Tokens do design system Alvinegro + Azul
 const UI = {
   dark: {
-    ai: 'border-transparent bg-[#1E1E1E] text-white shadow-lg shadow-black/40',
-    user: 'border-transparent bg-[#2A2A2A] text-white',
+    ai: 'border-[#153857] bg-[#0b1624] text-white shadow-lg shadow-black/40',
+    user: 'border-[#224566] bg-[#10243a] text-white',
     bold: 'font-bold text-white',
-    bullet: 'bg-[#FFD700]',
-    avatar: 'border-[#2A2A2A] bg-[#1E1E1E] text-[#FFD700]',
+    bullet: 'bg-[#38BDF8]',
+    avatar: 'border-[#2A2A2A] bg-[#1E1E1E] text-[#38BDF8]',
     userAvatar: 'border-[#2A2A2A] bg-[#2A2A2A] text-white',
     error: 'border-red-500/50 bg-[#1E1E1E] text-red-200',
     errorIcon: 'text-red-400',
-    copy: 'text-zinc-400 hover:text-[#FFD700] focus-visible:ring-[#FFD700]/60',
-    speak: 'border-white/10 text-zinc-300 hover:border-[#FFD700]/60 hover:text-[#FFD700]',
-    focusRing: 'focus-visible:ring-[#FFD700]/60',
+    copy: 'text-zinc-400 hover:text-[#38BDF8] focus-visible:ring-[#38BDF8]/60',
+    speak: 'border-white/10 text-zinc-300 hover:border-[#38BDF8]/60 hover:text-[#38BDF8]',
+    focusRing: 'focus-visible:ring-[#38BDF8]/60',
   },
   light: {
     ai: 'border-[#E5E7EB] bg-white text-[#121212] shadow-sm',
     user: 'border-transparent bg-[#0A0A0A] text-white',
     bold: 'font-bold text-[#121212]',
-    bullet: 'bg-[#D4AF37]',
-    avatar: 'border-[#E5E7EB] bg-white text-[#A16207]',
+    bullet: 'bg-[#0D6EFD]',
+    avatar: 'border-[#E5E7EB] bg-white text-[#0369a1]',
     userAvatar: 'border-transparent bg-[#0A0A0A] text-white',
     error: 'border-red-300 bg-red-50 text-red-900',
     errorIcon: 'text-red-600',
-    copy: 'text-gray-500 hover:text-[#A16207] focus-visible:ring-[#D4AF37]/60',
-    speak: 'border-[#E5E7EB] text-[#121212] hover:border-[#D4AF37] hover:text-[#A16207]',
-    focusRing: 'focus-visible:ring-[#D4AF37]/60',
+    copy: 'text-gray-500 hover:text-[#0369a1] focus-visible:ring-[#0D6EFD]/60',
+    speak: 'border-[#E5E7EB] text-[#121212] hover:border-[#0D6EFD] hover:text-[#0369a1]',
+    focusRing: 'focus-visible:ring-[#0D6EFD]/60',
   },
 };
 
@@ -186,7 +186,7 @@ function CodeBlock({ lang, code }) {
           type="button"
           onClick={copy}
           aria-label={copied ? 'Copiado' : 'Copiar código'}
-          className="flex items-center gap-1.5 rounded px-2 py-1 font-mono text-[11px] text-zinc-400 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFD700]/60"
+          className="flex items-center gap-1.5 rounded px-2 py-1 font-mono text-[11px] text-zinc-400 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#38BDF8]/60"
           style={{ fontFamily: FONT_MONO }}
         >
           {copied ? <Check size={12} aria-hidden="true" /> : <Copy size={12} aria-hidden="true" />}
@@ -256,8 +256,8 @@ function MessageBubble({ message }) {
   if (isUser) {
     return (
       <div className="my-2 flex w-full justify-end gap-3">
-        <div className="ml-auto max-w-[80%]">
-          <div className={`rounded-3xl rounded-tr-sm border px-6 py-4 text-[15px] font-medium leading-relaxed ${ui.user}`}>
+        <div className="ml-auto min-w-0 max-w-[calc(100%-3.25rem)]">
+          <div className={`rounded-xl rounded-tr-sm border px-6 py-4 text-[15px] font-medium leading-relaxed ${ui.user}`}>
             <p className="whitespace-pre-wrap break-words">{renderInline(text, 'font-bold')}</p>
           </div>
         </div>
@@ -279,10 +279,10 @@ function MessageBubble({ message }) {
           : <Sparkles className="h-[18px] w-[18px]" />}
       </Avatar>
 
-      <div className="max-w-[80%]">
+      <div className="min-w-0 max-w-[calc(100%-3.25rem)]">
         <div
           role={isError ? 'alert' : undefined}
-          className={`w-full rounded-[1.5rem] rounded-tl-sm border px-6 py-5 ${isError ? ui.error : ui.ai}`}
+          className={`w-full rounded-xl rounded-tl-sm border px-4 py-4 ${isError ? ui.error : ui.ai}`}
         >
           {segments.map((segment, index) => {
             if (segment.type === 'text') {
@@ -314,3 +314,4 @@ function MessageBubble({ message }) {
 }
 
 export default memo(MessageBubble);
+

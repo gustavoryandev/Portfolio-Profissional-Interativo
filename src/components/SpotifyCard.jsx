@@ -16,8 +16,8 @@ export default function SpotifyCard({ context }) {
 
   // Componente reutilizável para cada coluna (Faixas, Artistas, Recentes)
   const ListSection = ({ title, items, isArtist }) => (
-    <div className="flex-1 min-w-[200px]">
-      <h3 className={`text-center mb-6 font-bold text-[15px] ${darkMode ? 'text-white' : 'text-gray-900'}`}>{title}</h3>
+    <div className="min-w-0 flex-1">
+      <h3 className={`text-center mb-4 font-bold text-[15px] ${darkMode ? 'text-white' : 'text-gray-900'}`}>{title}</h3>
       <div className="flex flex-col gap-4">
         {items.length > 0 ? items.map((item, idx) => (
           <a key={idx} href={item.url} target="_blank" rel="noreferrer" className="flex items-center gap-3 group">
@@ -27,53 +27,53 @@ export default function SpotifyCard({ context }) {
               <span className={`truncate text-[13px] font-bold transition-colors ${darkMode ? 'text-white group-hover:text-[#1DB954]' : 'text-black group-hover:text-[#1DB954]'}`}>{item.name}</span>
               {!isArtist && (
                 <div className="flex items-center gap-1.5 mt-0.5">
-                  {item.explicit && <span className={`shrink-0 text-[8px] px-1 py-[1px] rounded-[3px] font-black flex items-center justify-center ${darkMode ? 'bg-zinc-300 text-zinc-900' : 'bg-zinc-600 text-white'}`}>E</span>}
+                  {item.explicit && <span className={`shrink-0 text-[8px] px-1 py-[1px] rounded-[3px] font-semibold flex items-center justify-center ${darkMode ? 'bg-zinc-300 text-zinc-900' : 'bg-zinc-600 text-white'}`}>E</span>}
                   <span className={`truncate text-[11px] font-medium ${darkMode ? 'text-zinc-400' : 'text-gray-500'}`}>{item.artists}</span>
                 </div>
               )}
             </div>
           </a>
         )) : (
-          <p className={`text-center text-[12px] italic mt-4 ${darkMode ? 'text-zinc-600' : 'text-gray-400'}`}>Ainda sem dados suficientes.</p>
+          <p className={`text-center text-[12px] italic mt-4 ${darkMode ? 'text-[var(--muted)]' : 'text-gray-400'}`}>Ainda sem dados suficientes.</p>
         )}
       </div>
     </div>
   );
 
   return (
-    <div className={`my-4 w-full max-w-4xl rounded-[32px] border p-6 md:p-8 transition-colors duration-300 relative ${darkMode ? 'bg-[#0f0f0f] border-zinc-800/80 shadow-xl' : 'bg-white border-gray-200 shadow-xl'}`}>
+    <div className={`portfolio-card my-4 w-full max-w-4xl rounded-xl border p-6 md:p-8 transition-colors duration-300 relative ${darkMode ? 'bg-[#050E17] border-[var(--line)]/80 shadow-sm' : 'bg-white border-gray-200 shadow-sm'}`}>
       
       {/* Cabeçalho */}
-      <h2 className={`text-center text-xl md:text-2xl font-black mb-8 ${darkMode ? 'text-white' : 'text-black'}`}>Gustavo's Spotify Data</h2>
+      <h2 className={`text-center text-xl md:text-xl font-semibold mb-5 ${darkMode ? 'text-white' : 'text-black'}`}>Gustavo's Spotify Data</h2>
       
       {/* Música Atual (Currently Listening To) */}
-      <div className="flex flex-col items-center mb-10">
+      <div className="flex flex-col items-center mb-5">
         <h3 className={`text-[14px] font-bold mb-4 ${darkMode ? 'text-white' : 'text-black'}`}>Currently Listening To</h3>
         {current ? (
            <a href={current.url} target="_blank" rel="noreferrer" className="flex flex-col items-center group">
                <img src={current.image} alt={current.name} className="w-16 h-16 rounded-md shadow-md mb-3 group-hover:scale-105 transition-transform" />
                <span className={`font-bold text-[15px] text-center ${darkMode ? 'text-white group-hover:text-[#1DB954]' : 'text-black group-hover:text-[#1DB954]'}`}>{current.name}</span>
                <div className="flex items-center gap-1.5 mt-0.5">
-                  {current.explicit && <span className={`shrink-0 text-[8px] px-1 py-[1px] rounded-[3px] font-black flex items-center justify-center ${darkMode ? 'bg-zinc-300 text-zinc-900' : 'bg-zinc-600 text-white'}`}>E</span>}
+                  {current.explicit && <span className={`shrink-0 text-[8px] px-1 py-[1px] rounded-[3px] font-semibold flex items-center justify-center ${darkMode ? 'bg-zinc-300 text-zinc-900' : 'bg-zinc-600 text-white'}`}>E</span>}
                   <span className={`text-[12px] font-medium text-center ${darkMode ? 'text-zinc-400' : 'text-gray-500'}`}>{current.artists}</span>
                </div>
            </a>
         ) : (
-           <span className={`text-[14px] font-medium ${darkMode ? 'text-zinc-500' : 'text-gray-400'}`}>Nothing</span>
+           <span className={`text-[14px] font-medium ${darkMode ? 'text-[var(--muted)]' : 'text-gray-400'}`}>Nothing</span>
         )}
       </div>
 
       {/* Grade de Listas em 3 Colunas */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-12">
+      <div className="card-grid card-grid-wide grid grid-cols-1 gap-5">
          <ListSection title="Recently Played Tracks" items={recent} />
          <ListSection title="Top Tracks" items={topTracks} />
          <ListSection title="Top Artists" items={topArtists} isArtist />
       </div>
 
       {/* Rodapé da Identidade Visual */}
-      <div className="mt-10 flex justify-between items-end border-t pt-5 border-zinc-800/50">
+      <div className="mt-5 flex justify-between items-end border-t pt-5 border-[var(--line)]/50">
          <SpotifyLogo className="w-7 h-7 text-[#1DB954]" />
-         <span className={`text-[10px] font-bold tracking-[0.2em] ${darkMode ? 'text-zinc-600' : 'text-gray-400'}`}>GUSTAVORYAN.AI</span>
+         <span className={`text-[10px] font-bold tracking-[0.2em] ${darkMode ? 'text-[var(--muted)]' : 'text-gray-400'}`}>GUSTAVORYAN.AI</span>
       </div>
     </div>
   );

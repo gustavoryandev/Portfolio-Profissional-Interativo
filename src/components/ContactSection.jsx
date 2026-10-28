@@ -34,8 +34,8 @@ const ContactSection = ({ lang = 'pt' }) => {
 
   if (submitted) {
     return (
-      <div className="card-surface mt-2 flex w-full max-w-md flex-col items-center p-6 text-center">
-        <CheckCircle size={48} className="mb-4 text-amber-400" />
+      <div className="portfolio-card contact-card card-surface mt-2 flex w-full max-w-md flex-col items-center p-6 text-center">
+        <CheckCircle size={48} className="mb-4 text-sky-400" />
         <h3 className="text-xl font-bold mb-2">Sucesso!</h3>
         <p>{t.contact_success}</p>
       </div>
@@ -43,7 +43,7 @@ const ContactSection = ({ lang = 'pt' }) => {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="card-surface mt-2 w-full max-w-md p-6">
+    <form onSubmit={handleSubmit} className="portfolio-card contact-card card-surface mt-2 w-full max-w-md p-6">
       <div className="flex items-center gap-3 mb-4 text-neutral-900 dark:text-white">
         <Mail size={24} className="text-blue-500" />
         <h3 className="card-heading">{t.contact_title}</h3>
@@ -52,24 +52,24 @@ const ContactSection = ({ lang = 'pt' }) => {
         <input
           required 
           type="text" 
-          placeholder={t.contact_name} 
-          className="w-full rounded-xl border border-zinc-800 bg-zinc-950 p-3 text-white outline-none transition-all focus:border-amber-500/60" 
+          placeholder={t.contact_name} aria-label={t.contact_name} 
+          className="w-full rounded-xl border border-[var(--line)] bg-[var(--panel-soft)] p-3 text-[var(--ink)] outline-none transition-all focus:border-sky-500/60" 
         />
         <input 
           required 
           type="email" 
-          placeholder={t.contact_email} 
-          className="w-full rounded-xl border border-zinc-800 bg-zinc-950 p-3 text-white outline-none transition-all focus:border-amber-500/60" 
+          placeholder={t.contact_email} aria-label={t.contact_email} 
+          className="w-full rounded-xl border border-[var(--line)] bg-[var(--panel-soft)] p-3 text-[var(--ink)] outline-none transition-all focus:border-sky-500/60" 
         />
         <textarea 
           required 
           rows="3" 
-          placeholder={t.contact_msg} 
-          className="w-full resize-none rounded-xl border border-zinc-800 bg-zinc-950 p-3 text-white outline-none transition-all focus:border-amber-500/60"
+          placeholder={t.contact_msg} aria-label={t.contact_msg} 
+          className="w-full resize-none rounded-xl border border-[var(--line)] bg-[var(--panel-soft)] p-3 text-[var(--ink)] outline-none transition-all focus:border-sky-500/60"
         ></textarea>
         <button 
           type="submit" 
-          className="flex w-full items-center justify-center gap-2 rounded-xl bg-amber-500 py-3 font-bold text-zinc-950 shadow-lg shadow-amber-500/20 transition-colors hover:bg-amber-400"
+          className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 font-semibold text-white shadow-lg shadow-sky-500/20 transition-colors hover:bg-blue-500"
         >
           <Send size={18} /> {t.contact_send}
         </button>

@@ -6,16 +6,16 @@ import { ThemeContext } from '../context/ThemeContext';
 const FONT_SANS = "Inter, 'Geist Sans', Roboto, system-ui, sans-serif";
 const DAILY_GOAL_SECONDS = 28800; // meta de 8h
 
-// Tokens do design system (Alvinegro + Gold)
+// Tokens do design system (Alvinegro + Azul)
 const THEME = {
   dark: {
-    card: '#1E1E1E',
-    border: '#2A2A2A',
+    card: '#0B192B',
+    border: '#163A59',
     text: '#FFFFFF',
-    muted: '#A1A1AA',
-    accent: '#FFD700',
-    track: '#2A2A2A',
-    accentSoft: 'rgba(255, 215, 0, 0.5)',
+    muted: '#A5BDDF',
+    accent: '#38BDF8',
+    track: '#163A59',
+    accentSoft: 'rgba(56, 189, 248, 0.5)',
     dashed: '#3F3F46',
     shadow: '0 20px 40px -12px rgba(0, 0, 0, 0.6)',
   },
@@ -24,9 +24,9 @@ const THEME = {
     border: '#E5E7EB',
     text: '#121212',
     muted: '#52525B',
-    accent: '#D4AF37',
+    accent: '#0D6EFD',
     track: '#E5E7EB',
-    accentSoft: 'rgba(212, 175, 55, 0.5)',
+    accentSoft: 'rgba(13, 110, 253, 0.5)',
     dashed: '#D4D4D8',
     shadow: '0 10px 25px -8px rgba(18, 18, 18, 0.15)',
   },
@@ -75,7 +75,7 @@ export default function StatsCard({ context }) {
 
   return (
     <article
-      className="card-surface w-full max-w-sm p-5 transition-colors duration-300"
+      className="portfolio-card card-surface w-full max-w-sm p-5 transition-colors duration-300"
       style={{
         background: ui.card,
         borderColor: ui.border,

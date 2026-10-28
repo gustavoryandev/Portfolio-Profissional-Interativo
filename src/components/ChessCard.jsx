@@ -39,17 +39,17 @@ function StatBox({ icon, label, value, sub, highlight = false }) {
   return (
     <div className={`flex flex-col rounded-xl p-3.5 transition-colors border ${
       darkMode
-        ? 'bg-[#141414] border-[#222222] hover:border-amber-500/40'
-        : 'bg-white border-gray-200 hover:border-amber-500/50 shadow-sm'
+        ? 'bg-[#0B192B] border-[#163A59] hover:border-sky-500/40'
+        : 'bg-white border-gray-200 hover:border-sky-500/50 shadow-sm'
     }`}>
       <div className={`flex items-center gap-1.5 text-[10px] font-bold tracking-widest uppercase mb-1.5 ${darkMode ? 'text-zinc-400' : 'text-gray-500'}`}>
-        {React.cloneElement(icon, { size: 14, className: 'text-amber-500' })}
+        {React.cloneElement(icon, { size: 14, className: 'text-sky-500' })}
         {label}
       </div>
-      <strong className={`text-xl font-bold ${highlight ? 'text-amber-500' : darkMode ? 'text-white' : 'text-gray-900'}`}>
+      <strong className={`text-xl font-bold ${highlight ? 'text-sky-500' : darkMode ? 'text-white' : 'text-gray-900'}`}>
         {value ?? '--'}
       </strong>
-      <p className={`mt-0.5 text-[11px] font-medium leading-tight ${darkMode ? 'text-zinc-500' : 'text-gray-400'}`}>
+      <p className={`mt-0.5 text-[11px] font-medium leading-tight ${darkMode ? 'text-[var(--muted)]' : 'text-gray-400'}`}>
         {sub}
       </p>
     </div>
@@ -86,25 +86,25 @@ function ModeCard({ data, t, fmt }) {
   return (
     <div className={`rounded-xl border p-4 transition-colors ${
       darkMode
-        ? 'bg-[#141414] border-[#222222] hover:border-amber-500/40'
-        : 'bg-white border-gray-200 hover:border-amber-500/50 shadow-sm'
+        ? 'bg-[#0B192B] border-[#163A59] hover:border-sky-500/40'
+        : 'bg-white border-gray-200 hover:border-sky-500/50 shadow-sm'
     }`}>
       <div className="flex items-center justify-between">
         <div className={`flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-widest ${darkMode ? 'text-zinc-400' : 'text-gray-500'}`}>
-          <Icon size={14} className="text-amber-500" />
+          <Icon size={14} className="text-sky-500" />
           {t(`cards.chess.modos.${data.mode}`, { defaultValue: data.mode })}
         </div>
         {data.winRate !== null && (
-          <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[10px] font-bold text-amber-500">
+          <span className="rounded-full border border-sky-500/30 bg-sky-500/10 px-2 py-0.5 text-[10px] font-bold text-sky-500">
             {data.winRate}%
           </span>
         )}
       </div>
 
       <div className="mt-2 flex items-baseline gap-2">
-        <strong className={`text-3xl font-black ${darkMode ? 'text-white' : 'text-gray-900'}`}>{fmt(data.rating)}</strong>
+        <strong className={`text-3xl font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>{fmt(data.rating)}</strong>
         {data.best !== null && (
-          <span className={`text-[11px] font-medium ${darkMode ? 'text-zinc-500' : 'text-gray-400'}`}>
+          <span className={`text-[11px] font-medium ${darkMode ? 'text-[var(--muted)]' : 'text-gray-400'}`}>
             {t('cards.chess.melhor')}: {fmt(data.best)}
           </span>
         )}
@@ -113,7 +113,7 @@ function ModeCard({ data, t, fmt }) {
       <div className="mt-3">
         <ResultBar wins={data.wins} draws={data.draws} losses={data.losses} height="h-1.5" />
       </div>
-      <p className={`mt-2 text-[11px] font-medium ${darkMode ? 'text-zinc-500' : 'text-gray-400'}`}>
+      <p className={`mt-2 text-[11px] font-medium ${darkMode ? 'text-[var(--muted)]' : 'text-gray-400'}`}>
         <span className="text-emerald-500">{fmt(data.wins)}</span>
         {' / '}
         <span className={darkMode ? 'text-zinc-400' : 'text-gray-500'}>{fmt(data.draws)}</span>
@@ -139,32 +139,32 @@ function GameRow({ game, t, locale }) {
       href={game.url}
       target="_blank"
       rel="noreferrer"
-      className={`group flex items-center gap-3 rounded-xl border p-3 transition-all hover:border-amber-500/30 ${
-        darkMode ? 'bg-[#141414] border-[#222222]' : 'bg-white border-gray-100 hover:shadow-md'
+      className={`group flex items-center gap-3 rounded-xl border p-3 transition-all hover:border-sky-500/30 ${
+        darkMode ? 'bg-[#0B192B] border-[#163A59]' : 'bg-white border-gray-100 hover:shadow-md'
       }`}
     >
-      <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border text-[13px] font-black ${darkMode ? style.dark : style.light}`}>
+      <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border text-[13px] font-semibold ${darkMode ? style.dark : style.light}`}>
         {t(`cards.chess.resultado.${game.result}`)}
       </span>
 
       <div className="min-w-0 flex-1">
         <p className={`truncate text-[14px] font-bold ${darkMode ? 'text-gray-200' : 'text-gray-800'}`}>
           {t('cards.chess.contra')} {game.opponent}
-          {game.opponentRating ? <span className={`ml-1.5 font-medium ${darkMode ? 'text-zinc-500' : 'text-gray-400'}`}>({game.opponentRating})</span> : null}
+          {game.opponentRating ? <span className={`ml-1.5 font-medium ${darkMode ? 'text-[var(--muted)]' : 'text-gray-400'}`}>({game.opponentRating})</span> : null}
         </p>
-        <p className={`flex items-center gap-1.5 truncate text-[12px] ${darkMode ? 'text-zinc-500' : 'text-gray-500'}`}>
-          <ModeIcon size={12} className="shrink-0 text-amber-500/80" />
+        <p className={`flex items-center gap-1.5 truncate text-[12px] ${darkMode ? 'text-[var(--muted)]' : 'text-gray-500'}`}>
+          <ModeIcon size={12} className="shrink-0 text-sky-500/80" />
           <span className="truncate">{subline}</span>
         </p>
       </div>
 
       <div className="shrink-0 text-right">
         {game.accuracy ? (
-          <p className="text-[12px] font-bold text-amber-500">
-            {game.accuracy}% <span className={`font-medium ${darkMode ? 'text-zinc-500' : 'text-gray-400'}`}>{t('cards.chess.precisao')}</span>
+          <p className="text-[12px] font-bold text-sky-500">
+            {game.accuracy}% <span className={`font-medium ${darkMode ? 'text-[var(--muted)]' : 'text-gray-400'}`}>{t('cards.chess.precisao')}</span>
           </p>
         ) : null}
-        <p className={`text-[11px] ${darkMode ? 'text-zinc-500' : 'text-gray-400'}`}>{timeAgo(game.date, locale)}</p>
+        <p className={`text-[11px] ${darkMode ? 'text-[var(--muted)]' : 'text-gray-400'}`}>{timeAgo(game.date, locale)}</p>
       </div>
     </a>
   );
@@ -205,25 +205,25 @@ export default function ChessCard({ context, lang = 'pt' }) {
   ].filter(Boolean);
 
   return (
-    <article className={`my-3 w-full max-w-[700px] rounded-2xl border p-6 transition-colors duration-300 ${
-      darkMode ? 'bg-[#0a0a0a] border-amber-500/20 shadow-lg shadow-black/50' : 'bg-gray-50 border-gray-200 shadow-md'
+    <article className={`portfolio-card my-3 w-full max-w-[700px] rounded-xl border p-6 transition-colors duration-300 ${
+      darkMode ? 'bg-[#050E17] border-sky-500/20 shadow-sm' : 'bg-gray-50 border-gray-200 shadow-md'
     }`}>
 
       {/* HEADER */}
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="rounded-lg p-2.5 bg-black text-amber-500 border border-zinc-800 shadow-md">
+          <div className="rounded-lg p-2.5 bg-black text-sky-500 border border-[var(--line)] shadow-md">
             <Crown className="h-7 w-7" />
           </div>
           <div>
-            <h3 className={`text-[19px] font-black tracking-tight ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+            <h3 className={`text-[19px] font-semibold tracking-tight ${darkMode ? 'text-white' : 'text-gray-900'}`}>
               {t('cards.chess.titulo')}
             </h3>
             <a
               href={profileUrl}
               target="_blank"
               rel="noreferrer"
-              className={`text-[12px] font-mono font-medium hover:text-amber-500 transition-colors ${muted}`}
+              className={`text-[12px] font-mono font-medium hover:text-sky-500 transition-colors ${muted}`}
             >
               chess.com/member/{username}
             </a>
@@ -231,8 +231,8 @@ export default function ChessCard({ context, lang = 'pt' }) {
         </div>
 
         {isConfigured && profile.avatar && (
-          <div className={`hidden sm:flex items-center gap-2.5 rounded-full border px-3 py-1.5 ${darkMode ? 'bg-[#141414] border-[#222]' : 'bg-white border-gray-300'}`}>
-            <img src={profile.avatar} alt="Avatar" className="w-6 h-6 rounded-full border border-amber-500/30" />
+          <div className={`hidden sm:flex items-center gap-2.5 rounded-full border px-3 py-1.5 ${darkMode ? 'bg-[#0B192B] border-[#222]' : 'bg-white border-gray-300'}`}>
+            <img src={profile.avatar} alt="Avatar" className="w-6 h-6 rounded-full border border-sky-500/30" />
             <span className={`text-[11px] font-bold tracking-wide uppercase ${darkMode ? 'text-zinc-400' : 'text-gray-600'}`}>
               {t('cards.chess.noChessDesde', { year: profile.joinedYear || '--' })}
             </span>
@@ -245,7 +245,7 @@ export default function ChessCard({ context, lang = 'pt' }) {
           {/* IDENTIDADE */}
           <div className="mb-5 flex flex-wrap items-center gap-2">
             {profile.title && (
-              <span className="rounded-md border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[11px] font-black text-amber-500">
+              <span className="rounded-md border border-sky-500/40 bg-sky-500/10 px-2 py-0.5 text-[11px] font-semibold text-sky-500">
                 {profile.title}
               </span>
             )}
@@ -254,18 +254,18 @@ export default function ChessCard({ context, lang = 'pt' }) {
             )}
             {countryName && (
               <span className={`flex items-center gap-1 text-[12px] font-medium ${muted}`}>
-                <MapPin size={12} className="text-amber-500" /> {countryName}
+                <MapPin size={12} className="text-sky-500" /> {countryName}
               </span>
             )}
             {lastSeen && (
-              <span className={`text-[12px] font-medium ${darkMode ? 'text-zinc-500' : 'text-gray-400'}`}>
+              <span className={`text-[12px] font-medium ${darkMode ? 'text-[var(--muted)]' : 'text-gray-400'}`}>
                 · {t('cards.chess.visto', { when: lastSeen })}
               </span>
             )}
           </div>
 
           {/* VISÃO GERAL */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="card-grid grid grid-cols-2 sm:grid-cols-4 gap-3">
             <StatBox icon={<Swords />} label={t('cards.chess.partidas')} value={fmt(totals.games)} sub={t('cards.chess.somandoModos')} />
             <StatBox icon={<Percent />} label={t('cards.chess.taxaVitoria')} value={totals.winRate != null ? `${totals.winRate}%` : null} sub={t('cards.chess.somandoModos')} highlight />
             <StatBox icon={<Trophy />} label={t('cards.chess.vitorias')} value={fmt(totals.wins)} sub={`${fmt(totals.draws)} ${t('cards.chess.empates').toLowerCase()}`} />
@@ -285,14 +285,14 @@ export default function ChessCard({ context, lang = 'pt' }) {
           {ratings.length > 0 && (
             <>
               <SectionTitle>{t('cards.chess.ratings')}</SectionTitle>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="card-grid grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {ratings.map((r) => <ModeCard key={r.mode} data={r} t={t} fmt={fmt} />)}
               </div>
             </>
           )}
 
           {/* EXTRAS */}
-          <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="mt-3 card-grid grid grid-cols-2 sm:grid-cols-4 gap-3">
             {extras.map(({ key, ...props }) => <StatBox key={key} {...props} />)}
           </div>
 
@@ -303,28 +303,28 @@ export default function ChessCard({ context, lang = 'pt' }) {
               {recent.map((game, i) => <GameRow key={game.url || i} game={game} t={t} locale={locale} />)}
             </div>
           ) : (
-            <div className={`py-6 text-center text-sm rounded-xl border border-dashed ${darkMode ? 'text-zinc-500 border-zinc-800 bg-[#141414]' : 'text-zinc-400 border-gray-200 bg-gray-50'}`}>
+            <div className={`py-6 text-center text-sm rounded-xl border border-dashed ${darkMode ? 'text-[var(--muted)] border-[var(--line)] bg-[#0B192B]' : 'text-zinc-400 border-gray-200 bg-gray-50'}`}>
               {t('cards.chess.semPartidas')}
             </div>
           )}
         </>
       ) : (
-        <div className={`py-12 text-center text-sm font-medium rounded-xl border border-dashed ${darkMode ? 'text-zinc-500 border-zinc-800' : 'text-zinc-400 border-gray-300'}`}>
+        <div className={`py-12 text-center text-sm font-medium rounded-xl border border-dashed ${darkMode ? 'text-[var(--muted)] border-[var(--line)]' : 'text-zinc-400 border-gray-300'}`}>
           {t('cards.chess.indisponivel')}
         </div>
       )}
 
       {/* FOOTER */}
       <div className={`mt-6 flex items-center justify-between border-t pt-4 ${darkMode ? 'border-[#222]' : 'border-gray-200'}`}>
-        <span className={`text-[11px] font-bold tracking-widest uppercase flex items-center gap-2 ${darkMode ? 'text-zinc-500' : 'text-gray-400'}`}>
-          <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></div>
+        <span className={`text-[11px] font-bold tracking-widest uppercase flex items-center gap-2 ${darkMode ? 'text-[var(--muted)]' : 'text-gray-400'}`}>
+          <div className="w-1.5 h-1.5 rounded-full bg-sky-500 animate-pulse"></div>
           {t('cards.chess.sincronizado')}
         </span>
         <a
           href={profileUrl}
           target="_blank"
           rel="noreferrer"
-          className="flex items-center gap-1.5 text-[12px] font-bold text-amber-500 transition-colors hover:text-amber-400"
+          className="flex items-center gap-1.5 text-[12px] font-bold text-sky-500 transition-colors hover:text-sky-400"
         >
           {t('cards.chess.verPerfil')} <ExternalLink size={14} />
         </a>

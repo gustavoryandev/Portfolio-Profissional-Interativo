@@ -9,33 +9,33 @@ import { ThemeContext } from '../context/ThemeContext';
 const FONT_SANS = "Inter, 'Geist Sans', Roboto, system-ui, sans-serif";
 const FONT_MONO = "'JetBrains Mono', 'Fira Code', ui-monospace, monospace";
 
-// Tokens do design system Alvinegro + Gold
+// Tokens do design system Alvinegro + Azul
 const THEME = {
   dark: {
-    page: '#0A0A0A',
-    card: '#1E1E1E',
-    border: '#2A2A2A',
-    hoverBorder: '#FFD700',
+    page: '#050E17',
+    card: '#0B192B',
+    border: '#163A59',
+    hoverBorder: '#38BDF8',
     text: '#FFFFFF',
-    muted: '#A3A3A3',
-    accent: '#FFD700',
-    iconBg: '#0A0A0A',
-    iconFg: '#FFD700',
-    ring: '#FFD700',
-    shadow: '0 20px 40px -12px rgba(0,0,0,0.6)',
+    muted: '#A5BDDF',
+    accent: '#38BDF8',
+    iconBg: '#050E17',
+    iconFg: '#38BDF8',
+    ring: '#38BDF8',
+    shadow: '0 4px 16px -8px rgba(0,0,0,0.3)',
   },
   light: {
     page: '#F4F4F5',
     card: '#FFFFFF',
     border: '#E5E7EB',
-    hoverBorder: '#D4AF37',
+    hoverBorder: '#0D6EFD',
     text: '#121212',
     muted: '#52525B',
-    accent: '#D4AF37',
-    iconBg: '#0A0A0A',
-    iconFg: '#D4AF37',
+    accent: '#0D6EFD',
+    iconBg: '#050E17',
+    iconFg: '#0D6EFD',
     ring: '#121212',
-    shadow: '0 10px 25px -8px rgba(18,18,18,0.15)',
+    shadow: '0 4px 16px -8px rgba(18,18,18,0.1)',
   },
 };
 
@@ -43,7 +43,7 @@ const THEME = {
 function StatBox({ icon, label, value, sub, t }) {
   return (
     <div
-      className="group flex flex-col rounded-xl p-4 border transition-all duration-300 hover:-translate-y-0.5"
+      className="group flex flex-col rounded-xl p-4 border transition-all duration-300 hover:border-sky-500/60"
       style={{
         background: t.card,
         borderColor: t.border,
@@ -68,7 +68,7 @@ function StatBox({ icon, label, value, sub, t }) {
       </div>
 
       <strong
-        className="text-2xl font-black tabular-nums leading-none"
+        className="text-xl font-semibold tabular-nums leading-none"
         style={{ color: t.text, fontFamily: FONT_SANS }}
       >
         {value ?? '--'}
@@ -98,7 +98,7 @@ export default function GithubCard({ context, lang = 'pt' }) {
 
   return (
     <article
-      className="relative my-3 w-full max-w-[700px] overflow-hidden rounded-2xl border p-6 transition-colors duration-300"
+      className="portfolio-card relative my-3 w-full max-w-[700px] overflow-hidden rounded-xl border p-6 transition-colors duration-300"
       style={{
         background: t.page,
         borderColor: t.border,
@@ -107,7 +107,7 @@ export default function GithubCard({ context, lang = 'pt' }) {
       }}
     >
       {/* Faixa de acento no topo */}
-      <div className="absolute inset-x-0 top-0 h-1.5" style={{ background: t.accent }} />
+      <div className="absolute inset-x-0 top-0 h-px" style={{ background: t.accent }} />
 
       {/* HEADER */}
       <div className="mb-6 mt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -119,7 +119,7 @@ export default function GithubCard({ context, lang = 'pt' }) {
             <Github className="h-6 w-6" />
           </div>
           <div>
-            <h3 className="text-lg font-black tracking-tight" style={{ color: t.text }}>
+            <h3 className="text-lg font-semibold tracking-tight" style={{ color: t.text }}>
               {tr('cards.github.titulo')}
             </h3>
             <a
@@ -157,7 +157,7 @@ export default function GithubCard({ context, lang = 'pt' }) {
 
       {/* MÉTRICAS */}
       {isConfigured ? (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="card-grid grid grid-cols-2 sm:grid-cols-4 gap-3">
           <StatBox t={t} icon={<Zap />} label={tr('cards.github.contribuicoes')} value={stats.contributions} sub={tr('cards.github.ultimos12Meses')} />
           <StatBox t={t} icon={<GitCommit />} label={tr('cards.github.commits')} value={stats.commits} sub={tr('cards.github.ultimos12Meses')} />
           <StatBox t={t} icon={<GitPullRequest />} label={tr('cards.github.pullRequests')} value={stats.prs} sub={tr('cards.github.noTotal')} />

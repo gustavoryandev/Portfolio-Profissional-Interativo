@@ -112,31 +112,31 @@ const LEVEL_KEYS = [0, 1, 2, 3, 4];
    ===================================================================== */
 const UI = {
   dark: {
-    panel: 'border-[#2a2a2a] bg-[#0f0f0f] text-gray-200',
-    surface: 'bg-[#141414] border-[#2a2a2a]',
-    divider: 'border-[#2a2a2a]',
-    muted: 'text-zinc-500',
-    sub: 'text-zinc-500',
+    panel: 'border-[#163A59] bg-[#050E17] text-gray-200',
+    surface: 'bg-[#0B192B] border-[#163A59]',
+    divider: 'border-[#163A59]',
+    muted: 'text-[var(--muted)]',
+    sub: 'text-[var(--muted)]',
     label: 'text-gray-400',
     caption: 'text-zinc-400',
     heading: 'text-gray-300',
     strong: 'text-gray-300',
     dayLabel: 'text-zinc-400',
     dayLabelActive: 'text-gray-200',
-    dot: 'text-zinc-600',
-    accentText: 'text-[#FFD700]',
-    badge: 'border-[#FFD700]/30 bg-[#FFD700]/10 text-[#FFD700]',
-    ringAccent: 'ring-[#FFD700]/50',
-    focus: 'focus-visible:ring-[#FFD700]/60',
+    dot: 'text-[var(--muted)]',
+    accentText: 'text-[#38BDF8]',
+    badge: 'border-[#38BDF8]/30 bg-[#38BDF8]/10 text-[#38BDF8]',
+    ringAccent: 'ring-[#38BDF8]/50',
+    focus: 'focus-visible:ring-[#38BDF8]/60',
     track: 'bg-[#161b22]',
     barTrack: 'bg-zinc-800',
-    bar: 'bg-[#B8960B]',
-    peak: 'bg-[#FFD700]',
-    levels: ['bg-[#161b22]', 'bg-[#4a3f00]', 'bg-[#7a6400]', 'bg-[#b8960b]', 'bg-[#ffd700]'],
-    emptyBox: 'border-zinc-800 text-zinc-500',
-    tooltip: 'border-[#2a2a2a] bg-[#0f0f0f] text-gray-200',
+    bar: 'bg-[#167AB6]',
+    peak: 'bg-[#38BDF8]',
+    levels: ['bg-[#161b22]', 'bg-[#103454]', 'bg-[#145c91]', 'bg-[#167AB6]', 'bg-[#38BDF8]'],
+    emptyBox: 'border-[var(--line)] text-[var(--muted)]',
+    tooltip: 'border-[#163A59] bg-[#050E17] text-gray-200',
     scrollbar: `.custom-scrollbar::-webkit-scrollbar { height: 6px; }
-      .custom-scrollbar::-webkit-scrollbar-track { background: #141414; border-radius: 4px; }
+      .custom-scrollbar::-webkit-scrollbar-track { background: #0B192B; border-radius: 4px; }
       .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(113, 113, 122, 0.4); border-radius: 4px; }
       .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #71717a; }`,
   },
@@ -153,15 +153,15 @@ const UI = {
     dayLabel: 'text-gray-500',
     dayLabelActive: 'text-gray-800',
     dot: 'text-gray-300',
-    accentText: 'text-[#A16207]',
-    badge: 'border-[#D4AF37]/50 bg-[#FFF8D6] text-[#A16207]',
-    ringAccent: 'ring-[#D4AF37]/60',
-    focus: 'focus-visible:ring-[#D4AF37]/60',
+    accentText: 'text-[#0369A1]',
+    badge: 'border-[#0D6EFD]/50 bg-[#EFF6FF] text-[#0369A1]',
+    ringAccent: 'ring-[#0D6EFD]/60',
+    focus: 'focus-visible:ring-[#0D6EFD]/60',
     track: 'bg-gray-200',
     barTrack: 'bg-gray-200',
-    bar: 'bg-[#E9C75A]',
-    peak: 'bg-[#D4AF37]',
-    levels: ['bg-gray-100', 'bg-[#FEF3C7]', 'bg-[#FDE68A]', 'bg-[#FACC15]', 'bg-[#D4AF37]'],
+    bar: 'bg-[#60A5FA]',
+    peak: 'bg-[#0D6EFD]',
+    levels: ['bg-gray-100', 'bg-[#DBEAFE]', 'bg-[#93C5FD]', 'bg-[#3B82F6]', 'bg-[#0D6EFD]'],
     emptyBox: 'border-gray-300 text-zinc-400',
     tooltip: 'border-gray-200 bg-white text-gray-800',
     scrollbar: `.custom-scrollbar::-webkit-scrollbar { height: 6px; }
@@ -540,7 +540,7 @@ const Calendar = memo(function Calendar({ summary, ui, t, f }) {
    ===================================================================== */
 function SummaryStat({ ui, icon, value, unit, label, note }) {
   return (
-    <div className={`flex flex-col items-center rounded-xl border px-4 py-5 text-center transition-all duration-200 hover:-translate-y-0.5 ${ui.surface}`}>
+    <div className={`flex flex-col items-center rounded-xl border px-4 py-5 text-center transition-all duration-200 hover:border-sky-500/60 ${ui.surface}`}>
       {icon}
       <span className="flex items-baseline gap-1 text-3xl font-bold leading-[1.1] md:text-[2rem]">
         {value}
@@ -626,7 +626,7 @@ export default function GithubActivityCard({ context, lang = 'pt' }) {
   /* ---------- Sem dados do GitHub ---------- */
   if (github?.status !== 'ok') {
     return (
-      <div className={`mx-auto my-6 w-full max-w-[850px] rounded-xl border p-6 shadow-lg transition-colors duration-300 ${ui.panel}`}>
+      <div className={`portfolio-card mx-auto my-6 w-full max-w-[850px] rounded-xl border p-6 shadow-lg transition-colors duration-300 ${ui.panel}`}>
         <div className={`rounded-xl border border-dashed py-12 text-center text-sm font-medium ${ui.emptyBox}`}>
           {t.unavailable}
         </div>
@@ -638,7 +638,7 @@ export default function GithubActivityCard({ context, lang = 'pt' }) {
   const blockTitle = `mb-4 block text-xs font-semibold uppercase tracking-wider ${ui.sub}`;
 
   return (
-    <div className={`mx-auto my-6 w-full max-w-[850px] rounded-xl border p-6 shadow-lg transition-colors duration-300 ${ui.panel}`}>
+    <div className={`portfolio-card mx-auto my-6 w-full max-w-[850px] rounded-xl border p-6 shadow-lg transition-colors duration-300 ${ui.panel}`}>
       <style>{ui.scrollbar}</style>
 
       {/* ===================== SEÇÃO 1: Atividade ===================== */}
@@ -647,7 +647,7 @@ export default function GithubActivityCard({ context, lang = 'pt' }) {
           <span className={`font-bold ${ui.accentText}`}>#</span> {t.activity}
         </h3>
 
-        <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-3">
+        <div className="mb-8 card-grid grid grid-cols-1 gap-4 md:grid-cols-3">
           <SummaryStat
             ui={ui}
             value={f.number(totalValue)}
@@ -674,7 +674,7 @@ export default function GithubActivityCard({ context, lang = 'pt' }) {
         {hasCalendar && <Calendar summary={summary} ui={ui} t={t} f={f} />}
 
         {/* Por ano + por dia da semana */}
-        <div className="grid grid-cols-1 gap-10 md:grid-cols-2 md:gap-8">
+        <div className="card-grid grid grid-cols-1 gap-10 md:grid-cols-2 md:gap-8">
           <div>
             <span className={blockTitle}>{t.contribByYear}</span>
             <Columns
@@ -761,14 +761,14 @@ export default function GithubActivityCard({ context, lang = 'pt' }) {
             </div>
 
             {/* Períodos do dia, com o mais ativo destacado */}
-            <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+            <div className="card-grid grid grid-cols-2 gap-4 md:grid-cols-4">
               {periods.map((period) => {
                 const Icon = period.icon;
                 const isTop = period.key === topPeriod.key;
                 return (
                   <div
                     key={period.key}
-                    className={`flex flex-col rounded-lg border p-4 transition-all duration-200 hover:-translate-y-0.5 ${ui.surface} ${isTop ? `ring-1 ${ui.ringAccent}` : ''}`}
+                    className={`flex flex-col rounded-lg border p-4 transition-all duration-200 hover:border-sky-500/60 ${ui.surface} ${isTop ? `ring-1 ${ui.ringAccent}` : ''}`}
                   >
                     <div className="mb-3 flex items-center gap-2">
                       <Icon size={21} className={ui.accentText} />

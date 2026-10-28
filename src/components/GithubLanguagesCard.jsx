@@ -1,3 +1,4 @@
+import LanguageIcon from './LanguageIcon';
 // src/components/GithubLanguages.jsx
 import { useContext, useMemo } from 'react';
 import { ThemeContext } from '../context/ThemeContext';
@@ -32,16 +33,16 @@ const copy = {
   },
 };
 
-// Tokens do design system Alvinegro + Gold
+// Tokens do design system Alvinegro + Azul
 const UI = {
   dark: {
-    panel: 'border-neutral-800 bg-[#0A0A0A] text-white shadow-lg shadow-black/50',
-    card: 'border-neutral-800 bg-[#1E1E1E]',
+    panel: 'border-[var(--line)] bg-[#050E17] text-white shadow-sm',
+    card: 'border-[var(--line)] bg-[#0B192B]',
     track: 'bg-neutral-800',
     text: 'text-white',
-    sub: 'text-[#A3A3A3]',
-    accentRule: 'bg-[#FFD700]',
-    dashed: 'border-neutral-800 text-[#A3A3A3]',
+    sub: 'text-[#A5BDDF]',
+    accentRule: 'bg-[#38BDF8]',
+    dashed: 'border-[var(--line)] text-[#A5BDDF]',
   },
   light: {
     panel: 'border-[#E5E7EB] bg-[#F4F4F5] text-[#121212] shadow-md',
@@ -49,7 +50,7 @@ const UI = {
     track: 'bg-[#E5E7EB]',
     text: 'text-[#121212]',
     sub: 'text-gray-600',
-    accentRule: 'bg-[#D4AF37]',
+    accentRule: 'bg-[#0D6EFD]',
     dashed: 'border-[#E5E7EB] text-gray-500',
   },
 };
@@ -116,7 +117,7 @@ export default function GithubLanguages({ context, lang = 'pt' }) {
   const items = useMemo(() => normalize(github?.languages?.items), [github?.languages?.items]);
   const groups = useMemo(() => groupRest(items, MAX_ITEMS, t.others), [items, t]);
 
-  const sectionClass = `mx-auto my-6 w-full max-w-[850px] rounded-xl border p-6 transition-colors duration-300 ${ui.panel}`;
+  const sectionClass = `portfolio-card mx-auto my-6 w-full max-w-[850px] rounded-xl border p-6 transition-colors duration-300 ${ui.panel}`;
   const headingId = 'gh-languages-title';
 
   if (github?.status !== 'ok') {
@@ -181,11 +182,7 @@ export default function GithubLanguages({ context, lang = 'pt' }) {
           >
             <div className="flex items-center justify-between gap-3">
               <div className="flex min-w-0 items-center gap-2.5">
-                <span
-                  aria-hidden="true"
-                  className="h-2.5 w-2.5 shrink-0 rounded-full"
-                  style={{ backgroundColor: g.color }}
-                />
+                <LanguageIcon name={g.name} size={18} color={g.color} />
                 <span className={`truncate text-[0.9rem] font-bold ${ui.text}`}>{g.name}</span>
               </div>
               <span

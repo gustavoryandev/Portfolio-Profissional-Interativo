@@ -72,26 +72,26 @@ const Countdown = ({ dateStr, t, darkMode }) => {
 
   const pad = (num) => num.toString().padStart(2, '0');
 
-  const boxClass = `flex flex-col items-center rounded-md px-3 py-1.5 min-w-[50px] border ${darkMode ? 'bg-black/60 border-amber-500/20' : 'bg-gray-100 border-amber-500/30 shadow-sm'}`;
-  const textClass = `text-lg font-black leading-none ${darkMode ? 'text-white' : 'text-gray-900'}`;
+  const boxClass = `flex flex-col items-center rounded-md px-3 py-1.5 min-w-0 flex-1 border ${darkMode ? 'bg-black/60 border-sky-500/20' : 'bg-gray-100 border-sky-500/30 shadow-sm'}`;
+  const textClass = `text-lg font-semibold leading-none ${darkMode ? 'text-white' : 'text-gray-900'}`;
 
   return (
-    <div className="flex gap-2 mt-3">
+    <div className="flex w-full max-w-xs gap-2 mt-3">
       <div className={boxClass}>
         <span className={textClass}>{pad(timeLeft.d)}</span>
-        <span className="text-[9px] text-amber-500 font-bold mt-1 tracking-wider">{t.boxDays}</span>
+        <span className="text-[9px] text-sky-500 font-bold mt-1 tracking-wider">{t.boxDays}</span>
       </div>
       <div className={boxClass}>
         <span className={textClass}>{pad(timeLeft.h)}</span>
-        <span className="text-[9px] text-amber-500 font-bold mt-1 tracking-wider">{t.boxHours}</span>
+        <span className="text-[9px] text-sky-500 font-bold mt-1 tracking-wider">{t.boxHours}</span>
       </div>
       <div className={boxClass}>
         <span className={textClass}>{pad(timeLeft.m)}</span>
-        <span className="text-[9px] text-amber-500 font-bold mt-1 tracking-wider">{t.boxMin}</span>
+        <span className="text-[9px] text-sky-500 font-bold mt-1 tracking-wider">{t.boxMin}</span>
       </div>
       <div className={boxClass}>
         <span className={textClass}>{pad(timeLeft.s)}</span>
-        <span className="text-[9px] text-amber-500 font-bold mt-1 tracking-wider">{t.boxSec}</span>
+        <span className="text-[9px] text-sky-500 font-bold mt-1 tracking-wider">{t.boxSec}</span>
       </div>
     </div>
   );
@@ -146,16 +146,16 @@ export default function GaloCard({ context, lang = 'pt', limit = 3 }) {
   };
 
   return (
-    <div className={`my-4 w-full max-w-2xl rounded-2xl border p-5 transition-colors duration-300 ${darkMode ? 'bg-[#0f0f0f] border-amber-500/20' : 'bg-white border-gray-200 shadow-sm'}`}>
+    <div className={`portfolio-card match-card my-4 w-full max-w-2xl rounded-xl border p-5 transition-colors duration-300 ${darkMode ? 'bg-[#050E17] border-sky-500/20' : 'bg-white border-gray-200 shadow-sm'}`}>
       
       {/* Cabeçalho */}
       <div className="flex items-center gap-4 mb-6">
-        <div className={`rounded-lg p-2 flex items-center justify-center border shadow-sm ${darkMode ? 'bg-zinc-950 border-zinc-800' : 'bg-gray-50 border-gray-200'}`}>
+        <div className={`rounded-lg p-2 flex items-center justify-center border shadow-sm ${darkMode ? 'bg-zinc-950 border-[var(--line)]' : 'bg-gray-50 border-gray-200'}`}>
           <img src="https://a.espncdn.com/i/teamlogos/soccer/500/7632.png" alt="Galo" className="w-7 h-7 object-contain drop-shadow-md" />
         </div>
         <div>
-          <h3 className={`text-[18px] font-black tracking-tight ${darkMode ? 'text-white' : 'text-gray-900'}`}>{t.title}</h3>
-          <p className={`text-[11px] font-medium ${darkMode ? 'text-zinc-500' : 'text-gray-500'}`}>{t.subtitle}</p>
+          <h3 className={`text-[18px] font-semibold tracking-tight ${darkMode ? 'text-white' : 'text-gray-900'}`}>{t.title}</h3>
+          <p className={`text-[11px] font-medium ${darkMode ? 'text-[var(--muted)]' : 'text-gray-500'}`}>{t.subtitle}</p>
         </div>
       </div>
 
@@ -165,18 +165,18 @@ export default function GaloCard({ context, lang = 'pt', limit = 3 }) {
           const isNextMatch = idx === 0 && game.state === 'pre';
           
           return (
-            <div key={game.id} className={`relative flex items-stretch rounded-xl border transition-colors ${darkMode ? 'bg-[#141414] border-[#2a2a2a]' : 'bg-gray-50 border-gray-100'}`}>
+            <div key={game.id} className={`match-row relative flex items-stretch rounded-xl border transition-colors ${darkMode ? 'bg-[#0B192B] border-[#163A59]' : 'bg-gray-50 border-gray-100'}`}>
               
               {/* Lado Esquerdo - Liga e Troféu */}
-              <div className={`flex flex-col items-center justify-center w-20 px-2 py-4 border-r border-dashed ${darkMode ? 'border-[#333]' : 'border-gray-200'}`}>
-                <p className={`text-[9px] font-bold text-center uppercase mb-3 leading-tight ${darkMode ? 'text-zinc-500' : 'text-gray-500'}`}>
+              <div className={`flex flex-col items-center justify-center match-league w-20 shrink-0 px-2 py-4 border-r border-dashed ${darkMode ? 'border-[#333]' : 'border-gray-200'}`}>
+                <p className={`text-[9px] font-bold text-center uppercase mb-3 leading-tight ${darkMode ? 'text-[var(--muted)]' : 'text-gray-500'}`}>
                   {translateLeague(game.league)}
                 </p>
-                <Trophy size={18} className="text-amber-500/60" />
+                <Trophy size={18} className="text-sky-500/60" />
               </div>
 
               {/* Lado Direito - Times e Infos */}
-              <div className="flex-1 flex flex-col p-4">
+              <div className="match-body min-w-0 flex-1 flex flex-col p-4">
                 
                 {/* Placar / Times */}
                 <div className="flex items-center justify-center gap-3 md:gap-5 mb-4">
@@ -185,7 +185,7 @@ export default function GaloCard({ context, lang = 'pt', limit = 3 }) {
                     <img src={game.home.logo} alt={game.home.name} className="w-8 h-8 object-contain drop-shadow-sm" />
                   </div>
                   
-                  <div className={`text-[11px] font-bold ${darkMode ? 'text-zinc-600' : 'text-gray-400'}`}>X</div>
+                  <div className={`text-[11px] font-bold ${darkMode ? 'text-[var(--muted)]' : 'text-gray-400'}`}>X</div>
                   
                   <div className="flex items-center gap-3 w-2/5 justify-start">
                     <img src={game.away.logo} alt={game.away.name} className="w-8 h-8 object-contain drop-shadow-sm" />
@@ -195,28 +195,28 @@ export default function GaloCard({ context, lang = 'pt', limit = 3 }) {
 
                 {/* Badges e Local */}
                 <div className="flex flex-wrap items-center justify-center gap-2.5 md:gap-4 text-[10px] font-bold uppercase tracking-wider">
-                  <span className={`px-2 py-0.5 rounded-sm ${game.isHome ? 'bg-amber-500 text-black' : (darkMode ? 'bg-zinc-800 text-zinc-300' : 'bg-gray-200 text-gray-600')}`}>
+                  <span className={`px-2 py-0.5 rounded-sm ${game.isHome ? 'bg-blue-600 text-white' : (darkMode ? 'bg-zinc-800 text-zinc-300' : 'bg-gray-200 text-gray-600')}`}>
                     {game.isHome ? t.home : t.away}
                   </span>
                   <span className={darkMode ? 'text-zinc-400' : 'text-gray-500'}>
                     {formatMatchDate(game.date)}
                   </span>
-                  <span className={`flex items-center gap-1 ${darkMode ? 'text-zinc-500' : 'text-gray-400'}`}>
+                  <span className={`flex items-center gap-1 ${darkMode ? 'text-[var(--muted)]' : 'text-gray-400'}`}>
                     <MapPin size={10} /> {game.venue === 'A definir' && lang === 'en' ? t.tbd : game.venue}
                   </span>
                 </div>
 
                 {/* Seção Condicional (Contagem Regressiva vs Texto Simples) */}
                 {isNextMatch ? (
-                  <div className={`mt-5 pt-5 border-t border-dashed flex flex-col items-center ${darkMode ? 'border-[#2a2a2a]' : 'border-gray-200'}`}>
-                    <span className="text-[12px] font-bold text-amber-500 flex items-center gap-1.5">
+                  <div className={`mt-5 pt-5 border-t border-dashed flex flex-col items-center ${darkMode ? 'border-[#163A59]' : 'border-gray-200'}`}>
+                    <span className="text-[12px] font-bold text-sky-500 flex items-center gap-1.5">
                       {t.nextMatchIn} {getRelativeTime(game.date)}
                     </span>
                     <Countdown dateStr={game.date} t={t} darkMode={darkMode} />
                   </div>
                 ) : (
                   <div className="mt-3 flex justify-center md:justify-start">
-                    <span className="text-[10px] font-bold text-amber-500/80 md:ml-2">
+                    <span className="text-[10px] font-bold text-sky-500/80 md:ml-2">
                       {t.in} {getRelativeTime(game.date)}
                     </span>
                   </div>
@@ -226,7 +226,7 @@ export default function GaloCard({ context, lang = 'pt', limit = 3 }) {
             </div>
           );
         }) : (
-          <div className={`py-6 text-center text-sm rounded-xl border border-dashed ${darkMode ? 'text-zinc-500 border-zinc-800 bg-[#141414]' : 'text-zinc-400 border-gray-200 bg-gray-50'}`}>
+          <div className={`py-6 text-center text-sm rounded-xl border border-dashed ${darkMode ? 'text-[var(--muted)] border-[var(--line)] bg-[#0B192B]' : 'text-zinc-400 border-gray-200 bg-gray-50'}`}>
             {t.empty}
           </div>
         )}
@@ -239,7 +239,7 @@ export default function GaloCard({ context, lang = 'pt', limit = 3 }) {
             href="https://www.espn.com.br/futebol/time/calendario/_/id/7632/atletico-mg" 
             target="_blank" 
             rel="noreferrer" 
-            className="flex items-center gap-1.5 text-[11px] font-bold text-amber-500 hover:text-amber-400 uppercase tracking-wider transition-colors"
+            className="flex items-center gap-1.5 text-[11px] font-bold text-sky-500 hover:text-sky-400 uppercase tracking-wider transition-colors"
           >
             {t.viewTable} <ExternalLink size={12} />
           </a>
