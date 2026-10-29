@@ -32,28 +32,6 @@
     ],
     "fallbackIdioma": "I can only communicate in Portuguese or English. Please choose one of these languages."
   },
-  "voz": {
-    "falar": "Talk to the assistant",
-    "pararGravacao": "Stop recording",
-    "ouvindo": "Listening... speak now",
-    "ouvir": "Listen",
-    "ouvirResposta": "Listen to reply",
-    "parar": "Stop",
-    "pararAudio": "Stop audio",
-    "respostasEmVoz": "Voice replies",
-    "erros": {
-      "naoSuportado": "Your browser doesn't support speech recognition. Use Chrome, Edge, or Safari, or type your question.",
-      "inseguro": "The microphone only works on a secure connection (HTTPS or localhost).",
-      "permissao": "The browser isn't allowing microphone access for this site. Click the lock or microphone icon in the address bar, allow access, and reload the page.",
-      "sistema": "The operating system is blocking the microphone for the browser. On Windows, check Settings > Privacy > Microphone (including the option for desktop apps). On macOS, check System Settings > Privacy & Security > Microphone.",
-      "servico": "The browser blocked the speech recognition service even though the microphone is available. Try Chrome or Edge, and turn off extensions or blockers that prevent audio from being sent.",
-      "semMicrofone": "No microphone was found. Check that it is connected and selected in your sound settings.",
-      "emUso": "The microphone is being used by another application. Close it and try again.",
-      "semFala": "I didn't hear anything. Tap the microphone and try again.",
-      "rede": "Network error during speech recognition. Check your connection.",
-      "generico": "Couldn't capture your voice. Please try again."
-    }
-  },
   "navbar": {
     "baixarCv": "Download Resume",
     "idioma": "Language",

@@ -1,9 +1,8 @@
 // src/components/MessageBubble.jsx
-import { lazy, memo, Suspense, useContext, useMemo, useState, useSyncExternalStore } from 'react';
-import { AlertTriangle, Check, Copy, Sparkles, User, Volume2, VolumeX } from 'lucide-react';
+import { lazy, memo, Suspense, useContext, useMemo, useState } from 'react';
+import { AlertTriangle, Check, Copy, Sparkles, User } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { ThemeContext } from '../context/ThemeContext';
-import { getSpeechState, subscribeSpeech, isSynthesisSupported, speak, stopSpeaking, toSpeechText } from '../services/speech';
 import SpotifyCard from './SpotifyCard';
 import GithubCard from './GithubCard';
 import StatsCard from './StatsCard';
@@ -67,7 +66,6 @@ const UI = {
     error: 'border-red-500/50 bg-[#1E1E1E] text-red-200',
     errorIcon: 'text-red-400',
     copy: 'text-zinc-400 hover:text-[#38BDF8] focus-visible:ring-[#38BDF8]/60',
-    speak: 'border-white/10 text-zinc-300 hover:border-[#38BDF8]/60 hover:text-[#38BDF8]',
     focusRing: 'focus-visible:ring-[#38BDF8]/60',
   },
   light: {
@@ -80,7 +78,6 @@ const UI = {
     error: 'border-red-300 bg-red-50 text-red-900',
     errorIcon: 'text-red-600',
     copy: 'text-gray-500 hover:text-[#0369a1] focus-visible:ring-[#0D6EFD]/60',
-    speak: 'border-[#E5E7EB] text-[#121212] hover:border-[#0D6EFD] hover:text-[#0369a1]',
     focusRing: 'focus-visible:ring-[#0D6EFD]/60',
   },
 };
@@ -216,44 +213,6 @@ function Avatar({ ui, isUser, children }) {
   );
 }
 
-// Animação de "ondas" enquanto a mensagem é lida
-function VoiceBars() {
-  return (
-    <span aria-hidden="true" className="voice-bars">
-      <span />
-      <span />
-      <span />
-    </span>
-  );
-}
-
-// Botão ouvir/parar de uma resposta da IA
-function SpeakButton({ id, text, lang, ui }) {
-  const { t } = useTranslation();
-  const state = useSyncExternalStore(subscribeSpeech, getSpeechState, getSpeechState);
-  const speaking = state.id === id && ['loading', 'playing'].includes(state.status);
-  const loading = speaking && state.status === 'loading';
-  const failed = state.id === id && state.status === 'error';
-  const en = lang.startsWith('en');
-
-  return (
-    <div className="mt-4 flex flex-wrap items-center gap-2">
-      <button
-        type="button"
-        onClick={() => (speaking ? stopSpeaking() : speak(id, text, lang))}
-        aria-label={speaking ? t('voz.pararAudio') : t('voz.ouvirResposta')}
-        aria-pressed={speaking}
-        className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 ${ui.speak} ${ui.focusRing}`}
-      >
-        {speaking ? <VolumeX size={14} aria-hidden="true" /> : <Volume2 size={14} aria-hidden="true" />}
-        <span>{loading ? (en ? 'Generating audio…' : 'Gerando áudio…') : speaking ? t('voz.parar') : t('voz.ouvir')}</span>
-        {speaking && !loading && <VoiceBars />}
-      </button>
-      {failed && <span role="alert" className="text-xs text-red-500">{en ? 'Audio unavailable. Try listening again.' : 'Áudio indisponível. Tente ouvir novamente.'}</span>}
-    </div>
-  );
-}
-
 function MessageBubble({ message, liveContext = {}, refreshing = [], onRefresh }) {
   const { i18n } = useTranslation();
   const uiLanguage = i18n.language.startsWith('en') ? 'en' : 'pt';
@@ -282,8 +241,6 @@ function MessageBubble({ message, liveContext = {}, refreshing = [], onRefresh }
     );
   }
 
-  // Só respostas válidas, com texto falável, ganham o botão de áudio
-  const canSpeak = isSynthesisSupported && !isError && Boolean(message?.id) && toSpeechText(text).length > 0;
 
   return (
     <div className={`my-2 flex w-full justify-start gap-3 ${hasCards ? 'message-row-with-cards' : ''}`}>
@@ -324,9 +281,6 @@ function MessageBubble({ message, liveContext = {}, refreshing = [], onRefresh }
             );
           })}
 
-          {canSpeak && (
-            <SpeakButton id={message.id} text={text} lang={uiLanguage} ui={ui} />
-          )}
         </div>
       </div>
     </div>
