@@ -138,8 +138,11 @@ scrollbar-color: rgba(245, 158, 11, 0.4) transparent;
 .chat-composer input { font-size: 13px; }
 .profile-panel { display: flex; flex-direction: column; gap: 12px; min-width: 0; overflow-y: auto; }
 .profile-card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px; }
-.profile-heading { display: flex; align-items: center; gap: 12px; }
-.profile-avatar { width: 52px; height: 60px; border: 1px solid var(--accent); border-radius: 50%; flex-shrink: 0; display: grid; place-items: center; color: #38bdf8; background: #071524 url('/hero-blue.png') center / cover; font-weight: 800; font-size: 18px; }
+.profile-heading { display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; }
+.profile-heading > div { min-width: 0; max-width: 100%; overflow-wrap: anywhere; }
+.profile-avatar { --avatar-size: 80px; display: block; width: var(--avatar-size); height: var(--avatar-size); aspect-ratio: 1; flex: none; border: 1px solid var(--accent); border-radius: 50%; background: var(--panel-soft); }
+.about-profile-portrait img { width: 150%; height: 150%; left: -1%; top: -8%; object-position: 50% 15%; }
+.detail-card .about-profile-heading h3 { margin: 0; max-width: 100%; overflow-wrap: anywhere; }
 .profile-heading h2 { font-size: 13px; line-height: 1.5; font-weight: 700; }
 .profile-heading p { font-size: 10px; color: var(--muted); margin-top: 5px; }
 .profile-intro { font-size: 11px; line-height: 1.7; color: var(--muted); margin: 14px 0; }
@@ -333,4 +336,7 @@ scrollbar-color: rgba(245, 158, 11, 0.4) transparent;
 }
 
 /* Enquadramento da foto nos cartões de perfil. */
-.profile-photo { object-fit: cover; object-position: center 20%; }
+.profile-photo { object-fit: cover; object-position: 35% 15%; }
+@media (max-width: 639px) {
+  .profile-avatar { --avatar-size: 72px; }
+}
