@@ -1,4 +1,6 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useId, useRef, useState } from 'react';
+import { Chess } from 'chess.js';
+import { Chessboard } from 'react-chessboard';
 import {
   Crown, ExternalLink, Trophy, Zap, Timer, Flame, Calendar, Users,
   Puzzle, Target, MapPin, Swords, Percent
@@ -7,6 +9,73 @@ import { useTranslation } from 'react-i18next';
 import { ThemeContext } from '../context/ThemeContext';
 
 const MODE_ICONS = { rapid: Timer, blitz: Zap, bullet: Flame, daily: Calendar };
+
+function ChessGame() {
+  const [game] = useState(() => new Chess());
+  const [fen, setFen] = useState(() => game.fen());
+  const timer = useRef(null);
+  const id = useId();
+
+  useEffect(() => {
+    if (game.turn() !== 'b' || game.isGameOver()) return;
+    timer.current = setTimeout(() => {
+      const moves = game.moves();
+      if (game.turn() === 'b' && !game.isGameOver() && moves.length) {
+        game.move(moves[Math.floor(Math.random() * moves.length)]);
+        setFen(game.fen());
+      }
+      timer.current = null;
+    }, 450);
+    return () => clearTimeout(timer.current);
+  }, [game, fen]);
+
+  function onPieceDrop({ sourceSquare, targetSquare }) {
+    if (!targetSquare || game.turn() !== 'w' || game.isGameOver()) return false;
+    try {
+      game.move({ from: sourceSquare, to: targetSquare, promotion: 'q' });
+      setFen(game.fen());
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  function reset() {
+    clearTimeout(timer.current);
+    timer.current = null;
+    game.reset();
+    setFen(game.fen());
+  }
+
+  const status = game.isCheckmate()
+    ? `Xeque-Mate — ${game.turn() === 'w' ? 'o bot venceu' : 'você venceu'}!`
+    : game.isDraw()
+      ? 'Empate'
+      : `${game.isCheck() ? 'Xeque! ' : ''}${game.turn() === 'w' ? 'Sua vez' : 'Bot pensando…'}`;
+
+  return (
+    <section className="mb-6 rounded-xl border border-[#f59e0b]/50 bg-zinc-900 p-3 text-[#f59e0b] sm:p-4" aria-label="Partida de xadrez contra o bot">
+      <h3 className="mb-2 text-lg font-semibold">Vamos jogar xadrez?</h3>
+      <p className="mb-3 text-sm text-zinc-300">Você joga com as brancas. Arraste uma peça para jogar. Promoção automática para dama.</p>
+      <p role="status" aria-live="polite" className="mb-3 inline-block rounded-full border border-[#f59e0b]/50 px-3 py-1 text-sm">{status}</p>
+      <div className="mx-auto w-full max-w-[480px]">
+        <Chessboard options={{
+          id,
+          position: fen,
+          boardOrientation: 'white',
+          allowDragging: game.turn() === 'w' && !game.isGameOver(),
+          canDragPiece: ({ square }) => game.get(square)?.color === 'w',
+          onPieceDrop,
+          darkSquareStyle: { backgroundColor: '#92400e' },
+          lightSquareStyle: { backgroundColor: '#fef3c7' },
+        }} />
+      </div>
+      <button type="button" onClick={reset} className="mt-4 rounded-lg border border-[#f59e0b] px-4 py-2 text-sm font-semibold hover:bg-amber-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500">
+        Reiniciar Partida
+      </button>
+    </section>
+  );
+}
 
 const RESULT_STYLES = {
   win: {
@@ -208,6 +277,8 @@ export default function ChessCard({ context, lang = 'pt' }) {
     <article className={`portfolio-card my-3 w-full max-w-[700px] rounded-xl border p-6 transition-colors duration-300 ${
       darkMode ? 'bg-[#050E17] border-sky-500/20 shadow-sm' : 'bg-gray-50 border-gray-200 shadow-md'
     }`}>
+
+      <ChessGame />
 
       {/* HEADER */}
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">

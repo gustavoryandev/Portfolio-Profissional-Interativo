@@ -172,7 +172,7 @@
     "erro": "❌ Falha ao enviar mensagem. Tente novamente."
   },
   "projetos": {
-    "portfolio_proj_title": "Portfólio Interativo IA",
+    "portfolio_proj_title": "Portfólio Interativo IA Generativa",
     "portfolio_proj_desc": "Portfólio em React, Tailwind CSS e Vercel Serverless Functions que simula um chat de IA (Gemini API) com renderização dinâmica de cards visuais.",
     "geosolar_proj_title": "GEOSOLAR - Sistema de Autenticação",
     "geosolar_proj_desc": "Módulo de segurança em Java (Spring Boot) e Thymeleaf para mapeamento de potencial solar, aplicando arquitetura MVC.",
