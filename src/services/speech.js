@@ -1,7 +1,7 @@
 // src/services/speech.js
-// Voz do chat com a Web Speech API nativa (sem chaves e sem serviços extras).
+// Reconhecimento nativo e reprodução neural via /api/tts.
 // - Reconhecimento: SpeechRecognition / webkitSpeechRecognition (hook em hooks/useVoice.js)
-// - Síntese: speechSynthesis, com um único "player" compartilhado por todas as mensagens
+// - Síntese: Edge TTS no servidor; um player compartilhado por todas as mensagens
 
 export const SpeechRecognitionCtor =
   typeof window !== 'undefined'
@@ -12,8 +12,7 @@ export const isRecognitionSupported = Boolean(SpeechRecognitionCtor);
 
 export const isSynthesisSupported =
   typeof window !== 'undefined' &&
-  'speechSynthesis' in window &&
-  typeof window.SpeechSynthesisUtterance === 'function';
+  typeof window.Audio === 'function' && typeof window.fetch === 'function';
 
 // Idioma do app ('pt' | 'en') -> locale BCP-47 usado pelos motores de voz
 export function toSpeechLocale(lang = 'pt') {
@@ -34,118 +33,82 @@ export function toSpeechText(markdown = '') {
     .trim();
 }
 
-// Chrome interrompe falas longas (~15s); quebramos em trechos curtos, por frase
-const MAX_CHUNK = 220;
-
-function wrapWords(text) {
-  const out = [];
-  let line = '';
-  for (const word of text.split(/\s+/)) {
-    if (line && (`${line} ${word}`).length > MAX_CHUNK) {
-      out.push(`${line} `);
-      line = word;
-    } else {
-      line = line ? `${line} ${word}` : word;
-    }
-  }
-  if (line) out.push(line);
-  return out;
-}
-
-function chunkText(text) {
-  const sentences = text.match(/[^.!?…]+[.!?…]*\s*/g) ?? [text];
-  const chunks = [];
-  let current = '';
-  for (const sentence of sentences) {
-    const pieces = sentence.length > MAX_CHUNK ? wrapWords(sentence) : [sentence];
-    for (const piece of pieces) {
-      if (current && (current + piece).length > MAX_CHUNK) {
-        chunks.push(current.trim());
-        current = '';
-      }
-      current += piece;
-    }
-  }
-  if (current.trim()) chunks.push(current.trim());
-  return chunks;
-}
-
-function pickVoice(locale) {
-  const voices = window.speechSynthesis.getVoices?.() ?? [];
-  const prefix = locale.slice(0, 2).toLowerCase();
-  return (
-    voices.find((voice) => voice.lang === locale) ||
-    voices.find((voice) => voice.lang?.toLowerCase().startsWith(prefix)) ||
-    null
-  );
-}
-
-// Estado compartilhado: qual mensagem está tocando agora (null se nenhuma)
+// Shared player: cancellation also invalidates pending requests and playback callbacks.
 let activeId = null;
-let sessionId = 0; // invalida callbacks de falas antigas
+let sessionId = 0;
+let controller = null;
+let player = null;
+let audioUrl = null;
+let state = { id: null, status: 'idle' };
 const listeners = new Set();
-
-function setActive(id) {
-  if (activeId === id) return;
-  activeId = id;
-  listeners.forEach((listener) => listener());
+function notify(id, status) {
+  activeId = status === 'loading' || status === 'playing' ? id : null;
+  state = { id, status };
+  listeners.forEach(listener => listener());
 }
-
-export function getActiveSpeechId() {
-  return activeId;
-}
-
+export function getActiveSpeechId() { return activeId; }
+export function getSpeechState() { return state; }
 export function subscribeSpeech(listener) {
   listeners.add(listener);
-  return () => {
-    listeners.delete(listener);
-  };
+  return () => listeners.delete(listener);
 }
-
 export function stopSpeaking() {
   sessionId += 1;
-  if (isSynthesisSupported) window.speechSynthesis.cancel();
-  setActive(null);
+  controller?.abort();
+  controller = null;
+  if (player) {
+    player.onended = null;
+    player.onerror = null;
+    player.pause();
+    player.removeAttribute('src');
+    player.load();
+    player = null;
+  }
+  if (audioUrl) URL.revokeObjectURL(audioUrl);
+  audioUrl = null;
+  notify(null, 'idle');
 }
 
-// Lê a resposta de uma mensagem. Retorna false se não for possível falar.
-export function speak(id, markdown, lang) {
+export async function speak(id, markdown, lang) {
   if (!isSynthesisSupported) return false;
   const text = toSpeechText(markdown);
   if (!text) return false;
-
   stopSpeaking();
-  const session = ++sessionId;
-
-  const synth = window.speechSynthesis;
-  if (synth.paused) synth.resume();
-
-  const locale = toSpeechLocale(lang);
-  const voice = pickVoice(locale);
-  const chunks = chunkText(text);
-
-  const finish = () => {
-    sessionId += 1;
-    synth.cancel();
-    setActive(null);
-  };
-
-  setActive(id);
-
-  chunks.forEach((chunk, index) => {
-    const utterance = new window.SpeechSynthesisUtterance(chunk);
-    utterance.lang = locale;
-    if (voice) utterance.voice = voice;
-    utterance.onend = () => {
+  const session = sessionId;
+  const abort = new AbortController();
+  controller = abort;
+  notify(id, 'loading');
+  const timeout = setTimeout(() => abort.abort(), 25000);
+  try {
+    const response = await fetch('/api/tts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, lang: String(lang).startsWith('en') ? 'en' : 'pt' }),
+      signal: abort.signal,
+    });
+    if (!response.ok || !response.headers.get('content-type')?.includes('audio/mpeg')) throw new Error('TTS unavailable');
+    const blob = await response.blob();
+    if (session !== sessionId) return false;
+    if (!blob.size) throw new Error('Empty audio');
+    audioUrl = URL.createObjectURL(blob);
+    player = new Audio(audioUrl);
+    player.onended = () => { if (session === sessionId) stopSpeaking(); };
+    player.onerror = () => {
       if (session !== sessionId) return;
-      if (index === chunks.length - 1) finish();
+      stopSpeaking();
+      notify(id, 'error');
     };
-    utterance.onerror = () => {
-      if (session !== sessionId) return;
-      finish();
-    };
-    synth.speak(utterance);
-  });
-
-  return true;
+    await player.play();
+    if (session !== sessionId) return false;
+    notify(id, 'playing');
+    return true;
+  } catch {
+    if (session === sessionId) {
+      stopSpeaking();
+      notify(id, 'error');
+    }
+    return false;
+  } finally {
+    clearTimeout(timeout);
+  }
 }

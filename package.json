@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@andresaya/edge-tts": "^1.9.1",
     "@emailjs/browser": "^4.4.1",
     "@google/generative-ai": "^0.24.1",
     "axios": "^1.8.4",

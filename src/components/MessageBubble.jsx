@@ -1,10 +1,9 @@
 // src/components/MessageBubble.jsx
-import { lazy, memo, Suspense, useContext, useMemo, useState } from 'react';
+import { lazy, memo, Suspense, useContext, useMemo, useState, useSyncExternalStore } from 'react';
 import { AlertTriangle, Check, Copy, Sparkles, User, Volume2, VolumeX } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { ThemeContext } from '../context/ThemeContext';
-import { isSynthesisSupported, speak, stopSpeaking, toSpeechText } from '../services/speech';
-import { useActiveSpeechId } from '../hooks/useVoice';
+import { getSpeechState, subscribeSpeech, isSynthesisSupported, speak, stopSpeaking, toSpeechText } from '../services/speech';
 import SpotifyCard from './SpotifyCard';
 import GithubCard from './GithubCard';
 import StatsCard from './StatsCard';
@@ -231,21 +230,26 @@ function VoiceBars() {
 // Botão ouvir/parar de uma resposta da IA
 function SpeakButton({ id, text, lang, ui }) {
   const { t } = useTranslation();
-  const activeId = useActiveSpeechId();
-  const speaking = activeId === id;
+  const state = useSyncExternalStore(subscribeSpeech, getSpeechState, getSpeechState);
+  const speaking = state.id === id && ['loading', 'playing'].includes(state.status);
+  const loading = speaking && state.status === 'loading';
+  const failed = state.id === id && state.status === 'error';
+  const en = lang.startsWith('en');
 
   return (
-    <div className="mt-4 flex items-center">
+    <div className="mt-4 flex flex-wrap items-center gap-2">
       <button
         type="button"
         onClick={() => (speaking ? stopSpeaking() : speak(id, text, lang))}
         aria-label={speaking ? t('voz.pararAudio') : t('voz.ouvirResposta')}
+        aria-pressed={speaking}
         className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 ${ui.speak} ${ui.focusRing}`}
       >
         {speaking ? <VolumeX size={14} aria-hidden="true" /> : <Volume2 size={14} aria-hidden="true" />}
-        <span>{speaking ? t('voz.parar') : t('voz.ouvir')}</span>
-        {speaking && <VoiceBars />}
+        <span>{loading ? (en ? 'Generating audio…' : 'Gerando áudio…') : speaking ? t('voz.parar') : t('voz.ouvir')}</span>
+        {speaking && !loading && <VoiceBars />}
       </button>
+      {failed && <span role="alert" className="text-xs text-red-500">{en ? 'Audio unavailable. Try listening again.' : 'Áudio indisponível. Tente ouvir novamente.'}</span>}
     </div>
   );
 }
@@ -321,7 +325,7 @@ function MessageBubble({ message, liveContext = {}, refreshing = [], onRefresh }
           })}
 
           {canSpeak && (
-            <SpeakButton id={message.id} text={text} lang={message.lang || 'pt'} ui={ui} />
+            <SpeakButton id={message.id} text={text} lang={uiLanguage} ui={ui} />
           )}
         </div>
       </div>
