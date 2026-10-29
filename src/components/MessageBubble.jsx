@@ -1,5 +1,5 @@
 // src/components/MessageBubble.jsx
-import { memo, useContext, useMemo, useState } from 'react';
+import { lazy, memo, Suspense, useContext, useMemo, useState } from 'react';
 import { AlertTriangle, Check, Copy, Sparkles, User, Volume2, VolumeX } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { ThemeContext } from '../context/ThemeContext';
@@ -16,12 +16,15 @@ import ExperienceCard from './ExperienceCard';
 import RepositoriesCard from './RepositoriesCards';
 import GithubActivityCard from './GithubActivityCard';
 import GithubLanguagesCard from './GithubLanguagesCard';
-import ChessCard from './ChessCard';
+import ChessCard, { ChessGame } from './ChessCard';
 import LiveDataNotice from './LiveDataNotice';
 import { CARD_SOURCES, mergeLiveContext } from '../services/liveContext';
 
+const ResumeCard = lazy(() => import('./ResumeCard'));
+
 // Tags fixas que viram cards. Esta é a única lista: a regex abaixo é derivada dela.
 const cards = {
+  '[RESUME_CARD]': ResumeCard,
   '[SPOTIFY_CARD]': SpotifyCard,
   '[GITHUB_CARD]': GithubCard,
   '[STATS_CARD]': StatsCard,
@@ -33,6 +36,7 @@ const cards = {
   '[GITHUB_ACTIVITY_CARD]': GithubActivityCard,
   '[GITHUB_LANGUAGES_CARD]': GithubLanguagesCard,
   '[CHESS_CARD]': ChessCard,
+  '[CHESS_GAME]': ChessGame,
 };
 
 // [GALO_CARD], [GALO_CARD:5] ou [GALO_CARD:ALL]; sem número mostra 3 jogos
@@ -309,7 +313,9 @@ function MessageBubble({ message, liveContext = {}, refreshing = [], onRefresh }
               <div className="my-4" key={index}>
                 {source && <LiveDataNotice data={data} pending={refreshing.includes(source)}
                   onRetry={onRefresh ? () => onRefresh([source], true) : undefined} lang={uiLanguage} />}
-                {(!source || data?.status === 'ok') && <Component context={context} lang={uiLanguage} limit={limit} />}
+                <Suspense fallback={<p role="status">{i18n.t('resume.loading')}</p>}>
+                  {(!source || data?.status === 'ok') && <Component context={context} lang={uiLanguage} limit={limit} />}
+                </Suspense>
               </div>
             );
           })}

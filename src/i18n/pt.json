@@ -1,4 +1,20 @@
 {
+  "resume": {
+    "title": "Currículo",
+    "pages_one": "{{count}} página",
+    "pages_other": "{{count}} páginas",
+    "page": "Página {{number}}",
+    "zoomOut": "Diminuir zoom",
+    "zoomIn": "Aumentar zoom",
+    "fit": "Ajustar à largura",
+    "expand": "Ampliar painel",
+    "collapse": "Recolher painel",
+    "download": "Baixar currículo em PDF",
+    "document": "Documento do currículo; use as setas para rolar",
+    "error": "Não foi possível exibir o currículo. Tente novamente ou use o botão de download.",
+    "retry": "Tentar novamente",
+    "loading": "Carregando currículo…"
+  },
   "chat": {
     "boasVindas": "Olá! Sou o assistente virtual do Gustavo. Como posso te ajudar hoje?",
     "subtitulo": "Pergunte sobre projetos, stack técnica, faculdade ou métricas ao vivo.",

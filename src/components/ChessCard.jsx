@@ -10,7 +10,7 @@ import { ThemeContext } from '../context/ThemeContext';
 
 const MODE_ICONS = { rapid: Timer, blitz: Zap, bullet: Flame, daily: Calendar };
 
-function ChessGame() {
+export function ChessGame() {
   const [game] = useState(() => new Chess());
   const [fen, setFen] = useState(() => game.fen());
   const timer = useRef(null);
@@ -277,8 +277,6 @@ export default function ChessCard({ context, lang = 'pt' }) {
     <article className={`portfolio-card my-3 w-full max-w-[700px] rounded-xl border p-6 transition-colors duration-300 ${
       darkMode ? 'bg-[#050E17] border-sky-500/20 shadow-sm' : 'bg-gray-50 border-gray-200 shadow-md'
     }`}>
-
-      <ChessGame />
 
       {/* HEADER */}
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">

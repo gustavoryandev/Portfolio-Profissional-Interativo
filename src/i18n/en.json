@@ -1,4 +1,20 @@
 {
+  "resume": {
+    "title": "Résumé",
+    "pages_one": "{{count}} page",
+    "pages_other": "{{count}} pages",
+    "page": "Page {{number}}",
+    "zoomOut": "Zoom out",
+    "zoomIn": "Zoom in",
+    "fit": "Fit to width",
+    "expand": "Expand panel",
+    "collapse": "Collapse panel",
+    "download": "Download résumé PDF",
+    "document": "Résumé document; use arrow keys to scroll",
+    "error": "The résumé could not be displayed. Try again or use the download button.",
+    "retry": "Try again",
+    "loading": "Loading résumé…"
+  },
   "chat": {
     "boasVindas": "Hello! I am Gustavo's virtual assistant. How can I help you today?",
     "subtitulo": "Ask about projects, tech stack, university, or live metrics.",

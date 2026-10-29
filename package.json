@@ -17,6 +17,7 @@
     "framer-motion": "^12.9.2",
     "i18next": "^24.2.3",
     "lucide-react": "^0.511.0",
+    "pdfjs-dist": "^6.4.299",
     "react": "^19.1.0",
     "react-chessboard": "^5.12.1",
     "react-dom": "^19.1.0",
