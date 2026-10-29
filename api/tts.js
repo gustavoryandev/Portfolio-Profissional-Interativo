@@ -31,7 +31,16 @@ export default async function handler(req, res) {
     res.setHeader('Content-Disposition', 'inline; filename="speech.mp3"');
     res.setHeader('X-Content-Type-Options', 'nosniff');
     return res.status(200).send(audio);
-  } catch {
-    return res.status(signal.aborted ? 504 : 502).json({ error: 'Voice synthesis unavailable. Please try again.' });
-  }
+  } catch (error) {
+  console.error('[TTS] Falha na síntese:', {
+    name: error?.name,
+    message: error?.message,
+    code: error?.code,
+    timedOut: signal.aborted,
+  });
+
+  return res.status(signal.aborted ? 504 : 502).json({
+    error: 'Voice synthesis unavailable. Please try again.',
+  });
+}
 }
