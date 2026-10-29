@@ -1,16 +1,39 @@
+# Dependencies
 node_modules/
+
+# Build output and deployment metadata
 dist/
 .vercel/
-*.log
+backend/target/
+frontend/node_modules/
+frontend/dist/
 
-# Environment variables
+# Logs and runtime files
+*.log
+*.pid
+*.pid.lock
+
+# Environment variables and local secrets
 .env
 .env.*
 !.env.example
 !.env.template
 
-# Existing project artifacts
-backend/target/
-frontend/node_modules/
-frontend/dist/
-.vercel
+# Local and generated JSON files
+*.local.json
+*.generated.json
+*.cache.json
+
+# Editor and OS files
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Tool caches and coverage reports
+.cache/
+.eslintcache
+coverage/
+*.tsbuildinfo
