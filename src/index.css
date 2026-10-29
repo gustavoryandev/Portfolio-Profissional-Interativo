@@ -331,3 +331,6 @@ scrollbar-color: rgba(245, 158, 11, 0.4) transparent;
   .message-row-with-cards > [aria-hidden="true"] { display: none; }
   .message-with-cards > div { padding: 8px; }
 }
+
+/* Enquadramento da foto nos cartões de perfil. */
+.profile-photo { object-fit: cover; object-position: center 20%; }

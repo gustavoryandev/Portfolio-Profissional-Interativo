@@ -299,9 +299,9 @@ export default function ChessCard({ context, lang = 'pt' }) {
           </div>
         </div>
 
-        {isConfigured && profile.avatar && (
+        {isConfigured && (
           <div className={`hidden sm:flex items-center gap-2.5 rounded-full border px-3 py-1.5 ${darkMode ? 'bg-[#0B192B] border-[#222]' : 'bg-white border-gray-300'}`}>
-            <img src={profile.avatar} alt="Avatar" className="w-6 h-6 rounded-full border border-sky-500/30" />
+            <img src="/perfil-foto.jpeg" alt={username} className="profile-photo w-6 h-6 rounded-full border border-sky-500/30" />
             <span className={`text-[11px] font-bold tracking-wide uppercase ${darkMode ? 'text-zinc-400' : 'text-gray-600'}`}>
               {t('cards.chess.noChessDesde', { year: profile.joinedYear || '--' })}
             </span>

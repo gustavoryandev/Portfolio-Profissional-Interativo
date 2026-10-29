@@ -10,7 +10,7 @@ export default function PortfolioSection({ active, en }) {
   return <section className="portfolio-section" aria-labelledby="section-heading">
     <p className="section-eyebrow">{en ? 'GET TO KNOW MY JOURNEY' : 'CONHEÇA MINHA TRAJETÓRIA'}</p>
     <h2 id="section-heading">{section?.[en ? 3 : 2]}</h2>
-    {active === 'about' && <div className="detail-card"><div className="profile-avatar" aria-hidden="true">GR</div><h3>{perfil.nome}</h3><p>{perfil.bio[en ? 'en' : 'pt']}</p><a className="cv-link" href={en ? '/Gustavo Ryan Resume (English).pdf' : '/Currículo Gustavo Ryan.pdf'} download><Download size={16} />{en ? 'Download résumé' : 'Baixar currículo'}</a></div>}
+    {active === 'about' && <div className="detail-card"><img className="profile-avatar profile-photo" src="/perfil-foto.jpeg" alt={en ? `Photo of ${perfil.nome}` : `Foto de ${perfil.nome}`} /><h3>{perfil.nome}</h3><p>{perfil.bio[en ? 'en' : 'pt']}</p><a className="cv-link" href={en ? '/Gustavo Ryan Resume (English).pdf' : '/Currículo Gustavo Ryan.pdf'} download><Download size={16} />{en ? 'Download résumé' : 'Baixar currículo'}</a></div>}
     {active === 'projects' && <ProjectsCard />}
     {active === 'experience' && <ExperienceCard />}
     {active === 'education' && <div className="detail-card"><GraduationCap size={32} /><h3>{perfil.instituicao}</h3><p>{en ? 'Software Engineering' : 'Engenharia de Software'}</p><h4>{en ? 'Current courses' : 'Disciplinas em andamento'}</h4><ul>{perfil.disciplinas.cursando.map(course => <li key={course}>{course}</li>)}</ul></div>}

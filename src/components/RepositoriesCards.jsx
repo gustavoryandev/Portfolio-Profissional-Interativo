@@ -71,7 +71,7 @@ const UI = {
   },
 };
 
-// Avatar vem do perfil já carregado pelo backend; sem ele, não renderiza nada
+// Foto local usada nos cartões do perfil.
 function ProfileAvatar({ src, login, ui, size = 'md' }) {
   if (!src) return null;
   const dimension = size === 'sm' ? 'h-7 w-7' : 'h-10 w-10';
@@ -81,7 +81,7 @@ function ProfileAvatar({ src, login, ui, size = 'md' }) {
       alt={copy.pt.avatarAlt(login)}
       loading="lazy"
       decoding="async"
-      className={`shrink-0 rounded-full object-cover ring-2 ${dimension} ${ui.avatarRing}`}
+      className={`profile-photo shrink-0 rounded-full object-cover ring-2 ${dimension} ${ui.avatarRing}`}
     />
   );
 }
@@ -156,7 +156,7 @@ export default function RepositoriesCard({ context, lang = 'pt' }) {
   const github = context?.github;
   const profile = github?.profile || {};
   const login = profile.login || GITHUB_USER;
-  const avatarSrc = profile.avatarUrl;
+  const avatarSrc = '/perfil-foto.jpeg';
 
   // Mantém a ordem recebida do backend e limita a quantidade exibida
   const repos = useMemo(

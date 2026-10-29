@@ -134,15 +134,15 @@ export default function GithubCard({ context, lang = 'pt' }) {
           </div>
         </div>
 
-        {isConfigured && profile.avatarUrl && (
+        {isConfigured && (
           <div
             className="hidden sm:flex items-center gap-2.5 rounded-full border py-1 pl-1 pr-3.5"
             style={{ background: t.card, borderColor: t.border }}
           >
             <img
-              src={profile.avatarUrl}
-              alt="Avatar"
-              className="w-7 h-7 rounded-full ring-2"
+              src="/perfil-foto.jpeg"
+              alt={login}
+              className="profile-photo w-7 h-7 rounded-full ring-2"
               style={{ '--tw-ring-color': t.ring }}
             />
             <span
