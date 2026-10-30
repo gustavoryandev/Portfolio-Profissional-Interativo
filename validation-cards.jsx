@@ -4,6 +4,7 @@ import './src/index.css';
 import './src/i18n';
 import { ThemeProvider, ThemeContext } from './src/context/ThemeContext';
 import Projects from './src/components/ProjectsCard';
+import { useTranslation } from 'react-i18next';
 import Experience from './src/components/ExperienceCard';
 import Github from './src/components/GithubCard';
 import Activity from './src/components/GithubActivityCard';
@@ -34,12 +35,16 @@ const cards = {Projects,Experience,Github,Activity,Languages,Repos,Stats,Waka,Ca
 function App() {
   const {darkMode,toggleTheme}=useContext(ThemeContext);
   const [empty,setEmpty]=useState(false);
+  const [width,setWidth]=useState(620);
+  const { i18n } = useTranslation();
   return <main style={{background:'var(--page)',color:'var(--ink)',padding:12,minHeight:'100vh'}}>
     <button onClick={toggleTheme}>{darkMode?'Claro':'Escuro'}</button>{' '}
     <button onClick={()=>setEmpty(!empty)}>{empty?'Dados preenchidos':'Sem dados'}</button>
+    <label>Largura dos cards <select value={width} onChange={event=>setWidth(Number(event.target.value))}><option value={320}>320 px</option><option value={620}>620 px</option><option value={960}>960 px</option></select></label>{' '}
+    <button onClick={()=>i18n.changeLanguage(i18n.language.startsWith('en')?'pt':'en')}>Alternar idioma</button>
     <div id="icon-fallback"><LanguageIcon name="Java" /><LanguageIcon name="Desconhecida" /></div>
     <button onClick={()=>document.querySelector('#icon-fallback img')?.dispatchEvent(new Event('error'))}>Simular falha</button>
-    {Object.entries(cards).map(([name,Component])=><section data-fixture={name} key={name} style={{maxWidth:620,width:'calc(100% - 48px)',margin:'24px auto'}}><h2>{name}</h2><Component context={empty?{}:context} /></section>)}
+    {Object.entries(cards).map(([name,Component])=><section data-fixture={name} key={name} style={{maxWidth:width,width:'calc(100% - 48px)',margin:'24px auto'}}><h2>{name}</h2><Component context={empty?{}:context} /></section>)}
   </main>;
 }
 createRoot(document.getElementById('root')).render(<ThemeProvider><App /></ThemeProvider>);

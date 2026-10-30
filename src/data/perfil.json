@@ -54,6 +54,7 @@
 "titulo": "projetos.portfolio_proj_title",
 "descricao": "projetos.portfolio_proj_desc"
 },
+"image": null,
 "techs": ["React", "Vite", "Tailwind CSS", "Gemini API", "i18next"],
 "githubUrl": "https://github.com/gustavoryan-del/"
 },
@@ -63,6 +64,7 @@
 "titulo": "projetos.geosolar_proj_title",
 "descricao": "projetos.geosolar_proj_desc"
 },
+"image": null,
 "techs": ["Java", "Spring Boot", "Thymeleaf", "MVC"],
 "githubUrl": "https://github.com/gustavoryan-del"
 },
@@ -72,6 +74,7 @@
 "titulo": "projetos.carrinho_proj_title",
 "descricao": "projetos.carrinho_proj_desc"
 },
+"image": null,
 "techs": ["Java", "POO", "CLI", "ArrayList"],
 "githubUrl": "https://github.com/gustavoryan-del"
 }

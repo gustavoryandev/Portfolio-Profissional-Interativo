@@ -166,6 +166,14 @@
     "erro": "❌ Failed to send message. Please try again."
   },
   "projetos": {
+    "heading": "Featured Projects",
+    "subtitle": "Selected portfolio projects",
+    "documentation": "Official {{name}} documentation (new tab)",
+    "previewAlt": "Screenshot of {{title}}",
+    "previewUnavailable": "Preview unavailable",
+    "technologies": "Technologies and concepts",
+    "openProject": "View project: {{title}} (new tab)",
+    "viewProject": "View project",
     "portfolio_proj_title": "Interactive AI Portfolio",
     "portfolio_proj_desc": "Portfolio built with React, Tailwind CSS, and Vercel Serverless Functions simulating an AI chat (Gemini API) with dynamic visual cards.",
     "geosolar_proj_title": "GEOSOLAR - Auth System",

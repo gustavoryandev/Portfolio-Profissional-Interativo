@@ -166,6 +166,14 @@
     "erro": "❌ Falha ao enviar mensagem. Tente novamente."
   },
   "projetos": {
+    "heading": "Projetos em Destaque",
+    "subtitle": "Projetos selecionados do portfólio",
+    "documentation": "Documentação oficial de {{name}} (nova aba)",
+    "previewAlt": "Screenshot do projeto {{title}}",
+    "previewUnavailable": "Prévia indisponível",
+    "technologies": "Tecnologias e conceitos",
+    "openProject": "Ver projeto: {{title}} (nova aba)",
+    "viewProject": "Ver projeto",
     "portfolio_proj_title": "Portfólio Interativo IA Generativa",
     "portfolio_proj_desc": "Portfólio em React, Tailwind CSS e Vercel Serverless Functions que simula um chat de IA (Gemini API) com renderização dinâmica de cards visuais.",
     "geosolar_proj_title": "GEOSOLAR - Sistema de Autenticação",

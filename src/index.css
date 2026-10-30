@@ -279,14 +279,17 @@ scrollbar-color: rgba(245, 158, 11, 0.4) transparent;
 .card-title-row > svg { flex-shrink: 0; color: var(--accent); }
 .card-title-row h3 { color: var(--ink); }
 .card-title-row p { margin-top: 3px; color: var(--muted); font-size: 11px; }
-.project-tile { display: flex; flex-direction: column; gap: 14px; min-width: 0; padding: 15px; border: 1px solid var(--line); border-radius: 7px; background: linear-gradient(140deg, var(--panel-soft), var(--panel)); transition: border-color 180ms ease, box-shadow 180ms ease; }
-.project-tile:hover { border-color: var(--accent); box-shadow: 0 0 16px -8px #0d6efd80; }
-.project-symbol { display: grid; place-items: center; width: 40px; height: 44px; flex-shrink: 0; border: 1px solid var(--line); border-radius: 7px; color: var(--accent); background: var(--panel); }
-.project-tile h4 { color: var(--ink); font-size: 13px; font-weight: 600; line-height: 1.5; }
-.project-tile p { margin-top: 6px; color: var(--muted); font-size: 11px; line-height: 1.7; }
-.project-tags { display: flex; flex-wrap: wrap; gap: 5px; }
-.project-tags span { border: 1px solid var(--line); border-radius: 12px; padding: 3px 7px; color: var(--muted); background: var(--panel-soft); font-size: 10px; }
-.project-action { display: flex; align-items: center; gap: 6px; margin-top: auto; color: var(--accent); font-size: 11px; }
+/* Project interactions belong exclusively to individual links. */
+.projects-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; }
+.projects-card .project-tile { border: 1px solid var(--line); border-radius: 14px; background: var(--panel); box-shadow: 0 8px 24px -18px rgb(0 0 0 / .3); }
+.project-preview { background: radial-gradient(ellipse at top right, #0d6efd14, transparent 70%), var(--panel-soft); }
+.projects-card .project-tile h4 { color: var(--ink); font-size: 19px; font-weight: 650; line-height: 1.4; }
+.projects-card .project-tile p { color: var(--muted); font-size: 14px; line-height: 1.75; }
+.project-tech { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 9px; background: var(--panel-soft); color: var(--ink); font-size: 12px; line-height: 1.4; transition: background 180ms ease, border-color 180ms ease; }
+a.project-tech:hover { border-color: var(--accent); background: var(--panel); }
+.project-action { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 10px 18px; border-radius: 9px; background: #0b5ed7; color: #fff; font-size: 14px; font-weight: 600; transition: background 180ms ease; }
+.project-action:hover { background: #094fb6; }
+@container portfolio-card (min-width: 700px) { .projects-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .reference-card { padding: 14px; }
 .reference-card h3 { border-bottom: 1px solid var(--line); padding-bottom: 10px; margin-bottom: 12px; font-size: 12px; font-weight: 600; }
 .reference-card .profile-heading h2 { font-size: 13px; }
