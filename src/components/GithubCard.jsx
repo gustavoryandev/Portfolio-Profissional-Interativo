@@ -43,7 +43,7 @@ const THEME = {
 function StatBox({ icon, label, value, sub, t }) {
   return (
     <div
-      className="group flex flex-col rounded-xl p-4 border transition-all duration-300 hover:border-sky-500/60"
+      className="group flex flex-col rounded-xl p-4 border transition-all duration-300 hover:border-brand-500/60"
       style={{
         background: t.card,
         borderColor: t.border,

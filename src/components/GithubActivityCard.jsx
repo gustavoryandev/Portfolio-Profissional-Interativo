@@ -124,15 +124,15 @@ const UI = {
     dayLabel: 'text-zinc-400',
     dayLabelActive: 'text-gray-200',
     dot: 'text-[var(--muted)]',
-    accentText: 'text-[#38BDF8]',
-    badge: 'border-[#38BDF8]/30 bg-[#38BDF8]/10 text-[#38BDF8]',
-    ringAccent: 'ring-[#38BDF8]/50',
-    focus: 'focus-visible:ring-[#38BDF8]/60',
+    accentText: 'text-brand-400',
+    badge: 'border-brand-400/30 bg-brand-400/10 text-brand-400',
+    ringAccent: 'ring-brand-400/50',
+    focus: 'focus-visible:ring-brand-400/60',
     track: 'bg-[#161b22]',
     barTrack: 'bg-zinc-800',
     bar: 'bg-[#167AB6]',
-    peak: 'bg-[#38BDF8]',
-    levels: ['bg-[#161b22]', 'bg-[#103454]', 'bg-[#145c91]', 'bg-[#167AB6]', 'bg-[#38BDF8]'],
+    peak: 'bg-brand-400',
+    levels: ['bg-[#161b22]', 'bg-[#103454]', 'bg-[#145c91]', 'bg-[#167AB6]', 'bg-brand-400'],
     emptyBox: 'border-[var(--line)] text-[var(--muted)]',
     tooltip: 'border-[#163A59] bg-[#050E17] text-gray-200',
   },
@@ -149,8 +149,8 @@ const UI = {
     dayLabel: 'text-gray-500',
     dayLabelActive: 'text-gray-800',
     dot: 'text-gray-300',
-    accentText: 'text-[#0369A1]',
-    badge: 'border-[#0D6EFD]/50 bg-[#EFF6FF] text-[#0369A1]',
+    accentText: 'text-[#1d4ed8]',
+    badge: 'border-[#0D6EFD]/50 bg-[#EFF6FF] text-[#1d4ed8]',
     ringAccent: 'ring-[#0D6EFD]/60',
     focus: 'focus-visible:ring-[#0D6EFD]/60',
     track: 'bg-gray-200',
@@ -532,7 +532,7 @@ const Calendar = memo(function Calendar({ summary, ui, t, f }) {
    ===================================================================== */
 function SummaryStat({ ui, icon, value, unit, label, note }) {
   return (
-    <div className={`flex flex-col items-center rounded-xl border px-4 py-5 text-center transition-all duration-200 hover:border-sky-500/60 ${ui.surface}`}>
+    <div className={`flex flex-col items-center rounded-xl border px-4 py-5 text-center transition-all duration-200 hover:border-brand-500/60 ${ui.surface}`}>
       {icon}
       <span className="flex items-baseline gap-1 text-3xl font-bold leading-[1.1] md:text-[2rem]">
         {value}
@@ -759,7 +759,7 @@ export default function GithubActivityCard({ context, lang = 'pt' }) {
                 return (
                   <div
                     key={period.key}
-                    className={`flex flex-col rounded-lg border p-4 transition-all duration-200 hover:border-sky-500/60 ${ui.surface} ${isTop ? `ring-1 ${ui.ringAccent}` : ''}`}
+                    className={`flex flex-col rounded-lg border p-4 transition-all duration-200 hover:border-brand-500/60 ${ui.surface} ${isTop ? `ring-1 ${ui.ringAccent}` : ''}`}
                   >
                     <div className="mb-3 flex items-center gap-2">
                       <Icon size={21} className={ui.accentText} />

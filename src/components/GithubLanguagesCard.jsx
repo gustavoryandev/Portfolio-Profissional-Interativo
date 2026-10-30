@@ -41,7 +41,7 @@ const UI = {
     track: 'bg-neutral-800',
     text: 'text-white',
     sub: 'text-[#A5BDDF]',
-    accentRule: 'bg-[#38BDF8]',
+    accentRule: 'bg-brand-400',
     dashed: 'border-[var(--line)] text-[#A5BDDF]',
   },
   light: {

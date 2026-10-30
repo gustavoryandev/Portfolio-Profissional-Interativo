@@ -60,24 +60,24 @@ const UI = {
     ai: 'border-[#153857] bg-[#0b1624] text-white shadow-lg shadow-black/40',
     user: 'border-[#224566] bg-[#10243a] text-white',
     bold: 'font-bold text-white',
-    bullet: 'bg-[#38BDF8]',
-    avatar: 'border-[#2A2A2A] bg-[#1E1E1E] text-[#38BDF8]',
+    bullet: 'bg-brand-400',
+    avatar: 'border-[#2A2A2A] bg-[#1E1E1E] text-brand-400',
     userAvatar: 'border-[#2A2A2A] bg-[#2A2A2A] text-white',
     error: 'border-red-500/50 bg-[#1E1E1E] text-red-200',
     errorIcon: 'text-red-400',
-    copy: 'text-zinc-400 hover:text-[#38BDF8] focus-visible:ring-[#38BDF8]/60',
-    focusRing: 'focus-visible:ring-[#38BDF8]/60',
+    copy: 'text-zinc-400 hover:text-brand-400 focus-visible:ring-brand-400/60',
+    focusRing: 'focus-visible:ring-brand-400/60',
   },
   light: {
     ai: 'border-[#E5E7EB] bg-white text-[#121212] shadow-sm',
     user: 'border-transparent bg-[#0A0A0A] text-white',
     bold: 'font-bold text-[#121212]',
     bullet: 'bg-[#0D6EFD]',
-    avatar: 'border-[#E5E7EB] bg-white text-[#0369a1]',
+    avatar: 'border-[#E5E7EB] bg-white text-[#1d4ed8]',
     userAvatar: 'border-transparent bg-[#0A0A0A] text-white',
     error: 'border-red-300 bg-red-50 text-red-900',
     errorIcon: 'text-red-600',
-    copy: 'text-gray-500 hover:text-[#0369a1] focus-visible:ring-[#0D6EFD]/60',
+    copy: 'text-gray-500 hover:text-[#1d4ed8] focus-visible:ring-[#0D6EFD]/60',
     focusRing: 'focus-visible:ring-[#0D6EFD]/60',
   },
 };
@@ -188,7 +188,7 @@ function CodeBlock({ lang, code }) {
           type="button"
           onClick={copy}
           aria-label={copied ? 'Copiado' : 'Copiar código'}
-          className="flex items-center gap-1.5 rounded px-2 py-1 font-mono text-[11px] text-zinc-400 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#38BDF8]/60"
+          className="flex items-center gap-1.5 rounded px-2 py-1 font-mono text-[11px] text-zinc-400 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400/60"
           style={{ fontFamily: FONT_MONO }}
         >
           {copied ? <Check size={12} aria-hidden="true" /> : <Copy size={12} aria-hidden="true" />}

@@ -60,6 +60,8 @@ letter-spacing: 0.12em;
   --ink: #111827;
   --muted: #46617f;
   --accent: #0866d9;
+  --brand-400: 8 102 217;
+  --brand-500: 11 94 215;
 }
 .dark {
   --page: #030a10;
@@ -69,6 +71,8 @@ letter-spacing: 0.12em;
   --ink: #e4edff;
   --muted: #a5bddf;
   --accent: #38bdf8;
+  --brand-400: 56 189 248;
+  --brand-500: 14 165 233;
   --surface: #0b1624;
   --surface-border: #163a59;
 }

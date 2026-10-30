@@ -51,15 +51,15 @@ const UI = {
     text: 'text-white',
     sub: 'text-zinc-400',
     muted: 'text-[var(--muted)]',
-    accentText: 'text-[#38BDF8]',
-    accentHover: 'hover:text-[#38BDF8]',
-    accentBorderHover: 'hover:border-[#38BDF8]/40',
-    iconTile: 'border-[#163A59] bg-[#0B192B] text-[#38BDF8]/80',
-    iconTileHover: 'group-hover:text-[#38BDF8]',
-    linkButton: 'border-[#163A59] bg-[#10243a] text-zinc-400 hover:text-[#38BDF8]',
-    badge: 'border-[#38BDF8]/30 bg-[#38BDF8]/10 text-[#38BDF8]',
-    dot: 'bg-[#38BDF8]',
-    dotPing: 'bg-[#38BDF8]',
+    accentText: 'text-brand-400',
+    accentHover: 'hover:text-brand-400',
+    accentBorderHover: 'hover:border-brand-400/40',
+    iconTile: 'border-[#163A59] bg-[#0B192B] text-brand-400/80',
+    iconTileHover: 'group-hover:text-brand-400',
+    linkButton: 'border-[#163A59] bg-[#10243a] text-zinc-400 hover:text-brand-400',
+    badge: 'border-brand-400/30 bg-brand-400/10 text-brand-400',
+    dot: 'bg-brand-400',
+    dotPing: 'bg-brand-400',
     dashed: 'border-[var(--line)] bg-[#0B192B] text-[var(--muted)]',
   },
   light: {
@@ -69,13 +69,13 @@ const UI = {
     text: 'text-[#121212]',
     sub: 'text-gray-600',
     muted: 'text-gray-500',
-    accentText: 'text-[#0369A1]',
-    accentHover: 'hover:text-[#0369A1]',
+    accentText: 'text-[#1d4ed8]',
+    accentHover: 'hover:text-[#1d4ed8]',
     accentBorderHover: 'hover:border-[#0D6EFD]/60',
-    iconTile: 'border-[#E5E7EB] bg-white text-[#0369A1]',
-    iconTileHover: 'group-hover:text-[#0369A1]',
-    linkButton: 'border-[#E5E7EB] bg-white text-gray-500 hover:text-[#0369A1]',
-    badge: 'border-[#0D6EFD]/50 bg-[#EFF6FF] text-[#0369A1]',
+    iconTile: 'border-[#E5E7EB] bg-white text-[#1d4ed8]',
+    iconTileHover: 'group-hover:text-[#1d4ed8]',
+    linkButton: 'border-[#E5E7EB] bg-white text-gray-500 hover:text-[#1d4ed8]',
+    badge: 'border-[#0D6EFD]/50 bg-[#EFF6FF] text-[#1d4ed8]',
     dot: 'bg-[#0D6EFD]',
     dotPing: 'bg-[#0D6EFD]',
     dashed: 'border-gray-300 bg-gray-50 text-gray-500',
@@ -156,7 +156,7 @@ export default function CanvasCard({ lang = 'pt', context }) {
           rel="noopener noreferrer"
           aria-label={t.open}
           title={t.open}
-          className={`hidden rounded-lg border p-2 transition-colors sm:flex focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#38BDF8]/60 ${ui.linkButton}`}
+          className={`hidden rounded-lg border p-2 transition-colors sm:flex focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400/60 ${ui.linkButton}`}
         >
           <LayoutDashboard className="h-4 w-4" aria-hidden="true" />
         </a>
@@ -222,7 +222,7 @@ export default function CanvasCard({ lang = 'pt', context }) {
           href={CANVAS_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className={`flex items-center gap-1.5 text-[13px] font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#38BDF8]/60 ${ui.accentText} ${ui.accentHover}`}
+          className={`flex items-center gap-1.5 text-[13px] font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400/60 ${ui.accentText} ${ui.accentHover}`}
         >
           {t.access} <ExternalLink size={14} aria-hidden="true" />
         </a>

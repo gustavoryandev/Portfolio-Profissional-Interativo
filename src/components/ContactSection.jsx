@@ -35,7 +35,7 @@ const ContactSection = ({ lang = 'pt' }) => {
   if (submitted) {
     return (
       <div className="portfolio-card contact-card card-surface mt-2 flex w-full max-w-md flex-col items-center p-6 text-center">
-        <CheckCircle size={48} className="mb-4 text-sky-400" />
+        <CheckCircle size={48} className="mb-4 text-brand-400" />
         <h3 className="text-xl font-bold mb-2">Sucesso!</h3>
         <p>{t.contact_success}</p>
       </div>
@@ -53,23 +53,23 @@ const ContactSection = ({ lang = 'pt' }) => {
           required
           type="text"
           placeholder={t.contact_name} aria-label={t.contact_name}
-          className="w-full rounded-xl border border-[var(--line)] bg-[var(--panel-soft)] p-3 text-[var(--ink)] outline-none transition-all focus:border-sky-500/60"
+          className="w-full rounded-xl border border-[var(--line)] bg-[var(--panel-soft)] p-3 text-[var(--ink)] outline-none transition-all focus:border-brand-500/60"
         />
         <input
           required
           type="email"
           placeholder={t.contact_email} aria-label={t.contact_email}
-          className="w-full rounded-xl border border-[var(--line)] bg-[var(--panel-soft)] p-3 text-[var(--ink)] outline-none transition-all focus:border-sky-500/60"
+          className="w-full rounded-xl border border-[var(--line)] bg-[var(--panel-soft)] p-3 text-[var(--ink)] outline-none transition-all focus:border-brand-500/60"
         />
         <textarea
           required
           rows="3"
           placeholder={t.contact_msg} aria-label={t.contact_msg}
-          className="w-full resize-none rounded-xl border border-[var(--line)] bg-[var(--panel-soft)] p-3 text-[var(--ink)] outline-none transition-all focus:border-sky-500/60"
+          className="w-full resize-none rounded-xl border border-[var(--line)] bg-[var(--panel-soft)] p-3 text-[var(--ink)] outline-none transition-all focus:border-brand-500/60"
         ></textarea>
         <button
           type="submit"
-          className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 font-semibold text-white shadow-lg shadow-sky-500/20 transition-colors hover:bg-blue-500"
+          className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 font-semibold text-white shadow-lg shadow-brand-500/20 transition-colors hover:bg-blue-500"
         >
           <Send size={18} /> {t.contact_send}
         </button>

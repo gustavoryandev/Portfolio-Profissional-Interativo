@@ -41,16 +41,16 @@ const copy = {
 const UI = {
   dark: {
     panel: 'border-[#163A59] bg-[#050E17] text-white shadow-sm',
-    card: 'border-[#163A59] bg-[#0B192B] hover:border-[#38BDF8]/50',
+    card: 'border-[#163A59] bg-[#0B192B] hover:border-brand-400/50',
     title: 'text-white',
     sub: 'text-[#A5BDDF]',
     muted: 'text-[var(--muted)]',
-    accent: 'text-[#38BDF8]',
-    accentBg: 'bg-[#38BDF8]/10 border-[#38BDF8]/30 text-[#38BDF8]',
+    accent: 'text-brand-400',
+    accentBg: 'bg-brand-400/10 border-brand-400/30 text-brand-400',
     neutralBadge: 'border-[#163A59] bg-[#163A59] text-[#E5E5E5]',
-    iconTile: 'border-[#163A59] bg-[#0B192B] text-[#38BDF8]',
-    linkButton: 'border-[#163A59] bg-[#0B192B] text-[#A5BDDF] hover:text-[#38BDF8]',
-    avatarRing: 'ring-[#38BDF8]/60',
+    iconTile: 'border-[#163A59] bg-[#0B192B] text-brand-400',
+    linkButton: 'border-[#163A59] bg-[#0B192B] text-[#A5BDDF] hover:text-brand-400',
+    avatarRing: 'ring-brand-400/60',
     dashed: 'border-[#163A59] bg-[#0B192B] text-[#A5BDDF]',
     divider: 'border-[#163A59]',
   },
@@ -60,11 +60,11 @@ const UI = {
     title: 'text-[#121212]',
     sub: 'text-gray-600',
     muted: 'text-gray-500',
-    accent: 'text-[#0369A1]',
-    accentBg: 'bg-[#EFF6FF] border-[#0D6EFD]/50 text-[#0369A1]',
+    accent: 'text-[#1d4ed8]',
+    accentBg: 'bg-[#EFF6FF] border-[#0D6EFD]/50 text-[#1d4ed8]',
     neutralBadge: 'border-[#E5E7EB] bg-[#F4F4F5] text-[#121212]',
-    iconTile: 'border-[#E5E7EB] bg-[#FFFFFF] text-[#0369A1]',
-    linkButton: 'border-[#E5E7EB] bg-[#FFFFFF] text-gray-600 hover:text-[#0369A1]',
+    iconTile: 'border-[#E5E7EB] bg-[#FFFFFF] text-[#1d4ed8]',
+    linkButton: 'border-[#E5E7EB] bg-[#FFFFFF] text-gray-600 hover:text-[#1d4ed8]',
     avatarRing: 'ring-[#121212]/20',
     dashed: 'border-[#E5E7EB] bg-[#FFFFFF] text-gray-500',
     divider: 'border-[#E5E7EB]',
@@ -99,7 +99,7 @@ const RepoItem = memo(function RepoItem({ repo, ui, t, langColor }) {
         target="_blank"
         rel="noopener noreferrer"
         aria-label={t.openRepo(repo.name)}
-        className={`group block rounded-xl border p-3.5 transition-all duration-200 hover:border-sky-500/60 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#38BDF8]/60 ${ui.card}`}
+        className={`group block rounded-xl border p-3.5 transition-all duration-200 hover:border-brand-500/60 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400/60 ${ui.card}`}
       >
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
@@ -193,7 +193,7 @@ export default function RepositoriesCard({ context, lang = 'pt' }) {
           rel="noopener noreferrer"
           aria-label={t.openAll}
           title={t.openAll}
-          className={`hidden rounded-lg border p-2 transition-colors sm:flex focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#38BDF8]/60 ${ui.linkButton}`}
+          className={`hidden rounded-lg border p-2 transition-colors sm:flex focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400/60 ${ui.linkButton}`}
         >
           <ExternalLink className="h-4 w-4" aria-hidden="true" />
         </a>
@@ -218,7 +218,7 @@ export default function RepositoriesCard({ context, lang = 'pt' }) {
             href={REPOS_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className={`font-bold underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#38BDF8]/60 ${ui.accent}`}
+            className={`font-bold underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400/60 ${ui.accent}`}
           >
             {t.viewOnGithub}
           </a>

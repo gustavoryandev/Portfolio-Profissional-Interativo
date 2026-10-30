@@ -72,26 +72,26 @@ const Countdown = ({ dateStr, t, darkMode }) => {
 
   const pad = (num) => num.toString().padStart(2, '0');
 
-  const boxClass = `flex flex-col items-center rounded-md px-3 py-1.5 min-w-0 flex-1 border ${darkMode ? 'bg-black/60 border-sky-500/20' : 'bg-gray-100 border-sky-500/30 shadow-sm'}`;
+  const boxClass = `flex flex-col items-center rounded-md px-3 py-1.5 min-w-0 flex-1 border ${darkMode ? 'bg-black/60 border-brand-500/20' : 'bg-gray-100 border-brand-500/30 shadow-sm'}`;
   const textClass = `text-lg font-semibold leading-none ${darkMode ? 'text-white' : 'text-gray-900'}`;
 
   return (
     <div className="flex w-full max-w-xs gap-2 mt-3">
       <div className={boxClass}>
         <span className={textClass}>{pad(timeLeft.d)}</span>
-        <span className="text-[9px] text-sky-500 font-bold mt-1 tracking-wider">{t.boxDays}</span>
+        <span className="text-[9px] text-brand-500 font-bold mt-1 tracking-wider">{t.boxDays}</span>
       </div>
       <div className={boxClass}>
         <span className={textClass}>{pad(timeLeft.h)}</span>
-        <span className="text-[9px] text-sky-500 font-bold mt-1 tracking-wider">{t.boxHours}</span>
+        <span className="text-[9px] text-brand-500 font-bold mt-1 tracking-wider">{t.boxHours}</span>
       </div>
       <div className={boxClass}>
         <span className={textClass}>{pad(timeLeft.m)}</span>
-        <span className="text-[9px] text-sky-500 font-bold mt-1 tracking-wider">{t.boxMin}</span>
+        <span className="text-[9px] text-brand-500 font-bold mt-1 tracking-wider">{t.boxMin}</span>
       </div>
       <div className={boxClass}>
         <span className={textClass}>{pad(timeLeft.s)}</span>
-        <span className="text-[9px] text-sky-500 font-bold mt-1 tracking-wider">{t.boxSec}</span>
+        <span className="text-[9px] text-brand-500 font-bold mt-1 tracking-wider">{t.boxSec}</span>
       </div>
     </div>
   );
@@ -146,7 +146,7 @@ export default function GaloCard({ context, lang = 'pt', limit = 3 }) {
   };
 
   return (
-    <div className={`portfolio-card match-card my-4 w-full max-w-2xl rounded-xl border p-5 transition-colors duration-300 ${darkMode ? 'bg-[#050E17] border-sky-500/20' : 'bg-white border-gray-200 shadow-sm'}`}>
+    <div className={`portfolio-card match-card my-4 w-full max-w-2xl rounded-xl border p-5 transition-colors duration-300 ${darkMode ? 'bg-[#050E17] border-brand-500/20' : 'bg-white border-gray-200 shadow-sm'}`}>
 
       {/* Cabeçalho */}
       <div className="flex items-center gap-4 mb-6">
@@ -172,7 +172,7 @@ export default function GaloCard({ context, lang = 'pt', limit = 3 }) {
                 <p className={`text-[9px] font-bold text-center uppercase mb-3 leading-tight ${darkMode ? 'text-[var(--muted)]' : 'text-gray-500'}`}>
                   {translateLeague(game.league)}
                 </p>
-                <Trophy size={18} className="text-sky-500/60" />
+                <Trophy size={18} className="text-brand-500/60" />
               </div>
 
               {/* Lado Direito - Times e Infos */}
@@ -209,14 +209,14 @@ export default function GaloCard({ context, lang = 'pt', limit = 3 }) {
                 {/* Seção Condicional (Contagem Regressiva vs Texto Simples) */}
                 {isNextMatch ? (
                   <div className={`mt-5 pt-5 border-t border-dashed flex flex-col items-center ${darkMode ? 'border-[#163A59]' : 'border-gray-200'}`}>
-                    <span className="text-[12px] font-bold text-sky-500 flex items-center gap-1.5">
+                    <span className="text-[12px] font-bold text-brand-500 flex items-center gap-1.5">
                       {t.nextMatchIn} {getRelativeTime(game.date)}
                     </span>
                     <Countdown dateStr={game.date} t={t} darkMode={darkMode} />
                   </div>
                 ) : (
                   <div className="mt-3 flex justify-center md:justify-start">
-                    <span className="text-[10px] font-bold text-sky-500/80 md:ml-2">
+                    <span className="text-[10px] font-bold text-brand-500/80 md:ml-2">
                       {t.in} {getRelativeTime(game.date)}
                     </span>
                   </div>
@@ -239,7 +239,7 @@ export default function GaloCard({ context, lang = 'pt', limit = 3 }) {
             href="https://www.espn.com.br/futebol/time/calendario/_/id/7632/atletico-mg"
             target="_blank"
             rel="noreferrer"
-            className="flex items-center gap-1.5 text-[11px] font-bold text-sky-500 hover:text-sky-400 uppercase tracking-wider transition-colors"
+            className="flex items-center gap-1.5 text-[11px] font-bold text-brand-500 hover:text-brand-400 uppercase tracking-wider transition-colors"
           >
             {t.viewTable} <ExternalLink size={12} />
           </a>
