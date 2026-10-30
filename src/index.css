@@ -49,19 +49,7 @@ font-weight: 700;
 letter-spacing: 0.12em;
 }
 
-.no-scrollbar::-webkit-scrollbar { display: none; }
-.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 .animate-spin-slow { animation: spin 3s linear infinite; }
-
-/* Nova barra de rolagem customizada para os prompts */
-.custom-scrollbar {
-scrollbar-width: thin;
-scrollbar-color: rgba(245, 158, 11, 0.4) transparent;
-}
-.custom-scrollbar::-webkit-scrollbar { height: 6px; }
-.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-.custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(245, 158, 11, 0.4); border-radius: 10px; }
-.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(245, 158, 11, 0.7); }
 
 /* Reference layout: blue accents, bordered panels and a persistent chat composer. */
 :root {
@@ -83,6 +71,53 @@ scrollbar-color: rgba(245, 158, 11, 0.4) transparent;
   --accent: #38bdf8;
   --surface: #0b1624;
   --surface-border: #163a59;
+}
+/* Shared scrollbar palette for the page and every nested scroll container. */
+:root {
+  color-scheme: light;
+  --scrollbar-track: #e8f0f8;
+  --scrollbar-thumb: #6686a8;
+  --scrollbar-thumb-hover: #386b9e;
+  --scrollbar-thumb-active: #0866d9;
+}
+:root.dark {
+  color-scheme: dark;
+  --scrollbar-track: #0b192b;
+  --scrollbar-thumb: #426b8e;
+  --scrollbar-thumb-hover: #65a2cf;
+  --scrollbar-thumb-active: #38bdf8;
+}
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+/* Chromium/Safari: native standard properties otherwise override these details. */
+@supports selector(::-webkit-scrollbar) {
+  * { scrollbar-width: auto; scrollbar-color: auto; }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: var(--scrollbar-track); border-radius: 999px; }
+  ::-webkit-scrollbar-thumb {
+    min-height: 32px;
+    min-width: 32px;
+    background: var(--scrollbar-thumb);
+    border: 2px solid var(--scrollbar-track);
+    border-radius: 999px;
+    background-clip: padding-box;
+  }
+  ::-webkit-scrollbar-thumb:hover { background-color: var(--scrollbar-thumb-hover); }
+  ::-webkit-scrollbar-thumb:active { background-color: var(--scrollbar-thumb-active); }
+  ::-webkit-scrollbar-corner { background: var(--scrollbar-track); }
+  ::-webkit-scrollbar-button { display: none; }
+}
+/* Honor the operating system's high-contrast palette. */
+@media (forced-colors: active) {
+  :root {
+    --scrollbar-track: Canvas;
+    --scrollbar-thumb: ButtonText;
+    --scrollbar-thumb-hover: Highlight;
+    --scrollbar-thumb-active: Highlight;
+  }
+  * { scrollbar-color: auto; }
 }
 .portfolio-app { background: var(--page); color: var(--ink); }
 .portfolio-app > [aria-hidden] { display: none; }
@@ -146,24 +181,6 @@ scrollbar-color: rgba(245, 158, 11, 0.4) transparent;
 .chat-composer form button[type=submit] { background: #0d6efd; color: white; border-radius: 8px; }
 .chat-composer input { font-size: 13px; }
 .profile-panel { display: flex; flex-direction: column; gap: 12px; min-width: 0; overflow-y: auto; }
-.profile-panel {
-  scrollbar-width: thin;
-  scrollbar-color: var(--accent) var(--panel);
-}
-@supports selector(::-webkit-scrollbar) {
-  .profile-panel { scrollbar-width: auto; scrollbar-color: auto; }
-  .profile-panel::-webkit-scrollbar { width: 8px; height: 8px; }
-  .profile-panel::-webkit-scrollbar-track { background: var(--panel); border-radius: 8px; }
-  .profile-panel::-webkit-scrollbar-thumb {
-    background: var(--accent);
-    border: 2px solid var(--panel);
-    border-radius: 8px;
-    min-height: 32px;
-  }
-  .profile-panel::-webkit-scrollbar-thumb:hover { background: var(--muted); }
-  .profile-panel::-webkit-scrollbar-corner { background: var(--panel); }
-  .profile-panel::-webkit-scrollbar-button { display: none; }
-}
 .profile-card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px; }
 .profile-heading { display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; }
 .profile-heading > div { min-width: 0; max-width: 100%; overflow-wrap: anywhere; }
@@ -196,8 +213,6 @@ scrollbar-color: rgba(245, 158, 11, 0.4) transparent;
 .detail-card .social-links { margin-top: 20px; }
 .skills-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 .card-surface:hover { border-color: var(--accent); outline-color: var(--line); }
-.custom-scrollbar { scrollbar-color: #246391 transparent; }
-.custom-scrollbar::-webkit-scrollbar-thumb { background: #246391; }
 @media (min-width: 1100px) { .app-frame { height: 100dvh; } }
 @media (max-width: 1199px) {
   .workspace { grid-template-columns: 150px minmax(0, 1fr) 260px; gap: 12px; padding: 16px; }
@@ -332,7 +347,7 @@ a.project-tech:hover { border-color: var(--accent); background: var(--panel); }
 .resume-controls :is(button, a):hover, .resume-notice button:hover { background: var(--panel); color: var(--accent); }
 .resume-controls button:disabled { opacity: .4; cursor: not-allowed; }
 .resume-viewer :focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
-.resume-viewport { height: clamp(320px, 65vh, 680px); overflow: auto; padding: 16px; background: var(--panel-soft); overscroll-behavior: contain; scrollbar-color: var(--accent) var(--panel-soft); }
+.resume-viewport { height: clamp(320px, 65vh, 680px); overflow: auto; padding: 16px; background: var(--panel-soft); overscroll-behavior: contain; }
 .resume-viewer-expanded .resume-viewport { height: 85vh; }
 .resume-page { width: max-content; margin: 0 auto 16px; background: white; box-shadow: 0 2px 10px #0003; }
 .resume-page:last-child { margin-bottom: 0; }

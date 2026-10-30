@@ -135,10 +135,6 @@ const UI = {
     levels: ['bg-[#161b22]', 'bg-[#103454]', 'bg-[#145c91]', 'bg-[#167AB6]', 'bg-[#38BDF8]'],
     emptyBox: 'border-[var(--line)] text-[var(--muted)]',
     tooltip: 'border-[#163A59] bg-[#050E17] text-gray-200',
-    scrollbar: `.custom-scrollbar::-webkit-scrollbar { height: 6px; }
-      .custom-scrollbar::-webkit-scrollbar-track { background: #0B192B; border-radius: 4px; }
-      .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(113, 113, 122, 0.4); border-radius: 4px; }
-      .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #71717a; }`,
   },
   light: {
     panel: 'border-gray-200 bg-white text-gray-800',
@@ -164,10 +160,6 @@ const UI = {
     levels: ['bg-gray-100', 'bg-[#DBEAFE]', 'bg-[#93C5FD]', 'bg-[#3B82F6]', 'bg-[#0D6EFD]'],
     emptyBox: 'border-gray-300 text-zinc-400',
     tooltip: 'border-gray-200 bg-white text-gray-800',
-    scrollbar: `.custom-scrollbar::-webkit-scrollbar { height: 6px; }
-      .custom-scrollbar::-webkit-scrollbar-track { background: #f9fafb; border-radius: 4px; }
-      .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(156, 163, 175, 0.4); border-radius: 4px; }
-      .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #9ca3af; }`,
   },
 };
 
@@ -639,7 +631,6 @@ export default function GithubActivityCard({ context, lang = 'pt' }) {
 
   return (
     <div className={`portfolio-card mx-auto my-6 w-full max-w-[850px] rounded-xl border p-6 shadow-lg transition-colors duration-300 ${ui.panel}`}>
-      <style>{ui.scrollbar}</style>
 
       {/* ===================== SEÇÃO 1: Atividade ===================== */}
       <div className="mb-8">
