@@ -9,7 +9,7 @@ export default function Navbar() {
   const en = i18n.language.startsWith('en');
   const cv = en ? '/Gustavo Ryan Resume (English).pdf' : '/Currículo Gustavo Ryan.pdf';
   return <header className="site-header">
-    <div className="brand-lockup"><img className="brand-logo" src="/logo-astra-ai.png" alt="GR" /><div><h1>{en ? 'Interactive AI Résumé' : 'Currículo IA Interativo'}</h1><p>{en ? 'Conversational Portfolio' : 'Portfólio Conversacional'}</p></div></div>
+    <div className="brand-lockup"><span className="brand-logo" role="img" aria-label="GR" /><div><h1>{en ? 'Interactive AI Résumé' : 'Currículo IA Interativo'}</h1><p>{en ? 'Conversational Portfolio' : 'Portfólio Conversacional'}</p></div></div>
     <p className="header-tagline">{en ? <>Your knowledge.<br />Your journey.<br />Now in conversation.</> : <>Seu conhecimento.<br />Sua trajetória.<br />Agora em conversa.</>}</p>
     <div className="header-actions">
       <span className="header-tech"><Sparkles size={18} /> IA Gemini · React</span>
