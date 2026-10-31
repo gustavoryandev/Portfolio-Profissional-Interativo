@@ -31,7 +31,7 @@
       "What is his chess rating?"
     ],
     "fallbackIdioma": "I can only communicate in Portuguese or English. Please choose one of these languages.",
-    "metricsSummary": "Here is the GitHub summary.\n[GITHUB_CARD]\nWould you like to see the detailed GitHub and WakaTime metrics?",
+    "metricsSummary": "Here is the GitHub and WakaTime summary.\n[GITHUB_CARD]\n[WAKATIME_CARD]\nWould you like to see the detailed GitHub and WakaTime metrics?",
     "metricsDeclined": "Okay, we will keep just the summary.",
     "metricsDetails": "Here are the available detailed metrics.\n[GITHUB_ACTIVITY_CARD]\n[GITHUB_LANGUAGES_CARD]\n[STATS_CARD]",
     "translating": "Translating…",

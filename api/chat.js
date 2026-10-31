@@ -516,13 +516,14 @@ async function fetchWakatime() {
   if (!key) return { status: 'not_configured' };
   const auth = process.env.WAKATIME_ACCESS_TOKEN
     ? { headers: { Authorization: `Bearer ${key}` } } : { auth: { username: key, password: '' } };
-  const weekPromise = client.get('https://wakatime.com/api/v1/users/current/stats/last_7_days', auth).catch(() => null);
-  const results = await Promise.allSettled(['stats/all_time', 'all_time_since_today'].map(path =>
+  const results = await Promise.allSettled(['stats/all_time', 'all_time_since_today', 'stats/last_7_days'].map(path =>
     client.get(`https://wakatime.com/api/v1/users/current/${path}`, auth)));
   const statsResponse = results[0].status === 'fulfilled' ? results[0].value : null;
   const totalResponse = results[1].status === 'fulfilled' ? results[1].value : null;
+  const weekResponse = results[2].status === 'fulfilled' ? results[2].value : null;
   const stats = statsResponse?.data?.data || {};
   const total = totalResponse?.data?.data || {};
+  const weekStats = weekResponse?.data?.data || {};
   const formatTime = secs => Number.isFinite(secs) ? `${Math.floor(secs / 3600)}h ${Math.floor(secs % 3600 / 60)}m` : null;
   const breakdown = items => (Array.isArray(items) ? items : []).map(item => ({
     name: item.name, seconds: item.total_seconds, formatted: formatTime(item.total_seconds),
@@ -532,12 +533,19 @@ async function fetchWakatime() {
     return results.every(result => result.status === 'rejected')
       ? sourceFailure(results[0].reason) : { status: 'error', reason: 'processing' };
   }
-  const weekData = (await weekPromise)?.data?.data || {};
   const editors = breakdown(stats.editors);
+
+  // Semana: só é "pronta" com resposta 200 e dados atualizados; 202/em processamento não vira "sem atividade"
+  const weekSeconds = weekStats.total_seconds_including_other_language ?? weekStats.total_seconds;
+  const weekPending = !weekResponse || weekResponse.status === 202
+    || weekStats.is_up_to_date === false || !Number.isFinite(weekSeconds);
+  const weekEditors = breakdown(weekStats.editors);
+
   return {
     status: 'ok',
-    stale: results.some(result => result.status === 'rejected') || [statsResponse, totalResponse].some(response =>
-      response?.status === 202 || response?.data?.data?.is_up_to_date === false),
+    stale: weekPending || results.some(result => result.status === 'rejected')
+      || [statsResponse, totalResponse, weekResponse].some(response =>
+        response?.status === 202 || response?.data?.data?.is_up_to_date === false),
     reason: results.some(result => result.status === 'rejected')
       ? sourceFailure(results.find(result => result.status === 'rejected').reason).reason : 'processing',
     range: { start: stats.start, end: stats.end, includingToday: stats.is_including_today },
@@ -547,13 +555,15 @@ async function fetchWakatime() {
       activeDays: stats.days_minus_holidays, totalDays: stats.days_including_holidays,
       topEditorName: editors[0]?.name, topEditorPercent: editors[0]?.percent,
     },
-    languages: breakdown(stats.languages), editors, operatingSystems: breakdown(stats.operating_systems),
-    week: {
-      totalFormatted: formatTime(weekData.total_seconds_including_other_language ?? weekData.total_seconds),
-      dailyAverageFormatted: formatTime(weekData.daily_average_including_other_language ?? weekData.daily_average),
-      topEditorName: breakdown(weekData.editors)[0]?.name ?? null,
-      languages: breakdown(weekData.languages).slice(0, 5),
+    week: weekPending ? null : {
+      totalSeconds: weekSeconds,
+      totalFormatted: formatTime(weekSeconds),
+      dailyAverageFormatted: formatTime(weekStats.daily_average_including_other_language ?? weekStats.daily_average),
+      topEditorName: weekEditors[0]?.name, topEditorPercent: weekEditors[0]?.percent,
+      languages: breakdown(weekStats.languages).slice(0, 5),
+      range: { start: weekStats.start, end: weekStats.end },
     },
+    languages: breakdown(stats.languages), editors, operatingSystems: breakdown(stats.operating_systems),
   };
 }
 
@@ -1231,8 +1241,7 @@ export default async function handler(req, res) {
 
     if (typeof userMessage !== 'string' || !userMessage.trim()) return res.status(400).json({ error: 'Mensagem inválida.' });
     const previous = [...chatHistory].reverse().find(item => item.sender === 'ai');
-    const lastAi = typeof previous?.text === 'string' ? previous.text : '';
-    const pendingMetrics = /\[(GITHUB|WAKATIME)_CARD\]/.test(lastAi) && !/\[(GITHUB_ACTIVITY|STATS)_CARD\]/.test(lastAi);
+    const pendingMetrics = previous?.translationKey === 'chat.metricsSummary';
     const affirmative = /^(sim|yes|yeah|sure|ok|claro|quero|pode)(?:[\s,!?.]|$)|^(?:mostre|mostrar|show)(?: me)? (?:os |as |the )?(?:detalhes|details|m[eé]tricas detalhadas|detailed metrics)\b/i.test(userMessage.trim()) && !/\b(n[aã]o|not|don.t)\b/i.test(userMessage);
     if (pendingMetrics && /^(n[aã]o|no|nope)(?:[\s,!?.]|$)/i.test(userMessage.trim())) {
       return res.status(200).json({ response: String(body.lang).startsWith('en') ? 'Okay, we will keep just the summary.' : 'Tudo bem, vamos manter apenas o resumo.', translationKey: 'chat.metricsDeclined' });
@@ -1241,32 +1250,15 @@ export default async function handler(req, res) {
     const githubQuery = /\bgithub\b/.test(normalizedQuery);
     const wakatimeQuery = /\bwaka[\s-]*time\b|\btempo de codigo\b|\bcoding time\b/.test(normalizedQuery);
     const metricsQuery = githubQuery || wakatimeQuery || /\bmetricas\b|\bmetrics\b/.test(normalizedQuery);
-    const detailQuery = /detalh|complet|adicion|additional|\bfull\b|in.?depth|(more|mais) (detail|info|metric|data|dado)|todas as metricas|all (the )?(metrics|data)/.test(normalizedQuery);
-    const expanded = (pendingMetrics && affirmative) || (detailQuery && (metricsQuery || pendingMetrics));
+    const expanded = pendingMetrics && affirmative;
     if (expanded || metricsQuery) {
+      const translationKey = expanded ? 'chat.metricsDetails' : 'chat.metricsSummary';
       const en = String(body.lang).startsWith('en');
-      const generic = !githubQuery && !wakatimeQuery;
-      const fromOffer = generic && pendingMetrics && expanded;
-      // Fontes: nomeadas na pergunta; sem nome, as do resumo anterior (oferta aceita), GitHub (resumo) ou ambas (detalhes genéricos)
-      const useGh = githubQuery || (generic && (!fromOffer || lastAi.includes('[GITHUB_CARD]')));
-      const useWk = wakatimeQuery || (generic && (fromOffer ? lastAi.includes('[WAKATIME_CARD]') : expanded));
-      // Resumos primeiro (o do WakaTime só na resposta inicial); detalhes só quando pedidos
-      const cardLines = [
-        useGh && '[GITHUB_CARD]',
-        !expanded && useWk && '[WAKATIME_CARD]',
-        expanded && useGh && '[GITHUB_ACTIVITY_CARD]\n[GITHUB_LANGUAGES_CARD]\n[REPOSITORIES_CARD]',
-        expanded && useWk && '[STATS_CARD]',
-      ];
-      const intro = expanded
-        ? (en ? 'Here are the summaries and the detailed metrics.' : 'Aqui estão os resumos e as métricas detalhadas.')
-        : useGh && useWk ? (en ? 'Here are the GitHub and WakaTime summaries.' : 'Aqui estão os resumos do GitHub e do WakaTime.')
-          : useGh ? (en ? 'Here is the GitHub summary.' : 'Aqui está o resumo do GitHub.')
-            : (en ? 'Here is the WakaTime summary.' : 'Aqui está o resumo do WakaTime.');
-      const names = useGh && useWk ? (en ? 'GitHub and WakaTime' : 'GitHub e WakaTime') : useGh ? 'GitHub' : 'WakaTime';
-      const offer = expanded ? '' : (en ? `Would you like to see the detailed ${names} metrics?` : `Quer ver as métricas detalhadas do ${names}?`);
-      const response = [intro, ...cardLines.filter(Boolean), offer].filter(Boolean).join('\n');
-      const liveContext = forClient(await fetchLiveContext([useGh && 'github', useWk && 'wakatime'].filter(Boolean)));
-      return res.status(200).json({ response, liveContext });
+      const response = expanded
+        ? (en ? 'Here are the available detailed metrics.\n[GITHUB_CARD]\n[GITHUB_ACTIVITY_CARD]\n[GITHUB_LANGUAGES_CARD]\n[STATS_CARD]' : 'Aqui estão as métricas detalhadas disponíveis.\n[GITHUB_CARD]\n[GITHUB_ACTIVITY_CARD]\n[GITHUB_LANGUAGES_CARD]\n[STATS_CARD]')
+        : (en ? 'Here is the GitHub summary.\n[GITHUB_CARD]\n[WAKATIME_CARD]\nWould you like to see the detailed GitHub and WakaTime metrics?' : 'Aqui está o resumo do GitHub.\n[GITHUB_CARD]\n[WAKATIME_CARD]\nQuer ver as métricas detalhadas do GitHub e WakaTime?');
+      const liveContext = forClient(await fetchLiveContext(['github', 'wakatime']));
+      return res.status(200).json({ response, translationKey, liveContext });
     }
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) return res.status(500).json({ error: 'GEMINI_API_KEY não configurada.' });
