@@ -101,7 +101,8 @@ export default function GaloCard({ context, lang = 'pt', limit = 3 }) {
   const { darkMode } = useContext(ThemeContext);
   const t = translations[lang] || translations.pt;
 
-  const games = context?.galo?.games?.slice(0, limit) || [];
+  // limit === null significa "todos" ([GALO_CARD:ALL]); slice(0, null) retornaria []
+  const games = (Array.isArray(context?.galo?.games) ? context.galo.games : []).slice(0, limit ?? undefined);
 
   // Tradutor de Ligas (A API da ESPN costuma retornar os nomes padrão em inglês)
   const translateLeague = (league) => {

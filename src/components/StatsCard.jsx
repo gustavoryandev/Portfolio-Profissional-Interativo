@@ -23,7 +23,7 @@ const UI = {
   },
   light: {
     panel: 'border-gray-200 bg-white text-gray-800',
-    surface: 'bg-gray-50 border-gray-100',
+    surface: 'bg-slate-50 border-slate-200',
     surfaceHover: 'hover:bg-gray-100',
     divider: 'border-gray-200',
     text: 'text-gray-800',
@@ -34,7 +34,7 @@ const UI = {
     accent: '#0D6EFD',
     track: '#e5e7eb',
     emptyBox: 'border-gray-300 text-zinc-400',
-    shadow: 'shadow-lg',
+    shadow: 'shadow-sm',
   },
 };
 
@@ -46,7 +46,7 @@ function HeaderBlock({ icon, label, value, sub, ui }) {
         {React.cloneElement(icon, { size: 12, className: ui.accentText, 'aria-hidden': true })}
         {label}
       </div>
-      <strong className={`text-[17px] font-semibold tabular-nums ${ui.strong}`}>{value || '--'}</strong>
+      <strong className={`text-[17px] font-semibold tabular-nums ${ui.strong}`}>{value ?? '--'}</strong>
       <p className={`mt-0.5 text-[11px] ${ui.muted}`}>{sub}</p>
     </div>
   );
@@ -83,7 +83,8 @@ function CircularProgress({ percent, ui, label }) {
 }
 
 export default function StatsCard({ context }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const en = i18n.language.startsWith('en');
   const { darkMode } = useContext(ThemeContext);
   const ui = darkMode ? UI.dark : UI.light;
 
@@ -101,20 +102,22 @@ export default function StatsCard({ context }) {
           {t('cards.wakatime.tempoProgramando')}
         </h3>
         <p className={`mt-1 font-mono text-[12px] ${ui.muted}`}>
-          {t('cards.wakatime.ultimosDias', { count: summary.totalDays || 7 })} • wakatime.com/@43529b87-73e1-4546-a267-d2bf1489e108
+          {en ? 'All available history' : 'Todo o histórico disponível'} • wakatime.com/@43529b87-73e1-4546-a267-d2bf1489e108
         </p>
       </div>
 
+      {wakatime?.range?.start && <p className={`mb-4 text-xs ${ui.muted}`}>{wakatime.range.start.slice(0, 10)} — {wakatime.range.end?.slice(0, 10)}{wakatime.range.includingToday === false ? (en ? ' (breakdowns exclude today)' : ' (distribuições não incluem hoje)') : ''}</p>}
       {isConfigured ? (
         <>
           {/* MÉTRICAS (4 blocos) */}
           <div className="mb-6 card-grid grid grid-cols-2 gap-3 md:grid-cols-4">
-            <HeaderBlock ui={ui} icon={<Clock />} label={t('cards.wakatime.total')} value={summary.totalFormatted} sub={t('cards.wakatime.emLinguagens', { count: languages.length })} />
-            <HeaderBlock ui={ui} icon={<Terminal />} label={t('cards.wakatime.mediaDiaria')} value={summary.dailyAverageFormatted} sub={t('cards.wakatime.nosDiasComCodigo')} />
-            <HeaderBlock ui={ui} icon={<Calendar />} label={t('cards.wakatime.diasAtivos')} value={summary.activeDays} sub={t('cards.wakatime.deDias', { count: summary.totalDays })} />
-            <HeaderBlock ui={ui} icon={<Code2 />} label={t('cards.wakatime.editor')} value={summary.topEditorName} sub={t('cards.wakatime.percentualTempo', { percent: summary.topEditorPercent })} />
+            <HeaderBlock ui={ui} icon={<Clock />} label={t('cards.wakatime.total')} value={summary.totalFormatted} sub={en ? 'all-time total' : 'total de todo o histórico'} />
+            <HeaderBlock ui={ui} icon={<Terminal />} label={t('cards.wakatime.mediaDiaria')} value={summary.dailyAverageFormatted} sub={en ? 'average reported by WakaTime' : 'média informada pelo WakaTime'} />
+            <HeaderBlock ui={ui} icon={<Calendar />} label={t('cards.wakatime.diasAtivos')} value={summary.activeDays} sub={t('cards.wakatime.deDias', { count: summary.totalDays ?? '--' })} />
+            <HeaderBlock ui={ui} icon={<Code2 />} label={t('cards.wakatime.editor')} value={summary.topEditorName} sub={t('cards.wakatime.percentualTempo', { percent: summary.topEditorPercent ?? '--' })} />
           </div>
 
+          {!languages.length && <p className={`mb-4 text-xs ${ui.muted}`}>{t('cards.wakatime.noBreakdown')}</p>}
           {/* LINGUAGENS */}
           <div className="card-grid grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5">
             {languages.map((lang, index) => (
@@ -123,7 +126,7 @@ export default function StatsCard({ context }) {
                 className={`flex flex-col items-center justify-center rounded-xl border p-4 transition-colors ${ui.surface} ${ui.surfaceHover}`}
               >
                 <div className="relative mb-3 flex items-center justify-center">
-                  <CircularProgress percent={lang.percent} ui={ui} label={`${lang.name}: ${lang.percent}%`} />
+                  <CircularProgress percent={lang.percent} ui={ui} label={`${lang.name}: ${lang.percent == null ? '—' : `${lang.percent}%`}`} />
                   <span className={`absolute text-[18px] font-semibold ${ui.strong}`} aria-hidden="true">
                     <LanguageIcon name={lang.name} size={22} />
                   </span>
@@ -132,8 +135,28 @@ export default function StatsCard({ context }) {
                   {lang.name}
                 </strong>
                 <p className={`mt-0.5 text-[11px] ${ui.muted}`}>{lang.formatted}</p>
-                <p className={`mt-1 text-[10px] font-bold tabular-nums ${ui.accentText}`}>{lang.percent}%</p>
+                <p className={`mt-1 text-[10px] font-bold tabular-nums ${ui.accentText}`}>{lang.percent == null ? '—' : `${lang.percent}%`}</p>
               </div>
+            ))}
+          </div>
+          <div className="mt-6 grid gap-4 sm:grid-cols-2">
+            {['operatingSystems', 'editors'].map(category => (
+              <section key={category} className={`rounded-xl border p-4 ${ui.surface}`}>
+                <h4 className={`mb-3 font-semibold ${ui.strong}`}>{t(`cards.wakatime.${category}`)}</h4>
+                <div className="space-y-3">
+                  {(wakatime[category] || []).map(item => (
+                    <div key={item.name}>
+                      <div className={`flex flex-wrap justify-between gap-2 text-xs ${ui.text}`}>
+                        <span>{item.name}</span><span>{item.formatted ?? '—'} · {item.percent == null ? '—' : `${item.percent}%`}</span>
+                      </div>
+                      <div className="mt-1 h-1.5 overflow-hidden rounded-full" style={{ background: ui.track }}>
+                        <div className="h-full rounded-full" style={{ background: ui.accent, width: `${Math.min(100, Math.max(0, Number(item.percent) || 0))}%` }} />
+                      </div>
+                    </div>
+                  ))}
+                  {!wakatime[category]?.length && <p className={`text-xs ${ui.muted}`}>{t('cards.wakatime.noBreakdown')}</p>}
+                </div>
+              </section>
             ))}
           </div>
         </>

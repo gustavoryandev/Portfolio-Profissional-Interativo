@@ -1,11 +1,12 @@
 // src/components/MessageBubble.jsx
-import { lazy, memo, Suspense, useContext, useMemo, useState } from 'react';
+import { lazy, memo, Suspense, useContext, useEffect, useMemo, useState } from 'react';
 import { AlertTriangle, Check, Copy, Sparkles, User } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { ThemeContext } from '../context/ThemeContext';
 import SpotifyCard from './SpotifyCard';
 import GithubCard from './GithubCard';
 import StatsCard from './StatsCard';
+import WakaTimeCard from './WakaTimeCard';
 import CanvasCard from './CanvasCard';
 import GaloCard from './GaloCard';
 import ContactSection from './ContactSection';
@@ -18,6 +19,8 @@ import ChessCard, { ChessGame } from './ChessCard';
 import LiveDataNotice from './LiveDataNotice';
 import { CARD_SOURCES, mergeLiveContext } from '../services/liveContext';
 
+import { translateMessage } from '../services/api';
+
 const ResumeCard = lazy(() => import('./ResumeCard'));
 
 // Tags fixas que viram cards. Esta é a única lista: a regex abaixo é derivada dela.
@@ -26,6 +29,7 @@ const cards = {
   '[SPOTIFY_CARD]': SpotifyCard,
   '[GITHUB_CARD]': GithubCard,
   '[STATS_CARD]': StatsCard,
+  '[WAKATIME_CARD]': WakaTimeCard,
   '[CANVAS_CARD]': CanvasCard,
   '[CONTACT_FORM]': ContactSection,
   '[PROJECTS_CARD]': ProjectsCard,
@@ -51,7 +55,7 @@ const TAG_SPLIT = new RegExp(
 // Bloco de código cercado por ``` (com linguagem opcional)
 const FENCE = /```([\w+-]*)[ \t]*\n([\s\S]*?)```/g;
 // Código inline `assim`, negrito **assim**
-const INLINE = /(`[^`\n]+`|\*\*[^\n]+?\*\*)/;
+const INLINE = /(`[^`\n]+`|\*\*[^\n]+?\*\*|\[[^\]\n]+\]\(https?:\/\/[^\s)]+\))/;
 const BULLET = /^\s*[-*•]\s+/;
 
 // Tokens do design system Alvinegro + Azul
@@ -132,6 +136,8 @@ function renderInline(text, boldClass) {
     if (!piece) return null;
     if (index % 2 === 0) return piece;
     if (piece.startsWith('`')) return <code key={index} className={INLINE_CODE}>{piece.slice(1, -1)}</code>;
+    const link = /^\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)$/.exec(piece);
+    if (link) return <a key={index} href={link[2]} target="_blank" rel="noreferrer" className="underline text-[var(--accent)]">{link[1]}</a>;
     return <strong key={index} className={boldClass}>{piece.slice(2, -2)}</strong>;
   });
 }
@@ -220,7 +226,22 @@ function MessageBubble({ message, liveContext = {}, refreshing = [], onRefresh }
   const ui = darkMode ? UI.dark : UI.light;
   const isUser = message?.sender === 'user';
   const isError = message?.tone === 'error';
-  const text = message?.text || '';
+  const original = message?.text || '';
+  const sourceLanguage = message?.lang?.startsWith('en') ? 'en' : 'pt';
+  const [translations, setTranslations] = useState({});
+  const [translationFailed, setTranslationFailed] = useState(false);
+  useEffect(() => {
+    if (isUser || message.translationKey || sourceLanguage === uiLanguage || translations[uiLanguage]) return;
+    let active = true;
+    setTranslationFailed(false);
+    translateMessage(original, uiLanguage).then(text => {
+      if (active) setTranslations(previous => ({ ...previous, [uiLanguage]: text }));
+    }).catch(() => { if (active) setTranslationFailed(true); });
+    return () => { active = false; };
+  }, [original, uiLanguage, sourceLanguage, isUser, message.translationKey, translations]);
+  const text = isUser ? original : message.translationKey ? i18n.t(message.translationKey)
+    : sourceLanguage === uiLanguage ? original : translations[uiLanguage] || original;
+  const translating = !isUser && !message.translationKey && sourceLanguage !== uiLanguage && !translations[uiLanguage];
 
   const segments = useMemo(() => (isUser ? [] : splitMessage(text)), [isUser, text]);
   const context = useMemo(() => mergeLiveContext(message?.context, liveContext), [message?.context, liveContext]);
@@ -255,6 +276,7 @@ function MessageBubble({ message, liveContext = {}, refreshing = [], onRefresh }
           role={isError ? 'alert' : undefined}
           className={`w-full rounded-xl rounded-tl-sm border px-4 py-4 ${isError ? ui.error : ui.ai}`}
         >
+          {translating && <p role="status" className="mb-3 text-xs text-[var(--muted)]">{i18n.t(translationFailed ? 'chat.translationFailed' : 'chat.translating')}</p>}
           {segments.map((segment, index) => {
             if (segment.type === 'text') {
               return parseBlocks(segment.value).map((block, bi) =>

@@ -42,6 +42,9 @@ const UI = {
     text: 'text-white',
     sub: 'text-[#A5BDDF]',
     accentRule: 'bg-brand-400',
+    tile: 'border-[var(--line)] bg-[#050E17]',
+    hover: 'hover:border-brand-400/50 hover:shadow-md',
+    badge: 'border-brand-400/30 bg-brand-400/10 text-brand-400',
     dashed: 'border-[var(--line)] text-[#A5BDDF]',
   },
   light: {
@@ -51,6 +54,9 @@ const UI = {
     text: 'text-[#121212]',
     sub: 'text-gray-600',
     accentRule: 'bg-[#0D6EFD]',
+    tile: 'border-[#E5E7EB] bg-[#F4F4F5]',
+    hover: 'hover:border-[#0D6EFD]/60 hover:shadow-md',
+    badge: 'border-[#0D6EFD]/50 bg-[#EFF6FF] text-[#1d4ed8]',
     dashed: 'border-[#E5E7EB] text-gray-500',
   },
 };
@@ -145,30 +151,35 @@ export default function GithubLanguages({ context, lang = 'pt' }) {
 
   return (
     <section aria-labelledby={headingId} className={sectionClass} style={{ fontFamily: FONT_SANS }}>
-      <header className="mb-6">
-        <h3
-          id={headingId}
-          className={`flex items-center gap-3 text-[0.85rem] font-semibold uppercase tracking-[0.05em] ${ui.sub}`}
-        >
-          <span aria-hidden="true" className={`h-4 w-[3px] rounded-full ${ui.accentRule}`} />
-          {t.title}
-        </h3>
-        <p className={`mt-2 text-sm ${ui.sub}`}>
-          {items.length === 1 ? t.countOne : t.count(fmtCount.format(items.length))}
-        </p>
+      <header className="mb-6 flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h3
+            id={headingId}
+            className={`flex items-center gap-3 text-[0.85rem] font-semibold uppercase tracking-[0.05em] ${ui.sub}`}
+          >
+            <span aria-hidden="true" className={`h-4 w-[3px] rounded-full ${ui.accentRule}`} />
+            {t.title}
+          </h3>
+          <p className={`mt-2 text-sm ${ui.sub}`}>
+            {items.length === 1 ? t.countOne : t.count(fmtCount.format(items.length))}
+          </p>
+        </div>
+        <span className={`rounded-full border px-3 py-1 text-[0.7rem] font-bold uppercase tracking-wider ${ui.badge}`}>
+          {groups[0].name} · {fmtPercent.format(groups[0].percent)}%
+        </span>
       </header>
 
       {/* Barra agregada: segmentos proporcionais, com descrição para leitores de tela */}
       <div
         role="img"
         aria-label={`${t.barLabel}: ${barSummary}`}
-        className={`mb-6 flex h-3 w-full overflow-hidden rounded-full ${ui.track}`}
+        className={`mb-6 flex h-3.5 w-full gap-[2px] overflow-hidden rounded-full p-[2px] ${ui.track}`}
       >
         {groups.map((g) => (
           <span
             key={g.name}
             aria-hidden="true"
-            className="h-full transition-[width] duration-700 ease-out"
+            className="h-full rounded-full transition-[width] duration-700 ease-out"
             style={{ width: `${g.percent}%`, backgroundColor: g.color }}
           />
         ))}
@@ -178,15 +189,23 @@ export default function GithubLanguages({ context, lang = 'pt' }) {
         {groups.map((g) => (
           <li
             key={g.name}
-            className={`rounded-xl border p-4 transition-colors duration-300 ${ui.card}`}
+            className={`rounded-xl border border-l-[3px] p-4 transition-all duration-200 ${ui.card} ${ui.hover}`}
+            style={{ borderLeftColor: g.color }}
           >
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex min-w-0 items-center gap-2.5">
-                <LanguageIcon name={g.name} size={18} color={g.color} />
-                <span className={`truncate text-[0.9rem] font-bold ${ui.text}`}>{g.name}</span>
+            <div className="flex items-center gap-3">
+              <span aria-hidden="true" className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border ${ui.tile}`}>
+                <LanguageIcon name={g.name} size={22} color={g.color} />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className={`truncate text-[0.95rem] font-bold ${ui.text}`}>{g.name}</p>
+                {g.bytes !== null && (
+                  <p className={`mt-0.5 text-[0.7rem] tabular-nums ${ui.sub}`} style={{ fontFamily: FONT_MONO }}>
+                    {fmtBytes(g.bytes)}
+                  </p>
+                )}
               </div>
               <span
-                className={`shrink-0 text-[0.85rem] font-semibold tabular-nums ${ui.text}`}
+                className={`shrink-0 text-[1.1rem] font-semibold tabular-nums ${ui.text}`}
                 style={{ fontFamily: FONT_MONO }}
               >
                 {fmtPercent.format(g.percent)}%
@@ -206,12 +225,6 @@ export default function GithubLanguages({ context, lang = 'pt' }) {
                 style={{ width: `${g.percent}%`, backgroundColor: g.color }}
               />
             </div>
-
-            {g.bytes !== null && (
-              <p className={`mt-2 text-[0.7rem] tabular-nums ${ui.sub}`} style={{ fontFamily: FONT_MONO }}>
-                {fmtBytes(g.bytes)}
-              </p>
-            )}
           </li>
         ))}
       </ul>

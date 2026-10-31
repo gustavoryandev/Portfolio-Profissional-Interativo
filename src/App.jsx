@@ -85,7 +85,7 @@ export default function App() {
   const { darkMode } = useContext(ThemeContext);
   const ui = darkMode ? UI.dark : UI.light;
 
-  const [messages, setMessages] = useState(() => [{ id: 'welcome', sender: 'ai', text: t('chat.boasVindas') }]);
+  const [messages, setMessages] = useState(() => [{ id: 'welcome', sender: 'ai', text: t('chat.boasVindas'), translationKey: 'chat.boasVindas' }]);
   const [input, setInput] = useState('');
   const [activeSection, setActiveSection] = useState('home');
   const en = i18n.language.startsWith('en');
@@ -135,7 +135,7 @@ export default function App() {
     setLoading(true);
     try {
       // O campo "id" é só da interface: não vai para o backend
-      const history = messagesRef.current.map(({ sender, text }) => ({ sender, text }));
+      const history = messagesRef.current.map(({ sender, text, translationKey }) => ({ sender, text, translationKey }));
       const data = await sendMessage(query, requestLanguage, history, conversationRef.current.chatContext);
       conversationRef.current = {
         chatContext: data.chatContext ?? conversationRef.current.chatContext,
@@ -146,6 +146,7 @@ export default function App() {
         id,
         sender: 'ai',
         text: data.response || data.error,
+        translationKey: data.translationKey,
         context: data.liveContext,
         lang: requestLanguage,
         model: data.model,
@@ -157,6 +158,7 @@ export default function App() {
         id: nextId(),
         sender: 'ai',
         tone: 'error',
+        translationKey: 'chat.erro',
         text: t('chat.erro', {
           defaultValue: 'ERRO: não foi possível processar sua pergunta agora. Tente novamente em instantes.',
         }),

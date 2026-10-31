@@ -1,6 +1,6 @@
 export const CARD_SOURCES = {
   SPOTIFY_CARD: 'spotify', GITHUB_CARD: 'github', GITHUB_ACTIVITY_CARD: 'github',
-  GITHUB_LANGUAGES_CARD: 'github', REPOSITORIES_CARD: 'github', STATS_CARD: 'wakatime',
+  GITHUB_LANGUAGES_CARD: 'github', REPOSITORIES_CARD: 'github', STATS_CARD: 'wakatime', WAKATIME_CARD: 'wakatime',
   CANVAS_CARD: 'canvas', GALO_CARD: 'galo', CHESS_CARD: 'chess',
 };
 

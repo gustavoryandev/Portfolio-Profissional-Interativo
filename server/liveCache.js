@@ -29,7 +29,7 @@ export function createLiveCache(ttls, now = Date.now) {
           data.activity = { ...fresh.activity, commitsPerHour: previous.activity.commitsPerHour,
             totalSampleCommits: previous.activity.totalSampleCommits };
         }
-      } else if (fresh.status === 'ok') data = { ...fresh, updatedAt: time, stale: false };
+      } else if (fresh.status === 'ok') data = { ...fresh, updatedAt: time, stale: Boolean(fresh.stale) };
       const ttl = data.reason === 'rate_limited' ? 60000
         : data.status === 'error' || data.stale ? 10000 : ttls[name] ?? 60000;
       entries.set(name, { data, expires: time + ttl });

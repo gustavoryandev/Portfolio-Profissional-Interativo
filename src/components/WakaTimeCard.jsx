@@ -1,128 +1,150 @@
-import { useContext } from 'react';
-import { Clock, TrendingUp } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
+import React, { useContext } from 'react';
+import { Clock, Code2, Terminal } from 'lucide-react';
 import { ThemeContext } from '../context/ThemeContext';
+import LanguageIcon from './LanguageIcon';
 
-const FONT_SANS = "Inter, 'Geist Sans', Roboto, system-ui, sans-serif";
-const DAILY_GOAL_SECONDS = 28800; // meta de 8h
-
-// Tokens do design system (Alvinegro + Azul)
-const THEME = {
-  dark: {
-    card: '#0B192B',
-    border: '#163A59',
-    text: '#FFFFFF',
-    muted: '#A5BDDF',
-    accent: '#38BDF8',
-    track: '#163A59',
-    accentSoft: 'rgba(56, 189, 248, 0.5)',
-    dashed: '#3F3F46',
-    shadow: '0 20px 40px -12px rgba(0, 0, 0, 0.6)',
+const copy = {
+  pt: {
+    title: 'WakaTime · esta semana',
+    range: 'Últimos 7 dias',
+    total: 'Tempo total',
+    average: 'Média diária',
+    editor: 'Editor mais usado',
+    languages: 'Linguagens da semana',
+    none: 'Sem atividade registrada na semana.',
+    unavailable: 'Dados do WakaTime indisponíveis no momento.',
   },
-  light: {
-    card: '#FFFFFF',
-    border: '#E5E7EB',
-    text: '#121212',
-    muted: '#52525B',
-    accent: '#0D6EFD',
-    track: '#E5E7EB',
-    accentSoft: 'rgba(13, 110, 253, 0.5)',
-    dashed: '#D4D4D8',
-    shadow: '0 10px 25px -8px rgba(18, 18, 18, 0.15)',
+  en: {
+    title: 'WakaTime · this week',
+    range: 'Last 7 days',
+    total: 'Total time',
+    average: 'Daily average',
+    editor: 'Most-used editor',
+    languages: 'Languages this week',
+    none: 'No activity recorded this week.',
+    unavailable: 'WakaTime data is unavailable at the moment.',
   },
 };
 
-const calcPercent = (seconds) => Math.min(((seconds || 0) / DAILY_GOAL_SECONDS) * 100, 100);
+const UI = {
+  dark: {
+    panel: 'border-[#163A59] bg-[#050E17] text-gray-200 shadow-sm',
+    surface: 'bg-[#0B192B] border-[#163A59]',
+    strong: 'text-white',
+    label: 'text-zinc-400',
+    muted: 'text-[var(--muted)]',
+    accentText: 'text-brand-400',
+    tile: 'border-[var(--line)] bg-[#050E17]',
+    hover: 'hover:border-brand-400/50 hover:shadow-md',
+    accent: '#38BDF8',
+    track: '#163A59',
+    dashed: 'border-[var(--line)] text-[var(--muted)]',
+  },
+  light: {
+    panel: 'border-gray-200 bg-white text-gray-800 shadow-sm',
+    surface: 'bg-slate-50 border-slate-200',
+    strong: 'text-gray-900',
+    label: 'text-gray-500',
+    muted: 'text-gray-500',
+    accentText: 'text-[#1d4ed8]',
+    tile: 'border-[#E5E7EB] bg-[#F4F4F5]',
+    hover: 'hover:border-[#0D6EFD]/60 hover:shadow-md',
+    accent: '#0D6EFD',
+    track: '#E5E7EB',
+    dashed: 'border-gray-300 text-zinc-400',
+  },
+};
 
-// Linha com rótulo, tempo e barra de progresso
-function DayRow({ label, readable, percent, soft = false, ui }) {
+function Block({ icon, label, value, ui }) {
   return (
-    <div>
-      <div className="mb-1 flex justify-between text-xs font-medium" style={{ color: ui.text }}>
-        <span>{label}</span>
-        <span className="tabular-nums font-semibold">{readable}</span>
+    <div className={`flex min-w-0 flex-col rounded-xl border p-3 ${ui.surface}`}>
+      <div className={`mb-1 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest ${ui.label}`}>
+        {React.cloneElement(icon, { size: 12, className: ui.accentText, 'aria-hidden': true })}
+        {label}
       </div>
-      <div
-        role="progressbar"
-        aria-label={label}
-        aria-valuemin={0}
-        aria-valuemax={100}
-        aria-valuenow={Math.round(percent)}
-        className="h-2 overflow-hidden rounded-full"
-        style={{ background: ui.track }}
-      >
-        <div
-          className="h-full rounded-full transition-all duration-1000"
-          style={{
-            width: `${percent}%`,
-            background: soft ? ui.accentSoft : ui.accent,
-          }}
-        />
-      </div>
+      <strong className={`truncate text-[17px] font-semibold tabular-nums ${ui.strong}`}>{value || '--'}</strong>
     </div>
   );
 }
 
-export default function StatsCard({ context }) {
-  const { t } = useTranslation();
+export default function WakaTimeCard({ context, lang = 'pt' }) {
   const { darkMode } = useContext(ThemeContext);
-  const ui = darkMode ? THEME.dark : THEME.light;
+  const t = copy[lang] || copy.pt;
+  const ui = darkMode ? UI.dark : UI.light;
 
   const wakatime = context?.wakatime;
-  const days = wakatime?.days || [];
-  const today = days.at(-1);
-  const yesterday = days.at(-2);
+  const week = wakatime?.week || {};
+  const languages = Array.isArray(week.languages) ? week.languages : [];
+  const ok = wakatime?.status === 'ok';
+  const hasData = Boolean(week.totalFormatted || languages.length);
 
   return (
-    <article
-      className="portfolio-card card-surface w-full max-w-sm p-5 transition-colors duration-300"
-      style={{
-        background: ui.card,
-        borderColor: ui.border,
-        color: ui.text,
-        boxShadow: ui.shadow,
-        fontFamily: FONT_SANS,
-      }}
-    >
-      <div className="mb-4 flex items-center gap-3">
-        <Clock size={22} style={{ color: ui.accent }} aria-hidden="true" />
-        <h3 className="card-heading" style={{ color: ui.text }}>
-          {t('cards.wakatime.titulo')}
+    <article className={`portfolio-card my-3 w-full max-w-[800px] rounded-xl border p-6 transition-colors duration-300 ${ui.panel}`}>
+      <div className="mb-5">
+        <h3 className={`flex items-center gap-2 text-lg font-semibold tracking-tight ${ui.strong}`}>
+          <Clock size={20} className={ui.accentText} aria-hidden="true" />
+          {t.title}
         </h3>
+        <p className={`mt-1 text-[12px] ${ui.muted}`}>{t.range}</p>
       </div>
 
-      {wakatime?.status === 'ok' && days.length > 0 ? (
-        <div className="space-y-4">
-          <DayRow
-            label={t('cards.wakatime.hoje')}
-            readable={today?.readable || '0h 0m'}
-            percent={calcPercent(today?.totalSeconds)}
-            ui={ui}
-          />
-          <DayRow
-            label={t('cards.wakatime.ontem')}
-            readable={yesterday?.readable || '0h 0m'}
-            percent={calcPercent(yesterday?.totalSeconds)}
-            soft
-            ui={ui}
-          />
-        </div>
+      {!ok ? (
+        <div className={`rounded-xl border border-dashed py-10 text-center text-sm font-medium ${ui.dashed}`}>{t.unavailable}</div>
+      ) : !hasData ? (
+        <div className={`rounded-xl border border-dashed py-10 text-center text-sm font-medium ${ui.dashed}`}>{t.none}</div>
       ) : (
-        <div
-          className="rounded-lg border border-dashed py-4 text-center text-sm"
-          style={{ color: ui.muted, borderColor: ui.dashed }}
-        >
-          {t('cards.wakatime.indisponivelHoje')}
-        </div>
-      )}
+        <>
+          <div className="card-grid grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <Block ui={ui} icon={<Clock />} label={t.total} value={week.totalFormatted} />
+            <Block ui={ui} icon={<Terminal />} label={t.average} value={week.dailyAverageFormatted} />
+            <Block ui={ui} icon={<Code2 />} label={t.editor} value={week.topEditorName} />
+          </div>
 
-      <footer
-        className="mt-4 flex items-center gap-2 border-t pt-3 text-xs tracking-wide"
-        style={{ borderColor: ui.border, color: ui.muted }}
-      >
-        <TrendingUp size={14} style={{ color: ui.accent }} aria-hidden="true" />
-        {t('cards.wakatime.aoVivo')}
-      </footer>
+          {languages.length > 0 && (
+            <>
+              <h4 className={`mb-3 mt-6 text-[11px] font-bold uppercase tracking-widest ${ui.label}`}>{t.languages}</h4>
+              <ul className="m-0 grid list-none grid-cols-1 gap-3 p-0 min-[420px]:grid-cols-2 md:grid-cols-3">
+                {languages.map((language, index) => {
+                  const percent = language.percent == null ? NaN : Number(language.percent);
+                  const hasPercent = Number.isFinite(percent);
+                  return (
+                    <li
+                      key={`${language.name}-${index}`}
+                      className={`min-w-0 rounded-xl border p-3 transition-all duration-200 ${ui.surface} ${ui.hover}`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <span aria-hidden="true" className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border ${ui.tile}`}>
+                          <LanguageIcon name={language.name} size={20} />
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <p className={`truncate text-[13px] font-bold ${ui.strong}`}>{language.name}</p>
+                          <p className={`text-[11px] tabular-nums ${ui.muted}`}>{language.formatted ?? '—'}</p>
+                        </div>
+                        {hasPercent && (
+                          <span className={`shrink-0 text-[13px] font-semibold tabular-nums ${ui.accentText}`}>{percent.toFixed(1)}%</span>
+                        )}
+                      </div>
+                      {hasPercent && (
+                        <div
+                          role="progressbar"
+                          aria-label={language.name}
+                          aria-valuemin={0}
+                          aria-valuemax={100}
+                          aria-valuenow={Math.round(percent)}
+                          className="mt-2.5 h-1.5 overflow-hidden rounded-full"
+                          style={{ background: ui.track }}
+                        >
+                          <div className="h-full rounded-full" style={{ width: `${Math.min(100, Math.max(0, percent))}%`, background: ui.accent }} />
+                        </div>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            </>
+          )}
+        </>
+      )}
     </article>
   );
 }

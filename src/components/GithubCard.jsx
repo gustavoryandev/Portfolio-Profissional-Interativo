@@ -25,16 +25,16 @@ const THEME = {
     shadow: '0 4px 16px -8px rgba(0,0,0,0.3)',
   },
   light: {
-    page: '#F4F4F5',
+    page: '#F8FAFF',
     card: '#FFFFFF',
-    border: '#E5E7EB',
+    border: '#CBD5E1',
     hoverBorder: '#0D6EFD',
     text: '#121212',
     muted: '#52525B',
     accent: '#0D6EFD',
-    iconBg: '#050E17',
-    iconFg: '#0D6EFD',
-    ring: '#121212',
+    iconBg: '#E8F0FE',
+    iconFg: '#1D4ED8',
+    ring: '#DBEAFE',
     shadow: '0 4px 16px -8px rgba(18,18,18,0.1)',
   },
 };
@@ -54,13 +54,13 @@ function StatBox({ icon, label, value, sub, t }) {
     >
       <div className="flex items-center gap-2 mb-3">
         <span
-          className="flex h-7 w-7 items-center justify-center rounded-full"
+          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full"
           style={{ background: t.iconBg, color: t.iconFg }}
         >
           {React.cloneElement(icon, { size: 13, strokeWidth: 2.5 })}
         </span>
         <span
-          className="text-[10px] font-bold tracking-[0.18em] uppercase"
+          className="min-w-0 break-words text-[10px] font-bold tracking-[0.08em] uppercase"
           style={{ color: t.muted, fontFamily: FONT_SANS }}
         >
           {label}
@@ -113,8 +113,8 @@ export default function GithubCard({ context, lang = 'pt' }) {
       <div className="mb-6 mt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3.5">
           <div
-            className="flex h-12 w-12 items-center justify-center rounded-xl shadow-md"
-            style={{ background: THEME.dark.iconBg, color: THEME.dark.accent }}
+            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl shadow-md"
+            style={{ background: t.iconBg, color: t.iconFg }}
           >
             <Github className="h-6 w-6" />
           </div>
@@ -157,7 +157,7 @@ export default function GithubCard({ context, lang = 'pt' }) {
 
       {/* MÉTRICAS */}
       {isConfigured ? (
-        <div className="card-grid grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="card-grid github-metrics-grid grid grid-cols-2 sm:grid-cols-4 gap-3">
           <StatBox t={t} icon={<Zap />} label={tr('cards.github.contribuicoes')} value={stats.contributions} sub={tr('cards.github.ultimos12Meses')} />
           <StatBox t={t} icon={<GitCommit />} label={tr('cards.github.commits')} value={stats.commits} sub={tr('cards.github.ultimos12Meses')} />
           <StatBox t={t} icon={<GitPullRequest />} label={tr('cards.github.pullRequests')} value={stats.prs} sub={tr('cards.github.noTotal')} />
@@ -183,7 +183,7 @@ export default function GithubCard({ context, lang = 'pt' }) {
       {/* RODAPÉ */}
       <div className="mt-6 flex items-center justify-between border-t pt-4" style={{ borderColor: t.border }}>
         <span
-          className="flex items-center gap-2 text-[10px] font-bold tracking-[0.18em] uppercase"
+          className="flex items-center gap-2 text-[10px] font-bold tracking-[0.08em] uppercase"
           style={{ color: t.muted }}
         >
           <span className="h-1.5 w-1.5 rounded-full animate-pulse" style={{ background: t.accent }} />

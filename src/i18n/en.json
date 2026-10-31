@@ -30,7 +30,12 @@
       "When is Galo's next match?",
       "What is his chess rating?"
     ],
-    "fallbackIdioma": "I can only communicate in Portuguese or English. Please choose one of these languages."
+    "fallbackIdioma": "I can only communicate in Portuguese or English. Please choose one of these languages.",
+    "metricsSummary": "Here is the GitHub summary.\n[GITHUB_CARD]\nWould you like to see the detailed GitHub and WakaTime metrics?",
+    "metricsDeclined": "Okay, we will keep just the summary.",
+    "metricsDetails": "Here are the available detailed metrics.\n[GITHUB_ACTIVITY_CARD]\n[GITHUB_LANGUAGES_CARD]\n[STATS_CARD]",
+    "translating": "Translating…",
+    "translationFailed": "Translation unavailable. Switch languages to retry."
   },
   "navbar": {
     "baixarCv": "Download Resume",
@@ -61,7 +66,10 @@
       "deDias": "out of {{count}} days",
       "editor": "Editor",
       "percentualTempo": "{{percent}}% of the time",
-      "indisponivel": "WakaTime metrics are currently unavailable."
+      "indisponivel": "WakaTime metrics are currently unavailable.",
+      "operatingSystems": "Operating systems",
+      "editors": "Code editors",
+      "noBreakdown": "No data for this period."
     },
     "github": {
       "titulo": "GitHub Statistics",

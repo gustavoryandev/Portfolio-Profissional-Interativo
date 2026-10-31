@@ -34,7 +34,9 @@ test('integration refresh completes without a Gemini key or model request', asyn
     calls++;
     assert.match(config.url, /^https:\/\/wakatime\.com\//);
     return { status: 200, statusText: 'OK', headers: {}, config,
-      data: { data: [{ grand_total: { total_seconds: 3600 }, languages: [{ name: 'Java', total_seconds: 3600 }], editors: [] }] } };
+      data: { data: { total_seconds: 3600, is_up_to_date: true, daily_average: 3600, days_minus_holidays: 1, days_including_holidays: 1,
+        languages: [{ name: 'Java', total_seconds: 3600, percent: 100 }], editors: [{ name: 'VS Code', total_seconds: 3600, percent: 100 }], operating_systems: [{ name: 'Linux', total_seconds: 3600, percent: 100 }] } } };
+
   };
   try {
     const res = response();
@@ -42,9 +44,102 @@ test('integration refresh completes without a Gemini key or model request', asyn
     assert.equal(res.code, 200);
     assert.equal(res.body.liveContext.wakatime.status, 'ok');
     assert.equal(res.body.liveContext.wakatime.languages[0].name, 'Java');
-    assert.equal(calls, 1);
+    assert.equal(res.body.liveContext.wakatime.editors[0].percent, '100.0');
+    assert.equal(res.body.liveContext.wakatime.operatingSystems[0].name, 'Linux');
+    assert.equal(calls, 2);
     assert.equal(JSON.stringify(res.body).includes('test-only'), false);
     assert.equal(res.body.model, undefined);
     assert.equal(res.headers['Cache-Control'], 'no-store');
+  } finally { mockAdapter = undefined; }
+});
+
+test('metrics summary and confirmation bypass the model and select only the requested source', async () => {
+  let res = response();
+  await handler({ method: 'POST', body: { userMessage: 'Show GitHub and WakaTime metrics', lang: 'en' } }, res);
+  assert.equal(res.code, 200);
+  assert.equal(res.body.translationKey, 'chat.metricsSummary');
+  assert.deepEqual(res.body.response.match(/\[[A-Z_]+\]/g), ['[GITHUB_CARD]']);
+  assert.equal(res.body.liveContext.wakatime, undefined);
+  res = response();
+  await handler({ method: 'POST', body: { userMessage: 'Yes please', lang: 'en', chatHistory: [{ sender: 'ai', translationKey: 'chat.metricsSummary' }] } }, res);
+  assert.equal(res.code, 200);
+  assert.equal(res.body.translationKey, 'chat.metricsDetails');
+  assert.deepEqual(res.body.response.match(/\[[A-Z_]+\]/g), ['[GITHUB_ACTIVITY_CARD]', '[GITHUB_LANGUAGES_CARD]', '[STATS_CARD]']);
+  assert.equal(res.body.liveContext.wakatime.operatingSystems[0].name, 'Linux');
+});
+
+test('WakaTime-only requests also start with the existing summary', async () => {
+  for (const userMessage of ['me mostre as metricas do waka time', 'WakaTime metrics', 'Show Waka-Time metrics', 'tempo de código', 'coding time']) {
+    const res = response();
+    await handler({ method: 'POST', body: { userMessage, lang: 'pt' } }, res);
+    assert.equal(res.body.translationKey, 'chat.metricsSummary');
+    assert.deepEqual(res.body.response.match(/\[[A-Z_]+\]/g), ['[GITHUB_CARD]']);
+    assert.equal(res.body.liveContext.wakatime, undefined);
+  }
+});
+
+test('explicit GitHub and combined requests retain the summary even after a pending offer', async () => {
+  for (const userMessage of ['Show GitHub metrics', 'Mostre as métricas do GitHub e WakaTime']) {
+    const res = response();
+    await handler({ method: 'POST', body: { userMessage, chatHistory: [{ sender: 'ai', translationKey: 'chat.metricsSummary' }] } }, res);
+    assert.equal(res.code, 200);
+    assert.equal(res.body.translationKey, 'chat.metricsSummary');
+    assert.deepEqual(res.body.response.match(/\[[A-Z_]+\]/g), ['[GITHUB_CARD]']);
+    assert.equal(res.body.liveContext.wakatime, undefined);
+  }
+});
+
+test('translation protects code, URLs and card markers before calling the model', async () => {
+  const originalFetch = globalThis.fetch;
+  process.env.GEMINI_API_KEY = 'test-only';
+  mockAdapter = async config => ({ status: 200, config, data: { models: [{name:'models/gemini-2.5-flash',supportedGenerationMethods:['generateContent']}] } });
+  let invalid = false;
+  globalThis.fetch = async (_url, options) => {
+    const body = JSON.parse(options.body);
+    const text = body.contents[0].parts[0].text;
+    assert.equal(text.includes('const secret = 1'), false);
+    assert.equal(text.includes('[GITHUB_CARD]'), false);
+    const translated = invalid ? 'Missing placeholders' : text.replace('Olá', 'Hello');
+    return new Response(JSON.stringify({ candidates: [{ content: {parts:[{text:translated}],role:'model'},finishReason:'STOP' }] }), {status:200,headers:{'content-type':'application/json'}});
+  };
+  try {
+    const text = 'Olá **amigo**.\n```js\nconst secret = 1;\n```\n[Site](https://example.com)\n[GITHUB_CARD]';
+    const res = response();
+    await handler({method:'POST',body:{action:'translate',text,lang:'en'}},res);
+    assert.equal(res.code,200);
+    assert.equal(res.body.text,text.replace('Olá','Hello'));
+    invalid = true;
+    const rejected = response();
+    await handler({method:'POST',body:{action:'translate',text,lang:'en'}},rejected);
+    assert.equal(rejected.code,502);
+  } finally { globalThis.fetch = originalFetch; process.env.GEMINI_API_KEY = ''; mockAdapter = undefined; }
+});
+
+test('partial WakaTime results retain the total without inventing breakdowns', async () => {
+  const savedAdapter = axios.defaults.adapter;
+  axios.defaults.adapter = async config => {
+    if (config.url.endsWith('/stats/all_time')) throw {response:{status:429}};
+    assert.ok(config.url.endsWith('/all_time_since_today'));
+    return {status:202,config,data:{data:{total_seconds:7200,is_up_to_date:false}}};
+  };
+  const {default: isolatedHandler} = await import('../api/chat.js?partial-test');
+  axios.defaults.adapter = savedAdapter;
+  const res = response();
+  await isolatedHandler({method:'POST',body:{action:'refreshContext',sources:['wakatime']}},res);
+  assert.equal(res.body.liveContext.wakatime.summary.totalFormatted,'2h 0m');
+  assert.deepEqual(res.body.liveContext.wakatime.languages,[]);
+  assert.equal(res.body.liveContext.wakatime.stale,true);
+  assert.equal(res.body.liveContext.wakatime.reason,'rate_limited');
+});
+
+test('declining details makes no additional integration or model request', async () => {
+  mockAdapter = () => { throw new Error('No request expected'); };
+  try {
+    const res = response();
+    await handler({method:'POST',body:{userMessage:'Não, obrigado',chatHistory:[{sender:'ai',translationKey:'chat.metricsSummary'}]}},res);
+    assert.equal(res.code,200);
+    assert.equal(res.body.translationKey,'chat.metricsDeclined');
+    assert.equal(res.body.liveContext,undefined);
+    assert.equal(res.body.response.includes('_CARD]'),false);
   } finally { mockAdapter = undefined; }
 });

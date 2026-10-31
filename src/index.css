@@ -260,7 +260,7 @@ letter-spacing: 0.12em;
   background: linear-gradient(90deg, #ffffffb3, #ffffff33), url('/header-light.png') center / cover;
 }
 :root:not(.dark) .chat-messages {
-  background: linear-gradient(#ffffff26, #ffffff40), url('/hero-light.png') center / cover;
+  background: linear-gradient(#ffffffa6, #ffffffbf), url('/hero-light.png') center / cover;
 }
 
 /* Card system: scoped to portfolio cards; navigation and chat controls keep their layout. */
@@ -389,3 +389,5 @@ a.project-tech:hover { border-color: var(--accent); background: var(--panel); }
 @media (max-width: 639px) {
   .profile-avatar { --avatar-size: 72px; }
 }
+
+.portfolio-card .github-metrics-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 155px), 1fr)); }
