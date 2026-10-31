@@ -4,6 +4,7 @@ node_modules/
 # Build output and deployment metadata
 dist/
 .vercel/
+.vite/
 backend/target/
 frontend/node_modules/
 frontend/dist/
@@ -12,6 +13,10 @@ frontend/dist/
 *.log
 *.pid
 *.pid.lock
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 
 # Environment variables and local secrets
 .env
@@ -36,4 +41,12 @@ Desktop.ini
 .cache/
 .eslintcache
 coverage/
+playwright-report/
+test-results/
 *.tsbuildinfo
+
+# Package manager and temporary files
+.pnpm-store/
+*.tgz
+*.swp
+*.swo

@@ -148,3 +148,9 @@ GITHUB_USERNAME=gustavoryan-del
 GITHUB_TOKEN=seu_github_token
 CANVAS_API_TOKEN=seu_canvas_token
 CANVAS_BASE_URL=[https://canvas.instructure.com](https://canvas.instructure.com)
+
+```
+
+## Contact email and autoresponder
+
+Both contact interfaces use the existing EmailJS browser SDK, public key and templates. See [contact integration details](docs/contact-email.md). No private credentials are sent to the browser.
