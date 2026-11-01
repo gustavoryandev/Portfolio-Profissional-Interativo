@@ -33,7 +33,6 @@ test('integration refresh completes without a Gemini key or model request', asyn
   mockAdapter = async config => {
     calls++;
     assert.match(config.url, /^https:\/\/wakatime\.com\//);
-    if (config.url.endsWith('/summaries')) return {status:200, config, data:{data:[{range:{date:config.params.end},grand_total:{total_seconds:0}}]}};
     return { status: 200, statusText: 'OK', headers: {}, config,
       data: { data: { total_seconds: 3600, is_up_to_date: true, daily_average: 3600, days_minus_holidays: 1, days_including_holidays: 1,
         languages: [{ name: 'Java', total_seconds: 3600, percent: 100 }], editors: [{ name: 'VS Code', total_seconds: 3600, percent: 100 }], operating_systems: [{ name: 'Linux', total_seconds: 3600, percent: 100 }] } } };
@@ -47,9 +46,7 @@ test('integration refresh completes without a Gemini key or model request', asyn
     assert.equal(res.body.liveContext.wakatime.languages[0].name, 'Java');
     assert.equal(res.body.liveContext.wakatime.editors[0].percent, '100.0');
     assert.equal(res.body.liveContext.wakatime.operatingSystems[0].name, 'Linux');
-    assert.equal(calls, 4);
-    assert.equal(res.body.liveContext.wakatime.days[0].totalSeconds, null);
-    assert.equal(res.body.liveContext.wakatime.days[1].totalSeconds, 0);
+    assert.equal(calls, 2);
     assert.equal(JSON.stringify(res.body).includes('test-only'), false);
     assert.equal(res.body.model, undefined);
     assert.equal(res.headers['Cache-Control'], 'no-store');
@@ -61,13 +58,13 @@ test('metrics summary and confirmation bypass the model and select only the requ
   await handler({ method: 'POST', body: { userMessage: 'Show GitHub and WakaTime metrics', lang: 'en' } }, res);
   assert.equal(res.code, 200);
   assert.equal(res.body.translationKey, 'chat.metricsSummary');
-  assert.deepEqual(res.body.response.match(/\[[A-Z_]+\]/g), ['[GITHUB_CARD]', '[WAKATIME_CARD]']);
-  assert.equal(res.body.liveContext.wakatime.status, 'ok');
+  assert.deepEqual(res.body.response.match(/\[[A-Z_]+\]/g), ['[GITHUB_CARD]']);
+  assert.equal(res.body.liveContext.wakatime, undefined);
   res = response();
-  await handler({ method: 'POST', body: { userMessage: 'Yes please', lang: 'en', chatHistory: [{ sender: 'ai', translationKey: 'chat.metricsSummary', text: '[GITHUB_CARD] [WAKATIME_CARD]' }] } }, res);
+  await handler({ method: 'POST', body: { userMessage: 'Yes please', lang: 'en', chatHistory: [{ sender: 'ai', translationKey: 'chat.metricsSummary' }] } }, res);
   assert.equal(res.code, 200);
-  assert.equal(res.body.translationKey, undefined);
-  assert.deepEqual(res.body.response.match(/\[[A-Z_]+\]/g), ['[GITHUB_CARD]', '[GITHUB_ACTIVITY_CARD]', '[GITHUB_LANGUAGES_CARD]', '[REPOSITORIES_CARD]', '[STATS_CARD]']);
+  assert.equal(res.body.translationKey, 'chat.metricsDetails');
+  assert.deepEqual(res.body.response.match(/\[[A-Z_]+\]/g), ['[GITHUB_ACTIVITY_CARD]', '[GITHUB_LANGUAGES_CARD]', '[STATS_CARD]']);
   assert.equal(res.body.liveContext.wakatime.operatingSystems[0].name, 'Linux');
 });
 
@@ -76,8 +73,8 @@ test('WakaTime-only requests also start with the existing summary', async () => 
     const res = response();
     await handler({ method: 'POST', body: { userMessage, lang: 'pt' } }, res);
     assert.equal(res.body.translationKey, 'chat.metricsSummary');
-    assert.deepEqual(res.body.response.match(/\[[A-Z_]+\]/g), ['[GITHUB_CARD]', '[WAKATIME_CARD]']);
-    assert.equal(res.body.liveContext.wakatime.status, 'ok');
+    assert.deepEqual(res.body.response.match(/\[[A-Z_]+\]/g), ['[GITHUB_CARD]']);
+    assert.equal(res.body.liveContext.wakatime, undefined);
   }
 });
 
@@ -87,8 +84,8 @@ test('explicit GitHub and combined requests retain the summary even after a pend
     await handler({ method: 'POST', body: { userMessage, chatHistory: [{ sender: 'ai', translationKey: 'chat.metricsSummary' }] } }, res);
     assert.equal(res.code, 200);
     assert.equal(res.body.translationKey, 'chat.metricsSummary');
-    assert.deepEqual(res.body.response.match(/\[[A-Z_]+\]/g), ['[GITHUB_CARD]', '[WAKATIME_CARD]']);
-    assert.equal(res.body.liveContext.wakatime.status, 'ok');
+    assert.deepEqual(res.body.response.match(/\[[A-Z_]+\]/g), ['[GITHUB_CARD]']);
+    assert.equal(res.body.liveContext.wakatime, undefined);
   }
 });
 

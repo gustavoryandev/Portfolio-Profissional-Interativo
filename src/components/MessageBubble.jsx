@@ -1,12 +1,10 @@
 // src/components/MessageBubble.jsx
-import { lazy, memo, Suspense, useContext, useEffect, useMemo, useState } from 'react';
+import { lazy, memo, Suspense, useEffect, useMemo, useState } from 'react';
 import { AlertTriangle, Check, Copy, Sparkles, User } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { ThemeContext } from '../context/ThemeContext';
 import SpotifyCard from './SpotifyCard';
 import GithubCard from './GithubCard';
 import StatsCard from './StatsCard';
-import WakaTimeCard from './WakaTimeCard';
 import CanvasCard from './CanvasCard';
 import GaloCard from './GaloCard';
 import ContactSection from './ContactSection';
@@ -29,7 +27,6 @@ const cards = {
   '[SPOTIFY_CARD]': SpotifyCard,
   '[GITHUB_CARD]': GithubCard,
   '[STATS_CARD]': StatsCard,
-  '[WAKATIME_CARD]': WakaTimeCard,
   '[CANVAS_CARD]': CanvasCard,
   '[CONTACT_FORM]': ContactSection,
   '[PROJECTS_CARD]': ProjectsCard,
@@ -52,54 +49,24 @@ const TAG_SPLIT = new RegExp(
   `(${[...Object.keys(cards).map(escapeRegExp), GALO_PATTERN].join('|')})`,
 );
 
-// Mensagens com texto vindo do i18n: a ordem dos cards é definida aqui, não no JSON de idioma.
-const METRIC_CARDS = {
-  'chat.metricsSummary': ['[GITHUB_CARD]', '[WAKATIME_CARD]'],
-  'chat.metricsDetails': ['[GITHUB_CARD]', '[GITHUB_ACTIVITY_CARD]', '[GITHUB_LANGUAGES_CARD]', '[STATS_CARD]'],
-};
-
-function withMetricCards(key, text) {
-  const tags = METRIC_CARDS[key];
-  if (!tags) return text;
-  const [intro, ...rest] = text.split(TAG_SPLIT)
-    .filter((_, index) => index % 2 === 0)
-    .map((part) => part.trim())
-    .filter(Boolean);
-  return [intro, tags.join('\n'), ...rest].filter(Boolean).join('\n');
-}
-
 // Bloco de código cercado por ``` (com linguagem opcional)
 const FENCE = /```([\w+-]*)[ \t]*\n([\s\S]*?)```/g;
 // Código inline `assim`, negrito **assim**
 const INLINE = /(`[^`\n]+`|\*\*[^\n]+?\*\*|\[[^\]\n]+\]\(https?:\/\/[^\s)]+\))/;
 const BULLET = /^\s*[-*•]\s+/;
 
-// Tokens do design system Alvinegro + Azul
+// Tokens do design system Alvinegro + Azul.
+// Temas via variantes `dark:` (a classe `dark` é aplicada em <html> pelo ThemeProvider):
+// o bubble não assina o contexto e o memo evita re-render na troca de tema.
 const UI = {
-  dark: {
-    ai: 'border-[#153857] bg-[#0b1624] text-white shadow-lg shadow-black/40',
-    user: 'border-[#224566] bg-[#10243a] text-white',
-    bold: 'font-bold text-white',
-    bullet: 'bg-brand-400',
-    avatar: 'border-[#2A2A2A] bg-[#1E1E1E] text-brand-400',
-    userAvatar: 'border-[#2A2A2A] bg-[#2A2A2A] text-white',
-    error: 'border-red-500/50 bg-[#1E1E1E] text-red-200',
-    errorIcon: 'text-red-400',
-    copy: 'text-zinc-400 hover:text-brand-400 focus-visible:ring-brand-400/60',
-    focusRing: 'focus-visible:ring-brand-400/60',
-  },
-  light: {
-    ai: 'border-[#E5E7EB] bg-white text-[#121212] shadow-sm',
-    user: 'border-transparent bg-[#0A0A0A] text-white',
-    bold: 'font-bold text-[#121212]',
-    bullet: 'bg-[#0D6EFD]',
-    avatar: 'border-[#E5E7EB] bg-white text-[#1d4ed8]',
-    userAvatar: 'border-transparent bg-[#0A0A0A] text-white',
-    error: 'border-red-300 bg-red-50 text-red-900',
-    errorIcon: 'text-red-600',
-    copy: 'text-gray-500 hover:text-[#1d4ed8] focus-visible:ring-[#0D6EFD]/60',
-    focusRing: 'focus-visible:ring-[#0D6EFD]/60',
-  },
+  ai: 'border-[#E5E7EB] bg-white text-[#121212] shadow-sm dark:border-[#153857] dark:bg-[#0b1624] dark:text-white dark:shadow-lg dark:shadow-black/40',
+  user: 'border-transparent bg-[#0A0A0A] text-white dark:border-[#224566] dark:bg-[#10243a]',
+  bold: 'font-bold text-[#121212] dark:text-white',
+  bullet: 'bg-[#0D6EFD] dark:bg-brand-400',
+  avatar: 'border-[#E5E7EB] bg-white text-[#1d4ed8] dark:border-[#2A2A2A] dark:bg-[#1E1E1E] dark:text-brand-400',
+  userAvatar: 'border-transparent bg-[#0A0A0A] text-white dark:border-[#2A2A2A] dark:bg-[#2A2A2A]',
+  error: 'border-red-300 bg-red-50 text-red-900 dark:border-red-500/50 dark:bg-[#1E1E1E] dark:text-red-200',
+  errorIcon: 'text-red-600 dark:text-red-400',
 };
 
 const INLINE_CODE = 'rounded bg-[#0A0A0A] px-1.5 py-0.5 font-mono text-[0.85em] text-white';
@@ -224,11 +191,11 @@ function CodeBlock({ lang, code }) {
   );
 }
 
-function Avatar({ ui, isUser, children }) {
+function Avatar({ isUser, children }) {
   return (
     <div
       aria-hidden="true"
-      className={`mt-2 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border ${isUser ? ui.userAvatar : ui.avatar}`}
+      className={`mt-2 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border ${isUser ? UI.userAvatar : UI.avatar}`}
     >
       {children}
     </div>
@@ -238,8 +205,7 @@ function Avatar({ ui, isUser, children }) {
 function MessageBubble({ message, liveContext = {}, refreshing = [], onRefresh }) {
   const { i18n } = useTranslation();
   const uiLanguage = i18n.language.startsWith('en') ? 'en' : 'pt';
-  const { darkMode } = useContext(ThemeContext);
-  const ui = darkMode ? UI.dark : UI.light;
+  const ui = UI;
   const isUser = message?.sender === 'user';
   const isError = message?.tone === 'error';
   const original = message?.text || '';
@@ -255,7 +221,7 @@ function MessageBubble({ message, liveContext = {}, refreshing = [], onRefresh }
     }).catch(() => { if (active) setTranslationFailed(true); });
     return () => { active = false; };
   }, [original, uiLanguage, sourceLanguage, isUser, message.translationKey, translations]);
-  const text = isUser ? original : message.translationKey ? withMetricCards(message.translationKey, i18n.t(message.translationKey))
+  const text = isUser ? original : message.translationKey ? i18n.t(message.translationKey)
     : sourceLanguage === uiLanguage ? original : translations[uiLanguage] || original;
   const translating = !isUser && !message.translationKey && sourceLanguage !== uiLanguage && !translations[uiLanguage];
 
@@ -271,7 +237,7 @@ function MessageBubble({ message, liveContext = {}, refreshing = [], onRefresh }
             <p className="whitespace-pre-wrap break-words">{renderInline(text, 'font-bold')}</p>
           </div>
         </div>
-        <Avatar ui={ui} isUser>
+        <Avatar isUser>
           <User className="h-[18px] w-[18px]" />
         </Avatar>
       </div>
@@ -281,7 +247,7 @@ function MessageBubble({ message, liveContext = {}, refreshing = [], onRefresh }
 
   return (
     <div className={`my-2 flex w-full justify-start gap-3 ${hasCards ? 'message-row-with-cards' : ''}`}>
-      <Avatar ui={ui}>
+      <Avatar>
         {isError
           ? <AlertTriangle className={`h-[18px] w-[18px] ${ui.errorIcon}`} />
           : <Sparkles className="h-[18px] w-[18px]" />}

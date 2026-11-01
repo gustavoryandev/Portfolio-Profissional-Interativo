@@ -1,160 +1,150 @@
-import { useContext } from 'react';
-import { Clock, Code2, Terminal, TrendingUp } from 'lucide-react';
+import React, { useContext } from 'react';
+import { Clock, Code2, Terminal } from 'lucide-react';
 import { ThemeContext } from '../context/ThemeContext';
-
-const FONT_SANS = "Inter, 'Geist Sans', Roboto, system-ui, sans-serif";
+import LanguageIcon from './LanguageIcon';
 
 const copy = {
   pt: {
     title: 'WakaTime · esta semana',
     range: 'Últimos 7 dias',
-    total: 'Total',
+    total: 'Tempo total',
     average: 'Média diária',
     editor: 'Editor mais usado',
-    languages: 'Linguagens',
-    empty: 'Sem atividade registrada na semana.',
-    unavailable: 'Dados da semana indisponíveis no momento.',
-    live: 'Sincronizado ao vivo',
+    languages: 'Linguagens da semana',
+    none: 'Sem atividade registrada na semana.',
+    unavailable: 'Dados do WakaTime indisponíveis no momento.',
   },
   en: {
     title: 'WakaTime · this week',
     range: 'Last 7 days',
-    total: 'Total',
+    total: 'Total time',
     average: 'Daily average',
-    editor: 'Top editor',
-    languages: 'Languages',
-    empty: 'No activity recorded this week.',
-    unavailable: 'Weekly data is unavailable at the moment.',
-    live: 'Synced live',
+    editor: 'Most-used editor',
+    languages: 'Languages this week',
+    none: 'No activity recorded this week.',
+    unavailable: 'WakaTime data is unavailable at the moment.',
   },
 };
 
-// Tokens do design system (Alvinegro + Azul)
-const THEME = {
+const UI = {
   dark: {
-    card: '#0B192B',
-    border: '#163A59',
-    text: '#FFFFFF',
-    muted: '#A5BDDF',
+    panel: 'border-[#163A59] bg-[#050E17] text-gray-200 shadow-sm',
+    surface: 'bg-[#0B192B] border-[#163A59]',
+    strong: 'text-white',
+    label: 'text-zinc-400',
+    muted: 'text-[var(--muted)]',
+    accentText: 'text-brand-400',
+    tile: 'border-[var(--line)] bg-[#050E17]',
+    hover: 'hover:border-brand-400/50 hover:shadow-md',
     accent: '#38BDF8',
     track: '#163A59',
-    dashed: '#3F3F46',
-    shadow: '0 20px 40px -12px rgba(0, 0, 0, 0.6)',
+    dashed: 'border-[var(--line)] text-[var(--muted)]',
   },
   light: {
-    card: '#FFFFFF',
-    border: '#E5E7EB',
-    text: '#121212',
-    muted: '#52525B',
+    panel: 'border-gray-200 bg-white text-gray-800 shadow-sm',
+    surface: 'bg-slate-50 border-slate-200',
+    strong: 'text-gray-900',
+    label: 'text-gray-500',
+    muted: 'text-gray-500',
+    accentText: 'text-[#1d4ed8]',
+    tile: 'border-[#E5E7EB] bg-[#F4F4F5]',
+    hover: 'hover:border-[#0D6EFD]/60 hover:shadow-md',
     accent: '#0D6EFD',
     track: '#E5E7EB',
-    dashed: '#D4D4D8',
-    shadow: '0 10px 25px -8px rgba(18, 18, 18, 0.15)',
+    dashed: 'border-gray-300 text-zinc-400',
   },
 };
 
-function Metric({ icon, label, value, ui }) {
+function Block({ icon, label, value, ui }) {
   return (
-    <div className="flex min-w-0 flex-col rounded-xl border p-3" style={{ borderColor: ui.border }}>
-      <div className="mb-1 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest" style={{ color: ui.muted }}>
-        <span style={{ color: ui.accent }} aria-hidden="true">{icon}</span>
+    <div className={`flex min-w-0 flex-col rounded-xl border p-3 ${ui.surface}`}>
+      <div className={`mb-1 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest ${ui.label}`}>
+        {React.cloneElement(icon, { size: 12, className: ui.accentText, 'aria-hidden': true })}
         {label}
       </div>
-      <strong className="truncate text-[17px] font-semibold tabular-nums" style={{ color: ui.text }}>
-        {value ?? '--'}
-      </strong>
+      <strong className={`truncate text-[17px] font-semibold tabular-nums ${ui.strong}`}>{value || '--'}</strong>
     </div>
   );
 }
 
 export default function WakaTimeCard({ context, lang = 'pt' }) {
   const { darkMode } = useContext(ThemeContext);
-  const ui = darkMode ? THEME.dark : THEME.light;
   const t = copy[lang] || copy.pt;
+  const ui = darkMode ? UI.dark : UI.light;
 
   const wakatime = context?.wakatime;
-  const week = wakatime?.status === 'ok' ? wakatime.week : null;
-  const hasActivity = Boolean(week) && Number(week.totalSeconds) > 0;
-  const languages = Array.isArray(week?.languages) ? week.languages : [];
+  const week = wakatime?.week || {};
+  const languages = Array.isArray(week.languages) ? week.languages : [];
+  const ok = wakatime?.status === 'ok';
+  const hasData = Boolean(week.totalFormatted || languages.length);
 
   return (
-    <article
-      className="portfolio-card card-surface w-full max-w-[700px] p-5 transition-colors duration-300"
-      style={{
-        background: ui.card,
-        borderColor: ui.border,
-        color: ui.text,
-        boxShadow: ui.shadow,
-        fontFamily: FONT_SANS,
-      }}
-    >
-      <div className="mb-4 flex items-center gap-3">
-        <Clock size={22} style={{ color: ui.accent }} aria-hidden="true" />
-        <div className="min-w-0">
-          <h3 className="card-heading" style={{ color: ui.text }}>{t.title}</h3>
-          <p className="text-[11px]" style={{ color: ui.muted }}>{t.range}</p>
-        </div>
+    <article className={`portfolio-card my-3 w-full max-w-[800px] rounded-xl border p-6 transition-colors duration-300 ${ui.panel}`}>
+      <div className="mb-5">
+        <h3 className={`flex items-center gap-2 text-lg font-semibold tracking-tight ${ui.strong}`}>
+          <Clock size={20} className={ui.accentText} aria-hidden="true" />
+          {t.title}
+        </h3>
+        <p className={`mt-1 text-[12px] ${ui.muted}`}>{t.range}</p>
       </div>
 
-      {hasActivity ? (
-        <div className="space-y-4">
+      {!ok ? (
+        <div className={`rounded-xl border border-dashed py-10 text-center text-sm font-medium ${ui.dashed}`}>{t.unavailable}</div>
+      ) : !hasData ? (
+        <div className={`rounded-xl border border-dashed py-10 text-center text-sm font-medium ${ui.dashed}`}>{t.none}</div>
+      ) : (
+        <>
           <div className="card-grid grid grid-cols-1 gap-3 sm:grid-cols-3">
-            <Metric ui={ui} icon={<Clock size={12} />} label={t.total} value={week.totalFormatted} />
-            <Metric ui={ui} icon={<Terminal size={12} />} label={t.average} value={week.dailyAverageFormatted} />
-            <Metric
-              ui={ui}
-              icon={<Code2 size={12} />}
-              label={t.editor}
-              value={week.topEditorName ? `${week.topEditorName}${week.topEditorPercent != null ? ` · ${week.topEditorPercent}%` : ''}` : null}
-            />
+            <Block ui={ui} icon={<Clock />} label={t.total} value={week.totalFormatted} />
+            <Block ui={ui} icon={<Terminal />} label={t.average} value={week.dailyAverageFormatted} />
+            <Block ui={ui} icon={<Code2 />} label={t.editor} value={week.topEditorName} />
           </div>
 
           {languages.length > 0 && (
-            <div>
-              <h4 className="mb-2 text-[10px] font-bold uppercase tracking-widest" style={{ color: ui.muted }}>{t.languages}</h4>
-              <ul className="m-0 flex list-none flex-col gap-2.5 p-0">
-                {languages.map((language) => {
-                  const percent = Math.min(100, Math.max(0, Number(language.percent) || 0));
+            <>
+              <h4 className={`mb-3 mt-6 text-[11px] font-bold uppercase tracking-widest ${ui.label}`}>{t.languages}</h4>
+              <ul className="m-0 grid list-none grid-cols-1 gap-3 p-0 min-[420px]:grid-cols-2 md:grid-cols-3">
+                {languages.map((language, index) => {
+                  const percent = language.percent == null ? NaN : Number(language.percent);
+                  const hasPercent = Number.isFinite(percent);
                   return (
-                    <li key={language.name}>
-                      <div className="mb-1 flex justify-between gap-2 text-xs font-medium" style={{ color: ui.text }}>
-                        <span className="truncate">{language.name}</span>
-                        <span className="shrink-0 tabular-nums font-semibold">{language.formatted ?? '--'} · {percent}%</span>
+                    <li
+                      key={`${language.name}-${index}`}
+                      className={`min-w-0 rounded-xl border p-3 transition-all duration-200 ${ui.surface} ${ui.hover}`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <span aria-hidden="true" className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border ${ui.tile}`}>
+                          <LanguageIcon name={language.name} size={20} />
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <p className={`truncate text-[13px] font-bold ${ui.strong}`}>{language.name}</p>
+                          <p className={`text-[11px] tabular-nums ${ui.muted}`}>{language.formatted ?? '—'}</p>
+                        </div>
+                        {hasPercent && (
+                          <span className={`shrink-0 text-[13px] font-semibold tabular-nums ${ui.accentText}`}>{percent.toFixed(1)}%</span>
+                        )}
                       </div>
-                      <div
-                        role="progressbar"
-                        aria-label={language.name}
-                        aria-valuemin={0}
-                        aria-valuemax={100}
-                        aria-valuenow={Math.round(percent)}
-                        className="h-2 overflow-hidden rounded-full"
-                        style={{ background: ui.track }}
-                      >
-                        <div className="h-full rounded-full transition-all duration-1000" style={{ width: `${percent}%`, background: ui.accent }} />
-                      </div>
+                      {hasPercent && (
+                        <div
+                          role="progressbar"
+                          aria-label={language.name}
+                          aria-valuemin={0}
+                          aria-valuemax={100}
+                          aria-valuenow={Math.round(percent)}
+                          className="mt-2.5 h-1.5 overflow-hidden rounded-full"
+                          style={{ background: ui.track }}
+                        >
+                          <div className="h-full rounded-full" style={{ width: `${Math.min(100, Math.max(0, percent))}%`, background: ui.accent }} />
+                        </div>
+                      )}
                     </li>
                   );
                 })}
               </ul>
-            </div>
+            </>
           )}
-        </div>
-      ) : (
-        <div
-          className="rounded-lg border border-dashed py-6 text-center text-sm font-medium"
-          style={{ color: ui.muted, borderColor: ui.dashed }}
-        >
-          {week ? t.empty : t.unavailable}
-        </div>
+        </>
       )}
-
-      <footer
-        className="mt-4 flex items-center gap-2 border-t pt-3 text-xs tracking-wide"
-        style={{ borderColor: ui.border, color: ui.muted }}
-      >
-        <TrendingUp size={14} style={{ color: ui.accent }} aria-hidden="true" />
-        {t.live}
-      </footer>
     </article>
   );
 }
