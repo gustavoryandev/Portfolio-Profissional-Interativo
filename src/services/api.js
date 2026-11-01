@@ -21,8 +21,8 @@ const sendMessage = async (userMessage, lang, chatHistory = [], chatContext = nu
 export default sendMessage;
 
 // Uses the existing backend route but never invokes the model or sends chat text.
-export async function refreshLiveContext(sources, signal) {
-  const response = await axios.post('/api/chat', { action: 'refreshContext', sources }, {
+export async function refreshLiveContext(sources, signal, force = false) {
+  const response = await axios.post('/api/chat', { action: 'refreshContext', sources, force }, {
     signal, timeout: 45000,
   });
   return response.data;

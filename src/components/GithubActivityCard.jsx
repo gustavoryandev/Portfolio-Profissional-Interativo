@@ -1,4 +1,4 @@
-import { memo, useContext, useEffect, useMemo, useState } from 'react';
+import { memo, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Flame, Moon, Sun, Sunrise, Sunset } from 'lucide-react';
 import { ThemeContext } from '../context/ThemeContext';
 
@@ -40,6 +40,7 @@ const TRANSLATIONS = {
     estimation: 'Estimativa com amostra de commits do GitHub • Horário de Brasília',
     sample: 'amostra',
     noCommits: 'Ainda não há commits suficientes na amostra para montar este gráfico.',
+    updatedAt: 'Atualizado às',
     unavailable: 'Métricas de atividade do GitHub indisponíveis ou não configuradas.',
     calendarLabel: 'Calendário de contribuições dos últimos 12 meses',
     madrugada: 'Madrugada',
@@ -82,6 +83,7 @@ const TRANSLATIONS = {
     estimation: 'Estimate from a sample of GitHub commits • Brasília Time',
     sample: 'sample',
     noCommits: 'Not enough commits in the sample to build this chart yet.',
+    updatedAt: 'Updated at',
     unavailable: 'GitHub activity metrics are unavailable or not configured.',
     calendarLabel: 'Contribution calendar for the last 12 months',
     madrugada: 'Late Night',
@@ -315,6 +317,25 @@ function Columns({ items, value, readout, axis, cap, caption, colClass = 'flex-1
   const peak = indexOfMax(values);
   const shown = active ?? peak;
 
+  // Toque: a barra fica selecionada por um instante depois de soltar o dedo e volta ao pico
+  const resetTimer = useRef(null);
+  useEffect(() => () => clearTimeout(resetTimer.current), []);
+  const select = (index) => {
+    clearTimeout(resetTimer.current);
+    setActive(index);
+  };
+  const releaseLater = (event) => {
+    if (event.pointerType === 'mouse') return;
+    clearTimeout(resetTimer.current);
+    resetTimer.current = setTimeout(() => setActive(null), 2500);
+  };
+  // Arrastar o dedo: o toque fica preso à primeira barra, então a barra sob o dedo é achada pela posição
+  const onPointerMove = (event) => {
+    if (event.pointerType === 'mouse') return;
+    const column = document.elementFromPoint(event.clientX, event.clientY)?.closest('[data-col]');
+    if (column) select(Number(column.dataset.col));
+  };
+
   const onKeyDown = (event) => {
     const step = { ArrowRight: 1, ArrowLeft: -1 }[event.key];
     if (!step || !items.length) return;
@@ -335,7 +356,10 @@ function Columns({ items, value, readout, axis, cap, caption, colClass = 'flex-1
         onKeyDown={onKeyDown}
         onBlur={() => setActive(null)}
         onPointerLeave={(e) => { if (e.pointerType === 'mouse') setActive(null); }}
-        className={`flex h-[150px] items-end justify-center border-b pt-6 outline-none ${ui.focus} ${ui.divider}`}
+        onPointerMove={onPointerMove}
+        onPointerUp={releaseLater}
+        onPointerCancel={releaseLater}
+        className={`flex h-[150px] touch-pan-y items-end justify-center border-b pt-6 outline-none ${ui.focus} ${ui.divider}`}
         style={{ gap }}
       >
         {items.map((item, index) => {
@@ -344,9 +368,10 @@ function Columns({ items, value, readout, axis, cap, caption, colClass = 'flex-1
           return (
             <div
               key={index}
+              data-col={index}
               className={`flex h-full items-end ${colClass}`}
-              onPointerEnter={() => setActive(index)}
-              onPointerDown={() => setActive(index)}
+              onPointerEnter={() => select(index)}
+              onPointerDown={() => select(index)}
             >
               <div
                 className={`relative min-h-[2px] w-full rounded-t-[2px] transition-opacity duration-200 ${isPeak ? ui.peak : ui.bar} ${index === shown ? 'opacity-100' : 'opacity-60'}`}
@@ -615,6 +640,11 @@ export default function GithubActivityCard({ context, lang = 'pt' }) {
   const maxDay = Math.max(...weekdays, 1);
   const peakDay = indexOfMax(weekdays);
 
+  /* ---------- Horário da última atualização (fuso de Brasília) ---------- */
+  const updatedLabel = Number.isFinite(github?.updatedAt)
+    ? new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit', timeZone: TIME_ZONE }).format(new Date(github.updatedAt))
+    : null;
+
   /* ---------- Sem dados do GitHub ---------- */
   if (github?.status !== 'ok') {
     return (
@@ -731,9 +761,6 @@ export default function GithubActivityCard({ context, lang = 'pt' }) {
                 <p className="text-[1.1rem] font-bold">
                   {t.peakAt} {f.hour(peakHour)} <span className={`font-normal ${ui.dot}`}>•</span> {f.percent(topPeriod.pct)} {t.commitsAreFrom} {topPeriod.label.toLowerCase()}
                 </p>
-                <p className={`mt-1 text-xs ${ui.sub}`}>
-                  {hourSpan(peakHour, peakHour + 1)} • {f.percent(hourItems[peakHour].pct)} ≈ {f.number(commitsPerHour[peakHour])} {t.commits}
-                </p>
               </div>
 
               <Columns
@@ -794,6 +821,10 @@ export default function GithubActivityCard({ context, lang = 'pt' }) {
           </div>
         )}
       </div>
+
+      {updatedLabel && (
+        <p className={`mt-4 text-center text-[0.7rem] font-medium ${ui.muted}`}>{t.updatedAt} {updatedLabel}</p>
+      )}
     </div>
   );
 }

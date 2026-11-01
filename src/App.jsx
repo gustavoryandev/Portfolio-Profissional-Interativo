@@ -152,7 +152,12 @@ export default function App() {
         model: data.model,
       });
       live.absorb(data.liveContext);
-      void live.refresh(sourcesForText(data.response));
+      const cardSources = sourcesForText(data.response);
+      live.watch(cardSources);
+      // Fontes com falha: recarrega com aviso. Todas as demais: revalida em silêncio,
+      // pois a resposta pode ter saído de um snapshot em cache enquanto o dado novo chegava.
+      void live.refresh(cardSources);
+      void live.refresh(cardSources, true, { silent: true });
     } catch {
       appendMessage({
         id: nextId(),

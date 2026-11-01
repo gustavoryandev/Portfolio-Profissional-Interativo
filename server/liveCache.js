@@ -8,11 +8,16 @@ export function sourceFailure(error) {
 
 export function createLiveCache(ttls, now = Date.now) {
   const entries = new Map();
-  async function get(name, fetcher, { retryFailed = false } = {}) {
+  // Idade mínima do dado para uma atualização forçada valer a pena: protege as APIs externas de excesso de chamadas.
+  const minForceAge = (name) => Math.max(15000, Math.floor((ttls[name] ?? 60000) / 6));
+  async function get(name, fetcher, { retryFailed = false, force = false } = {}) {
     const entry = entries.get(name);
     if (entry?.promise) return entry.promise;
     const degraded = entry?.data?.status === 'error' || entry?.data?.stale;
-    if (entry?.data && entry.expires > now()
+    const age = entry?.data?.updatedAt ? now() - entry.data.updatedAt : Infinity;
+    const limited = entry?.data?.reason === 'rate_limited' && entry.expires > now();
+    const forced = force && !limited && age >= minForceAge(name);
+    if (!forced && entry?.data && entry.expires > now()
       && (!retryFailed || !degraded || entry.data.reason === 'rate_limited')) return entry.data;
 
     const promise = Promise.resolve().then(fetcher).catch(sourceFailure).then(fresh => {
