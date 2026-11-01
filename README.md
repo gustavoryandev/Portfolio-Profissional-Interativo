@@ -1,6 +1,6 @@
 # Portfólio Interativo com IA 👨‍💻
 
-![React](https://img.shields.io/badge/React-19.1.1-007ec6?style=for-the-badge&logo=react&logoColor=white) ![Vite](https://img.shields.io/badge/Vite-7.1.3-007ec6?style=for-the-badge&logo=vite&logoColor=white) ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white) ![Google Gemini](https://img.shields.io/badge/Google_Gemini-8E75B2?style=for-the-badge&logo=google&logoColor=white) ![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white) ![GitHub repo size](https://img.shields.io/github/repo-size/gustavoryan-del/gustavoryan-portfolio?style=for-the-badge&logo=files) ![GitHub stars](https://img.shields.io/github/stars/gustavoryan-del/gustavoryan-portfolio?style=for-the-badge&logo=github) ![GitHub forks](https://img.shields.io/github/forks/gustavoryan-del/gustavoryan-portfolio?style=for-the-badge&logo=git) ![GitHub language count](https://img.shields.io/github/languages/count/gustavoryan-del/gustavoryan-portfolio?style=for-the-badge&logo=javascript) ![GitHub license](https://img.shields.io/github/license/gustavoryan-del/gustavoryan-portfolio?style=for-the-badge&color=007ec6&logo=opensourceinitiative)
+![React](https://img.shields.io/badge/React-19.1.1-007ec6?style=for-the-badge&logo=react&logoColor=white) ![Vite](https://img.shields.io/badge/Vite-7.1.3-007ec6?style=for-the-badge&logo=vite&logoColor=white) ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white) ![Google Gemini](https://img.shields.io/badge/Google_Gemini-8E75B2?style=for-the-badge&logo=google&logoColor=white) ![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white) ![GitHub repo size](https://img.shields.io/github/repo-size/gustavoryandev/gustavoryan-portfolio?style=for-the-badge&logo=files) ![GitHub stars](https://img.shields.io/github/stars/gustavoryandev/gustavoryan-portfolio?style=for-the-badge&logo=github) ![GitHub forks](https://img.shields.io/github/forks/gustavoryandev/gustavoryan-portfolio?style=for-the-badge&logo=git) ![GitHub language count](https://img.shields.io/github/languages/count/gustavoryandev/gustavoryan-portfolio?style=for-the-badge&logo=javascript) ![GitHub license](https://img.shields.io/github/license/gustavoryandev/gustavoryan-portfolio?style=for-the-badge&color=007ec6&logo=opensourceinitiative)
 
 -----
 
@@ -30,8 +30,8 @@
 ## 🔗 Links Úteis
 
 - 🌐 **Demo Online:** [https://gustavoryan.vercel.app](https://gustavoryan.vercel.app)
-- 💻 **Repositório:** [gustavoryan-del/gustavoryan-portfolio](https://github.com/gustavoryan-del/gustavoryan-portfolio)
-- 👤 **Perfil do GitHub:** [gustavoryan-del](https://github.com/gustavoryan-del)
+- 💻 **Repositório:** [gustavoryandev/gustavoryan-portfolio](https://github.com/gustavoryandev/gustavoryan-portfolio)
+- 👤 **Perfil do GitHub:** [gustavoryandev](https://github.com/gustavoryandev)
 - 🏫 **PUC Minas:** [Portal institucional](https://www.pucminas.br/)
 
 ---
@@ -144,7 +144,7 @@ WAKATIME_API_KEY=sua_chave_wakatime
 SPOTIFY_CLIENT_ID=seu_client_id
 SPOTIFY_CLIENT_SECRET=seu_client_secret
 SPOTIFY_REFRESH_TOKEN=seu_refresh_token
-GITHUB_USERNAME=gustavoryan-del
+GITHUB_USERNAME=gustavoryandev
 GITHUB_TOKEN=seu_github_token
 CANVAS_API_TOKEN=seu_canvas_token
 CANVAS_BASE_URL=[https://canvas.instructure.com](https://canvas.instructure.com)

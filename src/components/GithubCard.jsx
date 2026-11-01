@@ -93,7 +93,7 @@ export default function GithubCard({ context, lang = 'pt' }) {
   const profile = github?.profile || {};
   const stats = github?.stats || {};
   const isConfigured = github?.status === 'ok';
-  const login = profile.login || 'gustavoryan-del';
+  const login = profile.login || 'gustavoryandev';
   const profileUrl = `https://github.com/${login}`;
 
   return (

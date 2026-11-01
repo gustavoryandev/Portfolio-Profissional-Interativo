@@ -9,7 +9,7 @@ const FONT_MONO = "'JetBrains Mono', 'Fira Code', ui-monospace, monospace";
 const MAX_VISIBLE = 4;
 const FALLBACK_LANG_COLOR = '#8b949e';
 const HEX = /^#[0-9a-f]{6}$/i;
-const GITHUB_USER = 'gustavoryan-del';
+const GITHUB_USER = 'gustavoryandev';
 const REPOS_URL = `https://github.com/${GITHUB_USER}?tab=repositories`;
 
 const copy = {

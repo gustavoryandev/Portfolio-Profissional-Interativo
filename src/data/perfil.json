@@ -6,7 +6,7 @@
 "semestreAtual": 2,
 "localizacao": "Belo Horizonte, MG - Brasil",
 "email": "gryangomesguedes@gmail.com",
-"github": "gustavoryan-del",
+"github": "gustavoryandev",
 "linkedin": "https://linkedin.com/in/gryangomesguedes",
 "time": "Clube Atlético Mineiro (Galo)",
 "bio": {
@@ -56,7 +56,7 @@
 },
 "image": null,
 "techs": ["React", "Vite", "Tailwind CSS", "Gemini API", "i18next"],
-"githubUrl": "https://github.com/gustavoryan-del/"
+"githubUrl": "https://github.com/gustavoryandev/"
 },
 {
 "id": "geosolar",
@@ -66,7 +66,7 @@
 },
 "image": null,
 "techs": ["Java", "Spring Boot", "Thymeleaf", "MVC"],
-"githubUrl": "https://github.com/gustavoryan-del"
+"githubUrl": "https://github.com/gustavoryandev"
 },
 {
 "id": "carrinho-cli",
@@ -76,7 +76,7 @@
 },
 "image": null,
 "techs": ["Java", "POO", "CLI", "ArrayList"],
-"githubUrl": "https://github.com/gustavoryan-del"
+"githubUrl": "https://github.com/gustavoryandev"
 }
 ],
 "experiencias": [
