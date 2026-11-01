@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import SpotifyCard from './SpotifyCard';
 import GithubCard from './GithubCard';
 import StatsCard from './StatsCard';
+import WakaTimeCard from './WakaTimeCard';
 import CanvasCard from './CanvasCard';
 import GaloCard from './GaloCard';
 import ContactSection from './ContactSection';
@@ -26,6 +27,7 @@ const cards = {
   '[RESUME_CARD]': ResumeCard,
   '[SPOTIFY_CARD]': SpotifyCard,
   '[GITHUB_CARD]': GithubCard,
+  '[WAKATIME_CARD]': WakaTimeCard,
   '[STATS_CARD]': StatsCard,
   '[CANVAS_CARD]': CanvasCard,
   '[CONTACT_FORM]': ContactSection,
