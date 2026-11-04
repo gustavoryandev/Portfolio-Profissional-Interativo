@@ -16,6 +16,7 @@
     "loading": "Loading résumé…"
   },
   "chat": {
+    "erro": "Your question could not be processed right now. Please try again shortly.",
     "boasVindas": "Hello! I am Gustavo's virtual assistant. How can I help you today?",
     "subtitulo": "Ask about projects, tech stack, university, or live metrics.",
     "placeholder": "Ask something about Gustavo...",

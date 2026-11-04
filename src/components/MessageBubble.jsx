@@ -10,6 +10,7 @@ import CanvasCard from './CanvasCard';
 import GaloCard from './GaloCard';
 import ContactSection from './ContactSection';
 import ProjectsCard from './ProjectsCard';
+import SkillsProficiencyCard from './SkillsProficiencyCard';
 import ExperienceCard from './ExperienceCard';
 import RepositoriesCard from './RepositoriesCards';
 import GithubActivityCard from './GithubActivityCard';
@@ -32,6 +33,7 @@ const cards = {
   '[CANVAS_CARD]': CanvasCard,
   '[CONTACT_FORM]': ContactSection,
   '[PROJECTS_CARD]': ProjectsCard,
+  '[SKILLS_CARD]': SkillsProficiencyCard,
   '[EXPERIENCE_CARD]': ExperienceCard,
   '[REPOSITORIES_CARD]': RepositoriesCard,
   '[GITHUB_ACTIVITY_CARD]': GithubActivityCard,
@@ -223,7 +225,7 @@ function MessageBubble({ message, liveContext = {}, refreshing = [], onRefresh }
     }).catch(() => { if (active) setTranslationFailed(true); });
     return () => { active = false; };
   }, [original, uiLanguage, sourceLanguage, isUser, message.translationKey, translations]);
-  const text = isUser ? original : message.translationKey ? i18n.t(message.translationKey)
+  const text = isUser ? original : message.translationKey ? i18n.t(message.translationKey, { defaultValue: original })
     : sourceLanguage === uiLanguage ? original : translations[uiLanguage] || original;
   const translating = !isUser && !message.translationKey && sourceLanguage !== uiLanguage && !translations[uiLanguage];
 

@@ -16,6 +16,7 @@
     "loading": "Carregando currículo…"
   },
   "chat": {
+    "erro": "Não foi possível processar sua pergunta agora. Tente novamente em instantes.",
     "boasVindas": "Olá! Sou o assistente virtual do Gustavo. Como posso te ajudar hoje?",
     "subtitulo": "Pergunte sobre projetos, stack técnica, faculdade ou métricas ao vivo.",
     "placeholder": "Digite uma pergunta sobre o Gustavo...",

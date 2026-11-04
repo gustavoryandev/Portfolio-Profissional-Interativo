@@ -10,34 +10,34 @@
 "linkedin": "https://linkedin.com/in/gryangomesguedes",
 "time": "Clube Atlético Mineiro (Galo)",
 "bio": {
-"pt": "Sou graduando em Engenharia de Software pela Pontifícia Universidade Católica de Minas Gerais (PUC Minas) e busco ativamente minha primeira oportunidade no mercado. Tenho o ecossistema Java (Spring Boot) como principal stack back-end, além de conhecimentos em Python, React, Tailwind CSS e Engenharia de Prompt para IA Generativa.",
-"en": "I am a Software Engineering undergraduate at PUC Minas actively seeking my first industry opportunity. My primary stack is Java with Spring Boot for backend, alongside Python, React, Tailwind CSS, and Prompt Engineering for Generative AI."
+"pt": "Sou graduando em Engenharia de Software pela Pontifícia Universidade Católica de Minas Gerais (PUC Minas) e busco ativamente minha primeira oportunidade de inserção no mercado de trabalho. Meu interesse pelo universo da tecnologia teve início aos 15 anos e, desde então, venho construindo uma base técnica sólida. Atualmente, tenho o ecossistema Java como minha principal stack de desenvolvimento, com foco no framework Spring Boot para a construção de aplicações back-end, além de possuir conhecimentos em Python e tecnologias front-end (HTML, CSS e JavaScript). Mantenho-me em constante atualização, direcionando meus estudos para áreas como arquitetura de sistemas, desenvolvimento web e engenharia de software.",
+"en": "I am a Software Engineering undergraduate student at the Pontifical Catholic University of Minas Gerais (PUC Minas), actively seeking my first opportunity to enter the job market. My interest in technology began at age 15, and since then, I have been building a solid technical foundation. Currently, my main development stack is the Java ecosystem, focusing on the Spring Boot framework for building back-end applications, alongside knowledge in Python and front-end technologies (HTML, CSS, and JavaScript). I keep myself continuously updated, directing my studies toward systems architecture, web development, and software engineering."
 },
 "futsalBio": {
-"pt": "Prático futebol desde os 7 anos com passagem marcante pelo futsal do Colégio Santo Antônio. Essa trajetória desenvolveu minha disciplina, trabalho em equipe, raciocínio lógico e tomada de decisão sob pressão.",
-"en": "I've played soccer since age 7 with competitive futsal experience at Colégio Santo Antônio, developing strong discipline, teamwork, logical reasoning, and quick decision-making under pressure."
+"pt": "Fora do ambiente acadêmico e tecnológico, dedico-me ao futebol, esporte que pratico desde os 7 anos de idade. Minha longa trajetória no futsal, com destaque para a vivência esportiva no Colégio Santo Antônio, foi fundamental para o desenvolvimento de competências comportamentais e cognitivas indispensáveis. Essa experiência me proporcionou não apenas disciplina, resiliência e forte espírito de trabalho em equipe, mas também lapidou meu raciocínio lógico, foco em resultados e a capacidade de tomada de rápida decisão sob pressão.",
+"en": "Outside of the academic and technological environment, I am dedicated to soccer, a sport I have practiced since I was 7 years old. My long trajectory in futsal, highlighted by my sports experience at Colégio Santo Antônio, was fundamental to developing indispensable behavioral and cognitive skills. This experience provided me not only with discipline, resilience, and a strong spirit of teamwork but also honed my logical reasoning, focus on results, and the ability to make quick decisions under pressure."
 },
 "skills": [
-{ "nome": "Java", "nivel": "Avançado", "categoria": "Backend" },
-{ "nome": "Spring Boot", "nivel": "Intermediário", "categoria": "Backend" },
-{ "nome": "Python", "nivel": "Intermediário", "categoria": "Backend" },
-{ "nome": "Figma", "categoria": "Design" },
-{ "nome": "React", "nivel": "Intermediário", "categoria": "Frontend" },
-{ "nome": "Vite", "categoria": "Frontend" },
-{ "nome": "Thymeleaf", "categoria": "Frontend" },
-{ "nome": "MongoDB", "categoria": "Banco de dados" },
-{ "nome": "Supabase", "categoria": "Banco de dados" },
-{ "nome": "VS Code", "categoria": "Ferramentas" },
-{ "nome": "IntelliJ IDEA", "categoria": "Ferramentas" },
-{ "nome": "JavaScript", "nivel": "Intermediário", "categoria": "Frontend" },
-{ "nome": "HTML", "categoria": "Frontend" },
-{ "nome": "CSS", "categoria": "Frontend" },
-{ "nome": "Tailwind CSS", "nivel": "Intermediário", "categoria": "Frontend" },
-{ "nome": "Git", "nivel": "Avançado", "categoria": "Ferramentas" },
-{ "nome": "GitHub", "nivel": "Avançado", "categoria": "Ferramentas" },
-{ "nome": "Node.js", "categoria": "Backend" },
-{ "nome": "Maven", "categoria": "Ferramentas" },
-{ "nome": "JSON", "categoria": "Formato de dados" }
+{ "nome": "Java", "proficienciaPercentual": 60, "categoria": "Backend" },
+{ "nome": "Spring Boot", "proficienciaPercentual": 30, "categoria": "Backend" },
+{ "nome": "Python", "proficienciaPercentual": 50, "categoria": "Backend" },
+{ "nome": "Figma", "proficienciaPercentual": 30, "categoria": "Design" },
+{ "nome": "React", "proficienciaPercentual": 30, "categoria": "Frontend" },
+{ "nome": "Vite", "proficienciaPercentual": 30, "categoria": "Frontend" },
+{ "nome": "Thymeleaf", "proficienciaPercentual": 30, "categoria": "Frontend" },
+{ "nome": "MongoDB", "proficienciaPercentual": 30, "categoria": "Banco de dados" },
+{ "nome": "Supabase", "proficienciaPercentual": 30, "categoria": "Banco de dados" },
+{ "nome": "VS Code", "proficienciaPercentual": 70, "categoria": "Ferramentas" },
+{ "nome": "IntelliJ IDEA", "proficienciaPercentual": 60, "categoria": "Ferramentas" },
+{ "nome": "JavaScript", "proficienciaPercentual": 30, "categoria": "Frontend" },
+{ "nome": "HTML", "proficienciaPercentual": 30, "categoria": "Frontend" },
+{ "nome": "CSS", "proficienciaPercentual": 30, "categoria": "Frontend" },
+{ "nome": "Tailwind CSS", "proficienciaPercentual": 30, "categoria": "Frontend" },
+{ "nome": "Git", "proficienciaPercentual": 30, "categoria": "Ferramentas" },
+{ "nome": "GitHub", "proficienciaPercentual": 30, "categoria": "Ferramentas" },
+{ "nome": "Node.js", "proficienciaPercentual": 30, "categoria": "Backend" },
+{ "nome": "Maven", "proficienciaPercentual": 30, "categoria": "Ferramentas" },
+{ "nome": "JSON", "proficienciaPercentual": 30, "categoria": "Formato de dados" }
 ],
 "disciplinas": {
 "cursando": [

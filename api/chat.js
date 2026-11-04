@@ -4,6 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import { createHash } from 'crypto';
 import dotenv from 'dotenv';
+import { proficiencyValue, proficiencyLevel } from '../src/data/skillProficiency.js';
 import { createLiveCache, sourceFailure } from '../server/liveCache.js';
 
 dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
@@ -98,6 +99,9 @@ function readJson(fileName) {
   if (cached && cached.mtime === mtime) return cached.data;
 
   const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+  if (fileName === 'perfil.json') {
+    data.skills = data.skills.map(skill => ({ ...skill, nivel: proficiencyLevel(proficiencyValue(skill)) }));
+  }
   jsonCache.set(filePath, { mtime, data });
   return data;
 }
@@ -1109,6 +1113,7 @@ Emita cada marcador autorizado no máximo uma vez. Vários cards exigem pedidos 
 - [CHESS_CARD]: SOMENTE quando o usuário pedir para JOGAR uma partida de xadrez, abrir o tabuleiro ou ver as stats(estatísticas) do perfil: "Bora jogar xadrez?", "Quero uma partida", "Qual o rating dele no xadrez", "Vamos jogar agora" em contexto inequívoco de xadrez. NÃO emitir para "Você gosta de xadrez?", "Sabe jogar xadrez?", "Xadrez é difícil?", rating, histórico ou curiosidades. Não use outro marcador para contornar esta regra.
 - [GALO_CARD]: SOMENTE para pedido de próximo jogo, adversário, placar ou agenda do Atlético Mineiro: "Quando é o próximo jogo do Galo?", "Quem o Galo enfrenta?". NÃO emitir para "Você é atleticano?" ou menções genéricas ao clube.
 - [PROJECTS_CARD]: SOMENTE para solicitação de VER a lista/grade de projetos: "Mostra os trampos", "Quais são os seus projetos?". Perguntas sobre um projeto específico ou teoria de programação não autorizam o card.
+- [SKILLS_CARD]: Ao perguntar quais tecnologias Gustavo domina ou pedir suas habilidades, ferramentas ou proficiência, inclua este card de habilidades. Não use para dúvidas teóricas sobre uma tecnologia. Use somente níveis e percentuais cadastrados no perfil; percentual ausente significa "a definir", nunca zero. Percentuais de WakaTime são participação no tempo de código e não medem proficiência.
 - [STATS_CARD]: SOMENTE para solicitação de estatísticas de tempo de código / WakaTime. Mencionar linguagens ou perguntar "O que é WakaTime?" não autoriza o card.
 - [SPOTIFY_CARD]: SOMENTE ao perguntar o que Gustavo está ouvindo AGORA no Spotify. Gostos musicais, artistas favoritos, histórico e perguntas sobre o serviço não autorizam o card.
 - [GITHUB_CARD]: SOMENTE para pedido de estatísticas ou métricas do GitHub de Gustavo. "O que é GitHub?", "Você usa GitHub?", links de perfil e menções genéricas não autorizam o card. Cards adicionais [GITHUB_ACTIVITY_CARD], [GITHUB_LANGUAGES_CARD] e [REPOSITORIES_CARD] exigem pedido explícito das respectivas métricas detalhadas ou da lista de repositórios.
@@ -1302,7 +1307,7 @@ export default async function handler(req, res) {
     const suggestionIndex = body.predefinedSuggestion === true
       ? readJson(`${suggestionLanguage}.json`).chat.sugestoes.indexOf(userMessage.trim())
       : -1;
-    const suggestionCards = ['[PROJECTS_CARD]', '', '[CANVAS_CARD]', '[GITHUB_CARD]\n[STATS_CARD]', '[GALO_CARD]', '[CHESS_CARD]'];
+    const suggestionCards = ['[PROJECTS_CARD]', '[SKILLS_CARD]', '[CANVAS_CARD]', '[GITHUB_CARD]\n[STATS_CARD]', '[GALO_CARD]', '[CHESS_CARD]'];
     const requestedSuggestionCards = suggestionIndex >= 0 ? suggestionCards[suggestionIndex] : '';
     const previous = [...chatHistory].reverse().find(item => item.sender === 'ai');
     const lastAi = typeof previous?.text === 'string' ? previous.text : '';

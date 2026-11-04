@@ -123,7 +123,7 @@ Em vez de comandos fixos, você pode fazer perguntas naturais. A IA processará 
 ### Pré-requisitos
 
 - Node.js (v18 ou superior);
-- Vercel CLI instalada globalmente (`npm install -g vercel`);
+- Vercel CLI é opcional para desenvolvimento local;
 - Chaves de API das plataformas (Gemini, GitHub, Spotify, Wakatime).
 
 ### 🔐 Variáveis de Ambiente
@@ -132,7 +132,6 @@ Crie um arquivo `.env.local` na **raiz do projeto** e preencha com suas chaves. 
 
 ```env
 # FRONTEND (Public)
-VITE_API_BASE_URL=http://localhost:3000
 VITE_EMAILJS_SERVICE_ID=seu_service_id
 VITE_EMAILJS_TEMPLATE_ID_FOR_ME=seu_template
 VITE_EMAILJS_TEMPLATE_ID_FOR_SENDER=seu_template
@@ -149,6 +148,25 @@ GITHUB_TOKEN=seu_github_token
 CANVAS_API_TOKEN=seu_canvas_token
 CANVAS_BASE_URL=[https://canvas.instructure.com](https://canvas.instructure.com)
 
+```
+
+### Como executar a aplicação
+
+```sh
+npm install
+npm run dev
+```
+
+Abra o endereço exibido pelo Vite. O comando inicia o frontend e disponibiliza
+`/api/chat` no mesmo servidor, usando o handler de `api/chat.js` e as variáveis
+privadas de `.env.local`. Configure `GEMINI_API_KEY` para habilitar as respostas
+da IA. Reinicie o servidor após alterar as variáveis de ambiente.
+
+### Validação
+
+```sh
+node --test tests/dev-api.test.mjs
+npm run build
 ```
 
 ## Contact email and autoresponder
