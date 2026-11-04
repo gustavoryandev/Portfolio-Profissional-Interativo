@@ -128,6 +128,22 @@
     "demoUrl": "/"
   },
   {
+    "id": "github-profile",
+    "titulo": {
+      "pt": "Perfil GitHub — Gustavo Ryan",
+      "en": "GitHub Profile — Gustavo Ryan"
+    },
+    "descricao": {
+      "pt": "README personalizado do meu perfil no GitHub, com apresentação profissional, tecnologias, projetos em destaque, estatísticas, contribuições em 3D e integrações com WakaTime e Spotify.",
+      "en": "Custom GitHub profile README with a professional introduction, technologies, featured projects, statistics, 3D contributions, and WakaTime and Spotify integrations."
+    },
+    "techs": ["Markdown", "HTML", "GitHub"],
+    "categoria": "frontend",
+    "tipo": "project",
+    "image": { "src": "/github.png" },
+    "githubUrl": "https://github.com/gustavoryandev/gustavoryandev"
+  },
+  {
     "id": "pokedex",
     "titulo": {
       "pt": "Legends Pokédex",
@@ -286,7 +302,7 @@
     ],
     "categoria": "java",
     "tipo": "study",
-    "image": null,
+    "image": { "src": "/github.png" },
     "githubUrl": "https://github.com/gustavoryandev/Pratica02-CarrinhoDeCompras",
     "chavesI18n": {
       "titulo": "projetos.carrinho_proj_title",
@@ -310,7 +326,7 @@
     ],
     "categoria": "java",
     "tipo": "study",
-    "image": null,
+    "image": { "src": "/github.png" },
     "githubUrl": "https://github.com/gustavoryandev/Plano-gerenciamento-academia"
   },
   {
@@ -419,7 +435,7 @@
     ],
     "categoria": "java",
     "tipo": "prototype",
-    "image": null,
+    "image": { "src": "/github.png" },
     "githubUrl": "https://github.com/gustavoryandev/AtividadeAvaliativa1"
   }
 ],
