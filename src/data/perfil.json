@@ -119,7 +119,7 @@
     ],
     "categoria": "fullstack",
     "tipo": "project",
-    "image": null,
+    "image": { "src": "/portfolio-interativo-ia.png" },
     "githubUrl": null,
     "chavesI18n": {
       "titulo": "projetos.portfolio_proj_title",
