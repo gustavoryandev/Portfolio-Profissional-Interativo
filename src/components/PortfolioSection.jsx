@@ -1,6 +1,6 @@
 import LanguageIcon from './LanguageIcon';
 import ContactSection from './ContactSection';
-import { Download, GraduationCap } from 'lucide-react';
+import { Download } from 'lucide-react';
 import perfil from '../data/perfil.json';
 import ProjectsCard from './ProjectsCard';
 import ExperienceCard from './ExperienceCard';
@@ -8,6 +8,7 @@ import { SocialLinks } from './ProfilePanel';
 import { sections } from './Sidebar';
 import SkillsGlobe from './SkillsGlobe';
 import SkillsProficiencyCard from './SkillsProficiencyCard';
+import EducationSection from './EducationSection';
 export default function PortfolioSection({ active, en }) {
   const section = sections.find(([id]) => id === active);
   return <section className="portfolio-section" aria-labelledby="section-heading">
@@ -17,7 +18,7 @@ export default function PortfolioSection({ active, en }) {
     {active === 'projects' && <ProjectsCard />}
     {active === 'proficiency' && <SkillsProficiencyCard lang={en ? 'en' : 'pt'} />}
     {active === 'experience' && <ExperienceCard />}
-    {active === 'education' && <div className="detail-card"><GraduationCap size={32} /><h3>{perfil.instituicao}</h3><p>{en ? 'Software Engineering' : 'Engenharia de Software'}</p><h4>{en ? 'Current courses' : 'Disciplinas em andamento'}</h4><ul>{perfil.disciplinas.cursando.map(course => <li key={course}>{course}</li>)}</ul></div>}
+    {active === 'education' && <EducationSection en={en} />}
     {active === 'skills' && <><SkillsGlobe skills={perfil.skills} en={en} /><div className="skills-grid">{perfil.skills.map(skill => <div className="detail-card" key={skill.nome}><div className="flex items-center gap-3"><LanguageIcon name={skill.nome} size={24} /><h3>{skill.nome}</h3></div><p>{en ? ({ 'Banco de dados': 'Database', Ferramentas: 'Tools', 'Formato de dados': 'Data format' }[skill.categoria] || skill.categoria) : skill.categoria}</p></div>)}</div></>}
     {active === 'contact' && <div className="space-y-5"><div className="detail-card"><h3>{en ? 'Let’s talk' : 'Vamos conversar'}</h3><p>{en ? 'Get in touch by email or through my social profiles.' : 'Entre em contato por e-mail ou pelas minhas redes profissionais.'}</p><a className="text-link break-all" href={'mailto:' + perfil.email}>{perfil.email}</a><SocialLinks /></div><ContactSection lang={en ? 'en' : 'pt'} variant="page" /></div>}
   </section>;

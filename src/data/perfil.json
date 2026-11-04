@@ -39,6 +39,44 @@
 { "nome": "Maven", "proficienciaPercentual": 30, "categoria": "Ferramentas" },
 { "nome": "JSON", "proficienciaPercentual": 30, "categoria": "Formato de dados" }
 ],
+"formacao": [
+  {
+    "id": "puc-minas",
+    "instituicao": "PUC Minas",
+    "curso": { "pt": "Bacharelado em Engenharia de Software", "en": "Bachelor’s Degree in Software Engineering" },
+    "inicio": 2026,
+    "conclusao": 2030,
+    "conclusaoPrevista": true,
+    "logo": "/logos/puc.jpg",
+    "descricao": {
+      "pt": "Formação em andamento, desenvolvendo minha base técnica em engenharia de software e aprimorando minhas stacks e ferramentas com estudos e projetos.",
+      "en": "Degree in progress, developing my technical foundation in software engineering and improving my stacks and tools through study and projects."
+    },
+    "origemHabilidades": "skills"
+  },
+  {
+    "id": "csa",
+    "instituicao": "Colégio Santo Antônio (CSA)",
+    "curso": { "pt": "Ensino Fundamental II e Ensino Médio", "en": "Lower and Upper Secondary Education" },
+    "inicio": 2019,
+    "conclusao": 2025,
+    "conclusaoPrevista": false,
+    "logo": "/logos/csa-logo.png",
+    "descricao": {
+      "pt": "Concluí o Ensino Fundamental II e o Ensino Médio no CSA, onde também pratiquei futsal. A formação escolar e a vivência esportiva contribuíram para meu raciocínio lógico, resolução de problemas, disciplina e demais competências comportamentais e cognitivas.",
+      "en": "I completed lower and upper secondary education at CSA, where I also played futsal. My education and sporting experience helped develop logical reasoning, problem-solving, discipline and other behavioral and cognitive skills."
+    },
+    "habilidades": [
+      { "pt": "Disciplina", "en": "Discipline" },
+      { "pt": "Resiliência", "en": "Resilience" },
+      { "pt": "Trabalho em equipe", "en": "Teamwork" },
+      { "pt": "Raciocínio lógico", "en": "Logical reasoning" },
+      { "pt": "Resolução de problemas", "en": "Problem-solving" },
+      { "pt": "Foco em resultados", "en": "Results focus" },
+      { "pt": "Tomada de decisão sob pressão", "en": "Decision-making under pressure" }
+    ]
+  }
+],
 "disciplinas": {
 "cursando": [
 "Programação Modular (Teórica)",
