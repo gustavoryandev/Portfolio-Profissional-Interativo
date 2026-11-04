@@ -62,8 +62,8 @@ function TypingIndicator({ ui, label }) {
   return (
     <div className="flex w-full justify-start" role="status" aria-label={label}>
       <div className="flex max-w-[90%] items-start gap-4">
-        <div className="mt-2 flex h-12 w-12 shrink-0 items-center justify-center" aria-hidden="true">
-          <Sparkles className={`h-7 w-7 animate-spin-slow ${ui.typingAvatar}`} />
+        <div className="mt-2 h-12 w-12 shrink-0 overflow-hidden rounded-full" aria-hidden="true">
+          <img src="/astra-avatar.png" alt="" className="h-full w-full rounded-full object-cover" />
         </div>
         <div className={`flex items-center gap-2 rounded-[2rem] rounded-tl-sm border px-7 py-6 ${ui.typingBubble}`}>
           {[0, 0.2, 0.4].map((delay) => (

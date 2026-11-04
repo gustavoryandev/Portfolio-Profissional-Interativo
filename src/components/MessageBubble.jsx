@@ -252,7 +252,7 @@ function MessageBubble({ message, liveContext = {}, refreshing = [], onRefresh }
       <Avatar>
         {isError
           ? <AlertTriangle className={`h-[18px] w-[18px] ${ui.errorIcon}`} />
-          : <Sparkles className="h-[18px] w-[18px]" />}
+          : <img src="/astra-avatar.png" alt="" className="h-full w-full rounded-full object-cover" />}
       </Avatar>
 
       <div className={hasCards ? 'message-content message-with-cards' : 'message-content'}>
