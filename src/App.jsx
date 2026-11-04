@@ -123,7 +123,7 @@ export default function App() {
     setMessages(messagesRef.current);
   };
 
-  const handleSend = async (suggestion = input) => {
+  const handleSend = async (suggestion = input, predefinedSuggestion = false) => {
     const query = suggestion.trim();
     if (!query || sendingRef.current) return;
     sendingRef.current = true;
@@ -136,7 +136,7 @@ export default function App() {
     try {
       // O campo "id" é só da interface: não vai para o backend
       const history = messagesRef.current.map(({ sender, text, translationKey }) => ({ sender, text, translationKey }));
-      const data = await sendMessage(query, requestLanguage, history, conversationRef.current.chatContext);
+      const data = await sendMessage(query, requestLanguage, history, conversationRef.current.chatContext, predefinedSuggestion);
       conversationRef.current = {
         chatContext: data.chatContext ?? conversationRef.current.chatContext,
         model: data.model ?? conversationRef.current.model,
@@ -229,7 +229,7 @@ export default function App() {
                 <button
                   key={index}
                   type="button"
-                  onClick={() => handleSend(prompt)}
+                  onClick={() => handleSend(prompt, true)}
                   disabled={loading}
                   className={`shrink-0 rounded-full border px-4 py-2 text-[13px] font-medium backdrop-blur-md transition-colors disabled:opacity-50 ${ui.chip} ${ui.focusRing} focus-visible:outline-none focus-visible:ring-2`}
                 >

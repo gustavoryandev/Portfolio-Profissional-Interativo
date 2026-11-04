@@ -1,12 +1,13 @@
 import axios from "axios";
 
-const sendMessage = async (userMessage, lang, chatHistory = [], chatContext = null) => {
+const sendMessage = async (userMessage, lang, chatHistory = [], chatContext = null, predefinedSuggestion = false) => {
   try {
     const response = await axios.post("/api/chat", {
       userMessage,
       lang,
       chatHistory,
       chatContext,
+      predefinedSuggestion,
     });
     return response.data;
   } catch (error) {
