@@ -21,9 +21,23 @@
 { "nome": "Java", "nivel": "Avançado", "categoria": "Backend" },
 { "nome": "Spring Boot", "nivel": "Intermediário", "categoria": "Backend" },
 { "nome": "Python", "nivel": "Intermediário", "categoria": "Backend" },
-{ "nome": "JavaScript / React", "nivel": "Intermediário", "categoria": "Frontend" },
+{ "nome": "Figma", "categoria": "Design" },
+{ "nome": "React", "nivel": "Intermediário", "categoria": "Frontend" },
+{ "nome": "Vite", "categoria": "Frontend" },
+{ "nome": "Thymeleaf", "categoria": "Frontend" },
+{ "nome": "MongoDB", "categoria": "Banco de dados" },
+{ "nome": "Supabase", "categoria": "Banco de dados" },
+{ "nome": "VS Code", "categoria": "Ferramentas" },
+{ "nome": "IntelliJ IDEA", "categoria": "Ferramentas" },
+{ "nome": "JavaScript", "nivel": "Intermediário", "categoria": "Frontend" },
+{ "nome": "HTML", "categoria": "Frontend" },
+{ "nome": "CSS", "categoria": "Frontend" },
 { "nome": "Tailwind CSS", "nivel": "Intermediário", "categoria": "Frontend" },
-{ "nome": "Git & GitHub", "nivel": "Avançado", "categoria": "Ferramentas" }
+{ "nome": "Git", "nivel": "Avançado", "categoria": "Ferramentas" },
+{ "nome": "GitHub", "nivel": "Avançado", "categoria": "Ferramentas" },
+{ "nome": "Node.js", "categoria": "Backend" },
+{ "nome": "Maven", "categoria": "Ferramentas" },
+{ "nome": "JSON", "categoria": "Formato de dados" }
 ],
 "disciplinas": {
 "cursando": [

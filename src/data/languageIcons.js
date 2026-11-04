@@ -1,6 +1,10 @@
 // Local Devicon v2.16.0 assets. Names are matched against this allowlist only.
 // API responses never become URLs or SVG markup.
 const icons = new Map([
+  ['figma', 'figma'], ['vite', 'vitejs'], ['thymeleaf', 'thymeleaf'],
+  ['mongodb', 'mongodb'], ['mongo db', 'mongodb'], ['supabase', 'supabase'],
+  ['vscode', 'vscode'], ['vs code', 'vscode'], ['intellij', 'intellij'], ['intellij idea', 'intellij'],
+  ['github', 'github'], ['node', 'nodejs'], ['node.js', 'nodejs'], ['nodejs', 'nodejs'], ['maven', 'maven'],
   ['java', 'java'], ['spring', 'spring'], ['spring boot', 'spring'],
   ['react', 'react'], ['react.js', 'react'], ['jsx', 'react'],
   ['javascript / react', 'react'], ['python', 'python'],
