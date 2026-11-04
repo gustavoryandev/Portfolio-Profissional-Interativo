@@ -62,36 +62,328 @@
 ]
 },
 "projetos": [
-{
-"id": "portfolio",
-"chavesI18n": {
-"titulo": "projetos.portfolio_proj_title",
-"descricao": "projetos.portfolio_proj_desc"
-},
-"image": null,
-"techs": ["React", "Vite", "Tailwind CSS", "Gemini API", "i18next"],
-"githubUrl": "https://github.com/gustavoryandev/"
-},
-{
-"id": "geosolar",
-"chavesI18n": {
-"titulo": "projetos.geosolar_proj_title",
-"descricao": "projetos.geosolar_proj_desc"
-},
-"image": null,
-"techs": ["Java", "Spring Boot", "Thymeleaf", "MVC"],
-"githubUrl": "https://github.com/gustavoryandev"
-},
-{
-"id": "carrinho-cli",
-"chavesI18n": {
-"titulo": "projetos.carrinho_proj_title",
-"descricao": "projetos.carrinho_proj_desc"
-},
-"image": null,
-"techs": ["Java", "POO", "CLI", "ArrayList"],
-"githubUrl": "https://github.com/gustavoryandev"
-}
+  {
+    "id": "portfolio",
+    "titulo": {
+      "pt": "Portfólio Interativo IA Generativa",
+      "en": "Interactive AI Portfolio"
+    },
+    "descricao": {
+      "pt": "Portfólio conversacional com a assistente Astra, contexto profissional, cards de projetos, habilidades e integrações ao vivo.",
+      "en": "Conversational portfolio featuring the Astra assistant, professional context, project and skill cards, and live integrations."
+    },
+    "techs": [
+      "React",
+      "Vite",
+      "Tailwind CSS",
+      "Gemini API",
+      "i18next"
+    ],
+    "categoria": "fullstack",
+    "tipo": "project",
+    "image": null,
+    "githubUrl": null,
+    "chavesI18n": {
+      "titulo": "projetos.portfolio_proj_title",
+      "descricao": "projetos.portfolio_proj_desc"
+    },
+    "demoUrl": "/"
+  },
+  {
+    "id": "pokedex",
+    "titulo": {
+      "pt": "Legends Pokédex",
+      "en": "Legends Pokédex"
+    },
+    "descricao": {
+      "pt": "Pokédex dos 151 Pokémon de Kanto com busca, filtros por tipo, comparação de atributos, capturados salvos no navegador e detalhes da PokéAPI. Projeto em dupla.",
+      "en": "A Pokédex of the 151 Kanto Pokémon with search, type filters, stat comparisons, captured Pokémon saved in the browser and PokéAPI details. Built as a pair project."
+    },
+    "techs": [
+      "React",
+      "Vite",
+      "JavaScript",
+      "CSS",
+      "PokéAPI"
+    ],
+    "categoria": "frontend",
+    "tipo": "project",
+    "image": {
+      "src": "https://raw.githubusercontent.com/gustavoryandev/PokedexReact-Vite/main/src/assets/images/home-dark.png"
+    },
+    "githubUrl": "https://github.com/gustavoryandev/PokedexReact-Vite"
+  },
+  {
+    "id": "geosolar",
+    "titulo": {
+      "pt": "GEOSOLAR — Interface de Autenticação",
+      "en": "GEOSOLAR — Authentication Interface"
+    },
+    "descricao": {
+      "pt": "Módulo acadêmico com páginas de login, cadastro e recuperação de senha renderizadas por Thymeleaf, rotas MVC e serviço de envio de e-mail. Desenvolvido em dupla.",
+      "en": "Academic module with Thymeleaf login, registration and password recovery pages, MVC routes and an email service. Built as a pair project."
+    },
+    "techs": [
+      "Java",
+      "Spring Boot",
+      "Thymeleaf",
+      "Maven",
+      "HTML",
+      "CSS"
+    ],
+    "categoria": "fullstack",
+    "tipo": "project",
+    "image": { "src": "/geosolar-login.png" },
+    "githubUrl": "https://github.com/gustavoryandev/LoginPucDiaw",
+    "chavesI18n": {
+      "titulo": "projetos.geosolar_proj_title",
+      "descricao": "projetos.geosolar_proj_desc"
+    }
+  },
+  {
+    "id": "snakepy",
+    "titulo": {
+      "pt": "SnakePy",
+      "en": "SnakePy"
+    },
+    "descricao": {
+      "pt": "Jogo Snake em equipe com três dificuldades, pontuação, vidas, pausa, sons gerados em código e rankings por nível salvos em arquivos. Inclui testes das regras com Pytest.",
+      "en": "Team-built Snake game with three difficulty levels, scoring, lives, pause, code-generated sounds and per-level rankings saved to files. Includes rule tests with Pytest."
+    },
+    "techs": [
+      "Python",
+      "Pygame",
+      "Pytest"
+    ],
+    "categoria": "games",
+    "tipo": "project",
+    "image": null,
+    "githubUrl": "https://github.com/warlleyz/SnakePy"
+  },
+  {
+    "id": "secure-login",
+    "titulo": {
+      "pt": "SecureLoginPUC",
+      "en": "SecureLoginPUC"
+    },
+    "descricao": {
+      "pt": "Estudo de autenticação com perfis de usuário e administrador, Spring Security, validação reCAPTCHA, recuperação de senha e envio de e-mail, acompanhado de documentação por classe.",
+      "en": "Authentication study with user and administrator roles, Spring Security, reCAPTCHA validation, password recovery and email delivery, supported by class-by-class documentation."
+    },
+    "techs": [
+      "Java",
+      "Spring Boot",
+      "Spring Security",
+      "Thymeleaf",
+      "Maven"
+    ],
+    "categoria": "fullstack",
+    "tipo": "study",
+    "image": {
+      "src": "https://raw.githubusercontent.com/gustavoryandev/LoginPUCExplicado/main/imgs/Login.png"
+    },
+    "githubUrl": "https://github.com/gustavoryandev/LoginPUCExplicado"
+  },
+  {
+    "id": "terminal-portfolio",
+    "titulo": {
+      "pt": "Portfólio Terminal",
+      "en": "Terminal Portfolio"
+    },
+    "descricao": {
+      "pt": "Portfólio em uma interface de terminal com comandos para projetos, currículo e habilidades, globo 3D e integrações com GitHub, WakaTime, Spotify e Canvas.",
+      "en": "Portfolio presented as a terminal with commands for projects, résumé and skills, a 3D globe, and GitHub, WakaTime, Spotify and Canvas integrations."
+    },
+    "techs": [
+      "React",
+      "Vite",
+      "Three.js",
+      "Supabase",
+      "i18next"
+    ],
+    "categoria": "frontend",
+    "tipo": "project",
+    "image": {
+      "src": "https://raw.githubusercontent.com/gustavoryandev/gustavoryan-portfolio/main/public/portfolio-home.png"
+    },
+    "githubUrl": "https://github.com/gustavoryandev/gustavoryan-portfolio"
+  },
+  {
+    "id": "votacao-fazenda",
+    "titulo": {
+      "pt": "Votação A Fazenda",
+      "en": "A Fazenda Voting"
+    },
+    "descricao": {
+      "pt": "Simulador acadêmico de votação com participantes, registro local de votos e resultados ordenados com percentuais. Navegação entre páginas com React Router e persistência no localStorage.",
+      "en": "Academic voting simulator with contestants, locally recorded votes and ranked percentage results. Uses React Router for page navigation and localStorage for persistence."
+    },
+    "techs": [
+      "React",
+      "Vite",
+      "JavaScript",
+      "React Router",
+      "CSS"
+    ],
+    "categoria": "frontend",
+    "tipo": "study",
+    "image": null,
+    "githubUrl": "https://github.com/gustavoryandev/Prova02-DIAW"
+  },
+  {
+    "id": "carrinho-cli",
+    "titulo": {
+      "pt": "Carrinho de Compras em Java",
+      "en": "Java Shopping Cart"
+    },
+    "descricao": {
+      "pt": "Sistema de faturamento no terminal com catálogo, inclusão e exclusão de itens, alteração de quantidades e cálculo da fatura, aplicando encapsulamento e ArrayList.",
+      "en": "Terminal billing system with a product catalog, item addition and removal, quantity changes and invoice calculation, applying encapsulation and ArrayList."
+    },
+    "techs": [
+      "Java",
+      "POO",
+      "CLI",
+      "ArrayList"
+    ],
+    "categoria": "java",
+    "tipo": "study",
+    "image": null,
+    "githubUrl": "https://github.com/gustavoryandev/Pratica02-CarrinhoDeCompras",
+    "chavesI18n": {
+      "titulo": "projetos.carrinho_proj_title",
+      "descricao": "projetos.carrinho_proj_desc"
+    }
+  },
+  {
+    "id": "academia",
+    "titulo": {
+      "pt": "Bro Fit — Gestão de Academia",
+      "en": "Bro Fit — Gym Management"
+    },
+    "descricao": {
+      "pt": "Exercício de Programação Modular em Java com alunos, academia, exercícios e planos de treino individuais. Inclui manipulação de fichas e consultas por séries e repetições.",
+      "en": "Java Modular Programming exercise with students, a gym, exercises and individual training plans. Includes workout management and queries by sets and repetitions."
+    },
+    "techs": [
+      "Java",
+      "POO",
+      "CLI"
+    ],
+    "categoria": "java",
+    "tipo": "study",
+    "image": null,
+    "githubUrl": "https://github.com/gustavoryandev/Plano-gerenciamento-academia"
+  },
+  {
+    "id": "mini-commerce",
+    "titulo": {
+      "pt": "Mini Comércio Digital",
+      "en": "Mini Digital Store"
+    },
+    "descricao": {
+      "pt": "Catálogo interativo de produtos com busca por nome, filtro por categoria, detalhes e destaque de itens, usando dados locais e manipulação do DOM em JavaScript.",
+      "en": "Interactive product catalog with name search, category filters, item details and highlighting, built with local data and JavaScript DOM manipulation."
+    },
+    "techs": [
+      "HTML",
+      "CSS",
+      "JavaScript",
+      "JSON"
+    ],
+    "categoria": "frontend",
+    "tipo": "study",
+    "image": {
+      "src": "https://raw.githubusercontent.com/gustavoryandev/trabalho-pratico-semana-9-DIW/main/public/image.png"
+    },
+    "githubUrl": "https://github.com/gustavoryandev/trabalho-pratico-semana-9-DIW"
+  },
+  {
+    "id": "meddesk",
+    "titulo": {
+      "pt": "MedDesk — Gestão Hospitalar",
+      "en": "MedDesk — Hospital Management"
+    },
+    "descricao": {
+      "pt": "Protótipo acadêmico em equipe com interfaces para agenda, consultas, histórico e internações. O repositório contém telas Thymeleaf, estilos, documentação UML e a base Spring Boot.",
+      "en": "Team academic prototype with appointment, consultation, history and hospitalization interfaces. The repository includes Thymeleaf templates, styles, UML documentation and a Spring Boot foundation."
+    },
+    "techs": [
+      "Java",
+      "Spring Boot",
+      "Thymeleaf",
+      "Spring Security",
+      "CSS"
+    ],
+    "categoria": "fullstack",
+    "tipo": "prototype",
+    "image": null,
+    "githubUrl": "https://github.com/gustavoryandev/MedDesk"
+  },
+  {
+    "id": "car-rental",
+    "titulo": {
+      "pt": "ROTA — Locação de Veículos",
+      "en": "ROTA — Vehicle Rental"
+    },
+    "descricao": {
+      "pt": "Base em desenvolvimento para locação de veículos, com entidades Java, modelagem UML e migrações SQL para contas, veículos, solicitações, contratos e análise de crédito. Inclui configuração inicial React/Vite.",
+      "en": "Vehicle rental foundation in development with Java entities, UML models and SQL migrations for accounts, vehicles, requests, contracts and credit analysis. Includes an initial React/Vite setup."
+    },
+    "techs": [
+      "Java",
+      "Spring Boot",
+      "PostgreSQL",
+      "Flyway",
+      "React",
+      "Vite"
+    ],
+    "categoria": "fullstack",
+    "tipo": "prototype",
+    "image": null,
+    "githubUrl": "https://github.com/gustavoryandev/LABORATORIO-2-DIAW"
+  },
+  {
+    "id": "clima-api",
+    "titulo": {
+      "pt": "ClimaAPI — Estudo de API REST",
+      "en": "ClimaAPI — REST API Study"
+    },
+    "descricao": {
+      "pt": "Estudo em construção de integração com Open-Meteo via RestTemplate. Contém consulta de cidades e esboços de endpoints meteorológicos, com funcionalidades ainda incompletas.",
+      "en": "Work-in-progress study integrating Open-Meteo through RestTemplate. Includes city lookup and draft weather endpoints, with features still incomplete."
+    },
+    "techs": [
+      "Java",
+      "Spring Boot",
+      "Maven",
+      "Open-Meteo"
+    ],
+    "categoria": "backend",
+    "tipo": "prototype",
+    "image": null,
+    "githubUrl": "https://github.com/gustavoryandev/RestAPI-Clima"
+  },
+  {
+    "id": "oficina-java",
+    "titulo": {
+      "pt": "Oficina — Ordens de Serviço",
+      "en": "Workshop — Service Orders"
+    },
+    "descricao": {
+      "pt": "Exercício acadêmico de orientação a objetos com classes para ordens de serviço, mecânicos e boxes de oficina. O menu e parte das operações ainda estão em construção.",
+      "en": "Academic object-oriented exercise with service order, mechanic and workshop bay classes. The menu and some operations are still under construction."
+    },
+    "techs": [
+      "Java",
+      "POO",
+      "CLI"
+    ],
+    "categoria": "java",
+    "tipo": "prototype",
+    "image": null,
+    "githubUrl": "https://github.com/gustavoryandev/AtividadeAvaliativa1"
+  }
 ],
 "experiencias": [
 {

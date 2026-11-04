@@ -110,6 +110,7 @@ export default function GithubCard({ context, lang = 'pt' }) {
       <div className="absolute inset-x-0 top-0 h-px" style={{ background: t.accent }} />
 
       {/* HEADER */}
+      <img src="/github.png" alt="" aria-hidden="true" width="1024" height="512" loading="lazy" className="mb-5 aspect-[2/1] w-full rounded-xl object-cover" />
       <div className="mb-6 mt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3.5">
           <div
