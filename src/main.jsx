@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App.jsx';
 import './index.css';
+import './scroll.css';
 import './i18n';
 import { ThemeProvider } from './context/ThemeContext.jsx';
 

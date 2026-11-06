@@ -6,7 +6,7 @@ import axios from 'axios';
 import MessageBubble from '../src/components/MessageBubble.jsx';
 import GithubCard from '../src/components/GithubCard.jsx';
 import StatsCard from '../src/components/StatsCard.jsx';
-import App from '../src/App.jsx';
+import App from '../src/pages/ChatPage.jsx';
 import GaloCard from '../src/components/GaloCard.jsx';
 import SpotifyCard from '../src/components/SpotifyCard.jsx';
 import ChessCard from '../src/components/ChessCard.jsx';

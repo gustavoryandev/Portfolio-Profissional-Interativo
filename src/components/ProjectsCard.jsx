@@ -4,11 +4,12 @@ import { FolderGit2, Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import perfil from '../data/perfil.json';
 import ProjectCard from './ProjectCard';
+import ScrollReveal from './ui/ScrollReveal';
 import { projectContent } from '../data/projectContent';
 
 const normalize = value => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 
-export default function ProjectsCard() {
+export default function ProjectsCard({ reveal = false }) {
   const { t, i18n } = useTranslation();
   const headingId = useId();
   const searchId = useId();
@@ -31,7 +32,7 @@ export default function ProjectsCard() {
         <p role="status" aria-live="polite" className="!m-0 text-xs text-[var(--muted)]">{t('projetos.results', { count: projects.length, total: perfil.projetos.length })}</p>
       </div>
       <div className="projects-grid">
-        {projects.map(project => <ProjectCard key={project.id} project={project} />)}
+        {projects.map(project => reveal ? <ScrollReveal key={project.id}><ProjectCard project={project} /></ScrollReveal> : <ProjectCard key={project.id} project={project} />)}
       </div>
       {!projects.length && <p className="py-8 text-center text-sm text-[var(--muted)]">{t('projetos.noResults')}</p>}
     </CardShell>

@@ -3,16 +3,15 @@ import { useTranslation } from 'react-i18next';
 import { Sun, Moon, Download, Sparkles } from 'lucide-react';
 import { ThemeContext } from '../context/ThemeContext';
 
-export default function Navbar() {
+export default function Navbar({ portfolio = false }) {
   const { darkMode, toggleTheme } = useContext(ThemeContext);
   const { i18n, t } = useTranslation();
   const en = i18n.language.startsWith('en');
   const cv = en ? '/Gustavo Ryan Resume (English).pdf' : '/Currículo Gustavo Ryan.pdf';
   return <header className="site-header sticky top-0 z-40 bg-white bg-opacity-70 backdrop-blur-lg dark:bg-zinc-950 dark:bg-opacity-70">
-    <div className="brand-lockup"><span className="brand-logo" role="img" aria-label="GR" /><div><h1>{en ? 'Interactive AI Résumé' : 'Currículo IA Interativo'}</h1><p>{en ? 'Conversational Portfolio' : 'Portfólio Conversacional'}</p></div></div>
-    <p className="header-tagline">{en ? <>Your knowledge.<br />Your journey.<br />Now in conversation.</> : <>Seu conhecimento.<br />Sua trajetória.<br />Agora em conversa.</>}</p>
+    <a href={portfolio ? '#inicio' : '/'} className="brand-lockup" aria-label={en ? 'Gustavo Ryan — portfolio' : 'Gustavo Ryan — portfólio'}><span className="brand-logo" aria-hidden="true" /><div><p className="brand-title">Gustavo Ryan</p><p>{portfolio ? 'Software Engineering' : (en ? '← Back to portfolio' : '← Voltar ao portfólio')}</p></div></a>
+    {portfolio && <nav className="scroll-nav" aria-label={en ? 'Portfolio sections' : 'Seções do portfólio'}>{[['sobre', 'Sobre', 'About'], ['projetos', 'Projetos', 'Projects'], ['habilidades', 'Habilidades', 'Skills'], ['contato', 'Contato', 'Contact']].map(([id, pt, english]) => <a key={id} href={`#${id}`}>{en ? english : pt}</a>)}<a href="/chat" className="nav-astra">Astra <Sparkles size={14} aria-hidden="true" /></a></nav>}
     <div className="header-actions">
-      <span className="header-tech"><Sparkles size={18} /> IA Gemini · React</span>
       <div className="language-switch" aria-label={en ? 'Language' : 'Idioma'}>{['pt', 'en'].map(lang => <button key={lang} aria-pressed={i18n.language.startsWith(lang)} onClick={() => i18n.changeLanguage(lang)}>{lang.toUpperCase()}</button>)}</div>
       <button className="icon-button" onClick={toggleTheme} aria-label={darkMode ? t('navbar.temaClaro') : t('navbar.temaEscuro')}>{darkMode ? <Sun size={19} /> : <Moon size={19} />}</button>
       <a className="cv-link" href={cv} download><Download size={16} /><span>{t('navbar.baixarCv')}</span></a>

@@ -1,4 +1,5 @@
 import LanguageIcon from './LanguageIcon';
+import { useId } from 'react';
 import ContactSection from './ContactSection';
 import { Download } from 'lucide-react';
 import perfil from '../data/perfil.json';
@@ -10,10 +11,11 @@ import SkillsGlobe from './SkillsGlobe';
 import SkillsProficiencyCard from './SkillsProficiencyCard';
 import EducationSection from './EducationSection';
 export default function PortfolioSection({ active, en }) {
+  const headingId = useId();
   const section = sections.find(([id]) => id === active);
-  return <section className="portfolio-section" aria-labelledby="section-heading">
+  return <section className="portfolio-section" aria-labelledby={headingId}>
     <p className="section-eyebrow">{en ? 'GET TO KNOW MY JOURNEY' : 'CONHEÇA MINHA TRAJETÓRIA'}</p>
-    <h2 id="section-heading">{section?.[en ? 3 : 2]}</h2>
+    <h2 id={headingId}>{section?.[en ? 3 : 2]}</h2>
     {active === 'about' && <div className="detail-card about-profile-card"><div className="about-profile-heading mb-5 flex w-full flex-col items-center gap-4 text-center"><div className="about-profile-portrait relative isolate h-24 w-24 shrink-0 overflow-hidden rounded-full border border-[var(--accent)] bg-[var(--panel-soft)] sm:h-28 sm:w-28"><img width="572" height="777" className="absolute max-w-none object-cover" src="/perfil-foto.jpeg" alt={en ? `Photo of ${perfil.nome}` : `Foto de ${perfil.nome}`} /></div><h3>{perfil.nome}</h3></div><p>{perfil.bio[en ? 'en' : 'pt']}</p><a className="cv-link" href={en ? '/Gustavo Ryan Resume (English).pdf' : '/Currículo Gustavo Ryan.pdf'} download><Download size={16} />{en ? 'Download résumé' : 'Baixar currículo'}</a></div>}
     {active === 'projects' && <ProjectsCard />}
     {active === 'proficiency' && <SkillsProficiencyCard lang={en ? 'en' : 'pt'} />}
