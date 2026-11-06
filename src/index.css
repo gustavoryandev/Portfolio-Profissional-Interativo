@@ -666,7 +666,8 @@ a.tile:hover, .tile--hover:hover { border-color: var(--accent); }
   font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
 }
 .astra-chip .bp-handles i { opacity: 1; }
-.astra-sub { margin: 14px 0 0; max-width: 60ch; line-height: 1.6; }
+.astra-sub { display: block; margin: 18px 0 0; max-width: 60ch; line-height: 1.6; overflow-wrap: anywhere; }
+.astra-chip { max-width: 100%; overflow-wrap: anywhere; }
 .astra-starters {
   display: grid; gap: 10px; margin: 20px 0 0; padding: 0; list-style: none;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr));
