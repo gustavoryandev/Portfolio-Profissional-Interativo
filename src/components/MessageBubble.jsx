@@ -63,13 +63,9 @@ const BULLET = /^\s*[-*•]\s+/;
 // Temas via variantes `dark:` (a classe `dark` é aplicada em <html> pelo ThemeProvider):
 // o bubble não assina o contexto e o memo evita re-render na troca de tema.
 const UI = {
-  ai: 'border-[#E5E7EB] bg-white text-[#121212] shadow-sm dark:border-[#153857] dark:bg-[#0b1624] dark:text-white dark:shadow-lg dark:shadow-black/40',
-  user: 'border-transparent bg-[#0A0A0A] text-white dark:border-[#224566] dark:bg-[#10243a]',
-  bold: 'font-bold text-[#121212] dark:text-white',
-  bullet: 'bg-[#0D6EFD] dark:bg-brand-400',
-  avatar: 'border-[#E5E7EB] bg-white text-[#1d4ed8] dark:border-[#2A2A2A] dark:bg-[#1E1E1E] dark:text-brand-400',
-  userAvatar: 'border-transparent bg-[#0A0A0A] text-white dark:border-[#2A2A2A] dark:bg-[#2A2A2A]',
-  error: 'border-red-300 bg-red-50 text-red-900 dark:border-red-500/50 dark:bg-[#1E1E1E] dark:text-red-200',
+  bold: 'font-bold text-ink',
+  bullet: 'bg-accent',
+  userAvatar: 'border-line bg-panel-soft text-ink',
   errorIcon: 'text-red-600 dark:text-red-400',
 };
 
@@ -174,14 +170,14 @@ function CodeBlock({ lang, code }) {
   return (
     <div className="my-4 overflow-hidden rounded-xl border border-white/10 bg-[#0A0A0A]">
       <div className="flex items-center justify-between border-b border-white/10 px-4 py-2">
-        <span className="font-mono text-[11px] uppercase tracking-wider text-zinc-400" style={{ fontFamily: FONT_MONO }}>
+        <span className="font-mono text-xs uppercase tracking-wider text-zinc-400" style={{ fontFamily: FONT_MONO }}>
           {lang || 'code'}
         </span>
         <button
           type="button"
           onClick={copy}
           aria-label={copied ? 'Copiado' : 'Copiar código'}
-          className="flex items-center gap-1.5 rounded px-2 py-1 font-mono text-[11px] text-zinc-400 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400/60"
+          className="flex items-center gap-1.5 rounded px-2 py-1 font-mono text-xs text-zinc-400 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400/60"
           style={{ fontFamily: FONT_MONO }}
         >
           {copied ? <Check size={12} aria-hidden="true" /> : <Copy size={12} aria-hidden="true" />}
@@ -199,7 +195,7 @@ function Avatar({ isUser, children }) {
   return (
     <div
       aria-hidden="true"
-      className={`mt-2 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border ${isUser ? UI.userAvatar : UI.avatar}`}
+      className={`mt-2 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border ${isUser ? UI.userAvatar : 'avatar-astra'}`}
     >
       {children}
     </div>
@@ -237,59 +233,66 @@ function MessageBubble({ message, liveContext = {}, refreshing = [], onRefresh }
     return (
       <div className="my-2 flex w-full justify-end gap-3">
         <div className="ml-auto min-w-0 max-w-[calc(100%-3.25rem)]">
-          <div className={`rounded-xl rounded-tr-sm border px-6 py-4 text-[15px] font-medium leading-relaxed ${ui.user}`}>
-            <p className="whitespace-pre-wrap break-words">{renderInline(text, 'font-bold')}</p>
+          <div className="chat-bubble chat-bubble--user">
+            <p className="whitespace-pre-wrap break-words text-[15px] font-medium leading-relaxed">{renderInline(text, 'font-bold')}</p>
           </div>
         </div>
         <Avatar isUser>
-          <User className="h-[18px] w-[18px]" />
+          <User className="h-[18px] w-[18px]" aria-hidden="true" />
         </Avatar>
       </div>
     );
   }
 
-
   return (
     <div className={`my-2 flex w-full justify-start gap-3 ${hasCards ? 'message-row-with-cards' : ''}`}>
       <Avatar>
         {isError
-          ? <AlertTriangle className={`h-[18px] w-[18px] ${ui.errorIcon}`} />
-          : <img src="/astra-avatar.png" alt="" className="h-full w-full rounded-full object-cover" />}
+          ? <AlertTriangle className={`h-[18px] w-[18px] ${ui.errorIcon}`} aria-hidden="true" />
+          : <img src="/astra-avatar.png" alt="" />}
       </Avatar>
 
       <div className={hasCards ? 'message-content message-with-cards' : 'message-content'}>
-        <div
-          role={isError ? 'alert' : undefined}
-          className={`w-full rounded-xl rounded-tl-sm border px-4 py-4 ${isError ? ui.error : ui.ai}`}
-        >
-          {translating && <p role="status" className="mb-3 text-xs text-[var(--muted)]">{i18n.t(translationFailed ? 'chat.translationFailed' : 'chat.translating')}</p>}
-          {segments.map((segment, index) => {
-            if (segment.type === 'text') {
-              return parseBlocks(segment.value).map((block, bi) =>
-                block.type === 'code'
-                  ? <CodeBlock key={`${index}-${bi}`} lang={block.lang} code={block.value} />
-                  : <div key={`${index}-${bi}`}>{renderText(block.value, ui, `${index}-${bi}`)}</div>,
-              );
-            }
+        {!isError && (
+          <div className="astra-label">
+            <span>Astra</span>
+            {message.model && <span className="dim-tag">{message.model}</span>}
+          </div>
+        )}
+        {translating && (
+          <p role="status" className="text-xs text-muted">{i18n.t(translationFailed ? 'chat.translationFailed' : 'chat.translating')}</p>
+        )}
 
-            const card = resolveCard(segment.tag);
-            if (!card) return <span key={index}>{segment.tag}</span>;
-
-            const { Component, limit } = card;
-            const source = CARD_SOURCES[segment.tag.slice(1, -1).split(':')[0]];
-            const data = context[source];
+        {segments.map((segment, index) => {
+          if (segment.type === 'text') {
             return (
-              <div className="my-4" key={index}>
-                {source && <LiveDataNotice data={data} pending={refreshing.includes(source)}
-                  onRetry={onRefresh ? () => onRefresh([source], true) : undefined} lang={uiLanguage} />}
-                <Suspense fallback={<p role="status">{i18n.t('resume.loading')}</p>}>
-                  {(!source || data?.status === 'ok') && <Component context={context} lang={uiLanguage} limit={limit} />}
-                </Suspense>
+              <div key={index} role={isError ? 'alert' : undefined}
+                className={`chat-bubble ${isError ? 'chat-bubble--error' : 'chat-bubble--astra'}`}>
+                {parseBlocks(segment.value).map((block, bi) =>
+                  block.type === 'code'
+                    ? <CodeBlock key={`${index}-${bi}`} lang={block.lang} code={block.value} />
+                    : <div key={`${index}-${bi}`}>{renderText(block.value, ui, `${index}-${bi}`)}</div>,
+                )}
               </div>
             );
-          })}
+          }
 
-        </div>
+          const card = resolveCard(segment.tag);
+          if (!card) return <span key={index}>{segment.tag}</span>;
+
+          const { Component, limit } = card;
+          const source = CARD_SOURCES[segment.tag.slice(1, -1).split(':')[0]];
+          const data = context[source];
+          return (
+            <section className="message-card" key={index}>
+              {source && <LiveDataNotice data={data} pending={refreshing.includes(source)}
+                onRetry={onRefresh ? () => onRefresh([source], true) : undefined} lang={uiLanguage} />}
+              <Suspense fallback={<p role="status">{i18n.t('resume.loading')}</p>}>
+                {(!source || data?.status === 'ok') && <Component context={context} lang={uiLanguage} limit={limit} />}
+              </Suspense>
+            </section>
+          );
+        })}
       </div>
     </div>
   );

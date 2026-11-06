@@ -92,6 +92,7 @@
       "publicos": "públicos",
       "sequenciaAtual": "Seq. Atual",
       "dias": "{{count}} dias",
+      "diasSeguidos": "dias consecutivos",
       "ativoHoje": "ativo hoje!",
       "maiorSequencia": "Maior Seq.",
       "recordePessoal": "recorde pessoal",

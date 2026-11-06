@@ -1,53 +1,27 @@
+import { CardShell } from './ui/CardShell';
 import LanguageIcon from './LanguageIcon';
-import React, { useContext } from 'react';
+import React from 'react';
 import { Terminal, Clock, Calendar, Code2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { ThemeContext } from '../context/ThemeContext';
 
 // Tokens alinhados ao GithubActivityCard
-const UI = {
-  dark: {
-    panel: 'border-[#163A59] bg-[#050E17] text-gray-200',
-    surface: 'bg-[#0B192B] border-[#163A59]',
-    surfaceHover: 'hover:bg-[#10243a]',
-    divider: 'border-[#163A59]',
-    text: 'text-white',
-    strong: 'text-white',
-    label: 'text-zinc-400',
-    muted: 'text-[var(--muted)]',
-    accentText: 'text-brand-400',
-    accent: '#38BDF8',
-    track: '#163A59',
-    emptyBox: 'border-[var(--line)] text-[var(--muted)]',
-    shadow: 'shadow-sm',
-  },
-  light: {
-    panel: 'border-gray-200 bg-white text-gray-800',
-    surface: 'bg-slate-50 border-slate-200',
-    surfaceHover: 'hover:bg-gray-100',
-    divider: 'border-gray-200',
-    text: 'text-gray-800',
-    strong: 'text-gray-900',
-    label: 'text-gray-500',
-    muted: 'text-gray-500',
-    accentText: 'text-[#1d4ed8]',
-    accent: '#0D6EFD',
-    track: '#e5e7eb',
-    emptyBox: 'border-gray-300 text-zinc-400',
-    shadow: 'shadow-sm',
-  },
+const ui = {
+  panel: '', surface: 'border-line bg-panel-soft', surfaceHover: 'hover:border-accent',
+  divider: 'border-line', text: 'text-ink', strong: 'text-ink', label: 'text-muted', muted: 'text-muted',
+  accentText: 'text-accent', accent: 'var(--accent)', track: 'var(--line)',
+  emptyBox: 'border-line text-muted', shadow: '',
 };
 
 // Caixa de estatística (mesmo padrão das métricas do GithubActivityCard)
 function HeaderBlock({ icon, label, value, sub, ui }) {
   return (
     <div className={`flex flex-col rounded-xl border p-3 transition-colors ${ui.surface}`}>
-      <div className={`mb-1 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest ${ui.label}`}>
+      <div className={`mb-1 flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest ${ui.label}`}>
         {React.cloneElement(icon, { size: 12, className: ui.accentText, 'aria-hidden': true })}
         {label}
       </div>
       <strong className={`text-[17px] font-semibold tabular-nums ${ui.strong}`}>{value ?? '--'}</strong>
-      <p className={`mt-0.5 text-[11px] ${ui.muted}`}>{sub}</p>
+      <p className={`mt-0.5 text-xs ${ui.muted}`}>{sub}</p>
     </div>
   );
 }
@@ -65,14 +39,14 @@ function CircularProgress({ percent, ui, label }) {
       role="img"
       aria-label={label}
     >
-      <circle cx="25" cy="25" r={radius} strokeWidth="4" fill="none" stroke={ui.track} />
+      <circle cx="25" cy="25" r={radius} strokeWidth="4" fill="none" style={{ stroke: ui.track }} />
       <circle
         cx="25"
         cy="25"
         r={radius}
         strokeWidth="4"
         fill="none"
-        stroke={ui.accent}
+        style={{ stroke: ui.accent }}
         strokeDasharray={circumference}
         strokeDashoffset={offset}
         strokeLinecap="round"
@@ -85,8 +59,6 @@ function CircularProgress({ percent, ui, label }) {
 export default function StatsCard({ context }) {
   const { t, i18n } = useTranslation();
   const en = i18n.language.startsWith('en');
-  const { darkMode } = useContext(ThemeContext);
-  const ui = darkMode ? UI.dark : UI.light;
 
   const wakatime = context?.wakatime;
   const summary = wakatime?.summary || {};
@@ -94,7 +66,7 @@ export default function StatsCard({ context }) {
   const isConfigured = wakatime?.status === 'ok';
 
   return (
-    <article className={`portfolio-card my-3 w-full max-w-[800px] rounded-xl border p-6 transition-colors duration-300 ${ui.panel} ${ui.shadow}`}>
+    <CardShell as="article" className="my-3" >
       {/* CABEÇALHO */}
       <div className="mb-6 text-center sm:text-left">
         <h3 className={`flex items-center justify-center gap-2 text-xl font-semibold tracking-tight sm:justify-start ${ui.strong}`}>
@@ -134,8 +106,8 @@ export default function StatsCard({ context }) {
                 <strong className={`w-full truncate text-center text-[13px] font-bold ${ui.strong}`}>
                   {lang.name}
                 </strong>
-                <p className={`mt-0.5 text-[11px] ${ui.muted}`}>{lang.formatted}</p>
-                <p className={`mt-1 text-[10px] font-bold tabular-nums ${ui.accentText}`}>{lang.percent == null ? '—' : `${lang.percent}%`}</p>
+                <p className={`mt-0.5 text-xs ${ui.muted}`}>{lang.formatted}</p>
+                <p className={`mt-1 text-xs font-bold tabular-nums ${ui.accentText}`}>{lang.percent == null ? '—' : `${lang.percent}%`}</p>
               </div>
             ))}
           </div>
@@ -165,6 +137,6 @@ export default function StatsCard({ context }) {
           {t('cards.wakatime.indisponivel')}
         </div>
       )}
-    </article>
+    </CardShell>
   );
 }

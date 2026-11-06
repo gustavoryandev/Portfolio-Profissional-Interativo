@@ -1,9 +1,8 @@
+import { CardShell } from './ui/CardShell';
 import LanguageIcon from './LanguageIcon';
 // src/components/GithubLanguages.jsx
-import { useContext, useMemo } from 'react';
-import { ThemeContext } from '../context/ThemeContext';
+import { useMemo } from 'react';
 
-const FONT_SANS = "Inter, 'Geist Sans', Roboto, system-ui, sans-serif";
 const FONT_MONO = "'JetBrains Mono', 'Fira Code', ui-monospace, monospace";
 const FALLBACK_COLOR = '#8b949e';
 const MAX_ITEMS = 6;
@@ -34,31 +33,10 @@ const copy = {
 };
 
 // Tokens do design system Alvinegro + Azul
-const UI = {
-  dark: {
-    panel: 'border-[var(--line)] bg-[#050E17] text-white shadow-sm',
-    card: 'border-[var(--line)] bg-[#0B192B]',
-    track: 'bg-neutral-800',
-    text: 'text-white',
-    sub: 'text-[#A5BDDF]',
-    accentRule: 'bg-brand-400',
-    tile: 'border-[var(--line)] bg-[#050E17]',
-    hover: 'hover:border-brand-400/50 hover:shadow-md',
-    badge: 'border-brand-400/30 bg-brand-400/10 text-brand-400',
-    dashed: 'border-[var(--line)] text-[#A5BDDF]',
-  },
-  light: {
-    panel: 'border-[#E5E7EB] bg-[#F4F4F5] text-[#121212] shadow-md',
-    card: 'border-[#E5E7EB] bg-[#FFFFFF]',
-    track: 'bg-[#E5E7EB]',
-    text: 'text-[#121212]',
-    sub: 'text-gray-600',
-    accentRule: 'bg-[#0D6EFD]',
-    tile: 'border-[#E5E7EB] bg-[#F4F4F5]',
-    hover: 'hover:border-[#0D6EFD]/60 hover:shadow-md',
-    badge: 'border-[#0D6EFD]/50 bg-[#EFF6FF] text-[#1d4ed8]',
-    dashed: 'border-[#E5E7EB] text-gray-500',
-  },
+const ui = {
+  panel: '', card: 'border-line bg-panel-soft', track: 'bg-line', text: 'text-ink', sub: 'text-muted',
+  accentRule: 'bg-accent', tile: 'border-line bg-panel', hover: 'hover:border-accent hover:shadow-md',
+  badge: 'border-brand-400/40 bg-brand-400/10 text-accent', dashed: 'border-line text-muted',
 };
 
 // Lê só o que existe; ignora itens inválidos e ordena do maior para o menor
@@ -95,8 +73,6 @@ function groupRest(items, limit, othersLabel) {
 }
 
 export default function GithubLanguages({ context, lang = 'pt' }) {
-  const { darkMode } = useContext(ThemeContext);
-  const ui = darkMode ? UI.dark : UI.light;
   const t = copy[lang] || copy.pt;
   const locale = lang === 'en' ? 'en-US' : 'pt-BR';
 
@@ -123,34 +99,33 @@ export default function GithubLanguages({ context, lang = 'pt' }) {
   const items = useMemo(() => normalize(github?.languages?.items), [github?.languages?.items]);
   const groups = useMemo(() => groupRest(items, MAX_ITEMS, t.others), [items, t]);
 
-  const sectionClass = `portfolio-card mx-auto my-6 w-full max-w-[850px] rounded-xl border p-6 transition-colors duration-300 ${ui.panel}`;
   const headingId = 'gh-languages-title';
 
   if (github?.status !== 'ok' || github.languages == null) {
     return (
-      <section className={sectionClass} style={{ fontFamily: FONT_SANS }}>
+      <CardShell as="section" className="my-3" >
         <div className={`rounded-xl border border-dashed py-12 text-center text-sm font-medium ${ui.dashed}`}>
           {t.unavailable}
         </div>
-      </section>
+      </CardShell>
     );
   }
 
   if (items.length === 0) {
     return (
-      <section className={sectionClass} style={{ fontFamily: FONT_SANS }}>
+      <CardShell as="section" className="my-3" >
         <h3 className={`mb-4 text-[0.85rem] font-semibold uppercase tracking-[0.05em] ${ui.sub}`}>{t.title}</h3>
         <div className={`rounded-xl border border-dashed py-10 text-center text-sm font-medium ${ui.dashed}`}>
           {t.empty}
         </div>
-      </section>
+      </CardShell>
     );
   }
 
   const barSummary = groups.map((g) => `${g.name} ${fmtPercent.format(g.percent)}%`).join(', ');
 
   return (
-    <section aria-labelledby={headingId} className={sectionClass} style={{ fontFamily: FONT_SANS }}>
+    <CardShell as="section" className="my-3" aria-labelledby={headingId}>
       <header className="mb-6 flex flex-wrap items-start justify-between gap-3">
         <div>
           <h3
@@ -164,7 +139,7 @@ export default function GithubLanguages({ context, lang = 'pt' }) {
             {items.length === 1 ? t.countOne : t.count(fmtCount.format(items.length))}
           </p>
         </div>
-        <span className={`rounded-full border px-3 py-1 text-[0.7rem] font-bold uppercase tracking-wider ${ui.badge}`}>
+        <span className={`rounded-full border px-3 py-1 text-xs font-bold uppercase tracking-wider ${ui.badge}`}>
           {groups[0].name} · {fmtPercent.format(groups[0].percent)}%
         </span>
       </header>
@@ -199,7 +174,7 @@ export default function GithubLanguages({ context, lang = 'pt' }) {
               <div className="min-w-0 flex-1">
                 <p className={`truncate text-[0.95rem] font-bold ${ui.text}`}>{g.name}</p>
                 {g.bytes !== null && (
-                  <p className={`mt-0.5 text-[0.7rem] tabular-nums ${ui.sub}`} style={{ fontFamily: FONT_MONO }}>
+                  <p className={`mt-0.5 text-xs tabular-nums ${ui.sub}`} style={{ fontFamily: FONT_MONO }}>
                     {fmtBytes(g.bytes)}
                   </p>
                 )}
@@ -229,7 +204,7 @@ export default function GithubLanguages({ context, lang = 'pt' }) {
         ))}
       </ul>
 
-      <p className={`mt-6 text-center text-[0.7rem] font-medium ${ui.sub}`}>{t.note}</p>
-    </section>
+      <p className={`mt-6 text-center text-xs font-medium ${ui.sub}`}>{t.note}</p>
+    </CardShell>
   );
 }

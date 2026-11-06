@@ -1,10 +1,9 @@
+import { CardShell } from './ui/CardShell';
 import LanguageIcon from './LanguageIcon';
 // src/components/RepositoriesCard.jsx
-import { memo, useContext, useMemo } from 'react';
+import { memo, useMemo } from 'react';
 import { ExternalLink, GitFork, Star, Github } from 'lucide-react';
-import { ThemeContext } from '../context/ThemeContext';
 
-const FONT_SANS = "Inter, 'Geist Sans', Roboto, system-ui, sans-serif";
 const FONT_MONO = "'JetBrains Mono', 'Fira Code', ui-monospace, monospace";
 const MAX_VISIBLE = 4;
 const FALLBACK_LANG_COLOR = '#8b949e';
@@ -38,37 +37,13 @@ const copy = {
 };
 
 // Tokens do design system Alvinegro + Azul
-const UI = {
-  dark: {
-    panel: 'border-[#163A59] bg-[#050E17] text-white shadow-sm',
-    card: 'border-[#163A59] bg-[#0B192B] hover:border-brand-400/50',
-    title: 'text-white',
-    sub: 'text-[#A5BDDF]',
-    muted: 'text-[var(--muted)]',
-    accent: 'text-brand-400',
-    accentBg: 'bg-brand-400/10 border-brand-400/30 text-brand-400',
-    neutralBadge: 'border-[#163A59] bg-[#163A59] text-[#E5E5E5]',
-    iconTile: 'border-[#163A59] bg-[#0B192B] text-brand-400',
-    linkButton: 'border-[#163A59] bg-[#0B192B] text-[#A5BDDF] hover:text-brand-400',
-    avatarRing: 'ring-brand-400/60',
-    dashed: 'border-[#163A59] bg-[#0B192B] text-[#A5BDDF]',
-    divider: 'border-[#163A59]',
-  },
-  light: {
-    panel: 'border-[#E5E7EB] bg-[#F4F4F5] text-[#121212] shadow-md',
-    card: 'border-[#E5E7EB] bg-[#FFFFFF] hover:border-[#0D6EFD]/60',
-    title: 'text-[#121212]',
-    sub: 'text-gray-600',
-    muted: 'text-gray-500',
-    accent: 'text-[#1d4ed8]',
-    accentBg: 'bg-[#EFF6FF] border-[#0D6EFD]/50 text-[#1d4ed8]',
-    neutralBadge: 'border-[#E5E7EB] bg-[#F4F4F5] text-[#121212]',
-    iconTile: 'border-[#E5E7EB] bg-[#FFFFFF] text-[#1d4ed8]',
-    linkButton: 'border-[#E5E7EB] bg-[#FFFFFF] text-gray-600 hover:text-[#1d4ed8]',
-    avatarRing: 'ring-[#121212]/20',
-    dashed: 'border-[#E5E7EB] bg-[#FFFFFF] text-gray-500',
-    divider: 'border-[#E5E7EB]',
-  },
+const ui = {
+  panel: '', card: 'border-line bg-panel-soft hover:border-accent',
+  title: 'text-ink', sub: 'text-muted', muted: 'text-muted', accent: 'text-accent',
+  accentBg: 'border-brand-400/40 bg-brand-400/10 text-accent',
+  neutralBadge: 'border-line bg-panel text-ink', iconTile: 'border-line bg-panel text-accent',
+  linkButton: 'border-line bg-panel text-muted hover:text-accent',
+  avatarRing: 'ring-accent', dashed: 'border-line bg-panel-soft text-muted', divider: 'border-line',
 };
 
 // Foto local usada nos cartões do perfil.
@@ -106,14 +81,14 @@ const RepoItem = memo(function RepoItem({ repo, ui, t, langColor }) {
             <div className="flex flex-wrap items-center gap-2">
               <h4 className={`min-w-0 truncate text-[15px] font-bold ${ui.title}`}>{repo.name}</h4>
               {stars > 0 && (
-                <span className={`flex items-center gap-1 rounded-full border px-1.5 py-0.5 text-[11px] font-bold tabular-nums ${ui.accentBg}`}>
+                <span className={`flex items-center gap-1 rounded-full border px-1.5 py-0.5 text-xs font-bold tabular-nums ${ui.accentBg}`}>
                   <Star size={10} className="fill-current" aria-hidden="true" />
                   <span className="sr-only">{t.stars}:</span>
                   {stars}
                 </span>
               )}
               {forks > 0 && (
-                <span className={`flex items-center gap-1 rounded-full border px-1.5 py-0.5 text-[11px] font-bold tabular-nums ${ui.neutralBadge}`}>
+                <span className={`flex items-center gap-1 rounded-full border px-1.5 py-0.5 text-xs font-bold tabular-nums ${ui.neutralBadge}`}>
                   <GitFork size={10} aria-hidden="true" />
                   <span className="sr-only">{t.forks}:</span>
                   {forks}
@@ -128,14 +103,14 @@ const RepoItem = memo(function RepoItem({ repo, ui, t, langColor }) {
           <ExternalLink
             size={16}
             aria-hidden="true"
-            className={`mt-0.5 shrink-0 transition-colors ${ui.muted} group-hover:${ui.accent.replace('text-', 'text-')}`}
+            className={`mt-0.5 shrink-0 transition-colors ${ui.muted} group-hover:text-brand-400`}
           />
         </div>
 
         {repo.language && (
           <div className="mt-3 flex flex-wrap gap-2">
             <span
-              className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-bold tracking-wide ${ui.neutralBadge}`}
+              className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-bold tracking-wide ${ui.neutralBadge}`}
               style={{ fontFamily: FONT_MONO }}
             >
               <LanguageIcon name={repo.language} size={14} color={langColor} />
@@ -149,8 +124,6 @@ const RepoItem = memo(function RepoItem({ repo, ui, t, langColor }) {
 });
 
 export default function RepositoriesCard({ context, lang = 'pt' }) {
-  const { darkMode } = useContext(ThemeContext);
-  const ui = darkMode ? UI.dark : UI.light;
   const t = copy[lang] || copy.pt;
 
   const github = context?.github;
@@ -165,14 +138,13 @@ export default function RepositoriesCard({ context, lang = 'pt' }) {
   );
 
   const headingId = 'repos-card-title';
-  const sectionClass = `portfolio-card my-2 w-full max-w-lg rounded-xl border p-5 transition-colors duration-300 ${ui.panel}`;
 
   const headerAvatar = (
     <ProfileAvatar src={avatarSrc} login={login} ui={ui} />
   );
 
   return (
-    <section aria-labelledby={headingId} className={sectionClass} style={{ fontFamily: FONT_SANS }}>
+    <CardShell as="section" className="my-3" aria-labelledby={headingId}>
       <header className="mb-5 flex items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-3">
           {headerAvatar ?? (
@@ -224,6 +196,6 @@ export default function RepositoriesCard({ context, lang = 'pt' }) {
           </a>
         </div>
       )}
-    </section>
+    </CardShell>
   );
 }

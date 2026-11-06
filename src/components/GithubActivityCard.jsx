@@ -1,6 +1,6 @@
-import { memo, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { CardShell } from './ui/CardShell';
+import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { Flame, Moon, Sun, Sunrise, Sunset } from 'lucide-react';
-import { ThemeContext } from '../context/ThemeContext';
 
 /* =====================================================================
    Traduções
@@ -110,59 +110,25 @@ const WEEK_ORDER = [1, 2, 3, 4, 5, 6, 0]; // segunda primeiro
 const LEVEL_KEYS = [0, 1, 2, 3, 4];
 
 /* =====================================================================
-   Tokens de cor por tema (amarelo nos gráficos e atividade)
+   Tokens semânticos dos gráficos e da atividade
    ===================================================================== */
-const UI = {
-  dark: {
-    panel: 'border-[#163A59] bg-[#050E17] text-gray-200',
-    surface: 'bg-[#0B192B] border-[#163A59]',
-    divider: 'border-[#163A59]',
-    muted: 'text-[var(--muted)]',
-    sub: 'text-[var(--muted)]',
-    label: 'text-gray-400',
-    caption: 'text-zinc-400',
-    heading: 'text-gray-300',
-    strong: 'text-gray-300',
-    dayLabel: 'text-zinc-400',
-    dayLabelActive: 'text-gray-200',
-    dot: 'text-[var(--muted)]',
-    accentText: 'text-brand-400',
-    badge: 'border-brand-400/30 bg-brand-400/10 text-brand-400',
-    ringAccent: 'ring-brand-400/50',
-    focus: 'focus-visible:ring-brand-400/60',
-    track: 'bg-[#161b22]',
-    barTrack: 'bg-zinc-800',
-    bar: 'bg-[#167AB6]',
-    peak: 'bg-brand-400',
-    levels: ['bg-[#161b22]', 'bg-[#103454]', 'bg-[#145c91]', 'bg-[#167AB6]', 'bg-brand-400'],
-    emptyBox: 'border-[var(--line)] text-[var(--muted)]',
-    tooltip: 'border-[#163A59] bg-[#050E17] text-gray-200',
-  },
-  light: {
-    panel: 'border-gray-200 bg-white text-gray-800',
-    surface: 'bg-gray-50 border-gray-100',
-    divider: 'border-gray-200',
-    muted: 'text-gray-400',
-    sub: 'text-gray-500',
-    label: 'text-gray-500',
-    caption: 'text-gray-500',
-    heading: 'text-gray-600',
-    strong: 'text-gray-600',
-    dayLabel: 'text-gray-500',
-    dayLabelActive: 'text-gray-800',
-    dot: 'text-gray-300',
-    accentText: 'text-[#1d4ed8]',
-    badge: 'border-[#0D6EFD]/50 bg-[#EFF6FF] text-[#1d4ed8]',
-    ringAccent: 'ring-[#0D6EFD]/60',
-    focus: 'focus-visible:ring-[#0D6EFD]/60',
-    track: 'bg-gray-200',
-    barTrack: 'bg-gray-200',
-    bar: 'bg-[#60A5FA]',
-    peak: 'bg-[#0D6EFD]',
-    levels: ['bg-gray-100', 'bg-[#DBEAFE]', 'bg-[#93C5FD]', 'bg-[#3B82F6]', 'bg-[#0D6EFD]'],
-    emptyBox: 'border-gray-300 text-zinc-400',
-    tooltip: 'border-gray-200 bg-white text-gray-800',
-  },
+const ui = {
+  panel: '', surface: 'border-line bg-panel-soft', divider: 'border-line',
+  muted: 'text-muted', sub: 'text-muted', label: 'text-muted', caption: 'text-muted',
+  heading: 'text-ink', strong: 'text-ink', dayLabel: 'text-muted', dayLabelActive: 'text-ink',
+  dot: 'text-muted', accentText: 'text-accent',
+  badge: 'border-brand-400/40 bg-brand-400/10 text-accent', ringAccent: 'ring-accent',
+  focus: 'focus-visible:ring-2 focus-visible:ring-accent',
+  track: 'bg-line', barTrack: 'bg-line',
+  bar: 'bg-[color-mix(in_srgb,var(--accent)_55%,var(--panel))]', peak: 'bg-accent',
+  levels: [
+    'bg-panel-soft',
+    'bg-[color-mix(in_srgb,var(--accent)_28%,var(--panel-soft))]',
+    'bg-[color-mix(in_srgb,var(--accent)_52%,var(--panel-soft))]',
+    'bg-[color-mix(in_srgb,var(--accent)_76%,var(--panel-soft))]',
+    'bg-accent',
+  ],
+  emptyBox: 'border-line text-muted', tooltip: 'border-line bg-panel text-ink',
 };
 
 /* =====================================================================
@@ -378,7 +344,7 @@ function Columns({ items, value, readout, axis, cap, caption, colClass = 'flex-1
                 style={{ height }}
               >
                 {isPeak && (
-                  <span className={`absolute -top-6 left-1/2 -translate-x-1/2 whitespace-nowrap rounded border px-1.5 py-0.5 text-[0.7rem] font-bold ${ui.tooltip}`}>
+                  <span className={`absolute -top-6 left-1/2 -translate-x-1/2 whitespace-nowrap rounded border px-1.5 py-0.5 text-xs font-bold ${ui.tooltip}`}>
                     {cap(item)}
                   </span>
                 )}
@@ -388,7 +354,7 @@ function Columns({ items, value, readout, axis, cap, caption, colClass = 'flex-1
         })}
       </div>
 
-      <div aria-hidden="true" className={`mt-1.5 flex justify-center text-[0.7rem] font-medium ${ui.muted}`} style={{ gap }}>
+      <div aria-hidden="true" className={`mt-1.5 flex justify-center text-xs font-medium ${ui.muted}`} style={{ gap }}>
         {items.map((item, index) => (
           <span key={index} className={`relative h-4 ${colClass}`}>
             <span className="absolute left-1/2 -translate-x-1/2 whitespace-nowrap">{axis(item, index)}</span>
@@ -470,7 +436,7 @@ const Calendar = memo(function Calendar({ summary, ui, t, f }) {
       <figure className="m-0 mb-10">
         <div className={`mb-3 flex flex-wrap items-center justify-between gap-4 text-sm ${ui.caption}`}>
           <span>{f.number(summary.total)} {t.contrib12months}</span>
-          <div aria-hidden="true" className="flex items-center gap-1 text-[0.7rem]">
+          <div aria-hidden="true" className="flex items-center gap-1 text-xs">
             {t.less}
             {LEVEL_KEYS.map((level) => (
               <div key={level} className={`h-[11px] w-[11px] rounded-[2px] ${ui.levels[level]}`} />
@@ -483,7 +449,7 @@ const Calendar = memo(function Calendar({ summary, ui, t, f }) {
           <div className="custom-scrollbar flex gap-2 overflow-x-auto pb-2">
             {/* Rótulos Seg / Qua / Sex */}
             <div aria-hidden="true" className="shrink-0 pt-5" style={{ width: 28 }}>
-              <div className={`relative text-[10px] leading-[11px] ${ui.muted}`} style={{ height: 7 * PITCH - 3 }}>
+              <div className={`relative text-xs leading-[11px] ${ui.muted}`} style={{ height: 7 * PITCH - 3 }}>
                 {[1, 3, 5].map((day) => (
                   <span key={day} className="absolute left-0" style={{ top: day * PITCH }}>{t.weekDays[day - 1]}</span>
                 ))}
@@ -492,7 +458,7 @@ const Calendar = memo(function Calendar({ summary, ui, t, f }) {
 
             <div className="shrink-0">
               {/* Rótulos dos meses */}
-              <div aria-hidden="true" className={`relative mb-1 h-4 text-[10px] ${ui.muted}`} style={{ width: columns.length * PITCH }}>
+              <div aria-hidden="true" className={`relative mb-1 h-4 text-xs ${ui.muted}`} style={{ width: columns.length * PITCH }}>
                 {months.map((m) => (
                   <span key={m.date} className="absolute top-0" style={{ left: m.index * PITCH }}>{f.month(m.date)}</span>
                 ))}
@@ -517,7 +483,7 @@ const Calendar = memo(function Calendar({ summary, ui, t, f }) {
                       <div
                         key={cell.date}
                         data-index={cell.index}
-                        className={`relative z-0 h-[11px] w-[11px] cursor-pointer rounded-[2px] transition-all duration-200 hover:z-10 hover:scale-150 hover:shadow-lg hover:ring-1 hover:ring-white ${ui.levels[cell.level]} ${cell.index === active ? 'z-10 scale-150 ring-1 ring-white' : ''}`}
+                        className={`relative z-0 h-[11px] w-[11px] cursor-pointer rounded-[2px] transition-all duration-200 hover:z-10 hover:scale-150 hover:shadow-lg hover:ring-1 hover:ring-[var(--ink)] ${ui.levels[cell.level]} ${cell.index === active ? 'z-10 scale-150 ring-1 ring-[var(--ink)]' : ''}`}
                       />
                     ))}
                   </div>
@@ -540,7 +506,7 @@ const Calendar = memo(function Calendar({ summary, ui, t, f }) {
 
       {tip && tipCell && (
         <div
-          className="pointer-events-none fixed z-[100] -translate-x-1/2 -translate-y-full whitespace-nowrap rounded border border-zinc-700 bg-zinc-900 px-3 py-1.5 text-[11px] text-gray-100 shadow-2xl"
+          className="pointer-events-none fixed z-[100] -translate-x-1/2 -translate-y-full whitespace-nowrap rounded border border-zinc-700 bg-zinc-900 px-3 py-1.5 text-xs text-gray-100 shadow-2xl"
           style={{ top: tip.y, left: tip.x }}
         >
           <strong className="text-white">{describeCell(tipCell, t, f).bold}</strong> {describeCell(tipCell, t, f).rest}
@@ -564,7 +530,7 @@ function SummaryStat({ ui, icon, value, unit, label, note }) {
         {unit && <span className="text-[1.2rem]">{unit}</span>}
       </span>
       <span className={`mt-2 text-xs font-semibold ${ui.label}`}>{label}</span>
-      <span className={`mt-1 text-[0.7rem] ${ui.muted}`}>{note}</span>
+      <span className={`mt-1 text-xs ${ui.muted}`}>{note}</span>
     </div>
   );
 }
@@ -573,11 +539,9 @@ function SummaryStat({ ui, icon, value, unit, label, note }) {
    Componente principal
    ===================================================================== */
 export default function GithubActivityCard({ context, lang = 'pt' }) {
-  const { darkMode } = useContext(ThemeContext);
   const t = TRANSLATIONS[lang] || TRANSLATIONS.pt;
   const locale = lang === 'en' ? 'en-US' : 'pt-BR';
   const f = getFormatters(locale);
-  const ui = darkMode ? UI.dark : UI.light;
 
   const github = context?.github;
   const stats = github?.stats || {};
@@ -648,11 +612,11 @@ export default function GithubActivityCard({ context, lang = 'pt' }) {
   /* ---------- Sem dados do GitHub ---------- */
   if (github?.status !== 'ok') {
     return (
-      <div className={`portfolio-card mx-auto my-6 w-full max-w-[850px] rounded-xl border p-6 shadow-lg transition-colors duration-300 ${ui.panel}`}>
+      <CardShell as="div" className="my-3" >
         <div className={`rounded-xl border border-dashed py-12 text-center text-sm font-medium ${ui.emptyBox}`}>
           {t.unavailable}
         </div>
-      </div>
+      </CardShell>
     );
   }
 
@@ -660,7 +624,7 @@ export default function GithubActivityCard({ context, lang = 'pt' }) {
   const blockTitle = `mb-4 block text-xs font-semibold uppercase tracking-wider ${ui.sub}`;
 
   return (
-    <div className={`portfolio-card mx-auto my-6 w-full max-w-[850px] rounded-xl border p-6 shadow-lg transition-colors duration-300 ${ui.panel}`}>
+    <CardShell as="div" className="my-3" >
 
       {/* ===================== SEÇÃO 1: Atividade ===================== */}
       <div className="mb-8">
@@ -714,7 +678,7 @@ export default function GithubActivityCard({ context, lang = 'pt' }) {
               ui={ui}
             />
             {!yearsData.complete && (
-              <p className={`mt-2 text-center text-[0.65rem] ${ui.muted}`}>{t.windowNote}</p>
+              <p className={`mt-2 text-center text-xs ${ui.muted}`}>{t.windowNote}</p>
             )}
           </div>
 
@@ -792,10 +756,10 @@ export default function GithubActivityCard({ context, lang = 'pt' }) {
                       <Icon size={21} className={ui.accentText} />
                       <div className="min-w-0 flex-1">
                         <div className="text-[0.8rem] font-semibold">{period.label}</div>
-                        <div className={`mt-[0.1rem] text-[0.7rem] ${ui.muted}`}>{hourSpan(period.from, (period.to + 1) % 24)}</div>
+                        <div className={`mt-[0.1rem] text-xs ${ui.muted}`}>{hourSpan(period.from, (period.to + 1) % 24)}</div>
                       </div>
                       {isTop && (
-                        <span className={`rounded-full border px-1.5 py-0.5 text-[9px] font-bold uppercase ${ui.badge}`}>
+                        <span className={`rounded-full border px-1.5 py-0.5 text-xs font-bold uppercase ${ui.badge}`}>
                           {t.peak}
                         </span>
                       )}
@@ -804,13 +768,13 @@ export default function GithubActivityCard({ context, lang = 'pt' }) {
                     <div className={`h-[6px] overflow-hidden rounded-full ${ui.barTrack}`}>
                       <div className={`h-full rounded-full ${ui.bar}`} style={{ width: `${period.pct}%` }} />
                     </div>
-                    <div className={`mt-2 text-[0.7rem] ${ui.muted}`}>≈ {f.number(period.count)} {t.commits}</div>
+                    <div className={`mt-2 text-xs ${ui.muted}`}>≈ {f.number(period.count)} {t.commits}</div>
                   </div>
                 );
               })}
             </div>
 
-            <p className={`mt-8 text-center text-[0.7rem] font-medium ${ui.muted}`}>
+            <p className={`mt-8 text-center text-xs font-medium ${ui.muted}`}>
               {t.estimation}
               {activity.totalSampleCommits ? ` • ${f.number(activity.totalSampleCommits)} ${t.commits} (${t.sample})` : ''}
             </p>
@@ -823,8 +787,8 @@ export default function GithubActivityCard({ context, lang = 'pt' }) {
       </div>
 
       {updatedLabel && (
-        <p className={`mt-4 text-center text-[0.7rem] font-medium ${ui.muted}`}>{t.updatedAt} {updatedLabel}</p>
+        <p className={`mt-4 text-center text-xs font-medium ${ui.muted}`}>{t.updatedAt} {updatedLabel}</p>
       )}
-    </div>
+    </CardShell>
   );
 }

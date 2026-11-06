@@ -1,6 +1,6 @@
-import React, { useContext } from 'react';
+import { CardShell } from './ui/CardShell';
+import React from 'react';
 import { Clock, Code2, Terminal } from 'lucide-react';
-import { ThemeContext } from '../context/ThemeContext';
 import LanguageIcon from './LanguageIcon';
 
 const copy = {
@@ -26,39 +26,16 @@ const copy = {
   },
 };
 
-const UI = {
-  dark: {
-    panel: 'border-[#163A59] bg-[#050E17] text-gray-200 shadow-sm',
-    surface: 'bg-[#0B192B] border-[#163A59]',
-    strong: 'text-white',
-    label: 'text-zinc-400',
-    muted: 'text-[var(--muted)]',
-    accentText: 'text-brand-400',
-    tile: 'border-[var(--line)] bg-[#050E17]',
-    hover: 'hover:border-brand-400/50 hover:shadow-md',
-    accent: '#38BDF8',
-    track: '#163A59',
-    dashed: 'border-[var(--line)] text-[var(--muted)]',
-  },
-  light: {
-    panel: 'border-gray-200 bg-white text-gray-800 shadow-sm',
-    surface: 'bg-slate-50 border-slate-200',
-    strong: 'text-gray-900',
-    label: 'text-gray-500',
-    muted: 'text-gray-500',
-    accentText: 'text-[#1d4ed8]',
-    tile: 'border-[#E5E7EB] bg-[#F4F4F5]',
-    hover: 'hover:border-[#0D6EFD]/60 hover:shadow-md',
-    accent: '#0D6EFD',
-    track: '#E5E7EB',
-    dashed: 'border-gray-300 text-zinc-400',
-  },
+const ui = {
+  panel: '', surface: 'border-line bg-panel-soft', strong: 'text-ink', label: 'text-muted', muted: 'text-muted',
+  accentText: 'text-accent', tile: 'border-line bg-panel', hover: 'hover:border-accent hover:shadow-md',
+  accent: 'var(--accent)', track: 'var(--line)', dashed: 'border-line text-muted',
 };
 
 function Block({ icon, label, value, ui }) {
   return (
     <div className={`flex min-w-0 flex-col rounded-xl border p-3 ${ui.surface}`}>
-      <div className={`mb-1 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest ${ui.label}`}>
+      <div className={`mb-1 flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest ${ui.label}`}>
         {React.cloneElement(icon, { size: 12, className: ui.accentText, 'aria-hidden': true })}
         {label}
       </div>
@@ -68,9 +45,7 @@ function Block({ icon, label, value, ui }) {
 }
 
 export default function WakaTimeCard({ context, lang = 'pt' }) {
-  const { darkMode } = useContext(ThemeContext);
   const t = copy[lang] || copy.pt;
-  const ui = darkMode ? UI.dark : UI.light;
 
   const wakatime = context?.wakatime;
   const week = wakatime?.week || {};
@@ -79,7 +54,7 @@ export default function WakaTimeCard({ context, lang = 'pt' }) {
   const hasData = Boolean(week.totalFormatted || languages.length);
 
   return (
-    <article className={`portfolio-card my-3 w-full max-w-[800px] rounded-xl border p-6 transition-colors duration-300 ${ui.panel}`}>
+    <CardShell as="article" className="my-3" >
       <div className="mb-5">
         <h3 className={`flex items-center gap-2 text-lg font-semibold tracking-tight ${ui.strong}`}>
           <Clock size={20} className={ui.accentText} aria-hidden="true" />
@@ -102,7 +77,7 @@ export default function WakaTimeCard({ context, lang = 'pt' }) {
 
           {languages.length > 0 && (
             <>
-              <h4 className={`mb-3 mt-6 text-[11px] font-bold uppercase tracking-widest ${ui.label}`}>{t.languages}</h4>
+              <h4 className={`mb-3 mt-6 text-xs font-bold uppercase tracking-widest ${ui.label}`}>{t.languages}</h4>
               <ul className="m-0 grid list-none grid-cols-1 gap-3 p-0 min-[420px]:grid-cols-2 md:grid-cols-3">
                 {languages.map((language, index) => {
                   const percent = language.percent == null ? NaN : Number(language.percent);
@@ -118,7 +93,7 @@ export default function WakaTimeCard({ context, lang = 'pt' }) {
                         </span>
                         <div className="min-w-0 flex-1">
                           <p className={`truncate text-[13px] font-bold ${ui.strong}`}>{language.name}</p>
-                          <p className={`text-[11px] tabular-nums ${ui.muted}`}>{language.formatted ?? '—'}</p>
+                          <p className={`text-xs tabular-nums ${ui.muted}`}>{language.formatted ?? '—'}</p>
                         </div>
                         {hasPercent && (
                           <span className={`shrink-0 text-[13px] font-semibold tabular-nums ${ui.accentText}`}>{percent.toFixed(1)}%</span>
@@ -145,6 +120,6 @@ export default function WakaTimeCard({ context, lang = 'pt' }) {
           )}
         </>
       )}
-    </article>
+    </CardShell>
   );
 }

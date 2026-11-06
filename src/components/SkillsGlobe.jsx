@@ -130,8 +130,8 @@ export default function SkillsGlobe({ skills, en = false }) {
     drag.current = null;
   };
   return <div className="mb-5 overflow-hidden rounded-xl border border-[var(--line)] [background:radial-gradient(ellipse_at_50%_52%,color-mix(in_srgb,var(--accent)_12%,transparent),transparent_65%),var(--panel)]">
-    <div className="flex items-center justify-between gap-3 px-[18px] pt-[18px] max-[400px]:px-3 max-[400px]:pt-3"><p className="m-0 text-[14px] font-semibold text-[var(--ink)] max-[400px]:text-xs">{en ? 'My technology universe' : 'Meu universo de tecnologias'}<span className="mt-1 block text-[11px] font-normal text-[var(--muted)]">{en ? `${skills.length} skills in my toolkit` : `${skills.length} habilidades na minha bagagem`}</span></p>
-      <button type="button" className="flex items-center gap-[5px] rounded-[7px] border border-[var(--line)] px-[9px] py-[7px] text-[11px] text-[var(--accent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-[var(--accent)] disabled:cursor-default disabled:opacity-50" aria-pressed={paused || reduced} disabled={reduced} onClick={() => setPaused(value => !value)}>
+    <div className="flex items-center justify-between gap-3 px-[18px] pt-[18px] max-[400px]:px-3 max-[400px]:pt-3"><p className="m-0 text-[14px] font-semibold text-[var(--ink)] max-[400px]:text-xs">{en ? 'My technology universe' : 'Meu universo de tecnologias'}<span className="mt-1 block text-xs font-normal text-[var(--muted)]">{en ? `${skills.length} skills in my toolkit` : `${skills.length} habilidades na minha bagagem`}</span></p>
+      <button type="button" className="flex items-center gap-[5px] rounded-[7px] border border-[var(--line)] px-[9px] py-[7px] text-xs text-[var(--accent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-[var(--accent)] disabled:cursor-default disabled:opacity-50" aria-pressed={paused || reduced} disabled={reduced} onClick={() => setPaused(value => !value)}>
         {paused || reduced ? <Play size={14} aria-hidden="true" /> : <Pause size={14} aria-hidden="true" />}{en ? (paused || reduced ? 'Resume' : 'Pause') : (paused || reduced ? 'Retomar' : 'Pausar')}
       </button>
     </div>
@@ -146,6 +146,6 @@ export default function SkillsGlobe({ skills, en = false }) {
         {skills.map((skill, index) => <li ref={element => { items.current[index] = element; }} key={skill.nome} className="absolute left-1/2 top-1/2 flex flex-col items-center gap-[5px] whitespace-nowrap will-change-transform"><LanguageIcon name={skill.nome} size={32} className={`pointer-events-none drop-shadow-[0_2px_5px_rgb(0_0_0_/_0.15)] max-[400px]:!h-[25px] max-[400px]:!w-[25px] ${skill.nome === 'GitHub' ? 'dark:invert' : ''}`} /><span className="rounded bg-[var(--panel)] px-[5px] py-0.5 text-[clamp(8px,1vw,11px)] font-semibold leading-[1.3] text-[var(--ink)]">{skill.nome}</span></li>)}
       </ul>
     </div>
-    <p className="m-0 px-3 pb-[18px] text-center text-[11px] text-[var(--muted)]">{en ? 'Drag to explore · The full skill list is below' : 'Arraste para explorar · Lista completa de habilidades abaixo'}</p>
+    <p className="m-0 px-3 pb-[18px] text-center text-xs text-[var(--muted)]">{en ? 'Drag to explore · The full skill list is below' : 'Arraste para explorar · Lista completa de habilidades abaixo'}</p>
   </div>;
 }

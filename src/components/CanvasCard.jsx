@@ -1,9 +1,8 @@
-import React, { memo, useContext, useMemo } from 'react';
+import { CardShell } from './ui/CardShell';
+import React, { memo, useMemo } from 'react';
 import { BookOpen, ExternalLink, GraduationCap, LayoutDashboard, Clock } from 'lucide-react';
-import { ThemeContext } from '../context/ThemeContext';
 
 const CANVAS_URL = 'https://pucminas.instructure.com/';
-const FONT_SANS = "Inter, 'Geist Sans', Roboto, system-ui, sans-serif";
 const FONT_MONO = "'JetBrains Mono', 'Fira Code', ui-monospace, monospace";
 const MAX_VISIBLE = 4;
 
@@ -43,43 +42,14 @@ const translations = {
 };
 
 // Tokens do design system Alvinegro + Azul (mesmos do GithubActivityCard)
-const UI = {
-  dark: {
-    panel: 'border-[#163A59] bg-[#050E17] text-white shadow-sm',
-    surface: 'border-[#163A59] bg-[#0B192B]',
-    divider: 'border-[#163A59]',
-    text: 'text-white',
-    sub: 'text-zinc-400',
-    muted: 'text-[var(--muted)]',
-    accentText: 'text-brand-400',
-    accentHover: 'hover:text-brand-400',
-    accentBorderHover: 'hover:border-brand-400/40',
-    iconTile: 'border-[#163A59] bg-[#0B192B] text-brand-400/80',
-    iconTileHover: 'group-hover:text-brand-400',
-    linkButton: 'border-[#163A59] bg-[#10243a] text-zinc-400 hover:text-brand-400',
-    badge: 'border-brand-400/30 bg-brand-400/10 text-brand-400',
-    dot: 'bg-brand-400',
-    dotPing: 'bg-brand-400',
-    dashed: 'border-[var(--line)] bg-[#0B192B] text-[var(--muted)]',
-  },
-  light: {
-    panel: 'border-[#E5E7EB] bg-white text-[#121212] shadow-md',
-    surface: 'border-[#E5E7EB] bg-[#F9FAFB]',
-    divider: 'border-[#E5E7EB]',
-    text: 'text-[#121212]',
-    sub: 'text-gray-600',
-    muted: 'text-gray-500',
-    accentText: 'text-[#1d4ed8]',
-    accentHover: 'hover:text-[#1d4ed8]',
-    accentBorderHover: 'hover:border-[#0D6EFD]/60',
-    iconTile: 'border-[#E5E7EB] bg-white text-[#1d4ed8]',
-    iconTileHover: 'group-hover:text-[#1d4ed8]',
-    linkButton: 'border-[#E5E7EB] bg-white text-gray-500 hover:text-[#1d4ed8]',
-    badge: 'border-[#0D6EFD]/50 bg-[#EFF6FF] text-[#1d4ed8]',
-    dot: 'bg-[#0D6EFD]',
-    dotPing: 'bg-[#0D6EFD]',
-    dashed: 'border-gray-300 bg-gray-50 text-gray-500',
-  },
+const ui = {
+  panel: '', surface: 'border-line bg-panel-soft', divider: 'border-line',
+  text: 'text-ink', sub: 'text-muted', muted: 'text-muted',
+  accentText: 'text-accent', accentHover: 'hover:text-accent', accentBorderHover: 'hover:border-accent',
+  iconTile: 'border-line bg-panel text-accent', iconTileHover: 'group-hover:text-accent',
+  linkButton: 'border-line bg-panel text-muted hover:text-accent',
+  badge: 'border-brand-400/40 bg-brand-400/10 text-accent',
+  dot: 'bg-accent', dotPing: 'bg-accent', dashed: 'border-line bg-panel-soft text-muted',
 };
 
 // Disciplina individual (memoizada: não re-renderiza ao trocar o tema de outra parte)
@@ -105,7 +75,7 @@ const CourseRow = memo(function CourseRow({ course, ui, badgeLabel }) {
         </div>
       </div>
       <span
-        className={`hidden shrink-0 rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider sm:inline-block ${ui.badge}`}
+        className={`hidden shrink-0 rounded-full border px-2.5 py-1 text-xs font-bold uppercase tracking-wider sm:inline-block ${ui.badge}`}
       >
         {badgeLabel}
       </span>
@@ -114,9 +84,7 @@ const CourseRow = memo(function CourseRow({ course, ui, badgeLabel }) {
 });
 
 export default function CanvasCard({ lang = 'pt', context }) {
-  const { darkMode } = useContext(ThemeContext);
   const t = translations[lang] || translations.pt;
-  const ui = darkMode ? UI.dark : UI.light;
 
   const canvas = context?.canvas;
   const isConfigured = canvas?.status === 'ok';
@@ -132,11 +100,7 @@ export default function CanvasCard({ lang = 'pt', context }) {
   const titleId = 'canvas-card-title';
 
   return (
-    <article
-      aria-labelledby={titleId}
-      className={`portfolio-card my-2 w-full max-w-2xl rounded-xl border p-5 transition-colors duration-300 ${ui.panel}`}
-      style={{ fontFamily: FONT_SANS }}
-    >
+    <CardShell as="article" className="my-3" aria-labelledby={titleId}>
       {/* Cabeçalho */}
       <header className="mb-6 flex items-center justify-between gap-4">
         <div className="flex min-w-0 items-center gap-3">
@@ -171,7 +135,7 @@ export default function CanvasCard({ lang = 'pt', context }) {
           {/* Métricas rápidas */}
           <div className="mb-5 card-grid grid grid-cols-2 gap-3">
             <div className={`flex flex-col justify-center rounded-xl border p-3.5 ${ui.surface}`}>
-              <span className={`text-[11px] font-bold uppercase tracking-wider ${ui.muted}`}>{t.overview}</span>
+              <span className={`text-xs font-bold uppercase tracking-wider ${ui.muted}`}>{t.overview}</span>
               <div className="mt-1 flex items-baseline gap-2">
                 <span className={`text-xl font-semibold tabular-nums ${ui.text}`}>{courses.length}</span>
                 <span className={`text-[12px] font-medium ${ui.sub}`}>{t.active_courses}</span>
@@ -179,7 +143,7 @@ export default function CanvasCard({ lang = 'pt', context }) {
             </div>
 
             <div className={`flex flex-col justify-center rounded-xl border p-3.5 ${ui.surface}`}>
-              <span className={`text-[11px] font-bold uppercase tracking-wider ${ui.muted}`}>{t.situation}</span>
+              <span className={`text-xs font-bold uppercase tracking-wider ${ui.muted}`}>{t.situation}</span>
               <div className="mt-1.5 flex items-center gap-2">
                 <span className="relative flex h-3 w-3" aria-hidden="true">
                   <span className={`absolute inline-flex h-full w-full animate-ping rounded-full opacity-75 motion-reduce:animate-none ${ui.dotPing}`} />
@@ -227,6 +191,6 @@ export default function CanvasCard({ lang = 'pt', context }) {
           {t.access} <ExternalLink size={14} aria-hidden="true" />
         </a>
       </footer>
-    </article>
+    </CardShell>
   );
 }

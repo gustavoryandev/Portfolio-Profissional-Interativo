@@ -92,6 +92,7 @@
       "publicos": "public",
       "sequenciaAtual": "Current Streak",
       "dias": "{{count}} days",
+      "diasSeguidos": "consecutive days",
       "ativoHoje": "active today!",
       "maiorSequencia": "Longest Streak",
       "recordePessoal": "personal record",
