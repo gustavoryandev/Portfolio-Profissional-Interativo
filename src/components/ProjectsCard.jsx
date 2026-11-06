@@ -31,8 +31,20 @@ export default function ProjectsCard({ reveal = false }) {
         <div className="flex flex-wrap gap-2" role="group" aria-label={t('projetos.filterLabel')}>{['all', ...categories].map(value => <button key={value} type="button" aria-pressed={category === value} onClick={() => setCategory(value)} className={`rounded-full border px-3 py-1.5 text-xs transition-colors ${category === value ? 'border-[var(--accent)] bg-[var(--panel-soft)] text-[var(--accent)]' : 'border-[var(--line)] text-[var(--muted)] hover:border-[var(--accent)]'}`}>{t(`projetos.category.${value}`)}</button>)}</div>
         <p role="status" aria-live="polite" className="!m-0 text-xs text-[var(--muted)]">{t('projetos.results', { count: projects.length, total: perfil.projetos.length })}</p>
       </div>
-      <div className="projects-grid">
-        {projects.map(project => reveal ? <ScrollReveal key={project.id}><ProjectCard project={project} /></ScrollReveal> : <ProjectCard key={project.id} project={project} />)}
+      <div
+        data-projects-track
+        role="region"
+        aria-labelledby={headingId}
+        tabIndex={0}
+        className="flex overflow-x-auto gap-6 snap-x snap-mandatory scroll-smooth motion-reduce:scroll-auto px-1 py-3 scroll-px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+      >
+        {projects.map(project => (
+          <div key={project.id} data-project-slide className="flex flex-shrink-0 w-80 max-w-full snap-start [&>article]:w-full">
+            {reveal
+              ? <ScrollReveal className="flex w-full [&>article]:w-full"><ProjectCard project={project} /></ScrollReveal>
+              : <ProjectCard project={project} />}
+          </div>
+        ))}
       </div>
       {!projects.length && <p className="py-8 text-center text-sm text-[var(--muted)]">{t('projetos.noResults')}</p>}
     </CardShell>
