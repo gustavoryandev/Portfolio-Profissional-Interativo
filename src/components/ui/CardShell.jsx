@@ -3,7 +3,7 @@ import { ExternalLink } from 'lucide-react';
 // Única origem da classe `portfolio-card`. Largura opcional: size = sm | md | lg.
 export function CardShell({ as: Tag = 'article', size, blueprint = true, className = '', children, ...props }) {
   return (
-    <Tag className={`portfolio-card ${className}`.trim()} data-size={size} {...props}>
+    <Tag className={`portfolio-card glass-panel ${className}`.trim()} data-size={size} {...props}>
       {blueprint && <span className="bp-handles" aria-hidden="true"><i /><i /><i /><i /></span>}
       {children}
     </Tag>

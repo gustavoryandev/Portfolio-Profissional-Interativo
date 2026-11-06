@@ -29,7 +29,7 @@ export default function ProjectCard({ project }) {
   const title = projectContent(project, 'titulo', i18n.language, t);
   const description = projectContent(project, 'descricao', i18n.language, t);
   return (
-    <article className="project-tile flex min-w-0 flex-col overflow-hidden" aria-labelledby={titleId}>
+    <article className="project-tile glass-panel flex min-w-0 flex-col overflow-hidden" aria-labelledby={titleId}>
       <ProjectPreview key={project.image?.src || 'empty'} image={project.image} title={title} />
       <div className="flex flex-1 flex-col gap-5 p-5 sm:p-6">
         {project.tipo && <span className="w-fit rounded-full border border-[var(--line)] bg-[var(--panel-soft)] px-2.5 py-1 text-xs font-medium text-[var(--accent)]">{t(`projetos.kind.${project.tipo}`)}</span>}

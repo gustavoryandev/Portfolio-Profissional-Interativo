@@ -159,7 +159,7 @@ export default function App() {
 
   return (
     <div
-      className="portfolio-app relative flex min-h-screen flex-col overflow-hidden transition-colors duration-300"
+      className="portfolio-app relative flex min-h-screen flex-col overflow-x-clip transition-colors duration-300"
       style={{ fontFamily: FONT_SANS }}
     >
       <style>{MOTION_CSS}</style>
@@ -181,7 +181,7 @@ export default function App() {
         <div className="workspace">
           <Sidebar active={activeSection} onSelect={setActiveSection} onAsk={openChat} en={en} />
 
-          <main id="conteudo" tabIndex={-1} className="center-panel">
+          <main id="conteudo" tabIndex={-1} className="center-panel glass-panel">
             {activeSection !== 'home' && <PortfolioSection active={activeSection} en={en} />}
 
             <div className="chat-view" hidden={activeSection !== 'home'}>

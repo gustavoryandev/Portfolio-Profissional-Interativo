@@ -123,13 +123,19 @@ letter-spacing: 0.12em;
   }
   * { scrollbar-color: auto; }
 }
-.portfolio-app { background: var(--page); color: var(--ink); }
+.portfolio-app {
+  background:
+    radial-gradient(ellipse at 18% 8%, rgb(var(--brand-400) / .22), transparent 48%),
+    radial-gradient(ellipse at 90% 36%, rgb(var(--brand-500) / .16), transparent 52%),
+    var(--page);
+  color: var(--ink);
+}
 .portfolio-app > [aria-hidden] { display: none; }
 .app-frame { min-height: 100dvh; }
 .site-header {
   display: flex; align-items: center; gap: 28px; padding: 16px 26px;
-  min-height: 100px; border-bottom: 1px solid var(--accent); flex-shrink: 0;
-  background: linear-gradient(90deg, var(--panel) 25%, transparent 64%, var(--panel)), url('/hero-blue.png') center 45% / cover;
+  min-height: 100px; border-bottom: 1px solid var(--line); flex-shrink: 0;
+  box-shadow: 0 4px 20px rgb(0 0 0 / .08);
 }
 .brand-lockup { display: flex; align-items: center; gap: 14px; }
 .brand-logo {
@@ -178,8 +184,7 @@ letter-spacing: 0.12em;
 .chat-heading svg { color: var(--accent); }
 .chat-heading h2 { font-size: 13px; font-weight: 600; }
 .chat-heading > span { color: var(--muted); font-size: 12px; }
-.chat-messages { background: linear-gradient(180deg, transparent, var(--panel)), url('/hero-blue.png') center / cover; }
-.dark .chat-messages { background: linear-gradient(#030a10ed, #030a10e8), url('/hero-blue.png') center / cover; }
+.chat-messages { background: transparent; }
 .chat-composer { padding: 12px 16px 16px; border-top: 1px solid var(--line); background: var(--panel); }
 .chat-composer form { border: 1px solid var(--line); box-shadow: none; background: var(--panel-soft); }
 .chat-composer form button[type=submit] { background: #0d6efd; color: white; border-radius: 8px; }
@@ -255,16 +260,9 @@ letter-spacing: 0.12em;
   .skills-grid { grid-template-columns: 1fr; }
 }
 
-/* Supplied light-theme backgrounds, with a subtle veil for text contrast. */
-:root:not(.dark) .site-header {
-  background: linear-gradient(90deg, #ffffffb3, #ffffff33), url('/header-light.png') center / cover;
-}
-:root:not(.dark) .chat-messages {
-  background: linear-gradient(#ffffffa6, #ffffffbf), url('/hero-light.png') center / cover;
-}
 
 /* Card system: scoped to portfolio cards; navigation and chat controls keep their layout. */
-.portfolio-card, .reference-card, .detail-card {
+.reference-card, .detail-card {
   --card-title: var(--ink);
   border: 1px solid var(--line);
   border-radius: 9px;
@@ -274,6 +272,9 @@ letter-spacing: 0.12em;
   transition: border-color 180ms ease, box-shadow 180ms ease;
 }
 .portfolio-card {
+  --card-title: var(--ink);
+  color: var(--ink);
+  transition: border-color 180ms ease, box-shadow 180ms ease;
   container: portfolio-card / inline-size;
   min-width: 0;
   max-width: 100%;
@@ -300,7 +301,6 @@ letter-spacing: 0.12em;
 .card-title-row p { margin-top: 3px; color: var(--muted); font-size: 12px; }
 /* Project interactions belong exclusively to individual links. */
 .projects-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; }
-.projects-card .project-tile { border: 1px solid var(--line); border-radius: 14px; background: var(--panel); box-shadow: 0 8px 24px -18px rgb(0 0 0 / .3); }
 .project-preview { background: radial-gradient(ellipse at top right, #0d6efd14, transparent 70%), var(--panel-soft); }
 .projects-card .project-tile h4 { color: var(--ink); font-size: 19px; font-weight: 650; line-height: 1.4; }
 .projects-card .project-tile p { color: var(--muted); font-size: 14px; line-height: 1.75; }
@@ -401,13 +401,11 @@ a.project-tech:hover { border-color: var(--accent); background: var(--panel); }
   --radius-card: 12px;
 }
 
-.portfolio-card,
 .reference-card,
 .detail-card,
 .sidebar,
 .center-panel,
-.profile-card,
-.projects-card .project-tile {
+.profile-card {
   border-radius: var(--radius-card);
 }
 
@@ -761,3 +759,49 @@ a.tile:hover, .tile--hover:hover { border-color: var(--accent); }
 .chat-form { border: 1px solid var(--line); background: var(--panel-soft); }
 .sidebar-brand span { letter-spacing: .04em; }
 .astra-hero-wrap[data-compact="true"] .astra-spark { animation: none; }
+
+/* Shared glass surface. Keep opacity on the background, never on its content. */
+.glass-panel {
+  --glass-background: rgb(255 255 255 / .62);
+  --glass-fallback: #f4f4f5;
+  --glass-border: rgb(15 23 42 / .12);
+  --glass-shadow: 0 8px 32px rgb(15 23 42 / .1), inset 0 1px 0 rgb(255 255 255 / .62);
+  background: var(--glass-background);
+  background-image: linear-gradient(135deg, rgb(255 255 255 / .06), transparent 45%);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+  backdrop-filter: blur(12px) saturate(150%);
+  border: 1px solid var(--glass-border);
+  border-radius: 1rem;
+  box-shadow: var(--glass-shadow);
+  color: var(--ink, #111827);
+}
+.dark .glass-panel,
+.glass-panel.dark {
+  --glass-background: rgb(11 14 20 / .48);
+  --glass-fallback: #121722;
+  --glass-border: rgb(255 255 255 / .14);
+  --glass-shadow: 0 18px 48px -18px rgb(0 0 0 / .5), inset 0 1px 0 rgb(255 255 255 / .12), inset 0 -1px 0 rgb(96 165 250 / .04);
+}
+.glass-panel:is(.sidebar, .center-panel, .profile-card) {
+  -webkit-backdrop-filter: blur(40px) saturate(150%);
+  backdrop-filter: blur(40px) saturate(150%);
+}
+/* The outer window provides the blur; inner cards only add a translucent tint. */
+.center-panel .glass-panel {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+.center-panel.glass-panel .chat-composer,
+.center-panel.glass-panel .chat-heading {
+  background: var(--glass-background);
+}
+@supports not ((backdrop-filter: blur(12px)) or (-webkit-backdrop-filter: blur(12px))) {
+  .glass-panel { background: var(--glass-fallback); }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .glass-panel, .glass-panel:is(.sidebar, .center-panel, .profile-card) {
+    background: var(--glass-fallback);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}

@@ -8,7 +8,7 @@ export default function Navbar() {
   const { i18n, t } = useTranslation();
   const en = i18n.language.startsWith('en');
   const cv = en ? '/Gustavo Ryan Resume (English).pdf' : '/Currículo Gustavo Ryan.pdf';
-  return <header className="site-header">
+  return <header className="site-header sticky top-0 z-40 bg-white bg-opacity-70 backdrop-blur-lg dark:bg-zinc-950 dark:bg-opacity-70">
     <div className="brand-lockup"><span className="brand-logo" role="img" aria-label="GR" /><div><h1>{en ? 'Interactive AI Résumé' : 'Currículo IA Interativo'}</h1><p>{en ? 'Conversational Portfolio' : 'Portfólio Conversacional'}</p></div></div>
     <p className="header-tagline">{en ? <>Your knowledge.<br />Your journey.<br />Now in conversation.</> : <>Seu conhecimento.<br />Sua trajetória.<br />Agora em conversa.</>}</p>
     <div className="header-actions">

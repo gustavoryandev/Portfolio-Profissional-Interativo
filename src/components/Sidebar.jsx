@@ -7,7 +7,7 @@ export const sections = [
   ['contact', Mail, 'Contato', 'Contact'],
 ];
 export default function Sidebar({ active, onSelect, onAsk, en }) {
-  return <nav className="sidebar" aria-label={en ? 'Main navigation' : 'Navegação principal'}>
+  return <nav className="sidebar glass-panel" aria-label={en ? 'Main navigation' : 'Navegação principal'}>
     <div className="sidebar-brand"><span className="brand-logo" role="img" aria-label="GR" /><span>PORTFÓLIO</span></div>
     <div className="nav-items">{sections.map(([id, Icon, pt, english]) => <button type="button" key={id} onClick={() => onSelect(id)} aria-current={active === id ? 'page' : undefined} className={active === id ? 'nav-item active' : 'nav-item'}><Icon size={19} aria-hidden="true" /><span>{en ? english : pt}</span></button>)}</div>
     <button type="button" className="sidebar-note" onClick={onAsk || (() => onSelect('home'))}>
