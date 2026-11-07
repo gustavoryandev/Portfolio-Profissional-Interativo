@@ -241,7 +241,7 @@ export default function ChatPage() {
                     onPick={(prompt) => handleSend(prompt, true)} />
                   {messages.map(message => (
                     <div className="chat-msg-in" key={message.id}>
-                      <MessageBubble message={message} liveContext={live.context} refreshing={live.refreshing} onRefresh={live.refresh} />
+                      <MessageBubble message={message} liveContext={live.context} refreshing={live.refreshing} onRefresh={live.refresh} onSelectSection={setActiveSection} />
                     </div>
                   ))}
                   {streaming && (

@@ -202,7 +202,7 @@ function Avatar({ isUser, children }) {
   );
 }
 
-function MessageBubble({ message, liveContext = {}, refreshing = [], onRefresh }) {
+function MessageBubble({ message, liveContext = {}, refreshing = [], onRefresh, onSelectSection }) {
   const { i18n } = useTranslation();
   const uiLanguage = i18n.language.startsWith('en') ? 'en' : 'pt';
   const ui = UI;
@@ -288,7 +288,9 @@ function MessageBubble({ message, liveContext = {}, refreshing = [], onRefresh }
               {source && <LiveDataNotice data={data} pending={refreshing.includes(source)}
                 onRetry={onRefresh ? () => onRefresh([source], true) : undefined} lang={uiLanguage} />}
               <Suspense fallback={<p role="status">{i18n.t('resume.loading')}</p>}>
-                {(!source || data?.status === 'ok') && <Component context={context} lang={uiLanguage} limit={limit} />}
+                {(!source || data?.status === 'ok') && (Component === ProjectsCard
+                  ? <ProjectsCard preview onViewAll={() => onSelectSection?.('projects')} />
+                  : <Component context={context} lang={uiLanguage} limit={limit} />)}
               </Suspense>
             </section>
           );

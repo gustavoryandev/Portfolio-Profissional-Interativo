@@ -36,6 +36,10 @@ test('catalog renders every project with bilingual content and individual projec
       }
       assert.match(doc.querySelector('[role="status"]').textContent, new RegExp(`${cards.length}`));
       assert.doesNotMatch(doc.body.textContent, /projetos\.(kind|category|heading|subtitle)/);
+      const preview = new JSDOM(renderToStaticMarkup(React.createElement(I18nextProvider, { i18n }, React.createElement(Projects, { preview: true, onViewAll() {} })))).window.document;
+      assert.equal(preview.querySelectorAll('article').length, 5, 'chat preview is limited to five featured projects');
+      assert.equal(preview.querySelector('input[type="search"]'), null);
+      assert.match(preview.querySelector('button.project-action').textContent, lang === 'en' ? /View more projects/ : /Ver mais projetos/);
     }
   } finally { await unlink(output).catch(() => {}); }
 });
