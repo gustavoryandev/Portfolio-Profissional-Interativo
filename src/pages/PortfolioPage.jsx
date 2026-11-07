@@ -2,6 +2,7 @@ import { ArrowDown, ArrowUpRight, Sparkles } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import Navbar from '../components/Navbar';
 import ProjectsScrollSection from '../components/ProjectsScrollSection';
+import CodePlayground from '../components/CodePlayground';
 import PortfolioSection from '../components/PortfolioSection';
 import LanguageIcon from '../components/LanguageIcon';
 import { SocialLinks } from '../components/ProfilePanel';
@@ -34,8 +35,9 @@ export default function PortfolioPage() {
         <ScrollReveal repeat><p className="section-eyebrow">01 / {en ? 'THE JOURNEY' : 'A TRAJETÓRIA'}</p><h2 id="about-title">{en ? 'About me' : 'Sobre mim'}</h2><div className="glass-panel about-scroll"><p>{perfil.bio[en ? 'en' : 'pt']}</p></div></ScrollReveal>
       </section>
       <ProjectsScrollSection />
+      <CodePlayground />
       <section id="habilidades" className="scroll-section" aria-labelledby="skills-title">
-        <ScrollReveal repeat><p className="section-eyebrow">03 / {en ? 'TOOLKIT' : 'TECNOLOGIAS'}</p><h2 id="skills-title">{en ? 'What I build with.' : 'Com o que eu construo.'}</h2></ScrollReveal>
+        <ScrollReveal repeat><p className="section-eyebrow">04 / {en ? 'TOOLKIT' : 'TECNOLOGIAS'}</p><h2 id="skills-title">{en ? 'What I build with.' : 'Com o que eu construo.'}</h2></ScrollReveal>
         <div className="scroll-skills">{perfil.skills.map((skill, index) => <ScrollReveal repeat key={skill.nome} delay={(index % 4) * .04}><div className="glass-panel scroll-skill"><LanguageIcon name={skill.nome} size={28} /><h3>{skill.nome}</h3></div></ScrollReveal>)}</div>
       </section>
       {['experience', 'education', 'contact'].map(section => <div key={section} id={section === 'contact' ? 'contato' : section} className="scroll-section"><ScrollReveal repeat><PortfolioSection active={section} en={en} /></ScrollReveal></div>)}
