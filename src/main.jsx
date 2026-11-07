@@ -4,6 +4,7 @@ import App from './App.jsx';
 import './scroll.css';
 import './index.css';
 import './glass-neon.css';
+import './intro.css';
 import './glassFx.js';
 import './i18n';
 import { ThemeProvider } from './context/ThemeContext.jsx';
