@@ -1,0 +1,57 @@
+/* Scoped themes use React's saved preference on the first render. */
+[data-entrance-theme][data-entrance-theme] {
+  --entrance-bg: #060c16;
+  --entrance-text: #e4edff;
+  --entrance-muted: #a8bad2;
+  --entrance-blue: #38bdf8;
+  --entrance-panel: rgb(12 22 38 / .85);
+  --entrance-shadow: 0 30px 90px #0006;
+  --entrance-light: rgb(56 189 248 / .12);
+  color: var(--entrance-text);
+  background: radial-gradient(ellipse at 50% 45%, var(--entrance-light), transparent 65%), var(--entrance-bg);
+  isolation: isolate;
+}
+[data-entrance-theme][data-entrance-theme='light'] {
+  --entrance-bg: #eef5fc;
+  --entrance-text: #132b47;
+  --entrance-muted: #49627c;
+  --entrance-blue: #0869b4;
+  --entrance-panel: rgb(255 255 255 / .78);
+  --entrance-shadow: 0 24px 70px rgb(36 82 128 / .13);
+  --entrance-light: rgb(37 135 223 / .1);
+}
+[data-entrance-theme]::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(450px circle at var(--pointer-x, 50%) var(--pointer-y, 45%), var(--entrance-light), transparent 75%);
+}
+[data-entrance-theme] .opening-brand,
+[data-entrance-theme] .astra-entrance-panel {
+  translate: var(--drift-x, 0px) var(--drift-y, 0px);
+  transition: translate 220ms ease-out;
+}
+[data-entrance-theme] .opening-brand { padding: clamp(28px, 6vw, 64px); border: 1px solid rgb(100 160 210 / .22); border-radius: 28px; background: var(--entrance-panel); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); box-shadow: var(--entrance-shadow); }
+[data-entrance-theme] .astra-entrance-panel { background: linear-gradient(135deg, rgb(255 255 255 / .12), transparent 45%), var(--entrance-panel); box-shadow: inset 0 1px 0 rgb(255 255 255 / .25), var(--entrance-shadow); }
+[data-entrance-theme] .opening-brand small,
+[data-entrance-theme] .astra-entrance-panel p,
+[data-entrance-theme] .astra-entrance-status,
+[data-entrance-theme] .astra-entrance-bottom,
+[data-entrance-theme] .astra-entrance-top > span:last-child { color: var(--entrance-muted); }
+[data-entrance-theme] .opening-brand span span,
+[data-entrance-theme] .opening-brand p span,
+[data-entrance-theme] .astra-entrance-label,
+[data-entrance-theme] .astra-entrance-top > span > span { color: var(--entrance-blue); }
+[data-entrance-theme='light'] .opening-monogram { text-shadow: 0 0 35px rgb(37 135 223 / .1); }
+[data-entrance-theme='light'] .astra-entrance-word { -webkit-text-stroke-color: rgb(8 105 180 / .25); text-shadow: none; }
+[data-entrance-theme='light'] .astra-entrance-avatar { box-shadow: 0 0 25px rgb(37 135 223 / .12); border-color: rgb(8 105 180 / .4); }
+[data-entrance-theme] .opening-skip:hover,
+[data-entrance-theme] .astra-entrance-bottom a:hover,
+[data-entrance-theme] .astra-entrance-bottom button:hover { color: var(--entrance-blue); }
+@media (prefers-reduced-motion: reduce) {
+  [data-entrance-theme]::before { background: none; }
+  [data-entrance-theme] .opening-brand,
+  [data-entrance-theme] .astra-entrance-panel { translate: none; transition: none; }
+}

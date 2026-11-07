@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
 import './AstraEntrance.css';
+import useEntranceInteraction from '../hooks/useEntranceInteraction';
 
 const ChatPage = lazy(() => import('../pages/ChatPage'));
 
@@ -9,6 +10,7 @@ function ReadyChat({ onReady }) {
 }
 
 export default function AstraEntrance({ en }) {
+  const interaction = useEntranceInteraction();
   const [ready, setReady] = useState(false);
   const [elapsed, setElapsed] = useState(false);
   const entering = !ready || !elapsed;
@@ -30,7 +32,7 @@ export default function AstraEntrance({ en }) {
     <div hidden={entering} inert={entering}>
       <Suspense fallback={null}><ReadyChat onReady={setReady} /></Suspense>
     </div>
-    {entering && <main className="astra-entrance" aria-busy="true">
+    {entering && <main {...interaction} className="astra-entrance" aria-busy="true">
       <div className="astra-entrance-grid" aria-hidden="true" />
       <header className="astra-entrance-top"><span>Gustavo Ryan<span>.ai</span></span><span>PORTFOLIO / ASTRA</span></header>
       <div className="astra-entrance-word" aria-hidden="true">ASTRA</div>
