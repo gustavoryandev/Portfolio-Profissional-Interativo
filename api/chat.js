@@ -8,6 +8,7 @@ import { proficiencyValue, proficiencyLevel } from '../src/data/skillProficiency
 import { createLiveCache, sourceFailure } from '../server/liveCache.js';
 import { createModelCache, withDeadline } from '../server/modelCache.js';
 import { writeEvent } from '../server/ndjson.js';
+import { sourcesForText } from '../src/services/liveContext.js';
 
 dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 
@@ -28,9 +29,9 @@ const fallbackModels = [
 const GEMINI_TIMEOUT_MS = 15000;
 const GENERATION_CONFIG = { temperature: 0.8, maxOutputTokens: 1024 };
 // Tempo máximo que o prompt espera pelos dados ao vivo (cache frio). Depois disso usa o que já está em cache.
-const LIVE_PROMPT_WAIT_MS = 1500;
+const LIVE_PROMPT_WAIT_MS = 1200;
 // Tempo máximo que a resposta espera por dados ao vivo já em andamento; depois usa o snapshot do cache.
-const LIVE_RESPONSE_WAIT_MS = 250;
+const LIVE_RESPONSE_WAIT_MS = 150;
 // Tempo máximo que a primeira requisição espera pela descoberta de modelos (cache frio).
 const DISCOVERY_WAIT_MS = 1200;
 
@@ -131,17 +132,6 @@ const LIVE_TTL = {
   chess: 5 * 60 * 1000
 };
 const { entries: liveCache, get: cachedSource } = createLiveCache(LIVE_TTL);
-
-// Snapshot instantâneo do cache, sem disparar requisições
-function peekLiveContext() {
-  return Object.fromEntries(
-    Object.keys(LIVE_TTL).map((name) => [name, liveCache.get(name)?.data ?? { status: 'unknown' }])
-  );
-}
-
-// Usa o dado fresco se já chegou; senão, o snapshot do cache (nunca bloqueia a resposta)
-const settleLive = (promise) => withDeadline(promise, LIVE_RESPONSE_WAIT_MS)
-  .then((data) => data ?? peekLiveContext());
 
 let spotifyTokenCache = { token: null, expires: 0 };
 async function getSpotifyToken(id, secret, refresh) {
@@ -921,6 +911,17 @@ function fetchLiveContext(sources = Object.keys(LIVE_FETCHERS), options = {}) {
   ).then((entries) => Object.fromEntries(entries));
 }
 
+function prepareLiveContext(sources) {
+  const lookups = sources.map(name => [name, cachedSource(name, LIVE_FETCHERS[name])]);
+  return (wait) => Promise.all(lookups.map(async ([name, pending]) => {
+    const data = await withDeadline(pending, wait);
+    const snapshot = liveCache.get(name)?.data;
+    return [name, data ?? (snapshot?.status === 'ok'
+      ? { ...snapshot, stale: true, reason: snapshot.reason || 'refreshing' }
+      : snapshot ?? { status: 'unknown' })];
+  })).then(Object.fromEntries);
+}
+
 // ==========================================
 // CONTEXTO DA CONVERSA
 // Janela recente enviada na íntegra + resumo rolante das mensagens mais antigas.
@@ -1117,9 +1118,40 @@ DADOS COMPLETOS DO PERFIL: ${profileText(perfil)}`;
 // ==========================================
 
 // Assuntos que dependem do GitHub; a lista é ajustável conforme o uso real
-const GITHUB_INTENT = /github|reposit|projeto|c[oó]digo|commit|contribu|linguagem|readme|stack|tecnolog|pull request|issue|estrela|\bstar|fork|open.?source/i;
+const GITHUB_INTENT = /github|repositor|readme|\b(?:commits?|forks?|contribuicoes?|pull requests?|issues?|stars?|estrelas?|streak)\b|open.?source|projetos? (?:mais )?recentes?|recent projects?/;
 // Perguntas que pedem detalhes de projeto: só nestes casos os trechos de README entram no prompt
-const GITHUB_DETAIL_INTENT = /readme|como (funciona|foi feito|é feito)|detalh|tecnolog|stack|arquitetura|sobre (o|este|esse) projeto|o que (é|faz)|do que se trata|explica|documenta/i;
+const GITHUB_DETAIL_INTENT = /readme|como (funciona|foi feito|e feito)|detalh|tecnolog|stack|arquitetura|sobre (o|este|esse) projeto|o que (e|faz)|do que se trata|explica|documenta|how (does|was|is)|details?|technolog|architecture|what (is|does)|explain/;
+
+const WAKATIME_INTENT = /\b(?:waka[\s-]*time|tempo (?:de codigo|codando|programando)|horas? (?:de codigo|codando|programando)|coding (?:time|hours)|hours (?:coded|of coding))\b/;
+const SOURCE_INTENTS = {
+  github: GITHUB_INTENT,
+  wakatime: WAKATIME_INTENT,
+  spotify: /spotify|ouvindo|escutando|musicas?|artistas?|listening|songs?|tracks?|artists?|playlists?/,
+  canvas: /canvas|\bpuc\b|faculdade|universidade|materias?|disciplinas?|tarefas?|semestre|estudando|cursando|college|university|courses?|classes|assignments?|semester|studying/,
+  galo: /\b(?:galo|atletico(?:[ -]?mg| mineiro)?)\b/,
+  chess: /xadrez|chess|\belo\b/,
+};
+
+const normalizeQuery = (text) => text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
+function sourcesForQuestion(query, lastUser, lastAssistant, suggestedCards) {
+  const sources = new Set(sourcesForText(suggestedCards));
+  for (const [source, pattern] of Object.entries(SOURCE_INTENTS)) {
+    if (pattern.test(query)) sources.add(source);
+  }
+  if (/\b(?:projetos?|projects?)\b/.test(query) && GITHUB_DETAIL_INTENT.test(query)) sources.add('github');
+  const followUp = /^(?:e|and|sim|yes|yeah|sure|ok|claro|pode|quero|mais|more|detalhes|details|qual del[ea]s?|quanto tempo|qual a media|como funciona|which one|how long|how much)(?:[\s,!?.]|$)/;
+  if (!sources.size && query.split(/\s+/).length <= 7 && followUp.test(query)) {
+    const priorCards = sourcesForText(lastAssistant);
+    for (const source of priorCards) sources.add(source);
+    if (!priorCards.length) {
+      for (const [source, pattern] of Object.entries(SOURCE_INTENTS)) {
+        if (pattern.test(lastUser)) sources.add(source);
+      }
+    }
+  }
+  return [...sources];
+}
 
 // Texto compacto e marcado como dado. Só diz o que foi consultado; o resto aparece como indisponível.
 function githubBrief(github, detailed) {
@@ -1246,7 +1278,7 @@ function chunkText(chunk) {
 // HANDLER
 // ==========================================
 
-const GITHUB_PROMPT_WAIT_MS = 3500; // tempo extra para o GitHub quando a pergunta depende dele
+const GITHUB_PROMPT_WAIT_MS = 2400;
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' });
@@ -1308,7 +1340,8 @@ export default async function handler(req, res) {
     if (pendingMetrics && /^(n[aã]o|no|nope)(?:[\s,!?.]|$)/i.test(userMessage.trim())) {
       return res.status(200).json({ response: String(body.lang).startsWith('en') ? 'Okay, we will keep just the summary.' : 'Tudo bem, vamos manter apenas o resumo.', translationKey: 'chat.metricsDeclined' });
     }
-    const normalizedQuery = userMessage.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    const message = userMessage.trim();
+    const normalizedQuery = normalizeQuery(message);
     const githubQuery = /\bgithub\b/.test(normalizedQuery);
     const wakatimeQuery = /\bwaka[\s-]*time\b|\btempo de codigo\b|\bcoding time\b/.test(normalizedQuery);
     const metricsQuery = githubQuery || wakatimeQuery || /\bmetricas\b|\bmetrics\b/.test(normalizedQuery);
@@ -1342,26 +1375,16 @@ export default async function handler(req, res) {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) return res.status(500).json({ error: 'GEMINI_API_KEY não configurada.' });
 
-    const message = userMessage.trim();
     const messages = normalizeHistory(chatHistory);
-    const lastAssistant = [...messages].reverse().find((m) => m.role === 'model')?.text || '';
-    // Depende do GitHub se a pergunta citar o assunto ou se a resposta anterior falou dele (ex.: "sim" à oferta de métricas)
-    const githubTopic = GITHUB_INTENT.test(message) || /github/i.test(lastAssistant);
-
-    const githubPromise = cachedSource('github', fetchGithub);
-    const livePromise = fetchLiveContext(['github', 'wakatime', 'spotify', 'canvas', 'galo', 'chess']); // reaproveita a mesma busca do GitHub, sem duplicar
+    const lastUser = normalizeQuery(messages.findLast(m => m.role === 'user')?.text || '');
+    const sources = sourcesForQuestion(normalizedQuery, lastUser, lastAi, requestedSuggestionCards);
+    const githubTopic = sources.includes('github');
+    const readLive = prepareLiveContext(sources);
     const perfil = readJson('perfil.json');
-    const [modelsToTry, freshGithub, early] = await Promise.all([
+    const [modelsToTry, { github, ...geminiContext }] = await Promise.all([
       getModelList(apiKey),
-      withDeadline(githubPromise, githubTopic ? GITHUB_PROMPT_WAIT_MS : LIVE_PROMPT_WAIT_MS),
-      withDeadline(livePromise, LIVE_PROMPT_WAIT_MS),
+      readLive(githubTopic ? GITHUB_PROMPT_WAIT_MS : LIVE_PROMPT_WAIT_MS),
     ]);
-    const github = freshGithub ?? liveCache.get('github')?.data ?? { status: 'unknown' };
-
-    const live = early ?? peekLiveContext();
-
-    const geminiContext = { ...live, github };
-
 
     const genAI = new GoogleGenerativeAI(apiKey);
     const plan = planHistory(messages, sanitizeChatContext(body.chatContext), historyBudgetForQueue(modelsToTry));
@@ -1371,7 +1394,7 @@ export default async function handler(req, res) {
     const chatContext = { summary, covered: plan.start, anchor: plan.anchor };
     const history = toGeminiHistory(messages.slice(plan.start));
 
-    const githubBlock = githubTopic ? githubBrief(github, GITHUB_DETAIL_INTENT.test(message)) : '';
+    const githubBlock = githubTopic ? githubBrief(github, GITHUB_DETAIL_INTENT.test(normalizedQuery + " " + lastUser)) : '';
     const suggestionInstruction = suggestionIndex >= 0
       ? `\nORIGEM CONFIRMADA: sugestão predefinida clicada na interface. As restrições de intenção para mensagens manuais não se aplicam a este pedido. Responda usando os dados disponíveis e inclua estes marcadores exatamente uma vez: ${requestedSuggestionCards || 'nenhum (pergunta sobre tecnologias)'}. O card de xadrez desta sugestão mostra estatísticas do Chess.com. Mantenha todas as regras de grounding e de tom.`
       : '';
@@ -1390,7 +1413,7 @@ export default async function handler(req, res) {
         const result = await openChat(name).sendMessage(message, { signal: controller.signal });
         return result.response.text();
       }, controller.signal);
-      const liveContext = forClient(await settleLive(livePromise));
+      const liveContext = forClient(await readLive(LIVE_RESPONSE_WAIT_MS));
       const response = requestedSuggestionCards
         ? [text, ...requestedSuggestionCards.split('\n').filter(card => !text.includes(card))].join('\n')
         : text;
@@ -1412,7 +1435,7 @@ export default async function handler(req, res) {
     res.flushHeaders?.();
     const write = (payload) => writeEvent(res, payload, controller.signal);
 
-    await write({ type: 'meta', model, liveContext: forClient(peekLiveContext()), chatContext });
+    await write({ type: 'meta', model, liveContext: forClient(await readLive(0)), chatContext });
     try {
       let emittedText = '';
       let chunk = opened.first;
@@ -1426,7 +1449,7 @@ export default async function handler(req, res) {
       }
       const missingCards = requestedSuggestionCards.split('\n').filter(card => card && !emittedText.includes(card));
       if (missingCards.length) await write({ type: 'delta', text: '\n' + missingCards.join('\n') });
-      await write({ type: 'context', liveContext: forClient(await settleLive(livePromise)) });
+      await write({ type: 'context', liveContext: forClient(await readLive(LIVE_RESPONSE_WAIT_MS)) });
       await write({ type: 'done' });
     } catch (error) {
       if (!controller.signal.aborted && !res.destroyed) {
