@@ -27,6 +27,7 @@ test('proficiency cards preserve the declared values, levels and accessible bars
       for (const skill of profile.skills) {
         const bar = bars.find(bar => bar.getAttribute('aria-label').startsWith(`${skill.nome}:`));
         assert.equal(bar.getAttribute('aria-valuenow'), String(skill.proficienciaPercentual));
+        assert.equal(bar.firstElementChild.style.width, `${skill.proficienciaPercentual}%`);
         assert.equal(bar.getAttribute('aria-valuetext'), `${skill.proficienciaPercentual}% · ${proficiencyLevel(skill.proficienciaPercentual, lang)}`);
       }
       assert.match(doc.body.textContent, lang === 'pt' ? /Autoavaliação de proficiência/ : /Proficiency self-assessment/);

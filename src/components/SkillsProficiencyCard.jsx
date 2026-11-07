@@ -1,5 +1,4 @@
 import { useId, useState } from 'react';
-import { motion, useReducedMotion } from 'framer-motion';
 import { Info, TrendingUp } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import perfil from '../data/perfil.json';
@@ -15,7 +14,6 @@ export default function SkillsProficiencyCard({ lang, skills: allSkills = perfil
   const { i18n } = useTranslation();
   const en = (lang || i18n.language).startsWith('en');
   const heading = useId();
-  const reduced = useReducedMotion();
   const [category, setCategory] = useState('all');
   const skills = allSkills.filter(skill => category === 'all' || skill.categoria === category);
   return <section className="my-2 min-w-0 rounded-xl border border-[var(--line)] bg-[var(--panel)] p-4 text-[var(--ink)] sm:p-5" aria-labelledby={heading}>
@@ -27,7 +25,7 @@ export default function SkillsProficiencyCard({ lang, skills: allSkills = perfil
       {['all', ...new Set(allSkills.map(skill => skill.categoria))].map(value => <button key={value} type="button" aria-pressed={category === value} onClick={() => setCategory(value)} className={`rounded-full border px-3 py-1.5 text-xs transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)] ${category === value ? 'border-[var(--accent)] bg-[var(--panel-soft)] text-[var(--accent)]' : 'border-[var(--line)] text-[var(--muted)] hover:border-[var(--accent)] hover:text-[var(--ink)]'}`}>{value === 'all' ? (en ? 'All' : 'Todas') : categories[value]?.[en ? 1 : 0] || value}</button>)}
     </div>
     <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-      {skills.map((skill, index) => {
+      {skills.map(skill => {
         const percent = proficiencyValue(skill);
         const level = proficiencyLevel(percent, en ? 'en' : 'pt');
         const percentage = percent === null ? (en ? 'To be defined' : 'A definir') : `${new Intl.NumberFormat(en ? 'en' : 'pt-BR', { maximumFractionDigits: 1 }).format(percent)}%`;
@@ -35,7 +33,7 @@ export default function SkillsProficiencyCard({ lang, skills: allSkills = perfil
           <div className="mb-4 flex items-center gap-3"><span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-[var(--line)] bg-[var(--panel)]"><LanguageIcon name={skill.nome} size={24} className={skill.nome === 'GitHub' ? 'dark:invert' : ''} /></span><div className="min-w-0 flex-1"><h4 className="m-0 text-sm font-semibold">{skill.nome}</h4><p className="!mb-0 mt-1 text-xs text-[var(--muted)]">{categories[skill.categoria]?.[en ? 1 : 0] || skill.categoria}</p></div><span className="rounded-full border border-[var(--line)] bg-[var(--panel)] px-2 py-1 text-xs text-[var(--accent)]">{level}</span></div>
           <div className="mb-2 flex items-center justify-between gap-2 text-xs"><span className="text-[var(--muted)]">{en ? 'Declared proficiency' : 'Proficiência declarada'}</span><span className="font-semibold tabular-nums text-[var(--ink)]">{percentage}</span></div>
           <div className="h-2 overflow-hidden rounded-full bg-[var(--line)]" role={percent === null ? undefined : 'progressbar'} aria-label={`${skill.nome}: ${en ? 'proficiency' : 'proficiência'}`} aria-valuemin={percent === null ? undefined : 0} aria-valuemax={percent === null ? undefined : 100} aria-valuenow={percent ?? undefined} aria-valuetext={percent === null ? undefined : `${percentage} · ${level}`}>
-            {percent !== null && <motion.div className="h-full origin-left rounded-full bg-gradient-to-r from-blue-600 to-sky-400" initial={reduced ? false : { scaleX: 0 }} whileInView={{ scaleX: percent / 100 }} viewport={{ once: true, amount: 0.5 }} transition={{ duration: reduced ? 0 : 1.2, delay: reduced ? 0 : Math.min(index * 0.045, 0.3), ease: [0.22, 1, 0.36, 1] }} />}
+            {percent !== null && <div className="h-full rounded-full bg-gradient-to-r from-blue-600 to-sky-400" style={{ width: `${percent}%` }} />}
           </div>
           <p className="!mb-0 mt-3 text-xs leading-relaxed text-[var(--muted)]">{percent === null ? (en ? 'Percentage not yet provided; level to be defined.' : 'Percentual ainda não informado; nível a definir.') : (en ? 'Self-assessment · Learning and improving through practice.' : 'Autoavaliação · Aprendizado e evolução com a prática.')}</p>
         </article>;
