@@ -6,6 +6,7 @@ import { unlink } from 'node:fs/promises';
 
 test('scroll portfolio, section anchors and separate chat route', async () => {
   const output = new URL('./.portfolio-routing.mjs', import.meta.url);
+  const stylesheet = new URL('./.portfolio-routing.css', import.meta.url);
   try {
     await build({ entryPoints: ['tests/portfolio-routing.jsx'], outfile: fileURLToPath(output), bundle: true, platform: 'node', format: 'esm', packages: 'external', jsx: 'automatic', define: { 'import.meta.env': '{}' }, logLevel: 'silent', plugins: [{ name: 'unused-pdf', setup(build) {
       build.onResolve({ filter: /ResumeCard$/ }, () => ({ path: 'resume', namespace: 'stub' }));
@@ -13,5 +14,7 @@ test('scroll portfolio, section anchors and separate chat route', async () => {
     } }] });
     await import(output.href);
     assert.ok(true);
-  } finally { await unlink(output).catch(() => {}); }
+  } finally {
+    await Promise.all([output, stylesheet].map(file => unlink(file).catch(() => {})));
+  }
 });
