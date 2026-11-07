@@ -45,7 +45,10 @@
   .portfolio-hero h1 { font-size: clamp(52px, 16vw, 80px); }
   .hero-actions { flex-direction: column; align-items: stretch; gap: 12px; margin-block: 24px; }
   .hero-profile { display: none; }
-  .scroll-skills { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .scroll-skills { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .scroll-skill { min-height: 48px; padding: 8px 10px; gap: 8px; }
+  .scroll-skill h3 { font-size: 13px; line-height: 1.25; }
+  .scroll-skill > :is(img, svg) { width: 22px !important; height: 22px !important; }
   .astra-scroll-cta { flex-direction: column; align-items: stretch; gap: 16px; }
   .astra-scroll-cta .neon-cta { margin-left: 0; }
   .projects-scroll-section .project-tile :is(h4, p) { display: block; overflow: visible; -webkit-line-clamp: unset; }
@@ -55,7 +58,6 @@
   .projects-scroll-section [data-projects-track] { scroll-snap-type: x proximity; }
   .projects-grid, .skills-grid { grid-template-columns: minmax(0, 1fr); }
   .project-tile .mt-auto { flex-wrap: wrap; gap: 12px; }
-  .code-lab-columns, .code-lab-examples { grid-template-columns: minmax(0, 1fr); }
   .social-links { flex-wrap: wrap; gap: 12px; }
   .astra-chat-page {
     position: fixed;
