@@ -6,6 +6,8 @@
 .scroll-nav a:hover, .scroll-nav a:focus-visible { color: var(--accent); }
 .scroll-nav .nav-astra { display: inline-flex; align-items: center; gap: 6px; color: var(--accent); }
 .scroll-content, .scroll-footer { width: min(1180px, 90%); margin-inline: auto; }
+/* Programmatic focus after the intro/skip link should not frame the entire page. */
+.scroll-content:focus { outline: none; }
 .scroll-portfolio [id] { scroll-margin-top: 180px; }
 .portfolio-hero { min-height: min(850px, 92dvh); display: grid; grid-template-columns: 1.25fr .85fr; gap: clamp(28px, 7vw, 100px); align-items: center; padding-block: 80px; }
 .portfolio-hero h1 { font-size: clamp(64px, 8vw, 112px); font-weight: 750; letter-spacing: -.07em; line-height: .98; }
