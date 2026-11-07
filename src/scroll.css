@@ -1,8 +1,8 @@
 /* Scroll portfolio: all rules are scoped away from Astra's dashboard. */
 .scroll-portfolio { min-height: 100dvh; overflow-x: clip; }
 .brand-lockup .brand-title { margin: 0; color: var(--ink); font-size: 20px; font-weight: 700; letter-spacing: -.04em; }
-.scroll-nav { display: flex; align-items: center; gap: 22px; margin-inline: auto; font-size: 13px; white-space: nowrap; }
-.scroll-nav a { padding: 10px 0; color: var(--muted); }
+.scroll-nav { display: flex; align-items: center; gap: 18px; min-width: 0; margin-inline: auto; font-size: 13px; white-space: nowrap; }
+.scroll-nav a { flex-shrink: 0; padding: 12px 0; color: var(--muted); }
 .scroll-nav a:hover, .scroll-nav a:focus-visible { color: var(--accent); }
 .scroll-nav .nav-astra { display: inline-flex; align-items: center; gap: 6px; color: var(--accent); }
 .scroll-content, .scroll-footer { width: min(1180px, 90%); margin-inline: auto; }
@@ -79,6 +79,10 @@
   .scroll-portfolio .site-header { flex-wrap: wrap; gap: 12px; }
   .scroll-nav { order: 3; width: 100%; justify-content: center; }
   .scroll-skills { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 1400px) {
+  .scroll-portfolio .site-header { flex-wrap: wrap; gap: 12px; }
+  .scroll-portfolio .scroll-nav { order: 3; width: 100%; justify-content: flex-start; overflow-x: auto; padding: 2px 4px; scroll-padding-inline: 4px; }
 }
 @media (max-width: 700px) {
   .portfolio-hero { min-height: auto; grid-template-columns: 1fr; padding-block: 48px; }
