@@ -762,16 +762,46 @@ a.tile:hover, .tile--hover:hover { border-color: var(--accent); }
 .astra-hero-wrap[data-compact="true"] .astra-spark { animation: none; }
 
 @media (max-width: 639px) {
-  .chat-heading, .chat-composer { flex-shrink: 0; }
-  .chat-messages { overflow-y: auto; -webkit-overflow-scrolling: touch; }
-  .astra-starters {
-    max-height: min(360px, 45dvh);
-    overflow-y: auto;
-    overscroll-behavior-y: auto;
-    touch-action: pan-y;
-    padding: 4px 4px 12px;
-    -webkit-overflow-scrolling: touch;
+  /* One document scroller on mobile, including every suggested question. */
+  .astra-chat-page[data-chat-empty="true"] .center-panel {
+    height: auto;
+    max-height: none;
+    overflow: visible;
   }
+  .astra-chat-page[data-chat-empty="true"] .chat-view { flex: none; }
+  .astra-chat-page[data-chat-empty="true"] .chat-messages {
+    flex: none;
+    overflow: visible;
+    overscroll-behavior: auto;
+  }
+  .astra-chat-page .astra-hero-wrap { display: block; }
+  .astra-chat-page .astra-hero-wrap[data-compact="true"] { display: none; }
+  .astra-chat-page .astra-hero-clip { overflow: visible; }
+  .astra-chat-page .astra-hero { padding: 18px 14px; }
+  .astra-chat-page .astra-wordmark { font-size: clamp(42px, 16vw, 66px); }
+  .astra-chat-page .astra-avatar { width: 42px; height: 42px; }
+  .astra-chat-page .astra-chip { font-size: 11px; letter-spacing: .03em; }
+  .astra-chat-page .astra-sub { font-size: 12px; margin-top: 14px; }
+  .astra-chat-page .astra-starters {
+    grid-template-columns: minmax(0, 1fr);
+    max-height: none;
+    overflow: visible;
+    padding: 4px 0;
+  }
+  .astra-chat-page .astra-starter { min-height: 48px; padding: 12px; }
+  .astra-chat-page .chat-composer {
+    position: sticky;
+    bottom: 0;
+    z-index: 20;
+    flex-shrink: 0;
+    padding-bottom: max(10px, env(safe-area-inset-bottom));
+    border-radius: 0 0 var(--radius-card) var(--radius-card);
+  }
+  .astra-chat-page .chat-heading { flex-shrink: 0; }
+  .astra-chat-page .chat-heading > span { display: none; }
+  .astra-chat-page .chat-form input { font-size: 16px; }
+  .astra-chat-page .astra-fab { position: static; margin: 12px; align-self: flex-start; }
+  .astra-chat-page .chat-messages .message-card { min-width: 0; }
 }
 
 /* Shared glass surface. Keep opacity on the background, never on its content. */

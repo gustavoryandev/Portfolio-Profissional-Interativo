@@ -190,7 +190,8 @@ export default function ChatPage() {
 
   return (
     <div
-      className="portfolio-app relative flex min-h-screen flex-col overflow-x-clip transition-colors duration-300"
+      className="portfolio-app astra-chat-page relative flex min-h-screen flex-col overflow-x-clip transition-colors duration-300"
+      data-chat-empty={!compact}
       style={{ fontFamily: FONT_SANS }}
     >
       <style>{MOTION_CSS}</style>
