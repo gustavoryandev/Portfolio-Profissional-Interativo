@@ -1,6 +1,6 @@
 # Portfólio Interativo com IA 👨‍💻
 
-![React](https://img.shields.io/badge/React-19.1.1-007ec6?style=for-the-badge&logo=react&logoColor=white) ![Vite](https://img.shields.io/badge/Vite-7.1.3-007ec6?style=for-the-badge&logo=vite&logoColor=white) ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white) ![Google Gemini](https://img.shields.io/badge/Google_Gemini-8E75B2?style=for-the-badge&logo=google&logoColor=white) ![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white) ![GitHub repo size](https://img.shields.io/github/repo-size/gustavoryandev/gustavoryan-portfolio?style=for-the-badge&logo=files) ![GitHub stars](https://img.shields.io/github/stars/gustavoryandev/gustavoryan-portfolio?style=for-the-badge&logo=github) ![GitHub forks](https://img.shields.io/github/forks/gustavoryandev/gustavoryan-portfolio?style=for-the-badge&logo=git) ![GitHub language count](https://img.shields.io/github/languages/count/gustavoryandev/gustavoryan-portfolio?style=for-the-badge&logo=javascript) ![GitHub license](https://img.shields.io/github/license/gustavoryandev/gustavoryan-portfolio?style=for-the-badge&color=007ec6&logo=opensourceinitiative)
+![React](https://img.shields.io/badge/React-19-007ec6?style=for-the-badge&logo=react&logoColor=white) ![Vite](https://img.shields.io/badge/Vite-6-007ec6?style=for-the-badge&logo=vite&logoColor=white) ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white) ![Google Gemini](https://img.shields.io/badge/Google_Gemini-8E75B2?style=for-the-badge&logo=google&logoColor=white) ![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white) ![GitHub repo size](https://img.shields.io/github/repo-size/gustavoryandev/gustavoryan-portfolio?style=for-the-badge&logo=files) ![GitHub stars](https://img.shields.io/github/stars/gustavoryandev/gustavoryan-portfolio?style=for-the-badge&logo=github) ![GitHub forks](https://img.shields.io/github/forks/gustavoryandev/gustavoryan-portfolio?style=for-the-badge&logo=git) ![GitHub language count](https://img.shields.io/github/languages/count/gustavoryandev/gustavoryan-portfolio?style=for-the-badge&logo=javascript) ![GitHub license](https://img.shields.io/github/license/gustavoryandev/gustavoryan-portfolio?style=for-the-badge&color=007ec6&logo=opensourceinitiative)
 
 ---
 
@@ -8,6 +8,7 @@
 
 - [Links úteis](#-links-úteis)
 - [Sobre o projeto](#-sobre-o-projeto)
+- [Capturas de tela](#-capturas-de-tela)
 - [Funcionalidades](#-funcionalidades)
 - [Tecnologias](#-tecnologias)
 - [Arquitetura](#-arquitetura)
@@ -31,13 +32,29 @@
 
 ## 📝 Sobre o projeto
 
-Este projeto apresenta a trajetória profissional e acadêmica de Gustavo em formato de portfólio web. A página inicial oferece uma conversa com Astra, assistente baseada em Gemini, e a navegação lateral dá acesso direto às seções de perfil, projetos, experiência, educação, habilidades, proficiência e contato.
+Portfólio de Gustavo Ryan Gomes Guedes, graduando em Engenharia de Software na PUC Minas. A página inicial (`/`) reúne projetos, tecnologias, experiência, formação e contato. A rota `/chat` abre a Astra, assistente baseada em Gemini que responde a perguntas sobre o portfólio e apresenta cards com conteúdo relacionado à conversa.
 
-O conteúdo do perfil é mantido em `src/data/perfil.json`. A interface está disponível em português e inglês, adapta-se a telas menores e oferece temas claro e escuro.
+O conteúdo do perfil é mantido em `src/data/perfil.json`. A interface oferece português e inglês, temas claro e escuro e suporte a movimento reduzido.
+
+## 📸 Capturas de tela
+
+**Portfólio no desktop**
+
+![Página inicial com apresentação de Gustavo, atalhos para projetos e Astra e retrato de perfil](docs/screenshots/portfolio-desktop.jpg)
+
+**Chat e habilidades no mobile**
+
+<p>
+  <img src="docs/screenshots/astra-mobile.jpg" alt="Chat da Astra com campo de mensagem e navegação na base" width="320" />
+  <img src="docs/screenshots/habilidades-mobile.jpg" alt="Grade de tecnologias em duas colunas e navegação inferior" width="320" />
+</p>
 
 ## ✨ Funcionalidades
 
-- **Assistente Astra:** perguntas em linguagem natural sobre perfil, projetos e trajetória, com histórico contextual da conversa.
+- **Assistente Astra:** perguntas em linguagem natural sobre perfil, projetos e trajetória, com histórico contextual e respostas em fluxo.
+- **Catálogo de projetos:** busca por texto, filtros por categoria e rolagem horizontal com gestos no celular.
+- **Laboratório de código:** exemplos editáveis e execução de código no navegador, disponível a partir de 768 px.
+- **Interface mobile:** navegação inferior para Astra e Projetos, campo de mensagem na base do chat e habilidades em duas colunas. As demais seções ficam no Menu.
 - **Cards interativos na conversa:** projetos, habilidades, experiência, currículo, contato e dados de serviços externos aparecem junto às respostas.
 - **Integrações ao vivo:** estatísticas do GitHub, linguagens e repositórios; atividade de programação via WakaTime; música atual via Spotify; tarefas acadêmicas do Canvas LMS; agenda do Atlético Mineiro; e perfil/partida de xadrez do Chess.com.
 - **Atualização de dados:** os cards indicam quando a fonte está indisponível e permitem tentar novamente quando aplicável.
@@ -135,7 +152,7 @@ O projeto está configurado para deploy na Vercel: o front-end é construído co
 .
 ├── api/
 │   └── chat.js                 # Assistente, tradução e fontes de dados ao vivo
-├── docs/                       # Notas das integrações
+├── docs/                       # Notas das integrações e capturas de tela
 ├── public/                     # Imagens, ícones e currículos PDF
 ├── server/
 │   ├── devApi.js                # Rota local /api/chat para o Vite
@@ -146,6 +163,7 @@ O projeto está configurado para deploy na Vercel: o front-end é construído co
 │   ├── data/                    # Perfil, projetos e tecnologias
 │   ├── hooks/                   # Hooks de contexto ao vivo
 │   ├── i18n/                    # Traduções em português e inglês
+│   ├── pages/                   # Rotas do portfólio e do chat
 │   └── services/                # Cliente da API, contato e contexto ao vivo
 ├── tests/                       # Testes automatizados existentes
 ├── .env.example                 # Modelo das variáveis de ambiente
