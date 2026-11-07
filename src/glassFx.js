@@ -36,9 +36,8 @@ export function installGlassEffects(win) {
     if (active && !active.contains(event.relatedTarget)) clear();
   };
   const intersection = win.IntersectionObserver ? new win.IntersectionObserver(entries => {
-    for (const entry of entries) if (entry.isIntersecting) {
-      entry.target.classList.add('gn-in-view');
-      intersection.unobserve(entry.target);
+    for (const entry of entries) {
+      entry.target.classList.toggle('gn-in-view', entry.isIntersecting);
     }
   }, { threshold: .08 }) : null;
   const observe = node => {
@@ -52,7 +51,14 @@ export function installGlassEffects(win) {
     }
   };
   const mutations = new win.MutationObserver(records => {
-    for (const record of records) for (const node of record.addedNodes) observe(node);
+    for (const record of records) {
+      for (const node of record.addedNodes) observe(node);
+      for (const node of record.removedNodes) {
+        if (node.nodeType !== 1 || node.isConnected) continue;
+        if (node.matches('[data-project-slide]')) intersection?.unobserve(node);
+        node.querySelectorAll('[data-project-slide]').forEach(slide => intersection?.unobserve(slide));
+      }
+    }
   });
   mutations.observe(doc.documentElement, { childList: true, subtree: true });
   observe(doc.documentElement);

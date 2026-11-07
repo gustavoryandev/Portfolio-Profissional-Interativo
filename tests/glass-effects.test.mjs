@@ -57,7 +57,11 @@ test('horizontal cards reveal on intersection, including dynamically mounted car
   assert.ok(observed.has(first));
   notify([{ target: first, isIntersecting: true }]);
   assert.ok(first.classList.contains('gn-in-view'));
-  assert.equal(observed.size, 0);
+  assert.ok(observed.has(first), 'keep watching to replay on return');
+  notify([{ target: first, isIntersecting: false }]);
+  assert.equal(first.classList.contains('gn-in-view'), false);
+  notify([{ target: first, isIntersecting: true }]);
+  assert.ok(first.classList.contains('gn-in-view'), 'reveal again when scrolling back');
   const next = win.document.createElement('div');
   next.setAttribute('data-project-slide', '');
   first.parentElement.append(next);

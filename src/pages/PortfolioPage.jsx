@@ -16,7 +16,7 @@ export default function PortfolioPage() {
     <Navbar portfolio />
     <main id="main-content" tabIndex={-1} className="scroll-content">
       <section id="inicio" className="portfolio-hero" aria-labelledby="hero-title">
-        <ScrollReveal>
+        <ScrollReveal repeat>
           <p className="section-eyebrow">{en ? 'SOFTWARE ENGINEERING · PUC MINAS' : 'ENGENHARIA DE SOFTWARE · PUC MINAS'}</p>
           <h1 id="hero-title">Gustavo<br /><span className="neon-title">Ryan.</span></h1>
           <p className="hero-lead">{en ? 'Turning ideas into digital experiences.' : 'Transformando ideias em experiências digitais.'}</p>
@@ -24,22 +24,22 @@ export default function PortfolioPage() {
           <div className="hero-actions"><a className="neon-cta" href="/chat"><Sparkles size={18} aria-hidden="true" />{en ? 'Talk to Astra' : 'Conversar com Astra'}<ArrowUpRight size={18} aria-hidden="true" /></a><a className="scroll-secondary" href="#projetos">{en ? 'Explore projects' : 'Explorar projetos'}<ArrowDown size={17} aria-hidden="true" /></a></div>
           <SocialLinks />
         </ScrollReveal>
-        <ScrollReveal delay={.12} className="hero-profile glass-panel">
+        <ScrollReveal repeat delay={.12} className="hero-profile glass-panel">
           <div className="portrait-orbit" aria-hidden="true" />
           <img className="hero-photo" src="/perfil-foto.jpeg" alt={en ? 'Gustavo Ryan' : 'Foto de Gustavo Ryan'} width="572" height="777" fetchPriority="high" />
           <div className="hero-profile-caption"><span>{en ? 'DEVELOPER / STUDENT' : 'DESENVOLVEDOR / ESTUDANTE'}</span><strong>{perfil.localizacao}</strong></div>
         </ScrollReveal>
       </section>
       <section id="sobre" className="scroll-section" aria-labelledby="about-title">
-        <ScrollReveal><p className="section-eyebrow">01 / {en ? 'THE JOURNEY' : 'A TRAJETÓRIA'}</p><h2 id="about-title">{en ? 'About me' : 'Sobre mim'}</h2><div className="glass-panel about-scroll"><p>{perfil.bio[en ? 'en' : 'pt']}</p></div></ScrollReveal>
+        <ScrollReveal repeat><p className="section-eyebrow">01 / {en ? 'THE JOURNEY' : 'A TRAJETÓRIA'}</p><h2 id="about-title">{en ? 'About me' : 'Sobre mim'}</h2><div className="glass-panel about-scroll"><p>{perfil.bio[en ? 'en' : 'pt']}</p></div></ScrollReveal>
       </section>
       <ProjectsScrollSection />
       <section id="habilidades" className="scroll-section" aria-labelledby="skills-title">
-        <ScrollReveal><p className="section-eyebrow">03 / {en ? 'TOOLKIT' : 'TECNOLOGIAS'}</p><h2 id="skills-title">{en ? 'What I build with.' : 'Com o que eu construo.'}</h2></ScrollReveal>
-        <div className="scroll-skills">{perfil.skills.map((skill, index) => <ScrollReveal key={skill.nome} delay={(index % 4) * .04}><div className="glass-panel scroll-skill"><LanguageIcon name={skill.nome} size={28} /><h3>{skill.nome}</h3></div></ScrollReveal>)}</div>
+        <ScrollReveal repeat><p className="section-eyebrow">03 / {en ? 'TOOLKIT' : 'TECNOLOGIAS'}</p><h2 id="skills-title">{en ? 'What I build with.' : 'Com o que eu construo.'}</h2></ScrollReveal>
+        <div className="scroll-skills">{perfil.skills.map((skill, index) => <ScrollReveal repeat key={skill.nome} delay={(index % 4) * .04}><div className="glass-panel scroll-skill"><LanguageIcon name={skill.nome} size={28} /><h3>{skill.nome}</h3></div></ScrollReveal>)}</div>
       </section>
-      {['experience', 'education', 'contact'].map(section => <div key={section} id={section === 'contact' ? 'contato' : section} className="scroll-section"><ScrollReveal><PortfolioSection active={section} en={en} /></ScrollReveal></div>)}
-      <ScrollReveal><section className="glass-panel astra-scroll-cta" aria-labelledby="astra-cta-title"><img src="/astra-avatar.png" alt="" width="64" height="64" /><div><h2 id="astra-cta-title">{en ? 'Curious about my work?' : 'Quer conhecer melhor meu trabalho?'}</h2><p>{en ? 'Astra can guide you through my projects and live integrations.' : 'A Astra te guia pelos projetos e pelas integrações ao vivo.'}</p></div><a href="/chat" className="neon-cta">{en ? 'Talk to Astra' : 'Conversar com Astra'}<ArrowUpRight size={18} aria-hidden="true" /></a></section></ScrollReveal>
+      {['experience', 'education', 'contact'].map(section => <div key={section} id={section === 'contact' ? 'contato' : section} className="scroll-section"><ScrollReveal repeat><PortfolioSection active={section} en={en} /></ScrollReveal></div>)}
+      <ScrollReveal repeat><section className="glass-panel astra-scroll-cta" aria-labelledby="astra-cta-title"><img src="/astra-avatar.png" alt="" width="64" height="64" /><div><h2 id="astra-cta-title">{en ? 'Curious about my work?' : 'Quer conhecer melhor meu trabalho?'}</h2><p>{en ? 'Astra can guide you through my projects and live integrations.' : 'A Astra te guia pelos projetos e pelas integrações ao vivo.'}</p></div><a href="/chat" className="neon-cta">{en ? 'Talk to Astra' : 'Conversar com Astra'}<ArrowUpRight size={18} aria-hidden="true" /></a></section></ScrollReveal>
     </main>
     <footer className="scroll-footer"><span>© {new Date().getFullYear()} Gustavo Ryan</span><a href="#inicio">{en ? 'Back to top ↑' : 'Voltar ao topo ↑'}</a></footer>
   </div>;
