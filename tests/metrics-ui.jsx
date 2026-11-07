@@ -88,9 +88,11 @@ window.HTMLElement.prototype.scrollTo = () => {};
 window.HTMLElement.prototype.attachEvent = () => {};
 window.HTMLElement.prototype.detachEvent = () => {};
 const submitted = [];
-axios.defaults.adapter = async config => {
-  submitted.push(JSON.parse(config.data));
-  return { config, status: 200, data: { response: 'Test reply.', model: 'test-model' } };
+globalThis.fetch = async (_url, options) => {
+  const body = JSON.parse(options.body);
+  if (body.action === 'models') return Response.json({ models: ['test-model'] });
+  submitted.push(body);
+  return Response.json({ response: 'Test reply.', model: 'test-model' });
 };
 await render(true, <App />);
 assert.equal(document.querySelectorAll('main').length, 1);
@@ -100,6 +102,7 @@ assert.equal(document.querySelector('.astra-hero-wrap').hasAttribute('inert'), f
 await act(async () => document.querySelector('.astra-starter').click());
 assert.equal(submitted.length, 1);
 assert.equal(submitted[0].predefinedSuggestion, true);
+assert.equal(submitted[0].stream, true);
 assert.equal(document.querySelector('.astra-hero-wrap').hasAttribute('inert'), true);
 assert.match(document.querySelector('.astra-label .dim-tag').textContent, /test-model/);
 assert.equal(document.querySelectorAll('.chat-composer button[type="button"]').length, 6);
@@ -108,6 +111,31 @@ await act(async () => document.querySelector('.astra-fab').click());
 assert.equal(document.activeElement.id, 'chat-input');
 await act(async () => document.querySelector('.sidebar-note').click());
 assert.equal(document.activeElement.id, 'chat-input');
+
+// The pending stream must display the user message before any token arrives.
+let streamController;
+globalThis.fetch = async (_url, options) => new Response(new ReadableStream({
+  start(controller) {
+    streamController = controller;
+    options.signal.addEventListener('abort', () => controller.error(new DOMException('Stopped', 'AbortError')), { once: true });
+  },
+}), { headers: { 'Content-Type': 'application/x-ndjson' } });
+const previousMessages = document.querySelectorAll('.chat-msg-in').length;
+const firstBubble = document.querySelector('.chat-msg-in');
+await act(async () => document.querySelector('.chat-composer button[type="button"]').click());
+assert.equal(document.querySelectorAll('.chat-msg-in').length, previousMessages + 1);
+assert.ok(document.querySelector('[aria-label="Stop response"]'));
+await act(async () => {
+  streamController.enqueue(new TextEncoder().encode('{"type":"meta","model":"stream-model"}\n{"type":"delta","text":"Incremental response"}\n'));
+  await new Promise(resolve => setTimeout(resolve, 70));
+});
+assert.match(document.querySelector('[data-streaming-reply]').textContent, /Incremental response/);
+assert.equal(document.querySelector('.chat-msg-in'), firstBubble);
+await act(async () => document.querySelector('[aria-label="Stop response"]').click());
+assert.equal(document.querySelector('[data-streaming-reply]'), null);
+assert.match(document.body.textContent, /Incremental response/);
+assert.match(document.body.textContent, /Response stopped/);
+assert.equal(document.querySelector('button[type="submit"]').disabled, true); // empty input, no stuck loading state
 
 await act(async () => root.unmount());
 dom.window.close();

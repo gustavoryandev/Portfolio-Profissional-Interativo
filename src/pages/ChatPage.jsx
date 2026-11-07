@@ -1,6 +1,6 @@
 // src/App.jsx
 import { useEffect, useRef, useState } from 'react';
-import { Send, Sparkles } from 'lucide-react';
+import { Send, Sparkles, Square } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import Navbar from '../components/Navbar';
 import Sidebar from '../components/Sidebar';
@@ -8,6 +8,9 @@ import ProfilePanel from '../components/ProfilePanel';
 import PortfolioSection from '../components/PortfolioSection';
 import MessageBubble from '../components/MessageBubble';
 import AstraHero from '../components/AstraHero';
+import StreamingReply from '../components/StreamingReply';
+import { createStreamBuffer } from '../services/streamBuffer';
+import { warmModelCatalog } from '../services/chatStream';
 import sendMessage from '../services/api';
 import useLiveContext from '../hooks/useLiveContext';
 import { sourcesForText } from '../services/liveContext';
@@ -53,6 +56,10 @@ export default function ChatPage() {
   const [activeSection, setActiveSection] = useState('home');
   const en = i18n.language.startsWith('en');
   const [loading, setLoading] = useState(false);
+  const [streaming, setStreaming] = useState(null);
+  const activeRequest = useRef(null);
+  const mounted = useRef(true);
+  const followOutput = useRef(true);
   const messagesContainerRef = useRef(null);
   const inputRef = useRef(null);
   const wasLoading = useRef(false);
@@ -63,13 +70,23 @@ export default function ChatPage() {
   const conversationRef = useRef({ chatContext: null, model: null });
   const live = useLiveContext();
 
+  useEffect(() => {
+    mounted.current = true;
+    void warmModelCatalog(); // independent of chat history, which already lives locally
+    return () => {
+      mounted.current = false;
+      activeRequest.current?.controller.abort();
+      activeRequest.current?.buffer.dispose();
+    };
+  }, []);
+
   const nextId = () => `msg-${++idCounter.current}`;
   const compact = messages.length > 1; // hero grande só no estado vazio
 
   // Rola até a última mensagem. O timeout espera os cards renderizarem; limpar evita efeito tardio.
   useEffect(() => {
     const container = messagesContainerRef.current;
-    if (!container || !compact) return undefined;
+    if (!container || !compact || !followOutput.current) return undefined;
     const id = setTimeout(() => {
       container.scrollTo({ top: container.scrollHeight, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
     }, 100);
@@ -109,19 +126,30 @@ export default function ChatPage() {
     if (!query || sendingRef.current) return;
     sendingRef.current = true;
     const requestLanguage = i18n.language;
+    followOutput.current = true;
 
     appendMessage({ id: nextId(), sender: 'user', text: query, lang: requestLanguage });
     setInput('');
     setLoading(true);
+    const id = nextId();
+    const controller = new AbortController();
+    const buffer = createStreamBuffer();
+    activeRequest.current = { controller, buffer };
+    setStreaming({ id, buffer });
     try {
       // O campo "id" é só da interface: não vai para o backend
       const history = messagesRef.current.map(({ sender, text, translationKey }) => ({ sender, text, translationKey }));
-      const data = await sendMessage(query, requestLanguage, history, conversationRef.current.chatContext, predefinedSuggestion);
+      const data = await sendMessage(query, requestLanguage, history, conversationRef.current.chatContext, predefinedSuggestion, {
+        signal: controller.signal,
+        onEvent: event => {
+          if (mounted.current && !controller.signal.aborted) buffer.push(event);
+        },
+      });
+      if (!mounted.current) return;
       conversationRef.current = {
         chatContext: data.chatContext ?? conversationRef.current.chatContext,
         model: data.model ?? conversationRef.current.model,
       };
-      const id = nextId();
       appendMessage({
         id,
         sender: 'ai',
@@ -134,23 +162,27 @@ export default function ChatPage() {
       live.absorb(data.liveContext);
       const cardSources = sourcesForText(data.response);
       live.watch(cardSources);
-      // Fontes com falha: recarrega com aviso. Todas as demais: revalida em silêncio,
-      // pois a resposta pode ter saído de um snapshot em cache enquanto o dado novo chegava.
+      // Refresh only missing/stale sources; avoid a second forced HTTP request.
       void live.refresh(cardSources);
-      void live.refresh(cardSources, true, { silent: true });
     } catch {
+      if (!mounted.current) return;
+      const partial = buffer.getText();
+      const cancelled = controller.signal.aborted;
+      const notice = cancelled
+        ? (requestLanguage.startsWith('en') ? 'Response stopped.' : 'Resposta interrompida.')
+        : t('chat.erro', { lng: requestLanguage });
       appendMessage({
-        id: nextId(),
+        id,
         sender: 'ai',
-        tone: 'error',
-        translationKey: 'chat.erro',
-        text: t('chat.erro', {
-          defaultValue: 'ERRO: não foi possível processar sua pergunta agora. Tente novamente em instantes.',
-        }),
+        tone: cancelled ? undefined : 'error',
+        lang: requestLanguage,
+        text: [partial, notice].filter(Boolean).join('\n\n'),
       });
     } finally {
+      buffer.dispose();
+      activeRequest.current = null;
       sendingRef.current = false;
-      setLoading(false);
+      if (mounted.current) { setLoading(false); setStreaming(null); }
     }
   };
 
@@ -195,6 +227,10 @@ export default function ChatPage() {
 
               <div
                 ref={messagesContainerRef}
+                onScroll={event => {
+                  const node = event.currentTarget;
+                  followOutput.current = node.scrollHeight - node.scrollTop - node.clientHeight < 80;
+                }}
                 role="log"
                 aria-live="polite"
                 aria-relevant="additions"
@@ -209,8 +245,9 @@ export default function ChatPage() {
                       <MessageBubble message={message} liveContext={live.context} refreshing={live.refreshing} onRefresh={live.refresh} />
                     </div>
                   ))}
-                  {loading && (
-                    <TypingIndicator label={t('chat.digitando', { defaultValue: en ? 'Generating reply' : 'Gerando resposta' })} />
+                  {streaming && (
+                    <StreamingReply key={streaming.id} buffer={streaming.buffer} containerRef={messagesContainerRef} followRef={followOutput}
+                      fallback={<TypingIndicator label={t('chat.digitando', { defaultValue: en ? 'Generating reply' : 'Gerando resposta' })} />} />
                   )}
                 </div>
               </div>
@@ -251,6 +288,8 @@ export default function ChatPage() {
                     autoComplete="off"
                     className="min-w-0 flex-1 bg-transparent py-3 pl-4 pr-2 text-[15px] font-medium text-ink outline-none placeholder:text-muted disabled:opacity-60 sm:pl-2"
                   />
+                  {loading && <button type="button" onClick={() => activeRequest.current?.controller.abort()}
+                    className="icon-button shrink-0" aria-label={en ? 'Stop response' : 'Parar resposta'}><Square size={16} aria-hidden="true" /></button>}
                   <button
                     type="submit"
                     disabled={loading || !input.trim()}
