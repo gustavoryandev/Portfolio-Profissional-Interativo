@@ -1279,6 +1279,8 @@ function chunkText(chunk) {
 // ==========================================
 
 const GITHUB_PROMPT_WAIT_MS = 2400;
+const METRICS_WAIT_MS = 700;
+const METRICS_INTENT = /\b(?:metricas?|metrics?|estatisticas?|statistics|stats|numeros)\b/;
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' });
@@ -1323,7 +1325,8 @@ export default async function handler(req, res) {
       const translated = value.replace(/⟪KEEP_(\d+)⟫/g, (_, index) => protectedParts[Number(index)]);
       return res.status(200).json({ text: translated });
     }
-    const { userMessage, chatHistory = [] } = body;
+    const { userMessage } = body;
+    const chatHistory = Array.isArray(body.chatHistory) ? body.chatHistory : [];
     const stream = body.stream === true; // opt-in: resposta NDJSON; padrão continua JSON
 
     if (typeof userMessage !== 'string' || !userMessage.trim()) return res.status(400).json({ error: 'Mensagem inválida.' });
@@ -1333,27 +1336,35 @@ export default async function handler(req, res) {
       : -1;
     const suggestionCards = ['[PROJECTS_CARD]', '[SKILLS_CARD]', '[CANVAS_CARD]', '[GITHUB_CARD]\n[STATS_CARD]', '[GALO_CARD]', '[CHESS_CARD]'];
     const requestedSuggestionCards = suggestionIndex >= 0 ? suggestionCards[suggestionIndex] : '';
-    const previous = [...chatHistory].reverse().find(item => item.sender === 'ai');
+    const previous = chatHistory.findLast(item => item?.sender === 'ai');
     const lastAi = typeof previous?.text === 'string' ? previous.text : '';
-    const pendingMetrics = /\[(GITHUB|WAKATIME)_CARD\]/.test(lastAi) && !/\[(GITHUB_ACTIVITY|STATS)_CARD\]/.test(lastAi);
-    const affirmative = /^(sim|yes|yeah|sure|ok|claro|quero|pode)(?:[\s,!?.]|$)|^(?:mostre|mostrar|show)(?: me)? (?:os |as |the )?(?:detalhes|details|m[eé]tricas detalhadas|detailed metrics)\b/i.test(userMessage.trim()) && !/\b(n[aã]o|not|don.t)\b/i.test(userMessage);
-    if (pendingMetrics && /^(n[aã]o|no|nope)(?:[\s,!?.]|$)/i.test(userMessage.trim())) {
-      return res.status(200).json({ response: String(body.lang).startsWith('en') ? 'Okay, we will keep just the summary.' : 'Tudo bem, vamos manter apenas o resumo.', translationKey: 'chat.metricsDeclined' });
-    }
+    const legacyOffer = previous?.translationKey === 'chat.metricsSummary';
+    const pendingMetrics = legacyOffer || (/\[(GITHUB|WAKATIME)_CARD\]/.test(lastAi)
+      && !/\[(GITHUB_ACTIVITY|STATS)_CARD\]/.test(lastAi)
+      && /(?:quer ver|would you like to see).*(?:metricas detalhadas|detailed .*metrics)/.test(normalizeQuery(lastAi)));
     const message = userMessage.trim();
     const normalizedQuery = normalizeQuery(message);
+    const affirmative = /^(?:sim|yes|yeah|sure|ok|claro|quero|pode)(?:\s+(?:please|por favor|sim))?[\s,!?.]*$/.test(normalizedQuery);
+    if (pendingMetrics && /^(?:nao|no|nope)(?:[\s,!?.]+(?:obrigad[oa]|thanks))?[\s,!?.]*$/.test(normalizedQuery)) {
+      return res.status(200).json({ response: String(body.lang).startsWith('en') ? 'Okay, we will keep just the summary.' : 'Tudo bem, vamos manter apenas o resumo.', translationKey: 'chat.metricsDeclined' });
+    }
     const githubQuery = /\bgithub\b/.test(normalizedQuery);
-    const wakatimeQuery = /\bwaka[\s-]*time\b|\btempo de codigo\b|\bcoding time\b/.test(normalizedQuery);
-    const metricsQuery = githubQuery || wakatimeQuery || /\bmetricas\b|\bmetrics\b/.test(normalizedQuery);
-    const detailQuery = /detalh|complet|adicion|additional|\bfull\b|in.?depth|(more|mais) (detail|info|metric|data|dado)|todas as metricas|all (the )?(metrics|data)/.test(normalizedQuery);
-    const expanded = (pendingMetrics && affirmative) || (detailQuery && (metricsQuery || pendingMetrics));
-    if (suggestionIndex === 3 && (expanded || metricsQuery)) {
+    const wakatimeQuery = WAKATIME_INTENT.test(normalizedQuery);
+    const detailQuery = /detalh|detail|complet|\bfull\b|in.?depth|todas as metricas|all (the )?(metrics|data)/.test(normalizedQuery);
+    const followMetrics = pendingMetrics && !githubQuery && !wakatimeQuery && (affirmative
+      || /^(?:(?:mostre|mostra|mostrar|show(?: me)?)\s+)?(?:(?:os|as|the)\s+)?(?:detalhes|details|metricas detalhadas|detailed metrics)[\s,!?.]*$/.test(normalizedQuery));
+    const metricsQuery = (githubQuery || wakatimeQuery) && METRICS_INTENT.test(normalizedQuery)
+      && !/^(?:o que (?:e|sao)|what (?:is|are)|nao|don.t)\b/.test(normalizedQuery)
+      && !/\b(?:quanto|quantos|quantas|how many|how much)\b/.test(normalizedQuery);
+    const codingTimeSummary = /^(?:tempo de codigo|coding time)[\s,!?.]*$/.test(normalizedQuery);
+    const expanded = followMetrics || (metricsQuery && detailQuery);
+    if (suggestionIndex === 3 || metricsQuery || followMetrics || codingTimeSummary) {
       const en = String(body.lang).startsWith('en');
       const generic = !githubQuery && !wakatimeQuery;
-      const fromOffer = generic && pendingMetrics && expanded;
+      const fromOffer = generic && followMetrics;
       // Fontes: nomeadas na pergunta; sem nome, as do resumo anterior (oferta aceita), GitHub (resumo) ou ambas (detalhes genéricos)
-      const useGh = githubQuery || (generic && (!fromOffer || lastAi.includes('[GITHUB_CARD]')));
-      const useWk = wakatimeQuery || (generic && (fromOffer ? lastAi.includes('[WAKATIME_CARD]') : expanded));
+      const useGh = githubQuery || (generic && (!fromOffer || legacyOffer || lastAi.includes('[GITHUB_CARD]')));
+      const useWk = wakatimeQuery || (generic && fromOffer && (legacyOffer || lastAi.includes('[WAKATIME_CARD]')));
       // Resumos primeiro (o do WakaTime só na resposta inicial); detalhes só quando pedidos
       const cardLines = [
         useGh && '[GITHUB_CARD]',
@@ -1362,14 +1373,15 @@ export default async function handler(req, res) {
         expanded && useWk && '[STATS_CARD]',
       ];
       const intro = expanded
-        ? (en ? 'Here are the summaries and the detailed metrics.' : 'Aqui estão os resumos e as métricas detalhadas.')
+        ? (en ? 'Here are the detailed metrics.' : 'Aqui estão as métricas detalhadas.')
         : useGh && useWk ? (en ? 'Here are the GitHub and WakaTime summaries.' : 'Aqui estão os resumos do GitHub e do WakaTime.')
           : useGh ? (en ? 'Here is the GitHub summary.' : 'Aqui está o resumo do GitHub.')
             : (en ? 'Here is the WakaTime summary.' : 'Aqui está o resumo do WakaTime.');
       const names = useGh && useWk ? (en ? 'GitHub and WakaTime' : 'GitHub e WakaTime') : useGh ? 'GitHub' : 'WakaTime';
       const offer = expanded ? '' : (en ? `Would you like to see the detailed ${names} metrics?` : `Quer ver as métricas detalhadas do ${names}?`);
       const response = [intro, ...cardLines.filter(Boolean), offer].filter(Boolean).join('\n');
-      const liveContext = forClient(await fetchLiveContext([useGh && 'github', useWk && 'wakatime'].filter(Boolean)));
+      const readLive = prepareLiveContext([useGh && 'github', useWk && 'wakatime'].filter(Boolean));
+      const liveContext = forClient(await readLive(METRICS_WAIT_MS));
       return res.status(200).json({ response, liveContext });
     }
     const apiKey = process.env.GEMINI_API_KEY;
