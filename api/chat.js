@@ -6,6 +6,8 @@ import { createHash } from 'crypto';
 import dotenv from 'dotenv';
 import { proficiencyValue, proficiencyLevel } from '../src/data/skillProficiency.js';
 import { createLiveCache, sourceFailure } from '../server/liveCache.js';
+import { createModelCache, withDeadline } from '../server/modelCache.js';
+import { writeEvent } from '../server/ndjson.js';
 
 dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 
@@ -53,7 +55,7 @@ async function discoverModels(apiKey) {
     const models = response.data.models
       ?.filter((model) => model.supportedGenerationMethods?.includes('generateContent'))
       .map((model) => model.name.replace(/^models\//, ''))
-      .filter((name) => /^gemini-\d+(?:\.\d+)?-(?:flash|pro)(?:-(?:latest|preview|001))?$/i.test(name));
+      .filter((name) => /^gemini-\d+(?:\.\d+)?-(?:flash(?:-lite)?|pro)(?:-(?:latest|preview|001))?$/i.test(name));
 
     if (!models?.length) return [];
     return [...new Set(models)].sort((left, right) => modelPriority(left) - modelPriority(right));
@@ -138,7 +140,7 @@ function peekLiveContext() {
 }
 
 // Usa o dado fresco se já chegou; senão, o snapshot do cache (nunca bloqueia a resposta)
-const settleLive = (promise) => Promise.race([promise, sleep(LIVE_RESPONSE_WAIT_MS).then(() => null)])
+const settleLive = (promise) => withDeadline(promise, LIVE_RESPONSE_WAIT_MS)
   .then((data) => data ?? peekLiveContext());
 
 let spotifyTokenCache = { token: null, expires: 0 };
@@ -167,38 +169,7 @@ async function getSpotifyToken(id, secret, refresh) {
 // LISTA DE MODELOS (sem bloquear a resposta)
 // ==========================================
 
-let modelListCache = { list: null, expires: 0 };
-let discoveryInFlight = null;
-
-// Deduplica descobertas concorrentes
-function refreshModelList(apiKey) {
-  if (discoveryInFlight) return discoveryInFlight;
-  discoveryInFlight = discoverModels(apiKey)
-    .then((discovered) => {
-      const list = [...new Set([...discovered, ...fallbackModels])];
-      modelListCache = { list, expires: Date.now() + (discovered.length ? 60 * 60 * 1000 : 60 * 1000) };
-      return list;
-    })
-    .finally(() => {
-      discoveryInFlight = null;
-    });
-  return discoveryInFlight;
-}
-
-async function getModelList(apiKey) {
-  const { list, expires } = modelListCache;
-  if (list && expires > Date.now()) return list;
-
-  const pending = refreshModelList(apiKey);
-  if (list) {
-    // Cache expirado: usa a lista antiga e atualiza em segundo plano
-    pending.catch(() => {});
-    return list;
-  }
-  // Cache frio: espera só um pouco pela descoberta; se demorar, usa a ordem de fallback
-  await Promise.race([pending, sleep(DISCOVERY_WAIT_MS)]);
-  return modelListCache.list || fallbackModels;
-}
+const getModelList = createModelCache({ discover: discoverModels, fallback: fallbackModels, wait: DISCOVERY_WAIT_MS });
 
 const modelCooldown = new Map();
 function cooldownMs(error) {
@@ -1218,11 +1189,13 @@ function forClient(liveContext) {
 // FALLBACK DE MODELOS (com cooldown e 1 retry em 503)
 // ==========================================
 
-async function attemptModel(modelName, run) {
+async function attemptModel(modelName, run, signal) {
   for (let attempt = 0; ; attempt += 1) {
     try {
+      signal?.throwIfAborted();
       return await run(modelName);
     } catch (error) {
+      if (signal?.aborted) throw error;
       if (error?.status === 503 && attempt === 0) {
         await sleep(800);
         continue;
@@ -1232,7 +1205,7 @@ async function attemptModel(modelName, run) {
   }
 }
 
-async function runWithFallback(modelsToTry, run) {
+async function runWithFallback(modelsToTry, run, signal) {
   const now = Date.now();
   const healthy = modelsToTry.filter((name) => (modelCooldown.get(name) || 0) <= now);
   const queue = healthy.length ? healthy : modelsToTry;
@@ -1240,8 +1213,9 @@ async function runWithFallback(modelsToTry, run) {
   let lastError;
   for (const modelName of queue) {
     try {
-      return { value: await attemptModel(modelName, run), model: modelName };
+      return { value: await attemptModel(modelName, run, signal), model: modelName };
     } catch (error) {
+      if (signal?.aborted) throw error;
       lastError = error;
       if (!isRetryableModelError(error)) throw error;
       modelCooldown.set(modelName, Date.now() + cooldownMs(error));
@@ -1267,9 +1241,17 @@ const GITHUB_PROMPT_WAIT_MS = 3500; // tempo extra para o GitHub quando a pergun
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' });
-
+  const controller = new AbortController();
+  const disconnect = () => controller.abort();
+  res.once?.('close', disconnect);
   try {
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body || {};
+    if (body.action === 'models') {
+      const apiKey = process.env.GEMINI_API_KEY;
+      if (!apiKey) return res.status(503).json({ error: 'Model catalog unavailable' });
+      res.setHeader('Cache-Control', 'no-store');
+      return res.status(200).json({ models: await getModelList(apiKey) });
+    }
     if (body.action === 'refreshContext') {
       if (!Array.isArray(body.sources) || !body.sources.length || body.sources.length > 6
         || body.sources.some(name => typeof name !== 'string' || !Object.hasOwn(LIVE_FETCHERS, name))) {
@@ -1360,15 +1342,13 @@ export default async function handler(req, res) {
     const githubPromise = cachedSource('github', fetchGithub);
     const livePromise = fetchLiveContext(['github', 'wakatime', 'spotify', 'canvas', 'galo', 'chess']); // reaproveita a mesma busca do GitHub, sem duplicar
     const perfil = readJson('perfil.json');
-    const modelsToTry = await getModelList(apiKey);
-
-    const freshGithub = await Promise.race([
-      githubPromise,
-      sleep(githubTopic ? GITHUB_PROMPT_WAIT_MS : LIVE_PROMPT_WAIT_MS).then(() => null),
+    const [modelsToTry, freshGithub, early] = await Promise.all([
+      getModelList(apiKey),
+      withDeadline(githubPromise, githubTopic ? GITHUB_PROMPT_WAIT_MS : LIVE_PROMPT_WAIT_MS),
+      withDeadline(livePromise, LIVE_PROMPT_WAIT_MS),
     ]);
     const github = freshGithub ?? liveCache.get('github')?.data ?? { status: 'unknown' };
 
-    const early = await Promise.race([livePromise, sleep(LIVE_PROMPT_WAIT_MS).then(() => null)]);
     const live = early ?? peekLiveContext();
 
     const geminiContext = { ...live, github };
@@ -1398,9 +1378,9 @@ export default async function handler(req, res) {
     // ---- Modo padrão (JSON) ----
     if (!stream) {
       const { value: text, model } = await runWithFallback(modelsToTry, async (name) => {
-        const result = await openChat(name).sendMessage(message);
+        const result = await openChat(name).sendMessage(message, { signal: controller.signal });
         return result.response.text();
-      });
+      }, controller.signal);
       const liveContext = forClient(await settleLive(livePromise));
       const response = requestedSuggestionCards
         ? [text, ...requestedSuggestionCards.split('\n').filter(card => !text.includes(card))].join('\n')
@@ -1410,20 +1390,20 @@ export default async function handler(req, res) {
 
     // ---- Modo streaming (NDJSON) ----
     const { value: opened, model } = await runWithFallback(modelsToTry, async (name) => {
-      const { stream: chunks, response } = await openChat(name).sendMessageStream(message);
+      const { stream: chunks, response } = await openChat(name).sendMessageStream(message, { signal: controller.signal });
       response.catch(() => {});
       const iterator = chunks[Symbol.asyncIterator]();
       return { iterator, first: await iterator.next() };
-    });
+    }, controller.signal);
 
-    const liveContext = forClient(await settleLive(livePromise));
     res.statusCode = 200;
     res.setHeader('Content-Type', 'application/x-ndjson; charset=utf-8');
     res.setHeader('Cache-Control', 'no-cache, no-transform');
     res.setHeader('X-Accel-Buffering', 'no');
-    const write = (payload) => res.write(`${JSON.stringify(payload)}\n`);
+    res.flushHeaders?.();
+    const write = (payload) => writeEvent(res, payload, controller.signal);
 
-    write({ type: 'meta', model, liveContext, chatContext });
+    await write({ type: 'meta', model, liveContext: forClient(peekLiveContext()), chatContext });
     try {
       let emittedText = '';
       let chunk = opened.first;
@@ -1431,19 +1411,25 @@ export default async function handler(req, res) {
         const text = chunkText(chunk.value);
         if (text) {
           emittedText += text;
-          write({ type: 'delta', text });
+          await write({ type: 'delta', text });
         }
         chunk = await opened.iterator.next();
       }
       const missingCards = requestedSuggestionCards.split('\n').filter(card => card && !emittedText.includes(card));
-      if (missingCards.length) write({ type: 'delta', text: '\n' + missingCards.join('\n') });
-      write({ type: 'done' });
+      if (missingCards.length) await write({ type: 'delta', text: '\n' + missingCards.join('\n') });
+      await write({ type: 'context', liveContext: forClient(await settleLive(livePromise)) });
+      await write({ type: 'done' });
     } catch (error) {
-      console.error('Erro durante streaming Gemini:', error.message);
-      write({ type: 'error', error: 'Erro ao gerar resposta. Tente novamente em instantes.' });
+      if (!controller.signal.aborted && !res.destroyed) {
+        console.error('Erro durante streaming Gemini:', error.message);
+        await write({ type: 'error', error: 'Erro ao gerar resposta. Tente novamente em instantes.' });
+      }
+    } finally {
+      await opened.iterator.return?.();
     }
     return res.end();
   } catch (error) {
+    if (controller.signal.aborted || res.destroyed) return;
     console.error('Erro na Serverless /api/chat:', error.message);
     if (res.headersSent) return res.end();
 
@@ -1452,5 +1438,7 @@ export default async function handler(req, res) {
     if (error?.status === 503 || errStr.includes('high demand')) return res.status(503).json({ error: 'O Gemini está temporariamente sobrecarregado.' });
     if (error?.status === 429 || errStr.includes('quota')) return res.status(503).json({ error: 'A cota diária do Gemini foi atingida.' });
     return res.status(500).json({ error: 'Erro ao gerar resposta. Tente novamente em instantes.' });
+  } finally {
+    res.off?.('close', disconnect);
   }
 }
