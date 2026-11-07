@@ -431,7 +431,7 @@ async function fetchGithub() {
     const graphqlPromise = client.post('https://api.github.com/graphql', { query: GITHUB_MAIN_QUERY, variables: { login: username } }, auth);
     const languagesPromise = fetchGithubLanguages(username, token);
 
-    const [graphqlRes, languages] = await Promise.all([graphqlPromise, languagesPromise]);
+    const graphqlRes = await graphqlPromise;
 
     const user = graphqlRes.data?.data?.user;
     if (!user) {
@@ -482,9 +482,10 @@ async function fetchGithub() {
     }));
 
     const readmeNames = repos.map((r) => r.name).filter((n) => REPO_NAME.test(n)).slice(0, README_REPOS);
-    const [readmes, commitTimes] = await Promise.all([
+    const [readmes, commitTimes, languages] = await Promise.all([
       fetchReadmes(username, readmeNames, token),
       fetchCommitTimes(username, user.id, token),
+      languagesPromise,
     ]);
 
     // Horários: commits reais via GraphQL; se falhar, amostra dos eventos públicos. Sem nenhum dos dois, fica zerado (sem dados inventados).
