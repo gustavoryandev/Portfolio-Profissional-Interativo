@@ -47,6 +47,31 @@ test('partial stream failures are reported without retrying generation', async (
   } finally { globalThis.fetch = original; }
 });
 
+test('a fallback replaces the partial answer in the preview and final response', async () => {
+  const original = globalThis.fetch;
+  const buffer = createStreamBuffer();
+  globalThis.fetch = async (_url, { body }) => {
+    assert.equal(JSON.parse(body).streamRetry, true);
+    return stream([
+      { type: 'meta', model: 'first' },
+      { type: 'delta', text: 'Partial **ans' },
+      { type: 'reset' },
+      { type: 'meta', model: 'second' },
+      { type: 'delta', text: 'Complete answer.' },
+      { type: 'done' },
+    ].map(event => JSON.stringify(event)).join('\n'));
+  };
+  try {
+    const result = await requestChatStream({}, { onEvent: event => buffer.push(event) });
+    assert.equal(result.response, 'Complete answer.');
+    assert.equal(result.model, 'second');
+    assert.equal(buffer.getText(), result.response);
+  } finally {
+    buffer.dispose();
+    globalThis.fetch = original;
+  }
+});
+
 test('model warmup is deduplicated and reused in memory', async () => {
   const original = globalThis.fetch;
   let calls = 0;

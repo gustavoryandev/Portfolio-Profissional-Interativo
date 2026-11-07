@@ -148,3 +148,64 @@ test('declining details makes no additional integration or model request', async
     assert.equal(res.body.response.includes('_CARD]'),false);
   } finally { mockAdapter = undefined; }
 });
+
+test('the chat retries incomplete Gemini output in JSON and replaces it in the stream', async () => {
+  const originalFetch = globalThis.fetch;
+  const calls = [];
+  const first = 'gemini-3.8-flash';
+  const second = 'gemini-3.6-flash';
+  process.env.GEMINI_API_KEY = 'chat-regression-test';
+  mockAdapter = async config => {
+    calls.push(config.url);
+    assert.match(config.url, /generativelanguage\.googleapis\.com\/v1beta\/models$/);
+    return { status: 200, config, data: { models: [first, second].map(name => ({
+      name: `models/${name}`, supportedGenerationMethods: ['generateContent'],
+    })) } };
+  };
+  const candidate = (parts, finishReason) => ({ candidates: [{ content: { role: 'model', parts }, finishReason }] });
+  globalThis.fetch = async (url, options) => {
+    const body = JSON.parse(options.body);
+    assert.equal(body.generationConfig.thinkingConfig.thinkingLevel, 'LOW');
+    assert.ok(body.generationConfig.maxOutputTokens > 1024);
+    assert.match(body.systemInstruction.parts[0].text, /STATUS DAS APIS: \{\}/);
+    const truncated = url.includes(first);
+    assert.ok(truncated || url.includes(second));
+    const parts = [
+      { text: 'Internal thought', thought: true },
+      { text: truncated ? 'A resposta **incom' : 'A resposta completa.' },
+    ];
+    const finishReason = truncated ? 'MAX_TOKENS' : 'STOP';
+    if (url.includes('streamGenerateContent')) {
+      const frames = [candidate(parts), candidate([], finishReason)]
+        .map(frame => `data: ${JSON.stringify(frame)}\n\n`).join('');
+      return new Response(frames, { headers: { 'Content-Type': 'text/event-stream' } });
+    }
+    return Response.json(candidate(parts, finishReason));
+  };
+  try {
+    const res = response();
+    const request = { method: 'POST', body: { userMessage: 'Quem é Gustavo?' } };
+    await handler(request, res);
+    assert.equal(res.body.response, 'A resposta completa.');
+    assert.equal(res.body.model, second);
+    assert.deepEqual(res.body.liveContext, {});
+
+    const events = [];
+    const streamed = {
+      ...response(),
+      flushHeaders() { this.headersSent = true; },
+      write(line) { events.push(JSON.parse(line)); return true; },
+      end() {},
+    };
+    await handler({ ...request, body: { ...request.body, stream: true, streamRetry: true } }, streamed);
+    assert.deepEqual(events.map(event => event.type), ['meta', 'delta', 'reset', 'meta', 'delta', 'context', 'done']);
+    assert.equal(events[1].text, 'A resposta **incom');
+    assert.equal(events[3].model, second);
+    assert.equal(events[4].text, 'A resposta completa.');
+    assert.equal(calls.length, 1);
+  } finally {
+    globalThis.fetch = originalFetch;
+    process.env.GEMINI_API_KEY = '';
+    mockAdapter = undefined;
+  }
+});

@@ -166,7 +166,6 @@ export default function ChatPage() {
       void live.refresh(cardSources);
     } catch {
       if (!mounted.current) return;
-      const partial = buffer.getText();
       const cancelled = controller.signal.aborted;
       const notice = cancelled
         ? (requestLanguage.startsWith('en') ? 'Response stopped.' : 'Resposta interrompida.')
@@ -176,7 +175,7 @@ export default function ChatPage() {
         sender: 'ai',
         tone: cancelled ? undefined : 'error',
         lang: requestLanguage,
-        text: [partial, notice].filter(Boolean).join('\n\n'),
+        text: cancelled ? [buffer.getText(), notice].filter(Boolean).join('\n\n') : notice,
       });
     } finally {
       buffer.dispose();

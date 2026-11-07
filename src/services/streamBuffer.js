@@ -15,6 +15,7 @@ export function createStreamBuffer() {
     getSnapshot: () => snapshot,
     getText: () => text,
     push(event) {
+      if (event.type === 'reset') { text = ''; model = undefined; }
       if (event.type === 'delta') text += event.text;
       if (event.type === 'meta') model = event.model;
       if (!timer) timer = setTimeout(flush, 40);

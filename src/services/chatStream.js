@@ -2,7 +2,7 @@
 export async function requestChatStream(payload, { signal, onEvent = () => {} } = {}) {
   const response = await fetch('/api/chat', {
     method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/x-ndjson, application/json' },
-    body: JSON.stringify({ ...payload, stream: true }), signal,
+    body: JSON.stringify({ ...payload, stream: true, streamRetry: true }), signal,
   });
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
@@ -23,6 +23,7 @@ export async function requestChatStream(payload, { signal, onEvent = () => {} } 
     if (event.type === 'error') throw new Error(event.error || 'Chat stream failed');
     if (event.type === 'meta') Object.assign(result, { model: event.model, chatContext: event.chatContext, liveContext: event.liveContext });
     if (event.type === 'context') result.liveContext = event.liveContext;
+    if (event.type === 'reset') text = '';
     if (event.type === 'delta') {
       if (typeof event.text !== 'string') throw new Error('Invalid chat delta');
       text += event.text;
