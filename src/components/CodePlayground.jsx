@@ -5,6 +5,9 @@ import './CodePlayground.css';
 
 import { playgroundExamples as EXAMPLES } from '../data/playgroundExamples';
 import { languages, variants } from '../data/playgroundLanguages';
+import { freeCode } from '../data/playgroundFreeCode';
+
+const MODES = [...EXAMPLES, { id: 'free', pt: 'Código livre', en: 'Free coding' }];
 
 export default function CodePlayground() {
   const { i18n } = useTranslation();
@@ -16,9 +19,9 @@ export default function CodePlayground() {
   const [status, setStatus] = useState('idle');
   const worker = useRef(null);
   const timer = useRef(null);
-  const selected = EXAMPLES.find(item => item.id === example);
+  const selected = MODES.find(item => item.id === example);
   const draftKey = `${example}:${language}`;
-  const originalCode = language === 'python' ? selected.code : variants[example][language];
+  const originalCode = example === 'free' ? freeCode[language] : language === 'python' ? selected.code : variants[example][language];
   const code = drafts[draftKey] ?? originalCode;
   const setCode = value => setDrafts(previous => ({ ...previous, [draftKey]: value }));
   const busy = status === 'loading' || status === 'running';
@@ -89,12 +92,14 @@ export default function CodePlayground() {
         <button className="code-lab-reset" type="button" disabled={busy} onClick={() => { setCode(originalCode); setOutput(''); setStatus('idle'); }}><RotateCcw size={15} aria-hidden="true" />{en ? 'Reset' : 'Restaurar'}</button>
       </div>
       <div className="code-lab-examples" role="group" aria-label={en ? 'Choose an example' : 'Escolha um exemplo'}>
-        {EXAMPLES.map((item, index) => <button key={item.id} type="button" aria-pressed={example === item.id} disabled={busy} onClick={() => selectExample(item.id)}>
+        {MODES.map((item, index) => <button key={item.id} type="button" aria-pressed={example === item.id} disabled={busy} onClick={() => selectExample(item.id)}>
           <span className="code-lab-example-number" aria-hidden="true">0{index + 1}</span>
           <span>{item[en ? 'en' : 'pt']}</span>
         </button>)}
       </div>
-      <p className="code-lab-source">{en ? 'Project demo · ' : 'Demonstração do projeto · '}<a href={selected.source} target="_blank" rel="noreferrer">{en ? 'View original Java project ↗' : 'Ver projeto original em Java ↗'}</a></p><div className="code-lab-columns">
+      <p className="code-lab-source">{example === 'free'
+        ? (en ? 'Your space to experiment. Each language keeps its draft while this page is open.' : 'Seu espaço para experimentar. Cada linguagem mantém seu rascunho enquanto esta página estiver aberta.')
+        : <>{en ? 'Project demo · ' : 'Demonstração do projeto · '}<a href={selected.source} target="_blank" rel="noreferrer">{en ? 'View original Java project ↗' : 'Ver projeto original em Java ↗'}</a></>}</p><div className="code-lab-columns">
         <div className="code-lab-editor"><label htmlFor="playground-code">{languages[language].file}</label><textarea id="playground-code" value={code} onChange={event => setCode(event.target.value)} disabled={busy} spellCheck={false} autoCapitalize="off" autoCorrect="off" maxLength={20000} aria-label={en ? 'Editable code' : 'Código editável'} /></div>
         <div className="code-lab-output"><h3>{en ? 'Console output' : 'Saída do console'}</h3><p role="status">{labels[status]}</p><pre tabIndex={0} aria-label={en ? 'Execution result' : 'Resultado da execução'}>{output || (status === 'done' ? (en ? 'No console output.' : 'Nenhuma saída no console.') : '› _')}</pre></div>
       </div>
