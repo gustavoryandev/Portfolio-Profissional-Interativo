@@ -8,7 +8,7 @@ import ScrollReveal from './ui/ScrollReveal';
 import { projectContent } from '../data/projectContent';
 
 const normalize = value => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-const FEATURED_IDS = ['portfolio', 'terminal-portfolio', 'pokedex', 'geosolar', 'secure-login'];
+const FEATURED_IDS = ['portfolio', 'terminal-portfolio', 'pokedex', 'geosolar', 'secure-login', 'github-profile'];
 
 export default function ProjectsCard({ reveal = false, horizontal = false, preview = false, onViewAll }) {
   const { t, i18n } = useTranslation();
