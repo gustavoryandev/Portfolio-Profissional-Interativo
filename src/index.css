@@ -308,7 +308,7 @@ letter-spacing: 0.12em;
 a.project-tech:hover { border-color: var(--accent); background: var(--panel); }
 .project-action { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 10px 18px; border-radius: 9px; background: #0b5ed7; color: #fff; font-size: 14px; font-weight: 600; transition: background 180ms ease; }
 .project-action:hover { background: #094fb6; }
-@container portfolio-card (min-width: 700px) { .projects-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@container portfolio-card (min-width: 520px) { .projects-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .reference-card { padding: 14px; }
 .reference-card h3 { border-bottom: 1px solid var(--line); padding-bottom: 10px; margin-bottom: 12px; font-size: 12px; font-weight: 600; }
 .reference-card .profile-heading h2 { font-size: 13px; }

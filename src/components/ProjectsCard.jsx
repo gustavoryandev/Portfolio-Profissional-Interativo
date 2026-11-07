@@ -9,7 +9,7 @@ import { projectContent } from '../data/projectContent';
 
 const normalize = value => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 
-export default function ProjectsCard({ reveal = false }) {
+export default function ProjectsCard({ reveal = false, horizontal = false }) {
   const { t, i18n } = useTranslation();
   const headingId = useId();
   const searchId = useId();
@@ -32,14 +32,14 @@ export default function ProjectsCard({ reveal = false }) {
         <p role="status" aria-live="polite" className="!m-0 text-xs text-[var(--muted)]">{t('projetos.results', { count: projects.length, total: perfil.projetos.length })}</p>
       </div>
       <div
-        data-projects-track
+        data-projects-track={horizontal ? '' : undefined}
         role="region"
         aria-labelledby={headingId}
-        tabIndex={0}
-        className="flex overflow-x-auto gap-6 snap-x snap-mandatory scroll-smooth motion-reduce:scroll-auto px-1 py-3 scroll-px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+        tabIndex={horizontal ? 0 : undefined}
+        className={horizontal ? 'flex overflow-x-auto gap-6 snap-x snap-mandatory scroll-smooth motion-reduce:scroll-auto px-1 py-3 scroll-px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent' : 'projects-grid'}
       >
         {projects.map(project => (
-          <div key={project.id} data-project-slide className="flex flex-shrink-0 w-80 max-w-full snap-start [&>article]:w-full">
+          <div key={project.id} data-project-slide={horizontal ? '' : undefined} className={horizontal ? 'flex flex-shrink-0 w-80 max-w-full snap-start [&>article]:w-full' : 'flex min-w-0 [&>article]:w-full'}>
             {reveal
               ? <ScrollReveal className="flex w-full [&>article]:w-full"><ProjectCard project={project} /></ScrollReveal>
               : <ProjectCard project={project} />}
