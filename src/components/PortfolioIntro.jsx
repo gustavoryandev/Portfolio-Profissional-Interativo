@@ -3,7 +3,7 @@ import useEntranceInteraction from '../hooks/useEntranceInteraction';
 
 function shouldPlay() {
   if (new URLSearchParams(window.location.search).get('intro') === '1') return true;
-  return Boolean(window.matchMedia) && !window.location.hash;
+  return Boolean(window.matchMedia) && !window.matchMedia('(max-width: 767px), (prefers-reduced-motion: reduce)').matches && !window.location.hash;
 }
 
 export default function PortfolioIntro({ children, en }) {

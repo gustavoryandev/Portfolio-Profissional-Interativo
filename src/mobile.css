@@ -1,0 +1,94 @@
+/* Compatibility layer for the existing unlayered desktop styles.
+   New navigation uses mobile-first Tailwind utilities in MobileNav.jsx. */
+.mobile-menu::backdrop { background: rgb(0 0 0 / .65); }
+.mobile-nav [aria-current="page"] { color: var(--accent); background: var(--panel-soft); }
+@media (min-width: 768px) {
+  .mobile-nav, .mobile-menu { display: none; }
+}
+@media (max-width: 767px) {
+  :root, .dark {
+    --glass-blur: 6px;
+    --glass-alpha: .94;
+    --glass-sat: 115%;
+    --neon-strength: .18;
+    --neon-text-glow: none;
+    --orb-a: .12;
+  }
+  /* Includes inline links, dynamically inserted chat cards and icon controls. */
+  :is(.portfolio-app, .mobile-menu, .portfolio-opening, .astra-entrance, .route-loading) :is(a, button, summary, input:not([type="hidden"]), select) {
+    min-width: 48px;
+    min-height: 48px;
+    touch-action: manipulation;
+  }
+  .portfolio-app a:not(.hidden):not(.sr-only), .mobile-menu a { display: inline-flex; align-items: center; }
+  .portfolio-app :is(input, textarea, select) { font-size: 16px; }
+  .portfolio-app :is(a, button, summary):focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+  .portfolio-app { overflow-wrap: anywhere; }
+  .scroll-portfolio .scroll-reveal { opacity: 1 !important; transform: none !important; }
+  .portfolio-app .site-header {
+    flex: 0 0 auto;
+    flex-wrap: nowrap;
+    padding: 8px 16px;
+    min-height: 64px;
+    gap: 12px;
+    animation: none;
+  }
+  .site-header > .header-actions, .site-header .scroll-nav { display: none; }
+  .mobile-menu .header-actions { display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; }
+  .mobile-menu .language-switch { display: flex; gap: 8px; }
+  .mobile-menu .cv-link { gap: 8px; }
+  .mobile-menu .cv-link span { display: inline; }
+  .scroll-portfolio { padding-bottom: calc(88px + env(safe-area-inset-bottom)); }
+  .scroll-portfolio [id] { scroll-margin-top: 88px; }
+  .scroll-content, .scroll-footer { width: calc(100% - 32px); }
+  .portfolio-hero { display: flex; flex-direction: column; align-items: stretch; min-height: auto; padding-block: 32px; gap: 24px; }
+  .portfolio-hero h1 { font-size: clamp(52px, 16vw, 80px); }
+  .hero-actions { flex-direction: column; align-items: stretch; gap: 12px; margin-block: 24px; }
+  .hero-profile { display: none; }
+  .scroll-skills { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .astra-scroll-cta { flex-direction: column; align-items: stretch; gap: 16px; }
+  .astra-scroll-cta .neon-cta { margin-left: 0; }
+  .projects-scroll-section .project-tile :is(h4, p) { display: block; overflow: visible; -webkit-line-clamp: unset; }
+  .projects-scroll-section .project-tile ul { max-height: none; overflow: visible; }
+  .projects-scroll-section .project-preview { height: auto; aspect-ratio: 16 / 9; }
+  .projects-scroll-section [data-project-slide] { width: 100%; min-width: 0; }
+  .projects-scroll-section [data-projects-track] { scroll-snap-type: x proximity; }
+  .projects-grid, .skills-grid { grid-template-columns: minmax(0, 1fr); }
+  .project-tile .mt-auto { flex-wrap: wrap; gap: 12px; }
+  .code-lab-columns, .code-lab-examples { grid-template-columns: minmax(0, 1fr); }
+  .social-links { flex-wrap: wrap; gap: 12px; }
+  .astra-chat-page {
+    position: fixed;
+    inset: 0 0 auto;
+    top: var(--chat-viewport-top, 0px);
+    height: var(--chat-viewport-height, 100dvh);
+    min-height: 0;
+    overflow: hidden;
+  }
+  .astra-chat-page .app-frame { height: 100%; min-height: 0; }
+  .astra-chat-page .mobile-nav { position: static; order: 3; flex-shrink: 0; }
+  .astra-chat-page .workspace { display: flex; flex: 1; min-height: 0; padding: 0; gap: 0; }
+  .astra-chat-page .sidebar, .astra-chat-page .profile-panel { display: none; }
+  .astra-chat-page .center-panel,
+  .astra-chat-page[data-chat-empty="true"] .center-panel { flex: 1; width: 100%; height: auto; max-height: none; min-height: 0; overflow: hidden; border-radius: 0; animation: none; }
+  .astra-chat-page .chat-view,
+  .astra-chat-page[data-chat-empty="true"] .chat-view { flex: 1; min-height: 0; }
+  .astra-chat-page .chat-messages,
+  .astra-chat-page[data-chat-empty="true"] .chat-messages { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 16px; }
+  .astra-chat-page .chat-heading { display: none; }
+  .astra-chat-page .chat-composer { position: static; padding: 8px 12px; gap: 8px; background: var(--panel); border-radius: 0; }
+  .astra-chat-page .chat-form { gap: 8px; padding: 4px; }
+  .astra-chat-page .chat-form input { padding-inline: 8px; font-size: 16px; }
+  .astra-chat-page .chat-composer form button[type="submit"] { padding: 12px; }
+  .astra-chat-page .astra-starters { display: flex; gap: 12px; overflow-x: auto; padding: 4px; }
+  .astra-chat-page .astra-starters > li { flex: 0 0 85%; }
+  .astra-chat-page .portfolio-section { overflow-y: auto; min-height: 0; padding: 20px 16px; }
+  .astra-chat-page .astra-fab { display: none; }
+  .glass-panel:is(.sidebar, .center-panel, .profile-card) { backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+  .portfolio-app .glass-panel:hover { box-shadow: var(--glass-shadow); }
+  .portfolio-app :is(.astra-hero, .astra-wordmark, .astra-starters > li, .chat-msg-in, .message-card, .portfolio-section, .project-tile) { animation: none !important; }
+  .projects-scroll-section .gn-reveal-ready:not(.gn-in-view):not(:focus-within) { opacity: 1; }
+}
+@media (max-width: 767px) and (prefers-reduced-transparency: reduce) {
+  .glass-panel:is(.sidebar, .center-panel, .profile-card) { backdrop-filter: none; -webkit-backdrop-filter: none; }
+}

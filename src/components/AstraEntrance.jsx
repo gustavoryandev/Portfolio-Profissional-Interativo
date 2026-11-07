@@ -16,7 +16,7 @@ export default function AstraEntrance({ en }) {
   const entering = !ready || !elapsed;
 
   useEffect(() => {
-    const media = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const media = window.matchMedia('(max-width: 767px), (prefers-reduced-motion: reduce)');
     const timer = setTimeout(() => setElapsed(true), media.matches ? 0 : 1600);
     const skip = event => { if (event.key === 'Escape') setElapsed(true); };
     window.addEventListener('keydown', skip);
@@ -24,7 +24,7 @@ export default function AstraEntrance({ en }) {
   }, []);
 
   useEffect(() => {
-    if (entering) return;
+    if (entering || window.matchMedia('(pointer: coarse)').matches) return;
     document.getElementById('chat-input')?.focus({ preventScroll: true });
   }, [entering]);
 

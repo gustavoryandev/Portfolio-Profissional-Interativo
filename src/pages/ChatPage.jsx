@@ -3,6 +3,8 @@ import { useEffect, useRef, useState } from 'react';
 import { Send, Sparkles, Square } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import Navbar from '../components/Navbar';
+import MobileNav from '../components/MobileNav';
+import useMobileViewport from '../hooks/useMobileViewport';
 import Sidebar from '../components/Sidebar';
 import ProfilePanel from '../components/ProfilePanel';
 import PortfolioSection from '../components/PortfolioSection';
@@ -50,6 +52,7 @@ function TypingIndicator({ label }) {
 
 export default function ChatPage() {
   const { t, i18n } = useTranslation();
+  const viewportRef = useMobileViewport();
 
   const [messages, setMessages] = useState(() => [{ id: 'welcome', sender: 'ai', text: t('chat.boasVindas'), translationKey: 'chat.boasVindas' }]);
   const [input, setInput] = useState('');
@@ -191,6 +194,7 @@ export default function ChatPage() {
   return (
     <div
       className="portfolio-app astra-chat-page relative flex min-h-screen flex-col overflow-x-clip transition-colors duration-300"
+      ref={viewportRef}
       data-chat-empty={!compact}
       style={{ fontFamily: FONT_SANS }}
     >
@@ -210,6 +214,7 @@ export default function ChatPage() {
 
       <div className="app-frame relative z-10 flex flex-col">
         <Navbar />
+        <MobileNav en={en} active={activeSection} onSelect={setActiveSection} />
         <div className="workspace">
           <Sidebar active={activeSection} onSelect={setActiveSection} onAsk={openChat} en={en} />
 
@@ -262,7 +267,7 @@ export default function ChatPage() {
                         type="button"
                         onClick={() => handleSend(prompt, true)}
                         disabled={loading}
-                        className="shrink-0 rounded-full border border-line bg-panel-soft px-4 py-2 text-[13px] font-medium text-ink transition-colors hover:border-accent hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent disabled:opacity-50"
+                        className="min-h-12 min-w-12 shrink-0 rounded-full border border-line bg-panel-soft px-4 py-2 text-[13px] font-medium text-ink transition-colors hover:border-accent hover:text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent disabled:opacity-50"
                       >
                         {prompt}
                       </button>
@@ -286,16 +291,17 @@ export default function ChatPage() {
                     placeholder={t('chat.placeholder') || 'Digite uma pergunta sobre o Gustavo...'}
                     disabled={loading}
                     autoComplete="off"
-                    className="min-w-0 flex-1 bg-transparent py-3 pl-4 pr-2 text-[15px] font-medium text-ink outline-none placeholder:text-muted disabled:opacity-60 sm:pl-2"
+                    className="min-h-12 min-w-0 flex-1 bg-transparent py-3 pl-4 pr-2 text-[15px] font-medium text-ink outline-none placeholder:text-muted disabled:opacity-60 sm:pl-2"
                   />
                   {loading && <button type="button" onClick={() => activeRequest.current?.controller.abort()}
                     className="icon-button shrink-0" aria-label={en ? 'Stop response' : 'Parar resposta'}><Square size={16} aria-hidden="true" /></button>}
                   <button
                     type="submit"
                     disabled={loading || !input.trim()}
-                    className="flex shrink-0 items-center gap-2 px-4 py-3 text-sm font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent disabled:cursor-not-allowed disabled:opacity-50 sm:px-5"
+                    aria-label={t('chat.enviar')}
+                    className="min-h-12 min-w-12 flex shrink-0 items-center justify-center gap-2 px-4 py-3 text-sm font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent disabled:cursor-not-allowed disabled:opacity-50 sm:px-5"
                   >
-                    {t('chat.enviar')} <Send size={16} aria-hidden="true" />
+                    <span className="hidden sm:inline">{t('chat.enviar')}</span> <Send size={16} aria-hidden="true" />
                   </button>
                 </form>
               </div>

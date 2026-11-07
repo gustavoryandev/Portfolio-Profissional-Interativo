@@ -35,7 +35,7 @@ export default function ProjectsScrollSection() {
       section.style.setProperty('--projects-stage-height', `${stageHeight}px`);
       distance = Math.max(0, track.scrollWidth - track.clientWidth);
       // Short screens keep all card content readable instead of clipping it.
-      pinned = !reduced.matches && distance > 1 && pin.offsetHeight <= stageHeight + 1;
+      pinned = window.matchMedia('(min-width: 768px) and (hover: hover) and (pointer: fine)').matches && !reduced.matches && distance > 1 && pin.offsetHeight <= stageHeight + 1;
       section.dataset.pinned = String(pinned);
       section.style.height = pinned ? `${stageHeight + distance}px` : '';
       if (!pinned) meter.style.transform = 'scaleX(0)';

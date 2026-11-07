@@ -1,6 +1,7 @@
 import { ArrowDown, ArrowUpRight, Sparkles } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import Navbar from '../components/Navbar';
+import MobileNav from '../components/MobileNav';
 import ProjectsScrollSection from '../components/ProjectsScrollSection';
 import CodePlayground from '../components/CodePlayground';
 import PortfolioSection from '../components/PortfolioSection';
@@ -15,6 +16,7 @@ export default function PortfolioPage() {
   return <div className="portfolio-app scroll-portfolio">
     <a className="skip-link" href="#main-content">{en ? 'Skip to content' : 'Pular para o conteúdo'}</a>
     <Navbar portfolio />
+    <MobileNav en={en} />
     <main id="main-content" tabIndex={-1} className="scroll-content">
       <section id="inicio" className="portfolio-hero" aria-labelledby="hero-title">
         <ScrollReveal repeat>
