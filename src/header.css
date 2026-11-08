@@ -1,8 +1,8 @@
 /* A single visual system for the portfolio masthead and its controls. */
 .portfolio-app .site-header {
   gap: 24px;
-  min-height: 88px;
-  padding: 18px max(28px, calc((100vw - 1600px) / 2));
+  min-height: 80px;
+  padding: 12px max(24px, calc((100% - 1440px) / 2));
   border-bottom: 1px solid rgb(var(--brand-400) / .16);
   background: rgb(var(--glass-tint) / .9);
   box-shadow: 0 8px 32px -24px rgb(0 0 0 / .35);
@@ -39,10 +39,10 @@
 }
 .site-header .header-actions {
   flex-shrink: 0;
-  gap: 9px;
+  gap: 8px;
   width: auto;
-  padding-left: 20px;
-  border-left: 1px solid var(--line);
+  padding-left: 0;
+  border-left: 0;
 }
 .site-header :is(.language-switch, .icon-button, .cv-link) {
   min-height: 40px;
@@ -88,18 +88,36 @@
   border-color: rgb(var(--brand-400) / .4);
 }
 .site-header :is(a, button):focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
-@media (min-width: 1501px) {
-  .portfolio-app .site-header { flex-wrap: nowrap; }
-  .site-header .scroll-nav { width: auto; order: initial; }
+.site-header .scroll-nav {
+  gap: 2px;
+  padding: 4px;
+  border-radius: 14px;
 }
-@media (min-width: 768px) and (max-width: 1500px) {
-  .portfolio-app .site-header {
+.site-header .scroll-nav a { padding: 10px; }
+@media (min-width: 1280px) {
+  /* Equal side tracks keep navigation centered independently of label widths. */
+  .scroll-portfolio .site-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    gap: 24px;
+  }
+  .scroll-portfolio .site-header .scroll-nav {
+    width: auto;
+    order: initial;
+    margin: 0;
+    overflow: visible;
+  }
+  .scroll-portfolio .site-header .brand-lockup { justify-self: start; }
+  .scroll-portfolio .site-header .header-actions { justify-self: end; margin: 0; }
+}
+@media (min-width: 768px) and (max-width: 1279px) {
+  .scroll-portfolio .site-header {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
-    gap: 16px 24px;
-    padding-block: 16px 12px;
+    gap: 12px 24px;
+    padding-block: 12px;
   }
-  .portfolio-app .site-header .scroll-nav {
+  .scroll-portfolio .site-header .scroll-nav {
     grid-column: 1 / -1;
     grid-row: 2;
     order: initial;
