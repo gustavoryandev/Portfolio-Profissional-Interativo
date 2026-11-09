@@ -49,10 +49,8 @@ const GALO_PATTERN = '\\[GALO_CARD(?::(?:\\d+|ALL))?\\]';
 
 const escapeRegExp = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-// Grupo de captura: os pedaços ímpares do split são sempre tags.
-const TAG_SPLIT = new RegExp(
-  `(${[...Object.keys(cards).map(escapeRegExp), GALO_PATTERN].join('|')})`,
-);
+// A marker inside a code example is text, not an instruction to show a card.
+const CARD_OR_CODE = new RegExp(['```[\\s\\S]*?```', '`[^`\\n]+`', ...Object.keys(cards).map(escapeRegExp), GALO_PATTERN].join('|'), 'g');
 
 // Bloco de código cercado por ``` (com linguagem opcional)
 const FENCE = /```([\w+-]*)[ \t]*\n([\s\S]*?)```/g;
@@ -86,16 +84,31 @@ function resolveCard(tag) {
 
 // Texto e cards, em ordem. Quebras de linha encostadas num card são removidas.
 function splitMessage(text) {
-  const pieces = text.split(TAG_SPLIT);
-  return pieces
-    .map((value, index) => {
-      if (index % 2 === 1) return { type: 'card', tag: value };
-      let clean = value;
-      if (index > 0) clean = clean.replace(/^\n+/, '');
-      if (index < pieces.length - 1) clean = clean.replace(/\n+$/, '');
-      return { type: 'text', value: clean };
-    })
-    .filter((segment) => segment.type === 'card' || segment.value);
+  const segments = [];
+  let start = 0;
+  for (const match of text.matchAll(CARD_OR_CODE)) {
+    const [tag] = match;
+    if (tag.startsWith('`')) continue;
+    const value = text.slice(start, match.index).replace(/^\n+|\n+$/g, '');
+    if (value) segments.push({ type: 'text', value });
+    segments.push({ type: 'card', tag });
+    start = match.index + tag.length;
+  }
+  const tail = text.slice(start).replace(/^\n+/, '');
+  if (tail) segments.push({ type: 'text', value: tail });
+  return segments;
+}
+
+function compactCardMode(tag) {
+  const source = CARD_SOURCES[tag.slice(1, -1).split(':')[0]];
+  if (source === 'github' || source === 'wakatime') return 'inline';
+  if (tag === '[PROJECTS_CARD]') return 'projects';
+  if (tag === '[SKILLS_CARD]') return 'skills';
+  return 'full';
+}
+
+export function needsFullAstra(text) {
+  return splitMessage(text).some(segment => segment.type === 'card' && compactCardMode(segment.tag) === 'full');
 }
 
 // Separa blocos de código cercados do texto comum
@@ -284,10 +297,9 @@ function MessageBubble({ message, liveContext = {}, refreshing = [], onRefresh, 
 
           const { Component, limit } = card;
           const source = CARD_SOURCES[segment.tag.slice(1, -1).split(':')[0]];
-          // Metrics can be opened in either Astra surface; the other rich tools keep their existing full view.
-          if (compact && source !== 'github' && source !== 'wakatime') {
-            const target = segment.tag === '[PROJECTS_CARD]' ? 'projects' : segment.tag === '[SKILLS_CARD]' ? 'skills' : null;
-            if (!target) return null;
+          const target = compact ? compactCardMode(segment.tag) : 'inline';
+          if (target !== 'inline') {
+            if (target === 'full') return null;
             return <button key={index} className="chip chip--accent" onClick={() => onSelectSection?.(target)}>{target === 'projects' ? (uiLanguage === 'en' ? 'Explore projects' : 'Explorar projetos') : (uiLanguage === 'en' ? 'Explore skills' : 'Explorar habilidades')}</button>;
           }
           const data = context[source];

@@ -6,7 +6,7 @@ import Navbar from '../components/Navbar';
 import useMobileViewport from '../hooks/useMobileViewport';
 import AstraHero from '../components/AstraHero';
 import AstraResources, { ASTRA_RESOURCES_ID } from '../components/AstraResources';
-import MessageBubble from '../components/MessageBubble';
+import MessageBubble, { needsFullAstra } from '../components/MessageBubble';
 import StreamingReply from '../components/StreamingReply';
 import { createStreamBuffer } from '../services/streamBuffer';
 import { warmModelCatalog } from '../services/chatStream';
@@ -67,6 +67,7 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
   const activeRequest = useRef(null);
   const mounted = useRef(true);
   const followOutput = useRef(true);
+  const compactVisible = useRef(modal && visible);
   const fullCardTarget = useRef(null);
   const messagesContainerRef = useRef(null);
   const inputRef = useRef(null);
@@ -89,6 +90,7 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
 
   useEffect(() => { onReady?.(true); }, [onReady]);
   useEffect(() => {
+    compactVisible.current = modal && visible;
     setResourcesOpen(false);
   }, [modal, visible]);
   useEffect(() => {
@@ -191,7 +193,9 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
       }
       controller.signal.throwIfAborted();
       const replyLanguage = data.response || data.error ? requestLanguage : i18n.language;
-      const reply = [data.response || data.error, actionReply(notices, replyLanguage.startsWith('en'))].filter(Boolean).join('\n\n');
+      const handoff = modal && needsFullAstra(data.response ?? '');
+      const reply = [handoff && t('chat.surface.handoff', { lng: replyLanguage }), data.response || data.error,
+        actionReply(notices, replyLanguage.startsWith('en'))].filter(Boolean).join('\n\n');
       const response = [reply, ...cards].filter(Boolean).join('\n');
       updateHandoff(reply);
       conversationRef.current = {
@@ -212,6 +216,7 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
       live.watch(cardSources);
       // Refresh only missing/stale sources; avoid a second forced HTTP request.
       void live.refresh(cardSources);
+      if (handoff && openFull && compactVisible.current && !notices.includes('fullOpened')) viewFullMessage(id);
     } catch {
       if (!mounted.current) return;
       const cancelled = controller.signal.aborted;

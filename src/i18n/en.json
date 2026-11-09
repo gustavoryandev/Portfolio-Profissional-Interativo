@@ -19,7 +19,8 @@
     "surface": {
       "compact": "You’re in Compact Astra, the portfolio’s floating chat.",
       "full": "You’re in Full Astra, the dedicated chat page.",
-      "viewFull": "View in Full Astra"
+      "viewFull": "View in Full Astra",
+      "handoff": "This resource runs in Full Astra. You can continue the same conversation there."
     },
     "quickWelcome": "Hi! I’m Astra. Ask about Gustavo’s work, explore a project, or try “Open the Laboratory.”",
     "erro": "Your question could not be processed right now. Please try again shortly.",
@@ -38,6 +39,7 @@
       "What is his chess rating?"
     ],
     "chessGame": {
+      "offer": "Would you like to play a game of chess with me?",
       "label": "Chess game with Astra",
       "title": "Play chess with Astra",
       "instructions": "You play {{color}}. Drag a piece to move. Astra runs Stockfish on this device.",
@@ -76,7 +78,7 @@
       "title": "Astra resources",
       "close": "Close resource catalog",
       "note": "Choose a shortcut or write your own request in English or Portuguese. Type /help to reopen this list.",
-      "cardHandoff": "When Astra shows cards, use “View in Full Astra” to open the same reply on the dedicated page.",
+      "cardHandoff": "Resources that require Full Astra, such as playing chess, open the dedicated page automatically. On other cards, use “View in Full Astra” to open the same reply.",
       "groups": {
         "versions": "Astra versions",
         "portfolio": "Portfolio actions",

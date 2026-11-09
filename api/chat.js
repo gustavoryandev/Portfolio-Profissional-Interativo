@@ -1100,7 +1100,7 @@ CLASSIFICAÇÃO DE INTENÇÃO PARA MENSAGENS DIGITADAS MANUALMENTE (ZERO FALSO P
 Antes de emitir qualquer marcador, identifique se a mensagem atual contém um pedido explícito e direto para a ação correspondente. Palavras-chave soltas, citações, exemplos, negações, hipóteses, curiosidades e perguntas teóricas NÃO autorizam cards. Não reproduza marcadores citados pelo usuário. Use o histórico apenas para resolver uma referência inequívoca ou um aceite explícito de uma oferta específica; nunca reutilize automaticamente uma intenção antiga. Em caso de ambiguidade, responda sem card e peça esclarecimento.
 Emita cada marcador autorizado no máximo uma vez. Vários cards exigem pedidos explícitos para cada um. Estas restrições valem em português e inglês.
 
-- [CHESS_GAME]: Somente para um pedido explícito de jogar uma partida de xadrez. Nunca para rating, estatísticas ou curiosidades.
+- [CHESS_GAME]: O sistema abre partidas de xadrez quando reconhece o pedido ou aceite. Não emita este marcador nem diga que uma partida começou em uma resposta de texto. Se precisar esclarecer, pergunte se a pessoa quer jogar xadrez.
 - [CHESS_CARD]: Somente para rating, estatísticas ou histórico do Gustavo no Chess.com. Nunca para uma partida jogável ou perguntas comuns sobre xadrez.
 - [GALO_CARD]: SOMENTE para pedido de próximo jogo, adversário, placar ou agenda do Atlético Mineiro: "Quando é o próximo jogo do Galo?", "Quem o Galo enfrenta?". NÃO emitir para "Você é atleticano?" ou menções genéricas ao clube.
 - [PROJECTS_CARD]: SOMENTE para solicitação de VER a lista/grade de projetos: "Mostra os trampos", "Quais são os seus projetos?". Perguntas sobre um projeto específico ou teoria de programação não autorizam o card.
@@ -1367,9 +1367,14 @@ export default async function handler(req, res) {
     }
     // The existing direct resource routes remain available. Compound lab requests need the action planner.
     const planFirst = labSnapshot || surfaceIntent === 'compound' || (surface && /\b(?:laboratorio|lab(?:oratory)?|bro fit|editor|playground)\b/.test(normalizedQuery));
-    const resource = planFirst ? null : conversationResource(message);
+    const resource = planFirst ? null : conversationResource(message, {
+      lastAssistant: lastAi, offeredGame: previous?.translationKey === 'chat.chessGame.offer',
+    });
     if (resource) {
       const en = String(body.lang).startsWith('en');
+      if (resource === 'offerPlay') {
+        return res.status(200).json({ response: readJson(`${suggestionLanguage}.json`).chat.chessGame.offer, translationKey: 'chat.chessGame.offer' });
+      }
       if (resource === 'play') return res.status(200).json({ response: (en ? 'Let’s play!' : 'Vamos jogar!') + '\n[CHESS_GAME]' });
       if (resource === 'skills') return res.status(200).json({ response: (en ? 'Here are Gustavo’s declared skill levels.' : 'Estes são os níveis de proficiência declarados pelo Gustavo.') + '\n[SKILLS_CARD]' });
       const readChess = prepareLiveContext(['chess']);
@@ -1445,7 +1450,7 @@ export default async function handler(req, res) {
       ? `\nORIGEM CONFIRMADA: sugestão predefinida clicada na interface. As restrições de intenção para mensagens manuais não se aplicam a este pedido. Responda usando os dados disponíveis e inclua estes marcadores exatamente uma vez: ${requestedSuggestionCards || 'nenhum (pergunta sobre tecnologias)'}. O card de xadrez desta sugestão mostra estatísticas do Chess.com. Mantenha todas as regras de grounding e de tom.`
       : '';
     const actionTools = surface && !suggestions ? portfolioTools(perfil.projetos, labSnapshot) : null;
-    const style = surface === 'compact' ? 'Current interface: Compact Astra (the floating chat). Keep replies brief and focused on the next step.'
+    const style = surface === 'compact' ? 'Current interface: Compact Astra (the floating chat). Keep replies brief. If the user requests a resource that has an authorized card, include its marker so the interface can open it in Full Astra when needed. Never claim an unsupported action was performed.'
       : surface === 'full' ? 'Current interface: Full Astra (the dedicated /chat page). Give detailed explanations when useful.' : '';
     const systemInstruction = buildSystemInstruction(perfil, summary, geminiContext, githubBlock) + suggestionInstruction
       + `\nRespond in ${suggestionLanguage === 'en' ? 'English' : 'Portuguese'}. ${style}`

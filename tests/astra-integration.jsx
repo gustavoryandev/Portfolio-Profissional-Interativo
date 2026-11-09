@@ -16,7 +16,15 @@ window.HTMLElement.prototype.scrollTo = () => {};
 window.HTMLElement.prototype.scrollIntoView = () => {};
 window.HTMLDialogElement.prototype.showModal = window.HTMLDialogElement.prototype.show = function () { this.open = true; };
 window.HTMLDialogElement.prototype.close = function () { this.open = false; };
-globalThis.ResizeObserver = globalThis.IntersectionObserver = class { observe() {} unobserve() {} disconnect() {} };
+globalThis.IntersectionObserver = class { observe() {} unobserve() {} disconnect() {} };
+globalThis.ResizeObserver = class {
+  constructor(callback) { this.callback = callback; }
+  observe(element) {
+    if (element.closest('[aria-label="Chess game with Astra"]')) this.callback([{ contentRect: { width: 480 } }]);
+  }
+  unobserve() {}
+  disconnect() {}
+};
 
 const requests = [];
 const workers = [];
@@ -36,6 +44,11 @@ globalThis.fetch = async (_url, options) => {
     liveContext: { wakatime: { status: 'ok', week: { totalFormatted: '2h 30m' } } },
   });
   if (body.userMessage === 'Thanks') return Response.json({ response: 'You’re welcome.' });
+  if (body.userMessage === 'Show a code example') return Response.json({ response: '```js\nconsole.log("[CHESS_GAME]");\n```' });
+  if (body.userMessage === 'Can we play?') return Response.json({
+    response: 'Would you like to play a game of chess with me?', translationKey: 'chat.chessGame.offer',
+  });
+  if (body.userMessage === 'ss') return Response.json({ response: 'Let’s play!\n[CHESS_GAME]' });
   if (body.labSnapshot) return Response.json({ actions: [
     { type: 'lab.edit', edits: [{ find: 'aluno = "Carlos"', replace: 'aluno = "Ana"' }] },
   ] });
@@ -172,6 +185,26 @@ try {
   await click($('#astra-resource-identifyVersion').closest('button'));
   assert.equal(requests.at(-1).surface, 'full');
   assert.match($('.astra-full [role="log"]').textContent, /You’re in Full Astra/);
+
+  await click($('.astra-full .brand-lockup'));
+  await click($('.astra-fab'));
+  await send('Show a code example');
+  assert.equal(window.location.pathname, '/', 'markers in code do not open Full Astra');
+  assert.match($('.astra-compact [role="log"] pre').textContent, /\[CHESS_GAME\]/);
+  await send('Can we play?');
+  assert.equal(window.location.pathname, '/', 'asking what to play does not navigate until the visitor accepts');
+  assert.match($('.astra-compact [role="log"]').textContent, /Would you like to play a game of chess/);
+  const random = Math.random;
+  try {
+    Math.random = () => 0;
+    await send('ss');
+    await until(() => $('.astra-full [data-square="a1"]'));
+  } finally { Math.random = random; }
+  assert.equal(window.location.pathname, '/chat');
+  assert.equal(requests.at(-1).surface, 'compact');
+  const gameMessage = $('.astra-full [data-square="a1"]').closest('.chat-msg-in');
+  assert.match(gameMessage.textContent, /This resource runs in Full Astra/);
+  await until(() => document.activeElement === gameMessage);
 } finally {
   await act(async () => activeRoot.unmount());
   dom.window.close();

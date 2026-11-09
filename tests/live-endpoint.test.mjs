@@ -249,6 +249,20 @@ test('explicit Full Astra commands and interface questions work without Gemini',
   }
 });
 
+test('Compact Astra offers chess and sends a playable card when the visitor replies ss', async () => {
+  const request = { method: 'POST', body: { lang: 'pt', surface: 'compact', stream: true } };
+  const offer = response();
+  await handler({ ...request, body: { ...request.body, userMessage: 'vamos jogar?' } }, offer);
+  assert.equal(offer.body.translationKey, 'chat.chessGame.offer');
+  assert.match(offer.body.response, /xadrez.*\?/);
+  const play = response();
+  const chatHistory = [{ sender: 'user', text: 'vamos jogar?' },
+    { sender: 'ai', text: offer.body.response, translationKey: offer.body.translationKey }];
+  await handler({ ...request, body: { ...request.body, userMessage: 'ss', chatHistory } }, play);
+  assert.match(play.body.response, /\[CHESS_GAME\]$/);
+  assert.equal(play.body.model, undefined);
+});
+
 test('both Astra surfaces share the same tool contract and request editor data only in the second turn', async () => {
   const originalFetch = globalThis.fetch;
   process.env.GEMINI_API_KEY = 'portfolio-actions-test';
