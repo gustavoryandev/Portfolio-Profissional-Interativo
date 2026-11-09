@@ -103,7 +103,9 @@
       "original": "Original themes",
       "custom": "Custom themes",
       "light": "Light",
-      "dark": "Dark"
+      "dark": "Dark",
+      "neon-green": "Neon Green",
+      "mint-frost": "Mint Frost"
     },
     "baixarCv": "Download Resume",
     "idioma": "Language",

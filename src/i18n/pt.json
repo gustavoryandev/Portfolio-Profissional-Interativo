@@ -103,7 +103,9 @@
       "original": "Temas originais",
       "custom": "Temas personalizados",
       "light": "Claro",
-      "dark": "Escuro"
+      "dark": "Escuro",
+      "neon-green": "Verde Neon",
+      "mint-frost": "Menta Glacial"
     },
     "baixarCv": "Baixar CV",
     "idioma": "Idioma",
