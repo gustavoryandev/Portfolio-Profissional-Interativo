@@ -11,10 +11,22 @@ import StatTile from './ui/StatTile';
 
 const MODE_ICONS = { rapid: Timer, blitz: Zap, bullet: Flame, daily: Calendar };
 
-export function ChessGame() {
+export function ChessGame({ active = true }) {
+  const { i18n } = useTranslation();
+  const en = i18n.language.startsWith('en');
   const [game] = useState(() => new Chess());
   const [fen, setFen] = useState(() => game.fen());
   const timer = useRef(null);
+  const boardHost = useRef(null);
+  const [boardReady, setBoardReady] = useState(false);
+
+  useEffect(() => {
+    // react-chessboard needs measurable squares, including after returning from a hidden tab.
+    if (typeof ResizeObserver === 'undefined') { setBoardReady(true); return; }
+    const observer = new ResizeObserver(([entry]) => setBoardReady(entry.contentRect.width > 0));
+    observer.observe(boardHost.current);
+    return () => observer.disconnect();
+  }, []);
   const id = useId();
 
   useEffect(() => {
@@ -49,18 +61,18 @@ export function ChessGame() {
   }
 
   const status = game.isCheckmate()
-    ? `Xeque-Mate — ${game.turn() === 'w' ? 'o bot venceu' : 'você venceu'}!`
+    ? (en ? `Checkmate — ${game.turn() === 'w' ? 'Astra wins' : 'you win'}!` : `Xeque-Mate — ${game.turn() === 'w' ? 'a Astra venceu' : 'você venceu'}!`)
     : game.isDraw()
-      ? 'Empate'
-      : `${game.isCheck() ? 'Xeque! ' : ''}${game.turn() === 'w' ? 'Sua vez' : 'Bot pensando…'}`;
+      ? (en ? 'Draw' : 'Empate')
+      : `${game.isCheck() ? (en ? 'Check! ' : 'Xeque! ') : ''}${game.turn() === 'w' ? (en ? 'Your turn' : 'Sua vez') : (en ? 'Astra is thinking…' : 'Astra pensando…')}`;
 
   return (
-    <CardShell as="section" aria-label="Partida de xadrez contra o bot">
-      <h3 className="mb-2 text-lg font-semibold">Vamos jogar xadrez?</h3>
-      <p className="mb-3 text-sm text-muted">Você joga com as brancas. Arraste uma peça para jogar. Promoção automática para dama.</p>
+    <CardShell as="section" aria-label={en ? "Chess game with Astra" : "Partida de xadrez com a Astra"}>
+      <h3 className="mb-2 text-lg font-semibold">{en ? 'Play chess with Astra' : 'Jogue xadrez com a Astra'}</h3>
+      <p className="mb-3 text-sm text-muted">{en ? 'You play white. Drag a piece to move. Automatic queen promotion. Astra uses random legal moves in this local game.' : 'Você joga com as brancas. Arraste uma peça para jogar. Promoção automática para dama. Nesta partida local, a Astra usa lances legais aleatórios.'}</p>
       <p role="status" aria-live="polite" className="chip chip--accent mb-3 !text-sm">{status}</p>
-      <div className="mx-auto w-full max-w-[480px]">
-        <Chessboard options={{
+      <div ref={boardHost} className="mx-auto w-full max-w-[480px]">
+        {active && boardReady && <Chessboard options={{
           id,
           position: fen,
           boardOrientation: 'white',
@@ -69,10 +81,10 @@ export function ChessGame() {
           onPieceDrop,
           darkSquareStyle: { backgroundColor: '#3b6ea5' },
           lightSquareStyle: { backgroundColor: '#dbe9f7' },
-        }} />
+        }} />}
       </div>
       <button type="button" onClick={reset} className="chip chip--accent mt-4 !px-4 !py-2 !text-sm">
-        Reiniciar Partida
+        {en ? 'Restart game' : 'Reiniciar Partida'}
       </button>
     </CardShell>
   );
