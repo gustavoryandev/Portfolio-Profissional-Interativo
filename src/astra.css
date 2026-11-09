@@ -105,7 +105,7 @@
 .astra-resource:disabled { opacity: .55; cursor: not-allowed; }
 
 @media (width > 959px) {
-  .astra-full .astra-workspace:has(> .astra-resources[open]) {
+  .astra-full .astra-workspace:not(.astra-workspace-arcade):has(> .astra-resources[open]) {
     display: grid;
     grid-template-columns: minmax(0, 1fr) clamp(265px, 26vw, 310px);
     gap: 12px;

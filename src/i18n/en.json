@@ -79,13 +79,32 @@
       "close": "Close resource catalog",
       "note": "Choose a shortcut or write your own request in English or Portuguese. Type /help to reopen this list.",
       "cardHandoff": "Some resources, such as the chessboard, only appear in Full Astra. Use “View in Full Astra” to open the same reply when you’re ready.",
+      "arcadeCompact": "Check rules and records here. To play, follow the link Astra sends to open the full version.",
+      "arcadeFull": "Open the game selection or choose a guide. During a match, try asking “Pause,” “Resume,” or “Increase the difficulty.”",
+      "arcadeGuide": "How do I play {{game}}?",
       "groups": {
         "versions": "Astra versions",
+        "arcade": "Astra Arcade",
         "portfolio": "Portfolio actions",
         "laboratory": "Code Laboratory",
         "integrations": "Profile and integrations"
       },
       "items": {
+        "arcadeBrowse": {
+          "title": "List arcade games",
+          "description": "See the catalog and get a link to Full Astra",
+          "prompt": "What games are available in Astra Arcade?"
+        },
+        "arcadeOpen": {
+          "title": "Open game selection",
+          "description": "See all five games and choose what to play",
+          "prompt": "Open Astra Arcade."
+        },
+        "arcadeRecords": {
+          "title": "Show arcade records",
+          "description": "Check the best scores saved in this browser",
+          "prompt": "Show my arcade records."
+        },
         "identifyVersion": {
           "title": "Which version am I using?",
           "description": "Check whether you’re in Compact or Full Astra",

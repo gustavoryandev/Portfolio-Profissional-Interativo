@@ -139,7 +139,7 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
     setMessages(messagesRef.current);
   };
 
-  const handleSend = async (suggestion = input, predefinedSuggestion = false, resourceActions) => {
+  const handleSend = async (suggestion = input, predefinedSuggestion = false, resourceActions, arcadeShortcut) => {
     const query = suggestion.trim();
     if (query.toLowerCase() === '/help') {
       setInput('');
@@ -154,7 +154,7 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
     appendMessage({ id: nextId(), sender: 'user', text: query, lang: requestLanguage });
     setInput('');
     const session = showArcade ? arcadeSession.current : null;
-    const intent = !resourceActions && !predefinedSuggestion && arcadeIntent(query, session?.getState().game, showArcade);
+    const intent = arcadeShortcut ?? (!resourceActions && !predefinedSuggestion && arcadeIntent(query, session?.getState().game, showArcade));
     if (intent) {
       setLoading(true);
       try {
@@ -404,7 +404,7 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
 
           </section>
           <AstraResources open={resourcesOpen && visible} compact={modal} disabled={loading} triggerRef={resourcesTrigger}
-            onClose={() => setResourcesOpen(false)} onPick={(prompt, plan) => handleSend(prompt, !plan, plan)} />
+            onClose={() => setResourcesOpen(false)} onPick={(prompt, plan, arcadeShortcut) => handleSend(prompt, !plan, plan, arcadeShortcut)} />
         </div>
       </div>
     </div>

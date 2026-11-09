@@ -19,7 +19,7 @@ export async function answerArcade(intent, { en, compact, session, openArcade })
   }
   if (intent.info === 'help') {
     if (!game) return link(tr('Escolha um jogo para ver os controles. Temos ', 'Choose a game to see its controls. We have ') + names);
-    return link([game.description[lang], game.controls[lang], game.tip[lang]].join('\n\n'), intent.game);
+    return link([game.description[lang], game.rules?.[lang], game.controls[lang], game.tip[lang]].filter(Boolean).join('\n\n'), intent.game);
   }
   if (intent.info === 'records') {
     return { text: tr('Recordes salvos neste navegador\n', 'Personal bests saved in this browser\n') + personalBests(game ? [intent.game] : gameIds) };

@@ -10,6 +10,15 @@
   top: 86px;
   height: min(690px, calc(100dvh - 100px));
 }
+@media (width > 959px) {
+  .astra-full .astra-workspace-arcade > .astra-resources[open] {
+    position: fixed;
+    inset: 86px clamp(12px, 2vw, 28px) auto auto;
+    z-index: 45;
+    width: max(320px, 28vw);
+    height: min(690px, calc(100dvh - 100px));
+  }
+}
 .astra-heading-actions button[aria-expanded="true"] { color: var(--accent); }
 .arcade {
   --arcade-radius: 20px;
@@ -185,6 +194,7 @@
   position: absolute;
   inset: 0;
   display: grid;
+  grid-template-rows: minmax(0, 1fr);
   place-items: center;
   background: #111a32b9;
   border-radius: inherit;
@@ -240,4 +250,5 @@
 
 .arcade-key-hint { color: var(--muted); font-size: .78rem; text-align: center; }
 .arcade-overlay > div { max-width: min(95%, 320px); }
+.arcade-overlay > div[id="arcade-game-help"] { max-height: 100%; overflow-y: auto; }
 .arcade-overlay p { color: var(--muted); font-size: .83rem; }

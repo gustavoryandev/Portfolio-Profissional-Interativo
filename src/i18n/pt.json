@@ -79,13 +79,32 @@
       "close": "Fechar catálogo",
       "note": "Escolha um atalho ou escreva seu próprio pedido em português ou inglês. Digite /help para voltar a esta lista.",
       "cardHandoff": "Alguns recursos, como o tabuleiro de xadrez, só aparecem na Astra completa. Use “Ver na Astra completa” para abrir a mesma resposta quando quiser.",
+      "arcadeCompact": "Consulte regras e recordes aqui. Para jogar, use o link que a Astra envia para abrir a versão completa.",
+      "arcadeFull": "Abra a seleção de jogos ou escolha um guia. Durante a partida, experimente pedir “Pausar”, “Retomar” ou “Aumentar a dificuldade”.",
+      "arcadeGuide": "Como jogar {{game}}?",
       "groups": {
         "versions": "Versões da Astra",
+        "arcade": "Astra Arcade",
         "portfolio": "Ações do portfólio",
         "laboratory": "Laboratório de código",
         "integrations": "Perfil e integrações"
       },
       "items": {
+        "arcadeBrowse": {
+          "title": "Listar jogos do arcade",
+          "description": "Veja o catálogo e receba um link para a Astra completa",
+          "prompt": "Quais jogos estão disponíveis no Astra Arcade?"
+        },
+        "arcadeOpen": {
+          "title": "Abrir a seleção de jogos",
+          "description": "Veja os cinco jogos e escolha uma partida",
+          "prompt": "Abra o Astra Arcade."
+        },
+        "arcadeRecords": {
+          "title": "Ver recordes do arcade",
+          "description": "Confira as melhores pontuações salvas neste navegador",
+          "prompt": "Mostre meus recordes do arcade."
+        },
         "identifyVersion": {
           "title": "Qual versão estou usando?",
           "description": "Confira se você está na Astra compacta ou completa",

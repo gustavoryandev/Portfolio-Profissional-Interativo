@@ -1,9 +1,10 @@
 import { useLayoutEffect, useRef } from 'react';
 import {
-  BarChart3, Clock, Code2, Compass, FileCode2, Folder, Github, GraduationCap, Headphones, Info,
+  BarChart3, Clock, Code2, Compass, FileCode2, Folder, Gamepad2, Github, GraduationCap, Headphones, Info,
   Languages, Maximize2, Palette, Pencil, Play, RotateCcw, Square, Swords, Terminal, Trophy, UserRound, X,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { gameIds, games } from '../arcade/catalog';
 import { clickedDialogBackdrop } from '../services/dialogInteraction';
 
 export const ASTRA_RESOURCES_ID = 'astra-resources';
@@ -98,13 +99,19 @@ export default function AstraResources({ open, compact, disabled, triggerRef, on
     }
   };
 
-  const handlePick = (prompt, actions) => {
-    if (drawerRef.current || actions) onClose();
+  const handlePick = (prompt, actions, arcadeShortcut) => {
+    if (drawerRef.current || actions || arcadeShortcut) onClose();
     else closeRef.current.focus({ preventScroll: true });
-    onPick(prompt, actions);
+    onPick(prompt, actions, arcadeShortcut);
   };
+  const arcadeItems = [
+    compact ? ['arcadeBrowse', Gamepad2, null, { info: 'catalog' }] : ['arcadeOpen', Gamepad2, null, { type: 'arcade.open' }],
+    ['arcadeRecords', Trophy, null, { info: 'records' }],
+    ...gameIds.map(game => ['arcade-' + game, Gamepad2, null, { info: 'help', game }]),
+  ];
   const groups = [
     ['versions', compact ? [identifyVersion, openFullVersion] : [identifyVersion]],
+    ['arcade', arcadeItems],
     ['portfolio', portfolioActions], ['laboratory', labActions],
     ...(!compact ? [['integrations', integrations]] : [])];
 
@@ -126,14 +133,20 @@ export default function AstraResources({ open, compact, disabled, triggerRef, on
         {groups.map(([group, items]) => <section className="astra-resources-group" key={group} aria-labelledby={`astra-resources-${group}`}>
           <h4 id={`astra-resources-${group}`}>{t(`chat.resources.groups.${group}`)}</h4>
           {compact && group === 'versions' && <p className="astra-resources-note">{t('chat.resources.cardHandoff')}</p>}
+          {group === 'arcade' && <p className="astra-resources-note">{t(compact ? 'chat.resources.arcadeCompact' : 'chat.resources.arcadeFull')}</p>}
           <ul className="astra-resources-list">
-            {items.map(([key, Icon, action]) => {
-              const { title, description, prompt } = t(`chat.resources.items.${key}`, { returnObjects: true });
+            {items.map(([key, Icon, action, arcadeShortcut]) => {
+              const game = games[arcadeShortcut?.game];
+              const { title, description, prompt } = game ? {
+                title: game.name,
+                description: game.description[Number(en)],
+                prompt: t('chat.resources.arcadeGuide', { game: game.name }),
+              } : t(`chat.resources.items.${key}`, { returnObjects: true });
               return (
                 <li key={key}>
                   <button type="button" className="astra-resource" disabled={disabled}
                     aria-labelledby={`astra-resource-${key}`} aria-describedby={`astra-resource-${key}-description`}
-                    title={prompt} onClick={() => handlePick(prompt, typeof action === 'function' ? action(en) : action)}>
+                    title={prompt} onClick={() => handlePick(prompt, typeof action === 'function' ? action(en) : action, arcadeShortcut)}>
                     <Icon size={17} aria-hidden="true" />
                     <span>
                       <strong id={`astra-resource-${key}`}>{title}</strong>

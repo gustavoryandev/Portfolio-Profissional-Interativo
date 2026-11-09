@@ -158,10 +158,14 @@ function GameView({ session, state, en, onLobby, visualMode }) {
     {state.size && <div className="arcade-board" style={{ '--board-width': state.size[0], '--board-height': state.size[1] }}>
       <canvas ref={canvas} tabIndex={0} aria-label={game.name + ' · ' + game.controls[lang]} {...handlers} />
       {(showHelp || state.status !== 'running') && <div className="arcade-overlay">
-        <div>
+        <div id={showHelp ? 'arcade-game-help' : undefined}>
           <strong role="status">{showHelp ? tr('Como jogar', 'How to play') : state.status === 'paused' ? tr('Pausado', 'Paused')
             : state.result === 'win' ? tr('Vitória!', 'Victory!') : tr('Fim de jogo', 'Game over')}</strong>
-          {showHelp ? <><p>{game.controls[lang]}</p><button type="button" className="arcade-button" onClick={() => setShowHelp(false)}>{tr('Fechar instruções', 'Close instructions')}</button></>
+          {showHelp ? <>
+            <p>{game.rules?.[lang] ?? game.description[lang]}</p>
+            <p>{game.controls[lang]}</p>
+            <button type="button" className="arcade-button" onClick={() => setShowHelp(false)}>{tr('Fechar instruções', 'Close instructions')}</button>
+          </>
             : <>{state.status === 'ended' && <p>{tr('Pontuação final', 'Final score')} · {state.score}</p>}
           <button type="button" className="arcade-button arcade-primary" onClick={() => play(state.status === 'paused' ? 'game.resume' : 'game.restart')}>
             <Play size={16} aria-hidden="true" /> {state.status === 'paused' ? tr('Continuar', 'Resume') : tr('Jogar de novo', 'Play again')}
@@ -185,7 +189,8 @@ function GameView({ session, state, en, onLobby, visualMode }) {
         {state.status === 'paused' ? tr('Continuar', 'Resume') : tr('Pausar', 'Pause')}
       </button>
       <button type="button" className="arcade-button" disabled={state.status === 'loading'} onClick={() => play('game.restart')}><RotateCcw size={16} aria-hidden="true" /> {tr('Reiniciar', 'Restart')}</button>
-      <button type="button" className="arcade-button" disabled={!state.size} aria-expanded={showHelp} onClick={() => {
+      <button type="button" className="arcade-button" disabled={!state.size} aria-expanded={showHelp}
+        aria-controls={showHelp ? 'arcade-game-help' : undefined} onClick={() => {
         if (!showHelp) void session.dispatch({ type: 'game.pause' });
         setShowHelp(!showHelp);
       }}>{tr('Controles', 'Controls')}</button>
