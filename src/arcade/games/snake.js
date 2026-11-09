@@ -1,4 +1,4 @@
-import { directions, dot, move, pick, rect, same, stateFor, tile } from './shared.js';
+import { directions, move, pick, rect, same, stateFor, tile } from './shared.js';
 
 const size = 18;
 const unit = 20;
@@ -54,16 +54,17 @@ export default function createSnake(difficulty, random = Math.random) {
         else spawn();
       }
     },
-    render(ctx) {
-      rect(ctx, '#0d1820', 0, 0, extent, extent);
-      for (let y = 0; y < size; y++) for (let x = y % 2; x < size; x += 2) tile(ctx, '#14232b', x, y, unit, 0);
+    render(ctx, _en, palette) {
+      const ink = palette?.ink ?? '#273519';
+      rect(ctx, palette?.background ?? '#a9b97b', 0, 0, extent, extent);
+      for (let y = 0; y < size; y++) for (let x = y % 2; x < size; x += 2) tile(ctx, palette?.surface ?? '#a3b376', x, y, unit, 0);
       if (state.food) {
         const x = (state.food.x + 0.5) * unit;
         const y = (state.food.y + 0.5) * unit;
-        dot(ctx, '#ffb979', x, y, 6);
-        dot(ctx, '#fff0c8', x - 1, y - 2, 2);
+        rect(ctx, palette?.accent ?? ink, x - 6, y - 2, 12, 4);
+        rect(ctx, palette?.accent ?? ink, x - 2, y - 6, 4, 12);
       }
-      state.body.forEach(({ x, y }, index) => tile(ctx, index ? '#4abb85' : '#adffc4', x, y, unit, 2));
+      state.body.forEach(({ x, y }, index) => tile(ctx, ink, x, y, unit, index ? 3 : 1));
     },
   };
 }
