@@ -20,6 +20,7 @@ import LiveDataNotice from './LiveDataNotice';
 import { CARD_SOURCES, mergeLiveContext } from '../services/liveContext';
 
 import { translateMessage } from '../services/api';
+import FullAstraCardLink from './FullAstraCardLink';
 
 const ResumeCard = lazy(() => import('./ResumeCard'));
 
@@ -202,7 +203,7 @@ function Avatar({ isUser, children }) {
   );
 }
 
-function MessageBubble({ message, liveContext = {}, refreshing = [], onRefresh, onSelectSection, compact = false }) {
+function MessageBubble({ message, liveContext = {}, refreshing = [], onRefresh, onSelectSection, onViewFull, compact = false }) {
   const { i18n } = useTranslation();
   const uiLanguage = i18n.language.startsWith('en') ? 'en' : 'pt';
   const ui = UI;
@@ -262,6 +263,7 @@ function MessageBubble({ message, liveContext = {}, refreshing = [], onRefresh, 
         {translating && (
           <p role="status" className="text-xs text-muted">{i18n.t(translationFailed ? 'chat.translationFailed' : 'chat.translating')}</p>
         )}
+        {compact && hasCards && <FullAstraCardLink onOpen={onViewFull ? () => onViewFull(message.id) : undefined} />}
 
         {segments.map((segment, index) => {
           if (segment.type === 'text') {
@@ -284,8 +286,9 @@ function MessageBubble({ message, liveContext = {}, refreshing = [], onRefresh, 
           const source = CARD_SOURCES[segment.tag.slice(1, -1).split(':')[0]];
           // Metrics can be opened in either Astra surface; the other rich tools keep their existing full view.
           if (compact && source !== 'github' && source !== 'wakatime') {
-            const target = segment.tag === '[PROJECTS_CARD]' ? 'projects' : segment.tag === '[SKILLS_CARD]' ? 'skills' : 'full';
-            return <button key={segment.tag} className="chip chip--accent" onClick={() => onSelectSection?.(target)}>{target === 'projects' ? (uiLanguage === 'en' ? 'Explore projects' : 'Explorar projetos') : target === 'skills' ? (uiLanguage === 'en' ? 'Explore skills' : 'Explorar habilidades') : (uiLanguage === 'en' ? 'Explore in full Astra' : 'Explorar na Astra completa')}</button>;
+            const target = segment.tag === '[PROJECTS_CARD]' ? 'projects' : segment.tag === '[SKILLS_CARD]' ? 'skills' : null;
+            if (!target) return null;
+            return <button key={index} className="chip chip--accent" onClick={() => onSelectSection?.(target)}>{target === 'projects' ? (uiLanguage === 'en' ? 'Explore projects' : 'Explorar projetos') : (uiLanguage === 'en' ? 'Explore skills' : 'Explorar habilidades')}</button>;
           }
           const data = context[source];
           return (

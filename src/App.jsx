@@ -131,6 +131,7 @@ export default function App() {
   };
   const actionUi = {
     navigate: selectSection, setTheme, setLanguage: language => i18n.changeLanguage(language),
+    openFull: () => { if (full) return false; openFull(); return true; },
     openProject: id => { close(); navigate('/?project=' + encodeURIComponent(id) + '#projetos'); },
   };
   if (!['/', '/chat'].includes(path)) return <main className="route-loading"><h1>404</h1><a href="/">{en ? 'Back to portfolio' : 'Voltar ao portfólio'}</a></main>;
@@ -142,7 +143,7 @@ export default function App() {
         {full ? <a href="/" onClick={event => { event.preventDefault(); close(); navigate('/'); }}>{en ? '← Portfolio' : '← Portfólio'}</a> : <a href="/chat" onClick={openFull}>{en ? 'Open full Astra ↗' : 'Abrir Astra completa ↗'}</a>}
         {!full && <button autoFocus onClick={close} aria-label={en ? 'Close Astra' : 'Fechar Astra'}>✕</button>}
       </div>
-      {started && <Suspense fallback={<p className="astra-loading" role="status">{en ? 'Opening Astra…' : 'Abrindo Astra…'}</p>}><ChatPage onReady={setChatReady} modal={!full} visible={full || opened} onSelectSection={selectSection} /></Suspense>}
+      {started && <Suspense fallback={<p className="astra-loading" role="status">{en ? 'Opening Astra…' : 'Abrindo Astra…'}</p>}><ChatPage onReady={setChatReady} modal={!full} visible={full ? !showIntro : opened} onSelectSection={selectSection} /></Suspense>}
     </dialog>
     {showIntro && <AstraEntrance en={en} onFinish={finishIntro} />}
   </AstraContext.Provider>;

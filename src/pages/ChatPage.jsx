@@ -1,5 +1,5 @@
 // src/App.jsx
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { CircleHelp, Send, Sparkles, Square } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import Navbar from '../components/Navbar';
@@ -18,6 +18,8 @@ import LaboratoryReview from '../components/LaboratoryReview';
 import { actionReply } from '../services/astraActionReply';
 
 const FONT_SANS = "Inter, 'Geist Sans', Roboto, system-ui, sans-serif";
+const LAB_REVIEW_ID = 'astra-lab-review';
+const messageAnchor = id => `astra-${id}`;
 
 const MOTION_CSS = `
   @keyframes chatMsgIn {
@@ -53,7 +55,7 @@ function TypingIndicator({ label }) {
 export default function ChatPage({ modal = false, visible = true, onReady, onSelectSection }) {
   const { t, i18n } = useTranslation();
   const viewportRef = useMobileViewport();
-  const { actions, actionUi, setLabHandoff } = useAstra();
+  const { actions, actionUi, openFull, setLabHandoff } = useAstra();
 
   const [messages, setMessages] = useState(() => [{ id: 'welcome', sender: 'ai', text: t('chat.boasVindas'), translationKey: 'chat.boasVindas' }]);
   const [input, setInput] = useState('');
@@ -65,6 +67,7 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
   const activeRequest = useRef(null);
   const mounted = useRef(true);
   const followOutput = useRef(true);
+  const fullCardTarget = useRef(null);
   const messagesContainerRef = useRef(null);
   const inputRef = useRef(null);
   const wasLoading = useRef(false);
@@ -88,6 +91,23 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
   useEffect(() => {
     setResourcesOpen(false);
   }, [modal, visible]);
+  useEffect(() => {
+    if (modal || !visible || !fullCardTarget.current) return;
+    const frame = requestAnimationFrame(() => {
+      const target = document.getElementById(fullCardTarget.current);
+      fullCardTarget.current = null;
+      target?.scrollIntoView({ block: 'start', behavior: 'instant' });
+      target?.focus({ preventScroll: true });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [modal, visible]);
+
+  const viewFullCard = useCallback(target => {
+    followOutput.current = false;
+    fullCardTarget.current = target;
+    openFull();
+  }, [openFull]);
+  const viewFullMessage = useCallback(id => viewFullCard(messageAnchor(id)), [viewFullCard]);
 
   const nextId = () => `msg-${++idCounter.current}`;
   const compact = messages.length > 1; // hero grande só no estado vazio
@@ -95,7 +115,7 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
   // Rola até a última mensagem. O timeout espera os cards renderizarem; limpar evita efeito tardio.
   useEffect(() => {
     const container = messagesContainerRef.current;
-    if (!container || !compact || !followOutput.current) return undefined;
+    if (!visible || !container || !compact || !followOutput.current || fullCardTarget.current) return undefined;
     const id = setTimeout(() => {
       container.scrollTo({ top: container.scrollHeight, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
     }, 100);
@@ -267,15 +287,17 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
                   {!modal && <AstraHero en={en} compact={compact} prompts={prompts} disabled={loading} onPick={prompt => handleSend(prompt, true)} />}
 
                   {messages.map(message => (
-                    <div className="chat-msg-in" key={message.id}>
-                      <MessageBubble message={message.id === 'welcome' && modal ? { ...message, text: t('chat.quickWelcome'), translationKey: 'chat.quickWelcome' } : message} liveContext={live.context} refreshing={live.refreshing} onRefresh={live.refresh} onSelectSection={onSelectSection} compact={modal} />
+                    <div id={messageAnchor(message.id)} tabIndex={-1} className="chat-msg-in outline-none" key={message.id}>
+                      <MessageBubble message={message.id === 'welcome' && modal ? { ...message, text: t('chat.quickWelcome'), translationKey: 'chat.quickWelcome' } : message} liveContext={live.context} refreshing={live.refreshing} onRefresh={live.refresh} onSelectSection={onSelectSection}
+                        onViewFull={openFull ? viewFullMessage : undefined} compact={modal} />
                     </div>
                   ))}
                   {streaming && (
                     <StreamingReply key={streaming.id} buffer={streaming.buffer} containerRef={messagesContainerRef} followRef={followOutput}
                       fallback={<TypingIndicator label={t('chat.digitando', { defaultValue: en ? 'Generating reply' : 'Gerando resposta' })} />} />
                   )}
-                  {actions && <LaboratoryReview onOpenLab={() => onSelectSection?.('laboratorio')} />}
+                  {actions && <LaboratoryReview focusId={LAB_REVIEW_ID} onOpenLab={() => onSelectSection?.('laboratorio')}
+                    onViewFull={modal && openFull ? () => viewFullCard(LAB_REVIEW_ID) : undefined} />}
                 </div>
               </div>
 

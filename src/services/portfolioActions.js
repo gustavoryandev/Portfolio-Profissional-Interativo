@@ -16,6 +16,7 @@ export const PORTFOLIO_SECTIONS = [
   ['contato', 'Contato', 'Contact'],
 ];
 export const ACTION_TARGETS = {
+  'astra.openFull': [undefined],
   'navigate': PORTFOLIO_SECTIONS.map(([id]) => id),
   'theme.set': themes.map(({ id }) => id),
   'language.set': ['pt', 'en'],

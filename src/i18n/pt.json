@@ -16,6 +16,11 @@
     "loading": "Carregando currículo…"
   },
   "chat": {
+    "surface": {
+      "compact": "Você está na Astra compacta, a conversa flutuante do portfólio.",
+      "full": "Você está na Astra completa, a página dedicada à conversa.",
+      "viewFull": "Ver na Astra completa"
+    },
     "quickWelcome": "Olá! Sou a Astra. Pergunte sobre o Gustavo, explore um projeto ou experimente dizer “Abra o Laboratório”.",
     "erro": "Não foi possível processar sua pergunta agora. Tente novamente em instantes.",
     "boasVindas": "Olá! Sou o assistente virtual do Gustavo. Como posso te ajudar hoje?",
@@ -71,12 +76,24 @@
       "title": "Recursos da Astra",
       "close": "Fechar catálogo",
       "note": "Escolha um atalho ou escreva seu próprio pedido em português ou inglês. Digite /help para voltar a esta lista.",
+      "cardHandoff": "Quando a Astra mostrar cards, use “Ver na Astra completa” para abrir a mesma resposta na página dedicada.",
       "groups": {
+        "versions": "Versões da Astra",
         "portfolio": "Ações do portfólio",
         "laboratory": "Laboratório de código",
         "integrations": "Perfil e integrações"
       },
       "items": {
+        "identifyVersion": {
+          "title": "Qual versão estou usando?",
+          "description": "Confira se você está na Astra compacta ou completa",
+          "prompt": "Em qual versão da Astra eu estou?"
+        },
+        "openFullVersion": {
+          "title": "Abrir Astra completa",
+          "description": "Continue esta conversa na página dedicada",
+          "prompt": "Abra a Astra completa."
+        },
         "navigate": {
           "title": "Navegar pelo portfólio",
           "description": "Abra a seção Sobre ou peça outra seção no chat",

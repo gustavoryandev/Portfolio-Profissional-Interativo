@@ -1,13 +1,15 @@
 import { useLayoutEffect, useRef } from 'react';
 import {
-  BarChart3, Clock, Code2, Compass, FileCode2, Folder, Github, GraduationCap, Headphones,
-  Languages, Palette, Pencil, Play, RotateCcw, Square, Swords, Terminal, Trophy, UserRound, X,
+  BarChart3, Clock, Code2, Compass, FileCode2, Folder, Github, GraduationCap, Headphones, Info,
+  Languages, Maximize2, Palette, Pencil, Play, RotateCcw, Square, Swords, Terminal, Trophy, UserRound, X,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 export const ASTRA_RESOURCES_ID = 'astra-resources';
 const MOBILE_DRAWER = '(max-width: 959px)';
 
+const identifyVersion = ['identifyVersion', Info];
+const openFullVersion = ['openFullVersion', Maximize2, [{ type: 'astra.openFull' }]];
 const portfolioActions = [
   ['navigate', Compass, [{ type: 'navigate', target: 'sobre' }]],
   ['openProject', Folder, [{ type: 'project.open', target: 'academia' }]],
@@ -89,7 +91,9 @@ export default function AstraResources({ open, compact, disabled, triggerRef, on
     else closeRef.current.focus({ preventScroll: true });
     onPick(prompt, actions);
   };
-  const groups = [['portfolio', portfolioActions], ['laboratory', labActions],
+  const groups = [
+    ['versions', compact ? [identifyVersion, openFullVersion] : [identifyVersion]],
+    ['portfolio', portfolioActions], ['laboratory', labActions],
     ...(!compact ? [['integrations', integrations]] : [])];
 
   return (
@@ -108,6 +112,7 @@ export default function AstraResources({ open, compact, disabled, triggerRef, on
         <p className="astra-resources-note">{t('chat.resources.note')}</p>
         {groups.map(([group, items]) => <section className="astra-resources-group" key={group} aria-labelledby={`astra-resources-${group}`}>
           <h4 id={`astra-resources-${group}`}>{t(`chat.resources.groups.${group}`)}</h4>
+          {compact && group === 'versions' && <p className="astra-resources-note">{t('chat.resources.cardHandoff')}</p>}
           <ul className="astra-resources-list">
             {items.map(([key, Icon, action]) => {
               const { title, description, prompt } = t(`chat.resources.items.${key}`, { returnObjects: true });

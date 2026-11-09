@@ -11,7 +11,7 @@ import { createModelCache, withDeadline } from '../server/modelCache.js';
 import { writeEvent } from '../server/ndjson.js';
 import { sourcesForText } from '../src/services/liveContext.js';
 import { sanitizeLabSnapshot } from '../src/services/portfolioActions.js';
-import { portfolioTools } from '../server/portfolioTools.js';
+import { astraSurfaceIntent, portfolioTools } from '../server/portfolioTools.js';
 
 dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 
@@ -1359,8 +1359,14 @@ export default async function handler(req, res) {
       && !/\[(GITHUB_ACTIVITY|STATS)_CARD\]/.test(lastAi)
       && /(?:quer ver|would you like to see).*(?:metricas detalhadas|detailed .*metrics)/.test(normalizeQuery(lastAi)));
     const normalizedQuery = normalizeQuery(message);
+    const surfaceIntent = surface && !labSnapshot ? astraSurfaceIntent(normalizedQuery) : null;
+    if (surfaceIntent === 'open') return res.status(200).json({ actions: [{ type: 'astra.openFull' }] });
+    if (surfaceIntent === 'identify') {
+      const translationKey = `chat.surface.${surface}`;
+      return res.status(200).json({ response: readJson(`${suggestionLanguage}.json`).chat.surface[surface], translationKey });
+    }
     // The existing direct resource routes remain available. Compound lab requests need the action planner.
-    const planFirst = labSnapshot || (surface && /\b(?:laboratorio|lab(?:oratory)?|bro fit|editor|playground)\b/.test(normalizedQuery));
+    const planFirst = labSnapshot || surfaceIntent === 'compound' || (surface && /\b(?:laboratorio|lab(?:oratory)?|bro fit|editor|playground)\b/.test(normalizedQuery));
     const resource = planFirst ? null : conversationResource(message);
     if (resource) {
       const en = String(body.lang).startsWith('en');
@@ -1439,10 +1445,12 @@ export default async function handler(req, res) {
       ? `\nORIGEM CONFIRMADA: sugestão predefinida clicada na interface. As restrições de intenção para mensagens manuais não se aplicam a este pedido. Responda usando os dados disponíveis e inclua estes marcadores exatamente uma vez: ${requestedSuggestionCards || 'nenhum (pergunta sobre tecnologias)'}. O card de xadrez desta sugestão mostra estatísticas do Chess.com. Mantenha todas as regras de grounding e de tom.`
       : '';
     const actionTools = surface && !suggestions ? portfolioTools(perfil.projetos, labSnapshot) : null;
-    const style = surface === 'compact' ? 'Keep replies brief and focused on the next step.'
-      : surface === 'full' ? 'For analysis and debugging, give a detailed explanation when useful.' : '';
+    const style = surface === 'compact' ? 'Current interface: Compact Astra (the floating chat). Keep replies brief and focused on the next step.'
+      : surface === 'full' ? 'Current interface: Full Astra (the dedicated /chat page). Give detailed explanations when useful.' : '';
     const systemInstruction = buildSystemInstruction(perfil, summary, geminiContext, githubBlock) + suggestionInstruction
-      + `\nRespond in ${suggestionLanguage === 'en' ? 'English' : 'Portuguese'}. ${style}` + (actionTools?.instructions ?? '');
+      + `\nRespond in ${suggestionLanguage === 'en' ? 'English' : 'Portuguese'}. ${style}`
+      + (surface ? ' If asked which version the user is using, answer from the current interface above, even if the conversation history mentions the other version.' : '')
+      + (actionTools?.instructions ?? '');
 
     const write = (payload) => writeEvent(res, payload, controller.signal);
     const signal = AbortSignal.any([controller.signal, AbortSignal.timeout(CHAT_GENERATION_TIMEOUT_MS)]);

@@ -24,7 +24,8 @@ export function createAstraActionEngine({ lab, projectIds }) {
       if (raw?.length && !actions.length) result.notices.push('invalid');
       for (const { type, target, edits, runAfter } of actions) {
         if (signal?.aborted) break;
-        if (type === 'navigate') { ui.navigate(target); result.notices.push('navigated'); }
+        if (type === 'astra.openFull') result.notices.push(ui.openFull() ? 'fullOpened' : 'alreadyFull');
+        else if (type === 'navigate') { ui.navigate(target); result.notices.push('navigated'); }
         else if (type === 'project.open') { ui.openProject(target); result.notices.push('project'); }
         else if (type === 'theme.set') { ui.setTheme(target); result.notices.push('theme'); }
         else if (type === 'language.set') { await ui.setLanguage(target); result.notices.push('language'); }

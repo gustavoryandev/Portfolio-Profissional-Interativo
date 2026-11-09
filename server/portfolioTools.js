@@ -16,6 +16,18 @@ const editTool = {
 };
 const runTool = { name: 'propose_lab_run', description: 'Ask the user to review and run the current code.' };
 
+const FULL_ASTRA = '(?:astra completa|versao completa(?: da astra)?|modo completo(?: da astra)?|full astra|astra full|full (?:version|mode)(?: of astra)?)';
+const OPEN_FULL = new RegExp('^(?:(?:por favor|please)[, ]+)?(?:(?:voce pode|pode|poderia|can you|could you|quero|i want to) )?'
+  + '(?:abra|abre|abrir|acesse|open|launch|(?:me leve|me leva|va|vai|ir|mude|troque) (?:para|pra)|(?:go|switch|take me) to) '
+  + '(?:(?:a|o|the) )?' + FULL_ASTRA + '(?=[\\s,.!?]|$)');
+const CURRENT_SURFACE = /^(?:(?:em )?qual (?:e )?(?:a )?versao (?:da astra )?(?:eu )?estou|(?:estou|to) na (?:astra|versao) (?:compacta ou completa|completa ou compacta)|(?:what|which) (?:version|mode)(?: of astra)? am i (?:using|in)|am i (?:using|in) (?:compact or full astra|full or compact astra))[?.!]*$/;
+
+export function astraSurfaceIntent(query) {
+  const command = query.match(OPEN_FULL)?.[0];
+  if (command) return /^(?:[,.!? ]|por favor|please)*$/.test(query.slice(command.length)) ? 'open' : 'compound';
+  return CURRENT_SURFACE.test(query) ? 'identify' : null;
+}
+
 export function portfolioTools(projects, snapshot) {
   const declarations = snapshot ? (snapshot.code === undefined ? [runTool] : [editTool, runTool]) : [planTool];
   const projectIds = new Set(projects.map(project => project.id));
@@ -41,6 +53,7 @@ For explicit commands to operate the portfolio, call portfolio_actions once, in 
 Allowed type and target pairs: ${JSON.stringify(Object.fromEntries(Object.entries(ACTION_TARGETS).filter(([, targets]) => targets?.[0])))}
 project.open takes one project ID from this catalog: ${JSON.stringify(projects.map(({ id, titulo }) => ({ id, title: titulo })))}
 Open the actual portfolio sections using navigate. To show the Laboratory, use navigate with laboratorio; lab.language and lab.example select the editor's language and example without resetting drafts.
+When the current interface is Compact Astra and the user asks to open or switch to Full Astra, use astra.openFull with no target. When already in Full Astra, say so if asked to switch there.
 For a request to read, explain, debug or change the current editor, use lab.read as the last step, after any requested selections. Use target code for edits and explanations, result for output alone, or both when diagnosing a run. This fetches the live snapshot for a follow-up model turn. Always read fresh before proposing a custom change. If the user asks to change then run, end this first plan with lab.read; execution can be proposed together with the edit. For execution alone use lab.run as the last step, with no target. Use lab.stop without a target to stop an ongoing run. To restore the original example, use lab.reset as the last step, with no target (or with target run if explicitly asked to run after resetting); it requires review.
 Use metrics.open for GitHub and/or WakaTime dashboards. Use a detail target only when asked for details.
 When returning a tool call, don't narrate it as completed; the app will report what it did. Don't use card markers for the same action.`,

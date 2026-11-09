@@ -225,6 +225,30 @@ test('explicit game and proficiency requests bypass generation with one appropri
   }
 });
 
+test('explicit Full Astra commands and interface questions work without Gemini', async () => {
+  for (const [lang, command, question] of [
+    ['pt', 'Pode abrir a versão completa da Astra, por favor?', 'Em qual versão da Astra eu estou?'],
+    ['en', 'Switch to Full Astra, please.', 'Which version of Astra am I using?'],
+  ]) {
+    for (const surface of ['compact', 'full']) {
+      const request = { method: 'POST', body: { lang, surface, stream: true } };
+      const open = response();
+      await handler({ ...request, body: { ...request.body, userMessage: command } }, open);
+      assert.deepEqual(open.body.actions, [{ type: 'astra.openFull' }]);
+      const identify = response();
+      await handler({ ...request, body: { ...request.body, userMessage: question } }, identify);
+      assert.equal(identify.body.translationKey, `chat.surface.${surface}`);
+      assert.match(identify.body.response, surface === 'compact' ? /compact/i : /full|completa/i);
+      assert.equal(identify.body.actions, undefined);
+    }
+  }
+  for (const userMessage of ['Não abra a Astra completa.', 'What is Full Astra?']) {
+    const res = response();
+    await handler({ method: 'POST', body: { userMessage, surface: 'compact' } }, res);
+    assert.equal(res.body.actions, undefined);
+  }
+});
+
 test('both Astra surfaces share the same tool contract and request editor data only in the second turn', async () => {
   const originalFetch = globalThis.fetch;
   process.env.GEMINI_API_KEY = 'portfolio-actions-test';
@@ -243,6 +267,7 @@ test('both Astra surfaces share the same tool contract and request editor data o
     const declarations = body.tools[0].functionDeclarations.map(item => item.name);
     const parts = body.contents.at(-1).parts;
     const snapshotTurn = requests++ % 2 === 1;
+    assert.match(body.systemInstruction.parts[0].text, requests <= 2 ? /Current interface: Full Astra/ : /Current interface: Compact Astra/);
     assert.deepEqual(declarations, snapshotTurn ? ['propose_lab_edit', 'propose_lab_run'] : ['portfolio_actions']);
     assert.equal(parts.length, snapshotTurn ? 2 : 1);
     if (snapshotTurn) assert.deepEqual(JSON.parse(parts[1].text.split(' (data): ')[1]), snapshot);

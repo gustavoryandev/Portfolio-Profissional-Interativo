@@ -1,5 +1,7 @@
 // UI messages describe what actually happened, independently of the model's wording.
 const notices = {
+  fullOpened: ['Astra completa aberta. Podemos continuar daqui.', 'Full Astra is open. We can continue here.'],
+  alreadyFull: ['Você já está na Astra completa.', 'You’re already in Full Astra.'],
   navigated: ['Seção aberta.', 'Section opened.'],
   project: ['Projeto aberto.', 'Project opened.'],
   theme: ['Tema alterado.', 'Theme changed.'],
