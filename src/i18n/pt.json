@@ -70,8 +70,73 @@
     "resources": {
       "title": "Recursos da Astra",
       "close": "Fechar catálogo",
-      "note": "Escolha um recurso para enviar uma pergunta de exemplo. Você também pode pedir à Astra para abrir o Laboratório e explicar, editar ou executar o código. Converse em português ou inglês.",
+      "note": "Escolha um atalho ou escreva seu próprio pedido em português ou inglês. Digite /help para voltar a esta lista.",
+      "groups": {
+        "portfolio": "Ações do portfólio",
+        "laboratory": "Laboratório de código",
+        "integrations": "Perfil e integrações"
+      },
       "items": {
+        "navigate": {
+          "title": "Navegar pelo portfólio",
+          "description": "Abra a seção Sobre ou peça outra seção no chat",
+          "prompt": "Abra a seção Sobre do portfólio."
+        },
+        "openProject": {
+          "title": "Abrir um projeto",
+          "description": "Veja o cartão do Bro Fit como exemplo",
+          "prompt": "Abra o projeto Bro Fit."
+        },
+        "theme": {
+          "title": "Trocar tema",
+          "description": "Ative o tema Aurora",
+          "prompt": "Troque para o tema Aurora."
+        },
+        "language": {
+          "title": "Mudar para inglês",
+          "description": "Troque o idioma do portfólio e da Astra",
+          "prompt": "Mude o idioma para inglês."
+        },
+        "metrics": {
+          "title": "Abrir métricas",
+          "description": "Veja os resumos do GitHub e do WakaTime",
+          "prompt": "Abra as métricas do GitHub e do WakaTime."
+        },
+        "labOpen": {
+          "title": "Abrir o Laboratório",
+          "description": "Vá para o editor e o console",
+          "prompt": "Abra o Laboratório."
+        },
+        "labExample": {
+          "title": "Carregar Bro Fit em Python",
+          "description": "Selecione a linguagem e o exemplo no editor",
+          "prompt": "Abra o Laboratório, selecione Python e carregue Bro Fit."
+        },
+        "labAnalyze": {
+          "title": "Analisar código e saída",
+          "description": "Peça uma explicação ou um diagnóstico da última execução",
+          "prompt": "Analise o código atual do Laboratório e o último resultado. Explique o código e aponte a causa de qualquer erro."
+        },
+        "labEdit": {
+          "title": "Propor uma edição",
+          "description": "Veja uma proposta de comentários antes de aplicar",
+          "prompt": "Proponha adicionar comentários que expliquem as partes principais do código atual do Laboratório."
+        },
+        "labRun": {
+          "title": "Executar o código",
+          "description": "Revise e aprove a execução",
+          "prompt": "Execute o código atual do Laboratório."
+        },
+        "labStop": {
+          "title": "Parar a execução",
+          "description": "Interrompa a execução em andamento",
+          "prompt": "Pare a execução atual do Laboratório."
+        },
+        "labReset": {
+          "title": "Restaurar código original",
+          "description": "Revise antes de substituir seu rascunho",
+          "prompt": "Restaure o código original do exemplo atual do Laboratório."
+        },
         "about": {
           "title": "Sobre o Gustavo",
           "description": "Formação na PUC Minas e trajetória",

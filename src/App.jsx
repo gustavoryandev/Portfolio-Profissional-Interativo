@@ -68,7 +68,7 @@ export default function App() {
     navigate('/chat');
   };
   const trapFocus = event => {
-    if (full || event.key !== 'Tab') return;
+    if (full || event.key !== 'Tab' || event.defaultPrevented || event.target.closest('dialog') !== dialog.current) return;
     const controls = [...dialog.current.querySelectorAll('a[href], button:not(:disabled), input:not(:disabled), textarea:not(:disabled), select:not(:disabled), [tabindex="0"]')]
       .filter(node => node.getClientRects().length && !node.closest('[hidden]'));
     const first = controls[0];

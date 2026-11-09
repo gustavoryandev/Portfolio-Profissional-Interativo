@@ -83,6 +83,8 @@
   padding: 12px;
 }
 .astra-resources-note { margin-bottom: 12px; color: var(--muted); font-size: 12px; }
+.astra-resources-group + .astra-resources-group { margin-top: 16px; }
+.astra-resources-group h4 { margin-bottom: 6px; color: var(--muted); font-size: 12px; font-weight: 600; }
 .astra-resources-list { display: grid; gap: 6px; }
 .astra-resource {
   display: flex;
@@ -103,14 +105,22 @@
 .astra-resource:disabled { opacity: .55; cursor: not-allowed; }
 
 @media (width > 959px) {
-  .astra-workspace:has(> .astra-resources[open]) {
+  .astra-full .astra-workspace:has(> .astra-resources[open]) {
     display: grid;
     grid-template-columns: minmax(0, 1fr) clamp(265px, 26vw, 310px);
     gap: 12px;
   }
-  .astra-resources[open] { position: static; width: 100%; height: calc(100dvh - 92px); margin: 0; }
+  .astra-full .astra-resources[open] { position: static; width: 100%; height: calc(100dvh - 92px); margin: 0; }
+  .astra-compact .astra-resources[open] {
+    position: fixed;
+    inset: 0;
+    margin: auto;
+    width: min(420px, calc(100% - 24px));
+    height: min(620px, calc(100dvh - 24px));
+  }
 }
 
+.astra-resources::backdrop { background: #060b18aa; }
 @media (max-width: 959px) {
   .astra-resources[open] {
     position: fixed;
@@ -123,6 +133,5 @@
     border-radius: 0;
     padding-bottom: env(safe-area-inset-bottom);
   }
-  .astra-resources::backdrop { background: #060b18aa; }
   .astra-resources-close.icon-button { width: 44px; height: 44px; }
 }

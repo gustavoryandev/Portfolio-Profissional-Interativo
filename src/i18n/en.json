@@ -70,8 +70,73 @@
     "resources": {
       "title": "Astra resources",
       "close": "Close resource catalog",
-      "note": "Choose a resource to send an example question. You can also ask Astra to open the Laboratory and explain, edit, or run its code. Chat in English or Portuguese.",
+      "note": "Choose a shortcut or write your own request in English or Portuguese. Type /help to reopen this list.",
+      "groups": {
+        "portfolio": "Portfolio actions",
+        "laboratory": "Code Laboratory",
+        "integrations": "Profile and integrations"
+      },
       "items": {
+        "navigate": {
+          "title": "Navigate the portfolio",
+          "description": "Open About or ask for a different section in chat",
+          "prompt": "Open the About section of the portfolio."
+        },
+        "openProject": {
+          "title": "Open a project",
+          "description": "See the Bro Fit project card as an example",
+          "prompt": "Open the Bro Fit project."
+        },
+        "theme": {
+          "title": "Change theme",
+          "description": "Switch to the Aurora theme",
+          "prompt": "Switch to the Aurora theme."
+        },
+        "language": {
+          "title": "Switch to Portuguese",
+          "description": "Change the language of the portfolio and Astra",
+          "prompt": "Change the language to Portuguese."
+        },
+        "metrics": {
+          "title": "Open metrics",
+          "description": "See GitHub and WakaTime summaries",
+          "prompt": "Open the GitHub and WakaTime metrics."
+        },
+        "labOpen": {
+          "title": "Open the Laboratory",
+          "description": "Go to the editor and console",
+          "prompt": "Open the Laboratory."
+        },
+        "labExample": {
+          "title": "Load Bro Fit in Python",
+          "description": "Select a language and example in the editor",
+          "prompt": "Open the Laboratory, select Python and load Bro Fit."
+        },
+        "labAnalyze": {
+          "title": "Analyze code and output",
+          "description": "Get an explanation or diagnose the last run",
+          "prompt": "Analyze the current Laboratory code and its last result. Explain the code and identify the cause of any errors."
+        },
+        "labEdit": {
+          "title": "Propose an edit",
+          "description": "Review proposed comments before applying them",
+          "prompt": "Propose comments that explain the main parts of the current Laboratory code."
+        },
+        "labRun": {
+          "title": "Run the code",
+          "description": "Review and approve the run",
+          "prompt": "Run the current Laboratory code."
+        },
+        "labStop": {
+          "title": "Stop a run",
+          "description": "Stop the current execution",
+          "prompt": "Stop the current Laboratory run."
+        },
+        "labReset": {
+          "title": "Restore original code",
+          "description": "Review before replacing your draft",
+          "prompt": "Restore the original code for the current Laboratory example."
+        },
         "about": {
           "title": "About Gustavo",
           "description": "PUC Minas studies and career",

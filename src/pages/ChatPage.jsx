@@ -86,8 +86,8 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
 
   useEffect(() => { onReady?.(true); }, [onReady]);
   useEffect(() => {
-    if (modal) setResourcesOpen(false);
-  }, [modal]);
+    setResourcesOpen(false);
+  }, [modal, visible]);
 
   const nextId = () => `msg-${++idCounter.current}`;
   const compact = messages.length > 1; // hero grande só no estado vazio
@@ -113,9 +113,9 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
     setMessages(messagesRef.current);
   };
 
-  const handleSend = async (suggestion = input, predefinedSuggestion = false) => {
+  const handleSend = async (suggestion = input, predefinedSuggestion = false, resourceActions) => {
     const query = suggestion.trim();
-    if (!modal && query.toLowerCase() === '/help') {
+    if (query.toLowerCase() === '/help') {
       setInput('');
       setResourcesOpen(true);
       return;
@@ -145,7 +145,9 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
           if (mounted.current && !controller.signal.aborted) buffer.push(event);
         },
       };
-      let data = await sendMessage(query, requestLanguage, history, conversationRef.current.chatContext, predefinedSuggestion, options);
+      // Catalog shortcuts provide a fixed plan; typed requests use Gemini to choose the same actions.
+      let data = resourceActions ? { actions: resourceActions }
+        : await sendMessage(query, requestLanguage, history, conversationRef.current.chatContext, predefinedSuggestion, options);
       controller.signal.throwIfAborted();
       if (!mounted.current) return;
       const plan = actions && await actions.execute(turn, data.actions, {
@@ -157,7 +159,6 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
       }, { signal: controller.signal });
       const notices = [...(plan?.notices ?? [])];
       const cards = plan?.cards ?? [];
-      const requestEn = requestLanguage.startsWith('en');
       if (plan?.snapshot) {
         live.absorb(data.liveContext);
         buffer.push({ type: 'reset' });
@@ -169,7 +170,8 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
         notices.push(...proposal.notices);
       }
       controller.signal.throwIfAborted();
-      const reply = [data.response || data.error, actionReply(notices, requestEn)].filter(Boolean).join('\n\n');
+      const replyLanguage = data.response || data.error ? requestLanguage : i18n.language;
+      const reply = [data.response || data.error, actionReply(notices, replyLanguage.startsWith('en'))].filter(Boolean).join('\n\n');
       const response = [reply, ...cards].filter(Boolean).join('\n');
       updateHandoff(reply);
       conversationRef.current = {
@@ -182,7 +184,7 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
         text: response,
         translationKey: data.translationKey,
         context: data.liveContext,
-        lang: requestLanguage,
+        lang: replyLanguage,
         model: data.model,
       });
       live.absorb(data.liveContext);
@@ -225,7 +227,7 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
       <style>{MOTION_CSS}</style>
 
       <div className="app-frame relative z-10 flex flex-col" onKeyDown={event => {
-        if (modal || !resourcesOpen || event.key !== 'Escape' || event.defaultPrevented) return;
+        if (!resourcesOpen || event.key !== 'Escape' || event.defaultPrevented) return;
         event.preventDefault();
         setResourcesOpen(false);
       }}>
@@ -238,16 +240,14 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
                   <span className="astra-mini" aria-hidden="true"><img src="/astra-avatar.png" alt="" /></span>
                   <h2>{en ? 'Talk to Astra' : 'Converse com a Astra'}</h2>
                 </div>
-                <span className={modal ? undefined : 'astra-heading-actions'}>
+                <span className="astra-heading-actions">
                   {en ? 'AI assistant' : 'Assistente de IA'}
-                  {!modal && (
-                    <button ref={resourcesTrigger} type="button" className="icon-button astra-resources-trigger"
+                  <button ref={resourcesTrigger} type="button" className="icon-button astra-resources-trigger"
                       aria-label={t('chat.resources.title')} title={t('chat.resources.title')}
                       aria-controls={ASTRA_RESOURCES_ID} aria-expanded={resourcesOpen}
                       onClick={() => setResourcesOpen(open => !open)}>
                       <CircleHelp size={17} aria-hidden="true" />
-                    </button>
-                  )}
+                  </button>
                 </span>
               </div>
 
@@ -330,10 +330,8 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
             </div>
 
           </section>
-          {!modal && (
-            <AstraResources open={resourcesOpen} disabled={loading} triggerRef={resourcesTrigger}
-              onClose={() => setResourcesOpen(false)} onPick={prompt => handleSend(prompt, true)} />
-          )}
+          <AstraResources open={resourcesOpen && visible} compact={modal} disabled={loading} triggerRef={resourcesTrigger}
+            onClose={() => setResourcesOpen(false)} onPick={(prompt, plan) => handleSend(prompt, !plan, plan)} />
         </div>
       </div>
     </div>

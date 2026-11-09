@@ -51,7 +51,7 @@ O conteúdo do perfil é mantido em `src/data/perfil.json`. A interface oferece 
 
 ## ✨ Funcionalidades
 
-- **Assistente Astra:** perguntas sobre perfil, projetos e trajetória, com histórico contextual e respostas em fluxo. Nas duas interfaces, peça para navegar, abrir projetos ou métricas, trocar tema e idioma ou operar o Laboratório.
+- **Assistente Astra:** perguntas sobre perfil, projetos e trajetória, com histórico contextual e respostas em fluxo. Nas duas interfaces, digite `/help` ou abra Recursos para ver atalhos de navegação, projetos, métricas, tema, idioma e Laboratório.
 - **Catálogo de projetos:** busca por texto, filtros por categoria e rolagem horizontal com gestos no celular.
 - **Laboratório de código:** exemplos editáveis em desktop e celular. JavaScript e Python rodam no navegador; Java usa Wandbox. Experimente pedir “Abra o Laboratório, selecione Python, carregue Bro Fit e mude o nome do aluno para Ana”. A Astra mostra a alteração para revisão antes de aplicá-la. Rascunhos e resultados ficam em memória enquanto você navega entre o portfólio e as duas interfaces; recarregar a página encerra a sessão.
 - **Interface mobile:** navegação inferior para Astra e Projetos, campo de mensagem na base do chat e habilidades em duas colunas. As demais seções ficam no Menu.
