@@ -188,6 +188,11 @@ try {
 
   await click($('.astra-full .brand-lockup'));
   await click($('.astra-fab'));
+  const compactInput = $('#chat-input');
+  $('.chat-form button[type="submit"]').focus();
+  await send('Thanks');
+  assert.equal(document.activeElement, compactInput, 'sending from Compact Astra returns focus to the composer');
+
   await send('Show a code example');
   assert.equal(window.location.pathname, '/', 'markers in code do not open Full Astra');
   assert.match($('.astra-compact [role="log"] pre').textContent, /\[CHESS_GAME\]/);

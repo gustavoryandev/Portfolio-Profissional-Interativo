@@ -325,7 +325,11 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
                 )}
 
                 <form
-                  onSubmit={(event) => { event.preventDefault(); handleSend(); }}
+                  onSubmit={event => {
+                    event.preventDefault();
+                    if (modal) inputRef.current?.focus({ preventScroll: true });
+                    handleSend();
+                  }}
                   className="chat-form flex items-center gap-2 rounded-xl p-2 transition-colors duration-300 focus-within:ring-2 focus-within:ring-accent sm:gap-3"
                 >
                   <div className="hidden pl-4 text-accent sm:block" aria-hidden="true">
@@ -338,7 +342,7 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
                     value={input}
                     onChange={(event) => setInput(event.target.value)}
                     placeholder={t('chat.placeholder') || 'Digite uma pergunta sobre o Gustavo...'}
-                    disabled={loading}
+                    disabled={!modal && loading}
                     autoComplete="off"
                     className="min-h-12 min-w-0 flex-1 bg-transparent py-3 pl-4 pr-2 text-[15px] font-medium text-ink outline-none placeholder:text-muted disabled:opacity-60 sm:pl-2"
                   />
