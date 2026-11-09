@@ -6,6 +6,7 @@ import { clamp } from './games/shared.js';
 
 const loaders = {
   snake: () => import('./games/snake.js'),
+  pong: () => import('./games/pong.js'),
 };
 export const playableGames = gameIds.filter(game => Object.hasOwn(loaders, game));
 
