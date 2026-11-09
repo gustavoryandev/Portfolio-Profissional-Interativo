@@ -87,23 +87,30 @@ test('Frogger detects road and water hazards, carries the frog and progresses th
   advance(game, 0.08);
   assert.ok(game.state.frog.x > 1 && game.state.frog.x < 1.2, 'a log carries the frog');
   advance(game, 0.3);
-  for (const x of [2.5, 6.5, 10.5]) {
+  for (const x of [0.5, 3.5, 6.5, 9.5, 12.5]) {
     game.state.frog = { x, y: 1 };
     game.press('up');
     advance(game, 0.4);
   }
-  assert.equal(game.state.score, 300);
+  assert.ok(game.state.score > 500, 'remaining time awards a bonus');
   assert.equal(game.state.level, 2);
-  assert.equal(game.state.metrics.homes, 3);
+  assert.equal(game.state.metrics.homes, 5);
   game.state.level = 3;
-  game.state.filled = [2, 6];
-  game.state.frog = { x: 10.5, y: 1 };
+  game.state.filled = [0, 3, 6, 9];
+  game.state.frog = { x: 12.5, y: 1 };
   game.press('up');
   assert.equal(game.state.result, 'win');
+  const timed = createFrogger(1);
+  advance(timed, 33);
+  assert.equal(timed.state.lives, 2);
+  assert.equal(timed.state.metrics.timeouts, 1);
+  assert.ok(timed.state.timeLeft > 30 && timed.state.timeLeft < 32);
 });
 
 test('Pulse Maze has three connected maps and uses power, chase and recovery states', () => {
   const game = createMaze(0);
+  assert.equal(game.state.ghosts.length, 4);
+  assert.equal(game.state.ghosts.filter(ghost => ghost.mode === 'house').length, 3);
   game.press('left');
   advance(game, 0.9);
   assert.ok(game.state.score > 0);
@@ -111,6 +118,7 @@ test('Pulse Maze has three connected maps and uses power, chase and recovery sta
   const powered = createMaze(0);
   powered.state.power = 2;
   powered.state.ghosts[0].at = powered.state.player;
+  powered.state.ghosts[1].at = { x: 13, y: 11 };
   advance(powered, 0.8);
   assert.ok(powered.state.ghosts[0].recovering);
   assert.ok(powered.state.metrics.sentinels > 0);
@@ -123,7 +131,7 @@ test('Pulse Maze has three connected maps and uses power, chase and recovery sta
     assert.equal(levels.state.level, level);
     assert.equal([...levels.state.pellets.values()].filter(pellet => pellet.power).length, 4);
     const start = levels.state.player;
-    const open = new Set([start, ...levels.state.ghosts.map(ghost => ghost.at), ...levels.state.pellets.values()].map(({ x, y }) => x + ',' + y));
+    const open = new Set([start, ...levels.state.pellets.values()].map(({ x, y }) => x + ',' + y));
     const queue = [start];
     open.delete(start.x + ',' + start.y);
     for (const { x, y } of queue) {
@@ -172,6 +180,10 @@ test('Orbit Blocks rotates, holds once per piece, drops, clears lines and detect
   blocked.state.board[0].fill('J');
   blocked.press('drop');
   assert.equal(blocked.state.result, 'loss');
+  const wall = createBlocks(1);
+  wall.state.active = { type: 'I', x: -2, y: 4, turn: 1 };
+  wall.press('reverse');
+  assert.deepEqual(wall.state.active, { type: 'I', x: 0, y: 4, turn: 0 }, 'SRS applies the I-specific two-cell kick');
 });
 
 test('arcade actions load and run only in Full Astra and stale async loads are discarded', async () => {

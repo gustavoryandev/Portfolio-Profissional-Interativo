@@ -280,6 +280,11 @@ try {
   assert.match($('.astra-full [role="log"]').textContent, /Snake · Playing/);
   assert.equal(requests.length, beforeArcade, 'arcade commands use local game state without the model');
   await click(findButton($('.arcade-game-header'), 'Games'));
+  assert.equal($('.arcade').dataset.visual, 'classic');
+  await click($('.arcade-toolbar [aria-label="Game appearance"]'));
+  await click(findButton($('.arcade-toolbar [role="menu"]'), 'Astra Theme'));
+  assert.equal($('.arcade').dataset.visual, 'astra');
+  assert.equal(window.localStorage.getItem('astra-arcade-visual'), 'astra');
   await click($('.arcade-hero .arcade-difficulty-trigger'));
   await click($('.arcade-hero [data-preview="easy"]'));
   assert.equal($('.arcade-hero .arcade-difficulty-trigger').textContent, 'Easy');
