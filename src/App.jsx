@@ -9,14 +9,18 @@ import { ThemeContext } from './context/ThemeContext';
 import { createLaboratory } from './services/laboratory';
 import { createAstraActionEngine } from './services/astraActionEngine';
 import { clickedDialogBackdrop } from './services/dialogInteraction';
+import { arcadeHref, isGame } from './arcade/catalog';
 import perfil from './data/perfil.json';
 
 const ChatPage = lazy(() => import('./pages/ChatPage'));
 const projectIds = new Set(perfil.projetos.map(project => project.id));
 const readRoute = () => {
   const { pathname, hash, search } = window.location;
-  const project = new URLSearchParams(search).get('project');
+  const params = new URLSearchParams(search);
+  const project = params.get('project');
+  const arcade = params.get('arcade');
   return { path: pathname.replace(/\/+$/, '') || '/', section: hash.slice(1),
+    arcade: arcade === '1' || isGame(arcade) ? arcade : null, challenge: params.get('challenge') === '1',
     project: hash === '#projetos' && projectIds.has(project) ? project : null };
 };
 
@@ -96,9 +100,9 @@ export default function App() {
     };
   }, [full, opened]);
   useEffect(() => {
-    if (!full || showIntro || !chatReady) return;
+    if (!full || showIntro || !chatReady || route.arcade) return;
     if (!window.matchMedia('(pointer: coarse)').matches) document.getElementById('chat-input')?.focus({ preventScroll: true });
-  }, [full, showIntro, chatReady]);
+  }, [full, showIntro, chatReady, route.arcade]);
   useEffect(() => {
     if (route.path !== '/' || route.project || !route.section) return;
     const frame = requestAnimationFrame(() => {
@@ -121,6 +125,12 @@ export default function App() {
     openFull: () => { if (full) return false; openFull(); return true; },
     openProject: id => { close(); navigate('/?project=' + encodeURIComponent(id) + '#projetos'); },
   };
+  const openArcade = (game, challenge) => {
+    if (!full) dialog.current?.close();
+    setOpened(false);
+    setStarted(true);
+    navigate(arcadeHref(game, challenge));
+  };
   if (!['/', '/chat'].includes(path)) return <main className="route-loading"><h1>404</h1><a href="/">{en ? 'Back to portfolio' : 'Voltar ao portfólio'}</a></main>;
   return <AstraContext.Provider value={{ lab, actions, labHandoff, setLabHandoff, actionUi,
     openAstra, openFull, returnPortfolio: event => { event.preventDefault(); close(); navigate('/'); } }}>
@@ -131,7 +141,8 @@ export default function App() {
         {full ? <a href="/" onClick={event => { event.preventDefault(); close(); navigate('/'); }}>{en ? '← Portfolio' : '← Portfólio'}</a> : <a href="/chat" onClick={openFull}>{en ? 'Open full Astra ↗' : 'Abrir Astra completa ↗'}</a>}
         {!full && <button autoFocus onClick={close} aria-label={en ? 'Close Astra' : 'Fechar Astra'}>✕</button>}
       </div>
-      {started && <Suspense fallback={<p className="astra-loading" role="status">{en ? 'Opening Astra…' : 'Abrindo Astra…'}</p>}><ChatPage onReady={setChatReady} modal={!full} visible={full ? !showIntro : opened} onSelectSection={selectSection} /></Suspense>}
+      {started && <Suspense fallback={<p className="astra-loading" role="status">{en ? 'Opening Astra…' : 'Abrindo Astra…'}</p>}><ChatPage onReady={setChatReady} modal={!full} visible={full ? !showIntro : opened} onSelectSection={selectSection}
+        arcade={full ? route.arcade : null} arcadeChallenge={route.challenge} onOpenArcade={openArcade} onCloseArcade={() => navigate('/chat')} /></Suspense>}
     </dialog>
     {showIntro && <AstraEntrance en={en} onFinish={finishIntro} />}
   </AstraContext.Provider>;

@@ -1,6 +1,6 @@
 // src/App.jsx
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { CircleHelp, Send, Sparkles, Square } from 'lucide-react';
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
+import { CircleHelp, Gamepad2, Send, Sparkles, Square } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import Navbar from '../components/Navbar';
 import useMobileViewport from '../hooks/useMobileViewport';
@@ -16,7 +16,11 @@ import { sourcesForText } from '../services/liveContext';
 import { useAstra } from '../context/AstraContext';
 import LaboratoryReview from '../components/LaboratoryReview';
 import { actionReply } from '../services/astraActionReply';
+import { arcadeIntent } from '../arcade/commands';
+import { answerArcade } from '../arcade/replies';
+import { isGame } from '../arcade/catalog';
 
+const FullArcade = lazy(() => import('../arcade/FullArcade'));
 const FONT_SANS = "Inter, 'Geist Sans', Roboto, system-ui, sans-serif";
 const messageAnchor = id => `astra-${id}`;
 
@@ -51,7 +55,8 @@ function TypingIndicator({ label }) {
   );
 }
 
-export default function ChatPage({ modal = false, visible = true, onReady, onSelectSection }) {
+export default function ChatPage({ modal = false, visible = true, onReady, onSelectSection,
+  arcade, arcadeChallenge, onOpenArcade, onCloseArcade }) {
   const { t, i18n } = useTranslation();
   const viewportRef = useMobileViewport();
   const { actions, actionUi, openFull, setLabHandoff } = useAstra();
@@ -63,6 +68,8 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
   const [streaming, setStreaming] = useState(null);
   const [resourcesOpen, setResourcesOpen] = useState(false);
   const resourcesTrigger = useRef(null);
+  const arcadeSession = useRef(null);
+  const showArcade = !modal && visible && Boolean(arcade);
   const activeRequest = useRef(null);
   const mounted = useRef(true);
   const followOutput = useRef(true);
@@ -146,6 +153,21 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
 
     appendMessage({ id: nextId(), sender: 'user', text: query, lang: requestLanguage });
     setInput('');
+    const session = showArcade ? arcadeSession.current : null;
+    const intent = !resourceActions && !predefinedSuggestion && arcadeIntent(query, session?.getState().game, showArcade);
+    if (intent) {
+      setLoading(true);
+      try {
+        const response = await answerArcade(intent, { en, compact: modal || !visible, session, openArcade: onOpenArcade });
+        if (mounted.current) appendMessage({ id: nextId(), sender: 'ai', lang: requestLanguage, ...response });
+      } catch {
+        if (mounted.current) appendMessage({ id: nextId(), sender: 'ai', lang: requestLanguage, text: t('chat.erro') });
+      } finally {
+        sendingRef.current = false;
+        if (mounted.current) setLoading(false);
+      }
+      return;
+    }
     setLoading(true);
     const id = nextId();
     const turn = idCounter.current;
@@ -254,7 +276,11 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
         setResourcesOpen(false);
       }}>
         {!modal && <Navbar />}
-        <div className="astra-workspace">
+        <div className={showArcade ? 'astra-workspace astra-workspace-arcade' : 'astra-workspace'}>
+          {showArcade && <Suspense fallback={<p role="status">{en ? 'Opening Astra Arcade…' : 'Abrindo Astra Arcade…'}</p>}>
+            <FullArcade ref={arcadeSession} en={en} initialGame={isGame(arcade) ? arcade : null}
+              challenge={arcadeChallenge} onClose={onCloseArcade} />
+          </Suspense>}
           <section className="center-panel glass-panel" aria-label={en ? 'Conversation with Astra' : 'Conversa com Astra'}>
             <div className="chat-view">
               <div className="chat-heading">
@@ -264,6 +290,13 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
                 </div>
                 <span className="astra-heading-actions">
                   {en ? 'AI assistant' : 'Assistente de IA'}
+                  <button type="button" className="icon-button astra-arcade-trigger" aria-label="Astra Arcade" title="Astra Arcade"
+                    aria-expanded={modal ? undefined : showArcade} onClick={() => {
+                      setResourcesOpen(false);
+                      if (modal) void handleSend(en ? 'Astra Arcade games' : 'Jogos do Astra Arcade');
+                      else if (showArcade) onCloseArcade();
+                      else onOpenArcade();
+                    }}><Gamepad2 size={18} aria-hidden="true" /></button>
                   <button ref={resourcesTrigger} type="button" className="icon-button astra-resources-trigger"
                       aria-label={t('chat.resources.title')} title={t('chat.resources.title')}
                       aria-controls={ASTRA_RESOURCES_ID} aria-expanded={resourcesOpen}
@@ -286,7 +319,7 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
                 className="chat-messages custom-scrollbar flex min-h-0 w-full flex-1 flex-col gap-6 overflow-y-auto p-4 sm:p-6"
               >
                 <div className="space-y-6">
-                  {!modal && <AstraHero en={en} compact={compact} prompts={prompts} disabled={loading} onPick={prompt => handleSend(prompt, true)} />}
+                  {!modal && !showArcade && <AstraHero en={en} compact={compact} prompts={prompts} disabled={loading} onPick={prompt => handleSend(prompt, true)} />}
 
                   {messages.map(message => (
                     <div id={messageAnchor(message.id)} tabIndex={-1} className="chat-msg-in outline-none" key={message.id}>
@@ -294,6 +327,16 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
                         onViewFull={openFull ? viewFullMessage : undefined} compact={modal}>
                         {message.reviewId && <LaboratoryReview reviewId={message.reviewId} onOpenLab={() => onSelectSection?.('laboratorio')}
                           onViewFull={modal && openFull ? () => viewFullMessage(message.id) : undefined} />}
+                        {message.arcadeLink && <a className="chip chip--accent self-start" href={message.arcadeLink} onClick={event => {
+                          if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+                          event.preventDefault();
+                          const params = new URL(message.arcadeLink, window.location.origin).searchParams;
+                          const game = params.get('arcade');
+                          const challenge = params.get('challenge') === '1';
+                          if (showArcade && arcadeSession.current) {
+                            void arcadeSession.current.dispatch(isGame(game) ? { type: 'game.start', game, challenge } : { type: 'arcade.open' });
+                          } else onOpenArcade(game, challenge);
+                        }}>{modal ? (en ? 'Open in Full Astra ↗' : 'Abrir na Astra Completa ↗') : (en ? 'Open Astra Arcade' : 'Abrir Astra Arcade')}</a>}
                       </MessageBubble>
                     </div>
                   ))}
@@ -306,7 +349,7 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
 
               {/* Atalhos: no estado vazio ficam dentro do hero */}
               <div className="chat-composer flex min-w-0 flex-col gap-3">
-                {!modal && compact && prompts.length > 0 && (
+                {!modal && !showArcade && compact && prompts.length > 0 && (
                   <div className="custom-scrollbar flex gap-2 overflow-x-auto px-1 pb-3 pt-1">
                     {prompts.map((prompt) => (
                       <button
@@ -336,10 +379,11 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
                   <input
                     ref={inputRef}
                     id="chat-input"
-                    aria-label={t('chat.placeholder') || 'Pergunte sobre o Gustavo'}
+                    aria-label={showArcade ? (en ? 'Ask Astra about the game' : 'Pergunte à Astra sobre o jogo') : t('chat.placeholder')}
                     value={input}
                     onChange={(event) => setInput(event.target.value)}
-                    placeholder={t('chat.placeholder') || 'Digite uma pergunta sobre o Gustavo...'}
+                    placeholder={showArcade ? (en ? 'Ask Astra about the game…' : 'Pergunte à Astra sobre o jogo…')
+                      : t('chat.placeholder') || 'Digite uma pergunta sobre o Gustavo...'}
                     disabled={!modal && loading}
                     autoComplete="off"
                     className="min-h-12 min-w-0 flex-1 bg-transparent py-3 pl-4 pr-2 text-[15px] font-medium text-ink outline-none placeholder:text-muted disabled:opacity-60 sm:pl-2"
