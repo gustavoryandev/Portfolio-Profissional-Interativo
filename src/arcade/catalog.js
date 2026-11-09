@@ -7,7 +7,8 @@ export const games = {
   snake: {
     name: 'Snake', color: '#78e7a3', tag: ['Reflexos', 'Reflexes'], difficulty: 'easy', target: 120,
     description: ['Colete energia e faça a serpente crescer sem tocar nas paredes ou no próprio corpo.', 'Collect energy and grow your snake without hitting walls or your own tail.'],
-    controls: ['Setas, WASD ou deslize para virar.', 'Use arrows, WASD or swipe to turn.'],
+    rules: ['Cada energia vale 10 pontos. A serpente acelera conforme cresce. Você pode virar para os lados, mas não voltar na direção oposta.', 'Each pickup is worth 10 points. The snake speeds up as it grows. You can turn left or right, but you cannot reverse direction.'],
+    controls: ['Use as setas ou WASD. No celular, use o direcional ou deslize no tabuleiro.', 'Use arrow keys or WASD. On mobile, use the directional pad or swipe on the board.'],
     tip: ['Faça voltas largas e deixe uma rota de fuga antes de alcançar a próxima energia.', 'Take wide turns and leave an escape route before reaching the next pickup.'],
     metrics: { food: ['Energias', 'Pickups'] },
   },
