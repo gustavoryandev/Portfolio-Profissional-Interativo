@@ -727,9 +727,9 @@ a.tile:hover, .tile--hover:hover { border-color: var(--accent); }
 .chat-form:focus-within { border-color: var(--accent); }
 .sidebar-note {
   display: flex; flex-direction: column; align-items: flex-start; gap: 10px; text-align: left;
-  border: 1px solid transparent; border-radius: var(--radius-control); transition: border-color 180ms ease;
+  border: 1px solid transparent; border-radius: var(--radius-control);
 }
-.sidebar-note:hover { border-color: var(--line); color: var(--ink); }
+.sidebar-note:hover { color: var(--ink); }
 .sidebar-note p { margin: 0; }
 .center-panel { position: relative; }
 .portfolio-section { padding-bottom: 84px; }
