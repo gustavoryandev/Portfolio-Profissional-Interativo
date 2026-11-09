@@ -1,0 +1,19 @@
+Stockfish.js 19.0.1, Lite single-threaded WebAssembly build
+Copyright 2026 Chess.com, LLC and the Stockfish contributors.
+Port by Nathan Rugg and contributors. Lite network by Chris Bao (sscg13).
+
+The engine is distributed under the GNU General Public License, version 3.
+See Copying.txt in this directory. The worker and WASM are the unmodified
+stockfish-19-lite-single files from the upstream v19.0.1 release.
+
+Corresponding source, including the WebAssembly glue and build scripts:
+https://github.com/nmrugg/stockfish.js/archive/0d5dd7944f88c817c07a26bc4fb1905d5f9c46d6.tar.gz
+
+Lite NNUE network used by this build:
+https://tests.stockfishchess.org/api/nn/nn-61e7af4bb97d.nnue
+
+Build instructions (Emscripten 6.0.9, npm run build-single-lite):
+https://github.com/nmrugg/stockfish.js/blob/v19.0.1/README.md#how-do-i-compile-the-engine
+
+Original release and checksums:
+https://github.com/nmrugg/stockfish.js/releases/tag/v19.0.1

@@ -32,6 +32,39 @@
       "Qual é o próximo jogo do Galo?",
       "Qual é o rating dele no xadrez?"
     ],
+    "chessGame": {
+      "label": "Partida de xadrez com a Astra",
+      "title": "Jogue xadrez com a Astra",
+      "instructions": "Você joga com as brancas. Arraste uma peça para jogar. A Astra usa o Stockfish neste dispositivo.",
+      "difficulty": "Dificuldade",
+      "difficultySelected": "Dificuldade ({{level}})",
+      "levels": {
+        "beginner": "Iniciante",
+        "easy": "Fácil",
+        "medium": "Médio",
+        "hard": "Difícil",
+        "master": "Mestre"
+      },
+      "thinking": "Astra pensando…",
+      "yourTurn": "Sua vez",
+      "check": "Xeque!",
+      "astraWins": "Xeque-mate. A Astra venceu!",
+      "playerWins": "Xeque-mate. Você venceu!",
+      "stalemate": "Empate por afogamento",
+      "draw": "Empate",
+      "engineError": "O Stockfish não respondeu. Tente novamente ou reinicie a partida.",
+      "retry": "Tentar novamente",
+      "restart": "Reiniciar partida",
+      "promotion": "Escolha a peça para promoção",
+      "pieces": {
+        "q": "Dama",
+        "r": "Torre",
+        "b": "Bispo",
+        "n": "Cavalo"
+      },
+      "cancel": "Cancelar",
+      "source": "Stockfish · código-fonte e licença"
+    },
     "resources": {
       "title": "Recursos da Astra",
       "close": "Fechar catálogo",

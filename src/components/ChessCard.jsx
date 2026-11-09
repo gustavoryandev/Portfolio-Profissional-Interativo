@@ -3,20 +3,26 @@ import { Chess } from 'chess.js';
 import { Chessboard } from 'react-chessboard';
 import {
   Crown, Trophy, Zap, Timer, Flame, Calendar, Users,
-  Puzzle, Target, MapPin, Swords, Percent,
+  Puzzle, Target, MapPin, Swords, Percent, ChevronDown,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { CardShell, CardHeader, CardFooter } from './ui/CardShell';
 import StatTile from './ui/StatTile';
+import OptionMenu from './OptionMenu';
+import { findStockfishMove, STOCKFISH_LEVELS } from '../services/stockfish';
 
 const MODE_ICONS = { rapid: Timer, blitz: Zap, bullet: Flame, daily: Calendar };
+const PROMOTIONS = ['q', 'r', 'b', 'n'];
 
 export function ChessGame({ active = true }) {
-  const { i18n } = useTranslation();
-  const en = i18n.language.startsWith('en');
+  const { t } = useTranslation(undefined, { keyPrefix: 'chat.chessGame' });
   const [game] = useState(() => new Chess());
   const [fen, setFen] = useState(() => game.fen());
-  const timer = useRef(null);
+  const [difficulty, setDifficulty] = useState('medium');
+  const [promotion, setPromotion] = useState(null);
+  const [engineError, setEngineError] = useState(false);
+  const [retry, setRetry] = useState(0);
+  const search = useRef(null);
   const boardHost = useRef(null);
   const [boardReady, setBoardReady] = useState(false);
 
@@ -30,22 +36,34 @@ export function ChessGame({ active = true }) {
   const id = useId();
 
   useEffect(() => {
-    if (game.turn() !== 'b' || game.isGameOver()) return;
-    timer.current = setTimeout(() => {
-      const moves = game.moves();
-      if (game.turn() === 'b' && !game.isGameOver() && moves.length) {
-        game.move(moves[Math.floor(Math.random() * moves.length)]);
+    if (!active || game.turn() !== 'b' || game.isGameOver()) return;
+    const controller = new AbortController();
+    search.current = controller;
+    setEngineError(false);
+    findStockfishMove(fen, STOCKFISH_LEVELS[difficulty], { signal: controller.signal })
+      .then(move => {
+        if (controller.signal.aborted || game.fen() !== fen) return;
+        game.move(move);
         setFen(game.fen());
-      }
-      timer.current = null;
-    }, 450);
-    return () => clearTimeout(timer.current);
-  }, [game, fen]);
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) setEngineError(true);
+      });
+    return () => {
+      controller.abort();
+      search.current = null;
+    };
+  }, [active, difficulty, fen, game, retry]);
 
   function onPieceDrop({ sourceSquare, targetSquare }) {
-    if (!targetSquare || game.turn() !== 'w' || game.isGameOver()) return false;
+    if (!active || !targetSquare || promotion || game.turn() !== 'w' || game.isGameOver()) return false;
+    if (game.get(sourceSquare)?.type === 'p' && targetSquare.endsWith('8')
+      && game.moves({ square: sourceSquare, verbose: true }).some(move => move.to === targetSquare && move.promotion)) {
+      setPromotion({ from: sourceSquare, to: targetSquare });
+      return false;
+    }
     try {
-      game.move({ from: sourceSquare, to: targetSquare, promotion: 'q' });
+      game.move({ from: sourceSquare, to: targetSquare });
       setFen(game.fen());
       return true;
     } catch {
@@ -54,38 +72,82 @@ export function ChessGame({ active = true }) {
   }
 
   function reset() {
-    clearTimeout(timer.current);
-    timer.current = null;
+    search.current?.abort();
+    setPromotion(null);
+    setEngineError(false);
     game.reset();
     setFen(game.fen());
   }
 
+  const thinking = game.turn() === 'b' && !game.isGameOver() && !engineError;
   const status = game.isCheckmate()
-    ? (en ? `Checkmate — ${game.turn() === 'w' ? 'Astra wins' : 'you win'}!` : `Xeque-Mate — ${game.turn() === 'w' ? 'a Astra venceu' : 'você venceu'}!`)
-    : game.isDraw()
-      ? (en ? 'Draw' : 'Empate')
-      : `${game.isCheck() ? (en ? 'Check! ' : 'Xeque! ') : ''}${game.turn() === 'w' ? (en ? 'Your turn' : 'Sua vez') : (en ? 'Astra is thinking…' : 'Astra pensando…')}`;
+    ? t(game.turn() === 'w' ? 'astraWins' : 'playerWins')
+    : game.isStalemate() ? t('stalemate')
+      : game.isDraw() ? t('draw')
+        : engineError ? t('engineError')
+          : `${game.isCheck() ? `${t('check')} ` : ''}${t(thinking ? 'thinking' : 'yourTurn')}`;
 
   return (
-    <CardShell as="section" aria-label={en ? "Chess game with Astra" : "Partida de xadrez com a Astra"}>
-      <h3 className="mb-2 text-lg font-semibold">{en ? 'Play chess with Astra' : 'Jogue xadrez com a Astra'}</h3>
-      <p className="mb-3 text-sm text-muted">{en ? 'You play white. Drag a piece to move. Automatic queen promotion. Astra uses random legal moves in this local game.' : 'Você joga com as brancas. Arraste uma peça para jogar. Promoção automática para dama. Nesta partida local, a Astra usa lances legais aleatórios.'}</p>
-      <p role="status" aria-live="polite" className="chip chip--accent mb-3 !text-sm">{status}</p>
+    <CardShell as="section" aria-label={t('label')}>
+      <h3 className="mb-2 text-lg font-semibold">{t('title')}</h3>
+      <p className="mb-3 text-sm text-muted">{t('instructions')}</p>
+      <div className="mb-3 flex flex-wrap items-center gap-3">
+        <div className="flex items-center gap-2 text-sm">
+          <span className="text-muted">{t('difficulty')}</span>
+          <OptionMenu
+            label={t('difficulty')}
+            triggerLabel={t('difficultySelected', { level: t(`levels.${difficulty}`) })}
+            triggerClassName="chip chip--accent !text-sm"
+            triggerContent={<>{t(`levels.${difficulty}`)} <ChevronDown size={14} aria-hidden="true" /></>}
+            groups={[{ options: Object.keys(STOCKFISH_LEVELS).map(level => ({ id: level, label: t(`levels.${level}`) })) }]}
+            value={difficulty}
+            onChange={next => {
+              if (next === difficulty) return;
+              search.current?.abort();
+              setDifficulty(next);
+            }}
+            width={184}
+          />
+        </div>
+        <p role="status" className="chip chip--accent !text-sm">
+          {thinking && <span className="h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-accent motion-reduce:animate-none" aria-hidden="true" />}
+          {status}
+        </p>
+      </div>
+      {promotion && (
+        <div className="mb-3 flex flex-wrap items-center gap-2" role="group" aria-label={t('promotion')}>
+          <span className="text-sm text-muted">{t('promotion')}</span>
+          {PROMOTIONS.map(piece => (
+            <button type="button" key={piece} className="chip chip--accent" autoFocus={piece === 'q'} onClick={() => {
+              game.move({ ...promotion, promotion: piece });
+              setPromotion(null);
+              setFen(game.fen());
+            }}>{t(`pieces.${piece}`)}</button>
+          ))}
+          <button type="button" className="chip" onClick={() => setPromotion(null)}>{t('cancel')}</button>
+        </div>
+      )}
       <div ref={boardHost} className="mx-auto w-full max-w-[480px]">
         {active && boardReady && <Chessboard options={{
           id,
           position: fen,
           boardOrientation: 'white',
-          allowDragging: game.turn() === 'w' && !game.isGameOver(),
+          allowDragging: !promotion && game.turn() === 'w' && !game.isGameOver(),
           canDragPiece: ({ square }) => game.get(square)?.color === 'w',
           onPieceDrop,
           darkSquareStyle: { backgroundColor: 'var(--chess-dark-square, #3b6ea5)' },
           lightSquareStyle: { backgroundColor: 'var(--chess-light-square, #dbe9f7)' },
         }} />}
       </div>
-      <button type="button" onClick={reset} className="chip chip--accent mt-4 !px-4 !py-2 !text-sm">
-        {en ? 'Restart game' : 'Reiniciar Partida'}
-      </button>
+      <div className="mt-4 flex flex-wrap gap-2">
+        <button type="button" onClick={reset} className="chip chip--accent !px-4 !py-2 !text-sm">{t('restart')}</button>
+        {engineError && <button type="button" onClick={() => setRetry(count => count + 1)}
+          className="chip chip--accent !px-4 !py-2 !text-sm">{t('retry')}</button>}
+      </div>
+      <a href={`${import.meta.env.BASE_URL}stockfish/Source.txt`} target="_blank" rel="noreferrer"
+        className="mt-2 inline-block text-xs text-muted underline underline-offset-2">
+        {t('source')}
+      </a>
     </CardShell>
   );
 }

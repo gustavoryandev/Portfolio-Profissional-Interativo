@@ -32,6 +32,39 @@
       "When is Galo's next match?",
       "What is his chess rating?"
     ],
+    "chessGame": {
+      "label": "Chess game with Astra",
+      "title": "Play chess with Astra",
+      "instructions": "You play white. Drag a piece to move. Astra runs Stockfish on this device.",
+      "difficulty": "Difficulty",
+      "difficultySelected": "Difficulty ({{level}})",
+      "levels": {
+        "beginner": "Beginner",
+        "easy": "Easy",
+        "medium": "Medium",
+        "hard": "Hard",
+        "master": "Master"
+      },
+      "thinking": "Astra is thinking…",
+      "yourTurn": "Your turn",
+      "check": "Check!",
+      "astraWins": "Checkmate. Astra wins!",
+      "playerWins": "Checkmate. You win!",
+      "stalemate": "Draw by stalemate",
+      "draw": "Draw",
+      "engineError": "Stockfish did not respond. Try again or restart the game.",
+      "retry": "Try again",
+      "restart": "Restart game",
+      "promotion": "Choose a promotion piece",
+      "pieces": {
+        "q": "Queen",
+        "r": "Rook",
+        "b": "Bishop",
+        "n": "Knight"
+      },
+      "cancel": "Cancel",
+      "source": "Stockfish · source and license"
+    },
     "resources": {
       "title": "Astra resources",
       "close": "Close resource catalog",
