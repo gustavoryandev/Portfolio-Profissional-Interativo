@@ -41,6 +41,10 @@
 /* Programmatic focus after the intro/skip link should not frame the entire page. */
 .scroll-content:focus { outline: none; }
 .scroll-portfolio [id] { scroll-margin-top: 180px; }
+/* Route navigation focuses a non-interactive destination for keyboard and screen reader users. */
+.scroll-portfolio :is(.portfolio-hero, .scroll-section, .projects-scroll-section, [data-project-slide] h4)[tabindex="-1"]:focus {
+  outline: none;
+}
 .portfolio-hero { min-height: min(850px, 92dvh); display: grid; grid-template-columns: 1.25fr .85fr; gap: clamp(28px, 7vw, 100px); align-items: center; padding-block: 80px; }
 .portfolio-hero h1 { font-size: clamp(64px, 8vw, 112px); font-weight: 750; letter-spacing: -.07em; line-height: .98; }
 .neon-title { color: var(--accent); filter: drop-shadow(0 0 22px rgb(var(--brand-400) / .2)); }
