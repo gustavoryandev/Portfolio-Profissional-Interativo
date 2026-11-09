@@ -16,6 +16,19 @@ const shapes = {
 };
 const colors = { I: '#74def1', O: '#ffdc71', T: '#c2a2ff', S: '#78e5a6', Z: '#ff8396', J: '#829bff', L: '#ffb06d' };
 const types = Object.keys(shapes);
+// SRS offset tables adapted from Tetr.js (MIT). See public/THIRD_PARTY_NOTICES.txt.
+const offsets = [
+  [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0]],
+  [[0, 0], [1, 0], [1, 1], [0, -2], [1, -2]],
+  [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0]],
+  [[0, 0], [-1, 0], [-1, 1], [0, -2], [-1, -2]],
+];
+const offsetsI = [
+  [[0, 0], [-1, 0], [2, 0], [-1, 0], [2, 0]],
+  [[-1, 0], [0, 0], [0, 0], [0, -1], [0, 2]],
+  [[-1, -1], [1, -1], [-2, -1], [1, 0], [-2, 0]],
+  [[0, -1], [0, -1], [0, -1], [0, 1], [0, -2]],
+];
 const points = Object.fromEntries(types.map(type => {
   const grid = shapes[type];
   const turns = [grid.flatMap((row, y) => [...row].flatMap((cell, x) => cell === '#' ? [[x, y]] : []))];
@@ -86,13 +99,22 @@ export default function createBlocks(difficulty, random = Math.random) {
   }
 
   function rotate(delta) {
-    const piece = { ...state.active, turn: (state.active.turn + delta + 4) % 4 };
-    return [[0, 0], [-1, 0], [1, 0], [-2, 0], [2, 0], [0, -1], [-1, -1], [1, -1], [0, -2]]
-      .some(([x, y]) => shift({ ...piece, x: piece.x + x, y: piece.y + y }));
+    const { type, turn } = state.active;
+    if (type === 'O') return;
+    const piece = { ...state.active, turn: (turn + delta + 4) % 4 };
+    const table = type === 'I' ? offsetsI : offsets;
+    const from = table[turn];
+    const to = table[piece.turn];
+    // The local matrices already rotate about the natural pivot, so normalize the origin.
+    const originX = from[0][0] - to[0][0];
+    const originY = from[0][1] - to[0][1];
+    from.some(([x, y], index) => shift({
+      ...piece, x: piece.x + x - to[index][0] - originX, y: piece.y + y - to[index][1] - originY,
+    }));
   }
 
-  function preview(ctx, type, top) {
-    rect(ctx, '#23283f', 174, top, 90, 58);
+  function preview(ctx, type, top, palette) {
+    rect(ctx, palette?.surface ?? '#23283f', 174, top, 90, 58);
     if (type) for (const [x, y] of points[type][0]) rect(ctx, colors[type], 190 + x * 13, top + 10 + y * 13, 11, 11);
   }
 
@@ -129,19 +151,19 @@ export default function createBlocks(difficulty, random = Math.random) {
       if (valid(down(state.active))) grounded = 0;
       else if ((grounded += dt) >= 0.44) lock();
     },
-    render(ctx, en) {
-      rect(ctx, '#141a2b', 0, 0, width, height);
-      state.board.forEach((row, y) => row.forEach((type, x) => tile(ctx, colors[type] ?? '#1d263a', x, y, unit)));
+    render(ctx, en, palette) {
+      rect(ctx, palette?.background ?? '#141a2b', 0, 0, width, height);
+      state.board.forEach((row, y) => row.forEach((type, x) => tile(ctx, colors[type] ?? palette?.surface ?? '#1d263a', x, y, unit)));
       if (!state.result) {
-        for (const [x, y] of cells(ghost())) if (y >= 0) tile(ctx, '#51607b', x, y, unit, 3);
+        for (const [x, y] of cells(ghost())) if (y >= 0) tile(ctx, palette?.muted ?? '#51607b', x, y, unit, 3);
         for (const [x, y] of cells(state.active)) if (y >= 0) tile(ctx, colors[state.active.type], x, y, unit);
       }
       ctx.font = '700 11px system-ui';
-      ctx.fillStyle = '#d2d9ee';
+      ctx.fillStyle = palette?.ink ?? '#d2d9ee';
       ctx.fillText(en ? 'NEXT' : 'PRÓXIMA', 174, 23);
       ctx.fillText(en ? 'HOLD' : 'RESERVA', 174, 124);
-      preview(ctx, state.next, 31);
-      preview(ctx, state.held, 132);
+      preview(ctx, state.next, 31, palette);
+      preview(ctx, state.held, 132, palette);
     },
   };
 }
