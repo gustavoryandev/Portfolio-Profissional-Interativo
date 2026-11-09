@@ -281,11 +281,12 @@ function MessageBubble({ message, liveContext = {}, refreshing = [], onRefresh, 
           if (!card) return <span key={index}>{segment.tag}</span>;
 
           const { Component, limit } = card;
-          if (compact) {
+          const source = CARD_SOURCES[segment.tag.slice(1, -1).split(':')[0]];
+          // Metrics can be opened in either Astra surface; the other rich tools keep their existing full view.
+          if (compact && source !== 'github' && source !== 'wakatime') {
             const target = segment.tag === '[PROJECTS_CARD]' ? 'projects' : segment.tag === '[SKILLS_CARD]' ? 'skills' : 'full';
             return <button key={segment.tag} className="chip chip--accent" onClick={() => onSelectSection?.(target)}>{target === 'projects' ? (uiLanguage === 'en' ? 'Explore projects' : 'Explorar projetos') : target === 'skills' ? (uiLanguage === 'en' ? 'Explore skills' : 'Explorar habilidades') : (uiLanguage === 'en' ? 'Explore in full Astra' : 'Explorar na Astra completa')}</button>;
           }
-          const source = CARD_SOURCES[segment.tag.slice(1, -1).split(':')[0]];
           const data = context[source];
           return (
             <section className="message-card" key={index}>
