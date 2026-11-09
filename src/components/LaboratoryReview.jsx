@@ -12,17 +12,19 @@ const messages = {
   stale: ['O código mudou depois da proposta. Peça à Astra para preparar outra.', 'The code changed after the proposal. Ask Astra to prepare a new one.'],
 };
 
-export default function LaboratoryReview({ onOpenLab, onViewFull, focusId }) {
-  const [lab, { review, reviewStatus, busy }] = useLaboratory();
+export default function LaboratoryReview({ reviewId, onOpenLab, onViewFull }) {
+  const [lab, { review, latestReviewId, reviewResults, busy }] = useLaboratory();
   const { i18n } = useTranslation();
   const title = useId();
   const en = i18n.language.startsWith('en');
-  if (!review) return reviewStatus && <p role="status" className="lab-review-status">
+  const id = reviewId ?? latestReviewId;
+  const reviewStatus = reviewResults[id];
+  if (review?.id !== id) return reviewStatus ? <p role="status" className="lab-review-status">
     {messages[reviewStatus][Number(en)]}{onOpenLab && (reviewStatus === 'applied' || reviewStatus === 'approved') &&
       <> <button className="chip chip--accent" type="button" onClick={onOpenLab}>{en ? 'Open Laboratory' : 'Abrir Laboratório'}</button></>}
-  </p>;
+  </p> : null;
   const example = LAB_MODES.find(item => item.id === review.example)[en ? 'en' : 'pt'];
-  return <section id={focusId} tabIndex={focusId ? -1 : undefined} className="lab-review glass-panel outline-none" aria-labelledby={title}>
+  return <section className="lab-review glass-panel" aria-labelledby={title}>
     <h3 id={title}>{review.edits ? (en ? 'Review Astra’s code changes' : 'Revise as alterações da Astra')
       : (en ? 'Review code before running' : 'Revise o código antes de executar')}</h3>
     <p>{languages[review.language].label} · {example} · {languages[review.language].file}</p>

@@ -18,7 +18,6 @@ import LaboratoryReview from '../components/LaboratoryReview';
 import { actionReply } from '../services/astraActionReply';
 
 const FONT_SANS = "Inter, 'Geist Sans', Roboto, system-ui, sans-serif";
-const LAB_REVIEW_ID = 'astra-lab-review';
 const messageAnchor = id => `astra-${id}`;
 
 const MOTION_CSS = `
@@ -179,6 +178,7 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
       }, { signal: controller.signal });
       const notices = [...(plan?.notices ?? [])];
       const cards = plan?.cards ?? [];
+      let reviewId = plan?.reviewId;
       if (plan?.snapshot) {
         live.absorb(data.liveContext);
         buffer.push({ type: 'reset' });
@@ -187,6 +187,7 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
         controller.signal.throwIfAborted();
         if (!mounted.current) return;
         const proposal = await actions.execute(turn, data.actions, actionUi, { base: plan.base, signal: controller.signal });
+        reviewId = proposal.reviewId;
         notices.push(...proposal.notices);
       }
       controller.signal.throwIfAborted();
@@ -206,6 +207,7 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
         context: data.liveContext,
         lang: replyLanguage,
         model: data.model,
+        reviewId,
       });
       live.absorb(data.liveContext);
       const cardSources = sourcesForText(response);
@@ -289,15 +291,16 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
                   {messages.map(message => (
                     <div id={messageAnchor(message.id)} tabIndex={-1} className="chat-msg-in outline-none" key={message.id}>
                       <MessageBubble message={message.id === 'welcome' && modal ? { ...message, text: t('chat.quickWelcome'), translationKey: 'chat.quickWelcome' } : message} liveContext={live.context} refreshing={live.refreshing} onRefresh={live.refresh} onSelectSection={onSelectSection}
-                        onViewFull={openFull ? viewFullMessage : undefined} compact={modal} />
+                        onViewFull={openFull ? viewFullMessage : undefined} compact={modal}>
+                        {message.reviewId && <LaboratoryReview reviewId={message.reviewId} onOpenLab={() => onSelectSection?.('laboratorio')}
+                          onViewFull={modal && openFull ? () => viewFullMessage(message.id) : undefined} />}
+                      </MessageBubble>
                     </div>
                   ))}
                   {streaming && (
                     <StreamingReply key={streaming.id} buffer={streaming.buffer} containerRef={messagesContainerRef} followRef={followOutput}
                       fallback={<TypingIndicator label={t('chat.digitando', { defaultValue: en ? 'Generating reply' : 'Gerando resposta' })} />} />
                   )}
-                  {actions && <LaboratoryReview focusId={LAB_REVIEW_ID} onOpenLab={() => onSelectSection?.('laboratorio')}
-                    onViewFull={modal && openFull ? () => viewFullCard(LAB_REVIEW_ID) : undefined} />}
                 </div>
               </div>
 

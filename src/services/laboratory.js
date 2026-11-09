@@ -14,11 +14,11 @@ export function createLaboratory({ makeWorker = language => new Worker(`/${langu
   let snapshot;
   let active;
   let review = null;
-  let reviewStatus = null;
+  let reviewResults = {};
   let reviewId = 0;
   const entry = target => entries.get(keyOf(target)) ?? { code: original(target), output: '', status: 'idle', revision: 0 };
   const publish = () => {
-    snapshot = { ...selection, ...entry(selection), busy: Boolean(active), review, reviewStatus };
+    snapshot = { ...selection, ...entry(selection), busy: Boolean(active), review, latestReviewId: reviewId, reviewResults };
     for (const listener of listeners) listener();
   };
   const update = (target, values) => { entries.set(keyOf(target), { ...entry(target), ...values }); };
@@ -115,7 +115,6 @@ export function createLaboratory({ makeWorker = language => new Worker(`/${langu
     if (runAfter && !next.trim()) return 'empty';
     review = { id: ++reviewId, language: base.language, example: base.example, revision: current.revision,
       code: current.code, next, edits, runAfter, restore };
-    reviewStatus = null;
     publish();
     return 'review';
   }
@@ -123,17 +122,19 @@ export function createLaboratory({ makeWorker = language => new Worker(`/${langu
     if (review?.id !== id || (approve && active)) return;
     const proposal = review;
     review = null;
-    if (!approve) reviewStatus = 'rejected';
-    else if (entry(proposal).revision !== proposal.revision) reviewStatus = 'stale';
+    let status;
+    if (!approve) status = 'rejected';
+    else if (entry(proposal).revision !== proposal.revision) status = 'stale';
     else {
       selection = { language: proposal.language, example: proposal.example };
       if (proposal.edits) update(selection, { code: proposal.next, revision: proposal.revision + 1,
         ...(proposal.restore && { output: '', status: 'idle' }) });
-      reviewStatus = proposal.edits ? 'applied' : 'approved';
-      if (proposal.runAfter) {
-        run();
-        return;
-      }
+      status = proposal.edits ? 'applied' : 'approved';
+    }
+    reviewResults = { ...reviewResults, [id]: status };
+    if ((status === 'applied' || status === 'approved') && proposal.runAfter) {
+      run();
+      return;
     }
     publish();
   }

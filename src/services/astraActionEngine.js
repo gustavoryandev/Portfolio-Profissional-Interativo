@@ -44,6 +44,7 @@ export function createAstraActionEngine({ lab, projectIds }) {
           result.notices.push(edits && !base?.canEdit ? 'invalid' : lab.propose({ edits, runAfter: type === 'lab.run' || runAfter }, base));
         }
       }
+      if (result.notices.includes('review')) result.reviewId = lab.getSnapshot().latestReviewId;
       return result;
     },
   };

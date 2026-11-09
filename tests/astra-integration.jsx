@@ -134,6 +134,8 @@ try {
   assert.equal(workers.length, 0);
   await click($('.astra-fab'));
   await until(() => $('.astra-compact #chat-input'));
+  const editMessage = $('.astra-compact .lab-review-status').closest('.chat-msg-in');
+  assert.match(editMessage.textContent, /Change applied to the editor/);
   await send('/HELP');
   assert.ok($('.astra-compact #astra-resources[open]'));
   assert.ok($('#astra-resource-metrics'));
@@ -147,6 +149,8 @@ try {
   await send('/help');
   await click($('#astra-resource-labRun').closest('button'));
   await until(() => $('.astra-compact .lab-review'));
+  const runMessage = $('.astra-compact .lab-review').closest('.chat-msg-in');
+  assert.notEqual(runMessage, editMessage);
   assert.ok($('.astra-compact .lab-review a[href="/chat"]'));
   assert.equal(requests.length, beforeHelp);
   assert.equal(workers.length, 0, 'the run shortcut still requires approval');
@@ -160,6 +164,9 @@ try {
   await send('Thanks');
   const plainMessage = [...document.querySelectorAll('.astra-compact .chat-msg-in')].find(node => node.textContent.includes('You’re welcome.'));
   assert.equal(plainMessage.querySelector('a[href="/chat"]'), null);
+  assert.equal(plainMessage.querySelector('.lab-review-status'), null);
+  assert.match(editMessage.textContent, /Change applied to the editor/);
+  assert.match(runMessage.textContent, /Run approved/);
   await click(cardMessage.querySelector('a[href="/chat"]'));
   await until(() => $('.astra-full #chat-input'));
   await until(() => document.activeElement === cardMessage);
@@ -174,7 +181,7 @@ try {
   assert.match($('.astra-full [role="log"]').textContent, /already in Full Astra/);
   assert.equal(window.history.length, historyLength);
   assert.ok($('.astra-full .astra-resources-trigger'));
-  await click(findButton($('.astra-full'), 'Open Laboratory'));
+  await click(findButton(runMessage, 'Open Laboratory'));
   await until(() => window.location.hash === '#laboratorio');
   assert.match($('#playground-code').value, /aluno = "Ana"/);
   assert.match($('.code-lab-output pre').textContent, /Ficha de Ana/);

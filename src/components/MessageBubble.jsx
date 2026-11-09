@@ -212,7 +212,7 @@ function Avatar({ isUser, children }) {
   );
 }
 
-function MessageBubble({ message, liveContext = {}, refreshing = [], onRefresh, onSelectSection, onViewFull, compact = false }) {
+function MessageBubble({ message, liveContext = {}, refreshing = [], onRefresh, onSelectSection, onViewFull, compact = false, children }) {
   const { i18n } = useTranslation();
   const uiLanguage = i18n.language.startsWith('en') ? 'en' : 'pt';
   const ui = UI;
@@ -313,6 +313,7 @@ function MessageBubble({ message, liveContext = {}, refreshing = [], onRefresh, 
             </section>
           );
         })}
+        {children}
       </div>
     </div>
   );

@@ -28,8 +28,9 @@ test('a Laboratory plan works before mount and its approval runs once against th
   assert.match(snapshot.code, /aluno = "Carlos"/);
   assert.equal(Object.hasOwn(snapshot, 'output'), false);
   const edit = [{ type: 'lab.edit', edits: [{ find: 'aluno = "Carlos"', replace: 'aluno = "Ana"' }], runAfter: true }];
-  await engine.execute(1, edit, ui, { base });
+  const firstReview = await engine.execute(1, edit, ui, { base });
   const { id } = lab.getSnapshot().review;
+  assert.equal(firstReview.reviewId, id);
   assert.equal(lab.getSnapshot().code, snapshot.code);
   assert.equal(workers.length, 0);
   lab.resolveReview(id, true);
@@ -51,7 +52,8 @@ test('a Laboratory plan works before mount and its approval runs once against th
   const pendingId = lab.getSnapshot().review.id;
   lab.setCode(next.snapshot.code + '\n# manual change');
   lab.resolveReview(pendingId, true);
-  assert.equal(lab.getSnapshot().reviewStatus, 'stale');
+  assert.equal(lab.getSnapshot().reviewResults[pendingId], 'stale');
+  assert.equal(lab.getSnapshot().reviewResults[id], 'applied');
   assert.match(lab.getSnapshot().code, /# manual change/);
   assert.match(lab.getSnapshot().code, /aluno = "Ana"/);
 });
