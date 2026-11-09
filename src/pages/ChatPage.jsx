@@ -1,10 +1,11 @@
 // src/App.jsx
 import { useEffect, useRef, useState } from 'react';
-import { Send, Sparkles, Square } from 'lucide-react';
+import { CircleHelp, Send, Sparkles, Square } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import Navbar from '../components/Navbar';
 import useMobileViewport from '../hooks/useMobileViewport';
 import AstraHero from '../components/AstraHero';
+import AstraResources, { ASTRA_RESOURCES_ID } from '../components/AstraResources';
 import MessageBubble from '../components/MessageBubble';
 import StreamingReply from '../components/StreamingReply';
 import { createStreamBuffer } from '../services/streamBuffer';
@@ -55,6 +56,8 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
   const en = i18n.language.startsWith('en');
   const [loading, setLoading] = useState(false);
   const [streaming, setStreaming] = useState(null);
+  const [resourcesOpen, setResourcesOpen] = useState(false);
+  const resourcesTrigger = useRef(null);
   const activeRequest = useRef(null);
   const mounted = useRef(true);
   const followOutput = useRef(true);
@@ -78,6 +81,9 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
   }, []);
 
   useEffect(() => { onReady?.(true); }, [onReady]);
+  useEffect(() => {
+    if (modal) setResourcesOpen(false);
+  }, [modal]);
 
   const nextId = () => `msg-${++idCounter.current}`;
   const compact = messages.length > 1; // hero grande só no estado vazio
@@ -105,6 +111,11 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
 
   const handleSend = async (suggestion = input, predefinedSuggestion = false) => {
     const query = suggestion.trim();
+    if (!modal && query.toLowerCase() === '/help') {
+      setInput('');
+      setResourcesOpen(true);
+      return;
+    }
     if (!query || sendingRef.current) return;
     sendingRef.current = true;
     const requestLanguage = i18n.language;
@@ -179,7 +190,11 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
     >
       <style>{MOTION_CSS}</style>
 
-      <div className="app-frame relative z-10 flex flex-col">
+      <div className="app-frame relative z-10 flex flex-col" onKeyDown={event => {
+        if (modal || !resourcesOpen || event.key !== 'Escape' || event.defaultPrevented) return;
+        event.preventDefault();
+        setResourcesOpen(false);
+      }}>
         {!modal && <Navbar />}
         <div className="astra-workspace">
           <section className="center-panel glass-panel" aria-label={en ? 'Conversation with Astra' : 'Conversa com Astra'}>
@@ -189,7 +204,17 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
                   <span className="astra-mini" aria-hidden="true"><img src="/astra-avatar.png" alt="" /></span>
                   <h2>{en ? 'Talk to Astra' : 'Converse com a Astra'}</h2>
                 </div>
-                <span>{en ? 'AI assistant' : 'Assistente de IA'}</span>
+                <span className={modal ? undefined : 'astra-heading-actions'}>
+                  {en ? 'AI assistant' : 'Assistente de IA'}
+                  {!modal && (
+                    <button ref={resourcesTrigger} type="button" className="icon-button astra-resources-trigger"
+                      aria-label={t('chat.resources.title')} title={t('chat.resources.title')}
+                      aria-controls={ASTRA_RESOURCES_ID} aria-expanded={resourcesOpen}
+                      onClick={() => setResourcesOpen(open => !open)}>
+                      <CircleHelp size={17} aria-hidden="true" />
+                    </button>
+                  )}
+                </span>
               </div>
 
               <div
@@ -270,6 +295,10 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
             </div>
 
           </section>
+          {!modal && (
+            <AstraResources open={resourcesOpen} disabled={loading} triggerRef={resourcesTrigger}
+              onClose={() => setResourcesOpen(false)} onPick={prompt => handleSend(prompt, true)} />
+          )}
         </div>
       </div>
     </div>

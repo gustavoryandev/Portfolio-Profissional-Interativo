@@ -46,3 +46,83 @@
 .astra-full .chat-heading { padding-top: 16.5px; padding-bottom: 16.5px; }
 @media(max-width:767px) { .astra-full .astra-workspace { padding: 8px; } }
 .astra-starter b { flex-shrink: 0; white-space: nowrap; }
+
+.astra-heading-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.astra-resources-trigger.icon-button { width: 30px; height: 30px; }
+.astra-resources-trigger[aria-expanded=true] { border-color: var(--accent); }
+.astra-resources:not([open]) { display: none; }
+.astra-resources[open] {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  color: var(--ink);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.astra-resources-header {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line);
+  font-size: 15px;
+  font-weight: 600;
+}
+.astra-resources-body {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 12px;
+}
+.astra-resources-note { margin-bottom: 12px; color: var(--muted); font-size: 12px; }
+.astra-resources-list { display: grid; gap: 6px; }
+.astra-resource {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  min-height: 48px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel-soft);
+  text-align: start;
+}
+.astra-resource > svg { flex: none; color: var(--accent); }
+.astra-resource strong { display: block; font-size: 13px; font-weight: 600; }
+.astra-resource span span { display: block; color: var(--muted); font-size: 12px; }
+.astra-resource:not(:disabled):hover { border-color: var(--accent); }
+.astra-resource:disabled { opacity: .55; cursor: not-allowed; }
+
+@media (width > 959px) {
+  .astra-workspace:has(> .astra-resources[open]) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) clamp(265px, 26vw, 310px);
+    gap: 12px;
+  }
+  .astra-resources[open] { position: static; width: 100%; height: calc(100dvh - 92px); margin: 0; }
+}
+
+@media (max-width: 959px) {
+  .astra-resources[open] {
+    position: fixed;
+    inset: var(--chat-viewport-top, 0px) 0 auto auto;
+    margin: 0;
+    width: min(360px, 100%);
+    max-width: 100%;
+    height: var(--chat-viewport-height, 100dvh);
+    max-height: none;
+    border-radius: 0;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .astra-resources::backdrop { background: #060b18aa; }
+  .astra-resources-close.icon-button { width: 44px; height: 44px; }
+}
