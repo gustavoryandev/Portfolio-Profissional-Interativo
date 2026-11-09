@@ -9,6 +9,7 @@ Object.assign(globalThis, { window, document, HTMLElement: window.HTMLElement, M
   requestAnimationFrame: window.requestAnimationFrame.bind(window), cancelAnimationFrame: window.cancelAnimationFrame.bind(window),
   IS_REACT_ACT_ENVIRONMENT: true });
 window.localStorage.setItem('astra-intro-seen', '1'); // Left by a previous visit.
+window.sessionStorage.setItem('astra-intro-seen', '1');
 window.matchMedia = query => ({ matches: query.includes('prefers-reduced-motion') || query.includes('pointer: coarse'),
   addEventListener() {}, removeEventListener() {}, addListener() {}, removeListener() {} });
 window.scrollTo = () => {};
@@ -89,8 +90,7 @@ async function send(text) {
 }
 try {
   await act(async () => root.render(<ThemeProvider><App /></ThemeProvider>));
-  assert.ok($('.astra-entrance'), 'direct entry shows the intro in a fresh tab session');
-  assert.equal(window.sessionStorage.getItem('astra-intro-seen'), null);
+  assert.ok($('.astra-entrance'), 'direct entry shows the intro even with stale storage flags');
   await click($('.astra-entrance a[href="/"]'));
   await until(() => $('.astra-fab'));
   await click($('.astra-fab'));
@@ -101,14 +101,15 @@ try {
   assert.equal(requests[0].surface, 'compact');
   assert.ok($('.astra-entrance'), 'first Full Astra opening from compact plays the intro');
   await click($('.astra-entrance button'));
-  assert.equal(window.sessionStorage.getItem('astra-intro-seen'), '1');
   assert.equal($('.astra-entrance'), null);
-  // Fresh direct entry: the editor has never mounted, but the intro is already seen in this tab.
+  // Fresh direct entry in the same tab: both intro and editor state belong to this app load.
   await act(async () => root.unmount());
   requests.length = 0;
   const directRoot = createRoot(document.getElementById('root'));
   activeRoot = directRoot;
   await act(async () => directRoot.render(<ThemeProvider><App /></ThemeProvider>));
+  assert.ok($('.astra-entrance'), 'a new app load plays the intro again in the same tab');
+  await click($('.astra-entrance button'));
   await until(() => $('.astra-full #chat-input'));
   assert.equal($('#laboratorio'), null, 'direct entry to Full Astra has no mounted Laboratory');
   await send('/help');
@@ -164,7 +165,7 @@ try {
   await until(() => document.activeElement === cardMessage);
   assert.equal(cardMessage.querySelector('a[href="/chat"]'), null);
   assert.ok(cardMessage.querySelector('.project-tile'), 'the same reply now shows the full project card');
-  assert.equal($('.astra-entrance'), null, 'returning to Full Astra in the same tab skips the intro');
+  assert.equal($('.astra-entrance'), null, 'returning to Full Astra during the same visit skips the intro');
   await act(async () => workers[0].onmessage({ data: { type: 'done', output: 'BRO FIT | Ficha de Ana' } }));
   assert.match($('.astra-full [role="log"]').textContent, /rename the student to Ana/);
   const historyLength = window.history.length;

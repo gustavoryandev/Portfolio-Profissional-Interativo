@@ -33,20 +33,16 @@ for (const lang of ['pt', 'en']) {
   assert.equal(doc.querySelectorAll('.project-tile').length, perfil.projetos.length);
   page.window.close();
 }
-// Old persistent markers must not skip the intro in a fresh tab session.
+// Flags left by previous visits must not skip the intro on a fresh load.
 window.localStorage.setItem('astra-visited', '1');
 window.localStorage.setItem('astra-intro-seen', '1');
+window.sessionStorage.setItem('astra-intro-seen', '1');
 const firstChat = render('/chat');
 assert.ok(firstChat.window.document.querySelector('.astra-shell-full[inert]'));
 assert.ok(firstChat.window.document.querySelector('.astra-entrance'));
 assert.equal(firstChat.window.document.querySelector('.scroll-portfolio'), null);
 firstChat.window.close();
 
-window.sessionStorage.setItem('astra-intro-seen', '1');
-const returnChat = render('/chat');
-assert.ok(returnChat.window.document.querySelector('.astra-shell-full:not([inert])'));
-assert.equal(returnChat.window.document.querySelector('.astra-entrance'), null);
-returnChat.window.close();
 const unknown = render('/missing');
 assert.equal(unknown.window.document.querySelector('h1').textContent, '404');
 assert.equal(unknown.window.document.querySelector('a').getAttribute('href'), '/');

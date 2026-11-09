@@ -12,10 +12,6 @@ import { clickedDialogBackdrop } from './services/dialogInteraction';
 import perfil from './data/perfil.json';
 
 const ChatPage = lazy(() => import('./pages/ChatPage'));
-const INTRO_SEEN_KEY = 'astra-intro-seen';
-const hasSeenAstraIntro = () => {
-  try { return window.sessionStorage.getItem(INTRO_SEEN_KEY) === '1'; } catch { return false; }
-};
 const projectIds = new Set(perfil.projetos.map(project => project.id));
 const readRoute = () => {
   const { pathname, hash, search } = window.location;
@@ -33,9 +29,7 @@ export default function App() {
   const [lab] = useState(createLaboratory);
   const [actions] = useState(() => createAstraActionEngine({ lab, projectIds }));
   const [labHandoff, setLabHandoff] = useState(null);
-  const introSeen = useRef(null);
-  if (introSeen.current === null) introSeen.current = hasSeenAstraIntro();
-  const [entering, setEntering] = useState(() => path === '/chat' && !introSeen.current);
+  const [introSeen, setIntroSeen] = useState(false);
   const [chatReady, setChatReady] = useState(false);
   const [opened, setOpened] = useState(false);
   const [started, setStarted] = useState(path === '/chat');
@@ -43,20 +37,12 @@ export default function App() {
   const trigger = useRef(null);
   const scroll = useRef(0);
   const full = path === '/chat';
-  const showIntro = full && entering;
-  const finishIntro = useCallback(() => {
-    introSeen.current = true;
-    try { window.sessionStorage.setItem(INTRO_SEEN_KEY, '1'); } catch { /* The current page still remembers. */ }
-    setEntering(false);
-  }, []);
+  const showIntro = full && !introSeen;
+  const finishIntro = useCallback(() => setIntroSeen(true), []);
   const portfolioVisited = useRef(!full);
   if (!full) portfolioVisited.current = true;
   const close = () => { dialog.current?.close(); setOpened(false); };
-  const syncRoute = useCallback(() => {
-    const next = readRoute();
-    setRoute(next);
-    setEntering(next.path === '/chat' && !introSeen.current);
-  }, []);
+  const syncRoute = useCallback(() => setRoute(readRoute()), []);
   const navigate = (url) => {
     if (url !== window.location.pathname + window.location.search + window.location.hash) window.history.pushState({}, '', url);
     syncRoute();
