@@ -102,7 +102,6 @@ const PERIODS = [
 ];
 
 const TIME_ZONE = 'America/Sao_Paulo';
-const PITCH = 11 + 3; // célula + gap, em px
 const EMPTY = [];
 const NO_STREAK = { length: 0, start: null, end: null };
 const KEY_STEPS = { ArrowUp: -1, ArrowDown: 1, ArrowLeft: -7, ArrowRight: 7 };
@@ -446,21 +445,22 @@ const Calendar = memo(function Calendar({ summary, ui, t, f }) {
         </div>
 
         <div className={`rounded-lg border p-4 ${ui.surface}`}>
-          <div className="custom-scrollbar flex gap-2 overflow-x-auto pb-2">
+          <div className="github-calendar-scroll custom-scrollbar flex gap-2 overflow-x-auto pb-2"
+            style={{ '--calendar-weeks': Math.max(columns.length, 52) }}>
             {/* Rótulos Seg / Qua / Sex */}
-            <div aria-hidden="true" className="shrink-0 pt-5" style={{ width: 28 }}>
-              <div className={`relative text-xs leading-[11px] ${ui.muted}`} style={{ height: 7 * PITCH - 3 }}>
+            <div aria-hidden="true" className="w-7 shrink-0 pt-5">
+              <div className={`relative text-xs leading-[var(--calendar-cell)] ${ui.muted}`}>
                 {[1, 3, 5].map((day) => (
-                  <span key={day} className="absolute left-0" style={{ top: day * PITCH }}>{t.weekDays[day - 1]}</span>
+                  <span key={day} className="absolute left-0" style={{ top: `calc(${day} * var(--calendar-pitch))` }}>{t.weekDays[day - 1]}</span>
                 ))}
               </div>
             </div>
 
             <div className="shrink-0">
               {/* Rótulos dos meses */}
-              <div aria-hidden="true" className={`relative mb-1 h-4 text-xs ${ui.muted}`} style={{ width: columns.length * PITCH }}>
+              <div aria-hidden="true" className={`relative mb-1 h-4 text-xs ${ui.muted}`}>
                 {months.map((m) => (
-                  <span key={m.date} className="absolute top-0" style={{ left: m.index * PITCH }}>{f.month(m.date)}</span>
+                  <span key={m.date} className="absolute top-0" style={{ left: `clamp(0px, ${m.index} * var(--calendar-pitch), 100% - 1.5rem)` }}>{f.month(m.date)}</span>
                 ))}
               </div>
 
@@ -477,13 +477,13 @@ const Calendar = memo(function Calendar({ summary, ui, t, f }) {
                 {columns.map((column, c) => (
                   <div key={c} className="flex shrink-0 flex-col gap-[3px]">
                     {Array.from({ length: column.pad }, (_, k) => (
-                      <div key={`pad-${k}`} className="invisible h-[11px] w-[11px]" />
+                      <div key={`pad-${k}`} className="invisible size-[var(--calendar-cell)]" />
                     ))}
                     {column.days.map((cell) => (
                       <div
                         key={cell.date}
                         data-index={cell.index}
-                        className={`relative z-0 h-[11px] w-[11px] cursor-pointer rounded-[2px] transition-all duration-200 hover:z-10 hover:scale-150 hover:shadow-lg hover:ring-1 hover:ring-[var(--ink)] ${ui.levels[cell.level]} ${cell.index === active ? 'z-10 scale-150 ring-1 ring-[var(--ink)]' : ''}`}
+                        className={`relative z-0 size-[var(--calendar-cell)] cursor-pointer rounded-[2px] transition-all duration-200 hover:z-10 hover:scale-150 hover:shadow-lg hover:ring-1 hover:ring-[var(--ink)] ${ui.levels[cell.level]} ${cell.index === active ? 'z-10 scale-150 ring-1 ring-[var(--ink)]' : ''}`}
                       />
                     ))}
                   </div>

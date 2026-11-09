@@ -131,6 +131,15 @@ letter-spacing: 0.12em;
   color: var(--ink);
 }
 .portfolio-app > [aria-hidden] { display: none; }
+.github-calendar-scroll {
+  container-type: inline-size;
+  --calendar-cell: 11px;
+  --calendar-pitch: calc(var(--calendar-cell) + 3px);
+}
+@supports (width: 1cqi) {
+  /* Subtract the weekday column and its gap, then divide the rest by week. */
+  .github-calendar-scroll { --calendar-cell: max(11px, calc((100cqi - 33px) / var(--calendar-weeks) - 3px)); }
+}
 .app-frame { min-height: 100dvh; }
 .site-header {
   display: flex; align-items: center; gap: 28px; padding: 16px 26px;
