@@ -9,12 +9,14 @@ Object.assign(globalThis, { window, document, HTMLElement: window.HTMLElement, M
   requestAnimationFrame: window.requestAnimationFrame.bind(window), cancelAnimationFrame: window.cancelAnimationFrame.bind(window),
   IS_REACT_ACT_ENVIRONMENT: true });
 window.localStorage.setItem('astra-intro-seen', '1'); // Left by a previous visit.
+Object.defineProperty(globalThis, 'localStorage', { configurable: true, value: window.localStorage });
 window.sessionStorage.setItem('astra-intro-seen', '1');
 window.matchMedia = query => ({ matches: query.includes('prefers-reduced-motion') || query.includes('pointer: coarse'),
   addEventListener() {}, removeEventListener() {}, addListener() {}, removeListener() {} });
 window.scrollTo = () => {};
 window.HTMLElement.prototype.scrollTo = () => {};
 window.HTMLElement.prototype.scrollIntoView = () => {};
+window.HTMLElement.prototype.hidePopover = () => {};
 window.HTMLDialogElement.prototype.showModal = window.HTMLDialogElement.prototype.show = function () { this.open = true; };
 window.HTMLDialogElement.prototype.close = function () { this.open = false; };
 globalThis.IntersectionObserver = class { observe() {} unobserve() {} disconnect() {} };
@@ -29,6 +31,11 @@ globalThis.ResizeObserver = class {
 
 const requests = [];
 const workers = [];
+let canvasStarts = 0;
+window.HTMLCanvasElement.prototype.getContext = function () {
+  canvasStarts++;
+  return new Proxy({}, { get: () => () => {} });
+};
 globalThis.Worker = class {
   constructor(url) { this.url = url; workers.push(this); }
   postMessage({ code }) { this.code = code; }
@@ -247,6 +254,63 @@ try {
   assert.equal(window.location.pathname, '/chat');
   assert.doesNotMatch(gameMessage.textContent, /This resource can only be shown in Full Astra/);
   await until(() => document.activeElement === gameMessage);
+
+  await click($('.astra-full .brand-lockup'));
+  await click($('.astra-fab'));
+  const beforeArcade = requests.length;
+  const beforeCanvas = canvasStarts;
+  await send("Astra, let's play Snake.");
+  const handoff = $('.astra-compact a[href="/chat?arcade=snake"]');
+  assert.ok(handoff);
+  assert.equal($('.arcade'), null);
+  assert.equal(canvasStarts, beforeCanvas, 'the compact request does not initialize a game canvas');
+  await send('Show my records');
+  assert.match($('.astra-compact [role="log"]').textContent, /Personal bests saved in this browser/);
+  await click(handoff);
+  await until(() => $('.arcade-board canvas'));
+  assert.ok($('.astra-full .arcade canvas'));
+  assert.equal(window.location.pathname, '/chat');
+  await send('Pause the game');
+  assert.match($('.arcade-overlay').textContent, /Paused/);
+  await send('Resume');
+  assert.equal($('.arcade-overlay'), null);
+  await send('Increase the difficulty');
+  await until(() => $('.arcade-game-header .arcade-difficulty-trigger')?.textContent === 'Hard' && $('.arcade-board canvas'));
+  await send('Show game status');
+  assert.match($('.astra-full [role="log"]').textContent, /Snake · Playing/);
+  assert.equal(requests.length, beforeArcade, 'arcade commands use local game state without the model');
+  await click(findButton($('.arcade-game-header'), 'Games'));
+  await click($('.arcade-hero .arcade-difficulty-trigger'));
+  await click($('.arcade-hero [data-preview="easy"]'));
+  assert.equal($('.arcade-hero .arcade-difficulty-trigger').textContent, 'Easy');
+  for (const name of ['Pong', 'Frogger', 'Pulse Maze', 'Orbit Blocks']) {
+    await click($(`button[aria-label="Play ${name}"]`));
+    await until(() => $('.arcade-board canvas')?.getAttribute('aria-label')?.startsWith(name));
+    if (name === 'Orbit Blocks') {
+      await click($('button[aria-label="Drop"]'));
+      const score = () => Number($('.arcade-hud b').textContent);
+      const touchScore = score();
+      assert.ok(touchScore > 0, 'mobile drop button changes the real score');
+      await act(async () => $('.arcade-board canvas').dispatchEvent(new window.KeyboardEvent('keydown', { key: ' ', code: 'Space', bubbles: true })));
+      assert.ok(score() > touchScore, 'keyboard hard drop changes the real score');
+      await act(async () => window.dispatchEvent(new window.Event('blur')));
+      assert.match($('.arcade-overlay').textContent, /Paused/);
+    }
+    await click(findButton($('.arcade-game-header'), 'Games'));
+  }
+  const themeTrigger = $('.astra-full .header-actions button[aria-haspopup]');
+  const { themes } = await import('../src/data/themes.js');
+  for (const theme of themes) {
+    await click(themeTrigger);
+    await click($(`.astra-full [data-preview="${theme.id}"]`));
+    assert.equal(document.documentElement.dataset.theme, theme.id);
+    assert.equal(document.querySelectorAll('.arcade-card').length, 5);
+  }
+  await click(findButton($('.arcade-toolbar'), 'Stats'));
+  assert.match($('.arcade-dashboard').textContent, /Orbit Blocks/);
+  assert.ok([...Array(window.localStorage.length)].some((_, index) => window.localStorage.key(index).startsWith('astra-arcade-session-v1:')));
+  await click($('.astra-full .brand-lockup'));
+  assert.equal($('.arcade'), null);
 } finally {
   await act(async () => activeRoot.unmount());
   dom.window.close();
