@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import ProjectsCard from './ProjectsCard';
 
 // Native document scrolling drives the horizontal track; no wheel interception.
-export default function ProjectsScrollSection() {
+export default function ProjectsScrollSection({ projectFocus }) {
   const sectionRef = useRef(null);
   const { i18n } = useTranslation();
   const en = i18n.language.startsWith('en');
@@ -71,8 +71,19 @@ export default function ProjectsScrollSection() {
     track.addEventListener('keydown', keydown);
     track.addEventListener('focusin', focus);
     measure();
+    const focusFrame = projectFocus && requestAnimationFrame(() => {
+      const slide = [...track.querySelectorAll('[data-project-slide]')].find(node => node.dataset.projectId === projectFocus.project);
+      if (!slide) return;
+      const heading = slide.querySelector('h4');
+      const position = slide.getBoundingClientRect().left - track.getBoundingClientRect().left + track.scrollLeft;
+      if (pinned) { moveTo(position); update(); }
+      else { section.scrollIntoView({ behavior: 'instant' }); track.scrollLeft = position; }
+      heading?.setAttribute('tabindex', '-1');
+      heading?.focus({ preventScroll: true });
+    });
     return () => {
       cancelAnimationFrame(frame);
+      if (focusFrame) cancelAnimationFrame(focusFrame);
       observer.disconnect();
       mutations.disconnect();
       window.removeEventListener('scroll', schedule);
@@ -81,12 +92,12 @@ export default function ProjectsScrollSection() {
       track.removeEventListener('keydown', keydown);
       track.removeEventListener('focusin', focus);
     };
-  }, []);
+  }, [projectFocus]);
 
   return <section ref={sectionRef} id="projetos" className="projects-scroll-section" aria-labelledby="projects-title">
     <div className="projects-pin">
       <div className="projects-scroll-heading"><div><p className="section-eyebrow">02 / {en ? 'SELECTED WORK' : 'PROJETOS'}</p><h2 id="projects-title">{en ? 'Ideas put into practice.' : 'Ideias colocadas em prática.'}</h2></div><span className="projects-scroll-hint">{en ? 'Scroll to explore →' : 'Role para explorar →'}</span></div>
-      <ProjectsCard horizontal />
+      <ProjectsCard horizontal projectFocus={projectFocus} />
       <div className="projects-scroll-progress" aria-hidden="true"><span /></div>
     </div>
   </section>;

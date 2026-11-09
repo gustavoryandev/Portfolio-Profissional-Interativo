@@ -23,7 +23,8 @@ export async function requestChatStream(payload, { signal, onEvent = () => {} } 
     if (event.type === 'error') throw new Error(event.error || 'Chat stream failed');
     if (event.type === 'meta') Object.assign(result, { model: event.model, chatContext: event.chatContext, liveContext: event.liveContext });
     if (event.type === 'context') result.liveContext = event.liveContext;
-    if (event.type === 'reset') text = '';
+    if (event.type === 'reset') { text = ''; delete result.actions; }
+    if (event.type === 'actions') result.actions = event.actions;
     if (event.type === 'delta') {
       if (typeof event.text !== 'string') throw new Error('Invalid chat delta');
       text += event.text;
@@ -45,7 +46,7 @@ export async function requestChatStream(payload, { signal, onEvent = () => {} } 
       if (chunk.done) { consume(buffer); break; }
     }
     if (!done) throw new Error('Chat stream interrupted');
-    if (!text.trim()) throw new Error('Empty chat response');
+    if (!text.trim() && !result.actions?.length) throw new Error('Empty chat response');
     return { ...result, response: text };
   } finally {
     await reader.cancel().catch(() => {});

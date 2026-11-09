@@ -12,7 +12,7 @@ import { SocialLinks } from '../components/ProfilePanel';
 import ScrollReveal from '../components/ui/ScrollReveal';
 import perfil from '../data/perfil.json';
 
-export default function PortfolioPage() {
+export default function PortfolioPage({ projectFocus }) {
   const { openAstra, openFull } = useAstra();
   const { i18n } = useTranslation();
   const en = i18n.language.startsWith('en');
@@ -39,7 +39,7 @@ export default function PortfolioPage() {
       <section id="sobre" className="scroll-section" aria-labelledby="about-title">
         <ScrollReveal repeat><p className="section-eyebrow">01 / {en ? 'THE JOURNEY' : 'A TRAJETÓRIA'}</p><h2 id="about-title">{en ? 'About me' : 'Sobre mim'}</h2><div className="glass-panel about-scroll"><p>{perfil.bio[en ? 'en' : 'pt']}</p></div></ScrollReveal>
       </section>
-      <ProjectsScrollSection />
+      <ProjectsScrollSection projectFocus={projectFocus} />
       <CodePlayground />
       <section id="habilidades" className="scroll-section" aria-labelledby="skills-title">
         <ScrollReveal repeat><p className="section-eyebrow">04 / {en ? 'TOOLKIT' : 'TECNOLOGIAS'}</p><h2 id="skills-title">{en ? 'What I build with.' : 'Com o que eu construo.'}</h2></ScrollReveal>

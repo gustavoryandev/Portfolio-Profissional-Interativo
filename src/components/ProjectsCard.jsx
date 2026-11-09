@@ -1,5 +1,5 @@
 import { CardShell } from './ui/CardShell';
-import { useId, useState } from 'react';
+import { useId, useLayoutEffect, useState } from 'react';
 import { FolderGit2, Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import perfil from '../data/perfil.json';
@@ -10,12 +10,15 @@ import { projectContent } from '../data/projectContent';
 const normalize = value => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 const FEATURED_IDS = ['portfolio', 'terminal-portfolio', 'pokedex', 'geosolar', 'secure-login', 'github-profile'];
 
-export default function ProjectsCard({ reveal = false, horizontal = false, preview = false, onViewAll }) {
+export default function ProjectsCard({ reveal = false, horizontal = false, preview = false, onViewAll, projectFocus }) {
   const { t, i18n } = useTranslation();
   const headingId = useId();
   const searchId = useId();
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('all');
+  useLayoutEffect(() => {
+    if (projectFocus) { setQuery(''); setCategory('all'); }
+  }, [projectFocus]);
   const categories = [...new Set(perfil.projetos.map(project => project.categoria).filter(Boolean))];
   const catalog = preview ? FEATURED_IDS.map(id => perfil.projetos.find(project => project.id === id)).filter(Boolean) : perfil.projetos;
   const projects = catalog.filter(project => {
@@ -41,7 +44,7 @@ export default function ProjectsCard({ reveal = false, horizontal = false, previ
         className={horizontal ? 'flex overflow-x-auto gap-6 snap-x snap-mandatory scroll-smooth motion-reduce:scroll-auto px-1 py-3 scroll-px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent' : 'projects-grid'}
       >
         {projects.map(project => (
-          <div key={project.id} data-project-slide={horizontal ? '' : undefined} className={horizontal ? 'flex flex-shrink-0 w-80 max-w-full snap-start [&>article]:w-full' : 'flex min-w-0 [&>article]:w-full'}>
+          <div key={project.id} data-project-slide={horizontal ? '' : undefined} data-project-id={horizontal ? project.id : undefined} className={horizontal ? 'flex flex-shrink-0 w-80 max-w-full snap-start [&>article]:w-full' : 'flex min-w-0 [&>article]:w-full'}>
             {reveal
               ? <ScrollReveal className="flex w-full [&>article]:w-full"><ProjectCard project={project} /></ScrollReveal>
               : <ProjectCard project={project} />}

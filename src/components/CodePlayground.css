@@ -28,6 +28,14 @@
 .code-lab-footer p { max-width: 60ch; color: var(--muted); font-size: 12px; line-height: 1.6; }
 .code-lab :is(button, textarea, pre):focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 .code-lab button:disabled { opacity: .5; cursor: not-allowed; }
+.lab-review, .lab-handoff { padding: 16px; margin-block: 12px; }
+.lab-review h3 { color: var(--ink); font-weight: 650; }
+.lab-review p, .lab-handoff p, .lab-review-status { color: var(--muted); font-size: 0.875rem; margin-block: 8px; }
+.lab-handoff p { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 12rem; overflow: auto; }
+.lab-review-diff { max-height: 14rem; overflow: auto; padding: 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel-soft); }
+.lab-review-diff pre { overflow-wrap: anywhere; white-space: pre-wrap; color: var(--ink); font-size: 0.8125rem; }
+.lab-review-diff > div + div { border-top: 1px solid var(--line); margin-top: 12px; }
+.lab-review-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
 @media (max-width: 700px) {
   .code-lab-columns { grid-template-columns: 1fr; }
   .code-lab-editor { border-right: 0; border-bottom: 1px solid var(--line); }

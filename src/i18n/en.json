@@ -16,7 +16,7 @@
     "loading": "Loading résumé…"
   },
   "chat": {
-    "quickWelcome": "Hi! I’m Astra. What would you like to know about Gustavo’s work?",
+    "quickWelcome": "Hi! I’m Astra. Ask about Gustavo’s work, explore a project, or try “Open the Laboratory.”",
     "erro": "Your question could not be processed right now. Please try again shortly.",
     "boasVindas": "Hello! I am Gustavo's virtual assistant. How can I help you today?",
     "subtitulo": "Ask about projects, tech stack, university, or live metrics.",
@@ -70,7 +70,7 @@
     "resources": {
       "title": "Astra resources",
       "close": "Close resource catalog",
-      "note": "Choose a resource to send an example question. Chat in English or Portuguese.",
+      "note": "Choose a resource to send an example question. You can also ask Astra to open the Laboratory and explain, edit, or run its code. Chat in English or Portuguese.",
       "items": {
         "about": {
           "title": "About Gustavo",

@@ -1,22 +1,37 @@
-import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import PortfolioPage from './pages/PortfolioPage';
 import PortfolioIntro from './components/PortfolioIntro';
 import AstraEntrance from './components/AstraEntrance';
 import { AstraContext } from './context/AstraContext';
 import useMobileViewport from './hooks/useMobileViewport';
+import { ThemeContext } from './context/ThemeContext';
+import { createLaboratory } from './services/laboratory';
+import { createAstraActionEngine } from './services/astraActionEngine';
+import perfil from './data/perfil.json';
 
 const ChatPage = lazy(() => import('./pages/ChatPage'));
 const INTRO_SEEN_KEY = 'astra-intro-seen';
 const hasSeenAstraIntro = () => {
   try { return window.sessionStorage.getItem(INTRO_SEEN_KEY) === '1'; } catch { return false; }
 };
-const readPath = () => window.location.pathname.replace(/\/+$/, '') || '/';
+const projectIds = new Set(perfil.projetos.map(project => project.id));
+const readRoute = () => {
+  const { pathname, hash, search } = window.location;
+  const project = new URLSearchParams(search).get('project');
+  return { path: pathname.replace(/\/+$/, '') || '/', section: hash.slice(1),
+    project: hash === '#projetos' && projectIds.has(project) ? project : null };
+};
 
 export default function App() {
   const { i18n } = useTranslation();
   const en = i18n.language.startsWith('en');
-  const [path, setPath] = useState(readPath);
+  const [route, setRoute] = useState(readRoute);
+  const { path } = route;
+  const { setTheme } = useContext(ThemeContext) ?? {};
+  const [lab] = useState(createLaboratory);
+  const [actions] = useState(() => createAstraActionEngine({ lab, projectIds }));
+  const [labHandoff, setLabHandoff] = useState(null);
   const introSeen = useRef(null);
   if (introSeen.current === null) introSeen.current = hasSeenAstraIntro();
   const [entering, setEntering] = useState(() => path === '/chat' && !introSeen.current);
@@ -37,12 +52,12 @@ export default function App() {
   if (!full) portfolioVisited.current = true;
   const close = () => { dialog.current?.close(); setOpened(false); };
   const syncRoute = useCallback(() => {
-    const next = readPath();
-    setPath(next);
-    setEntering(next === '/chat' && !introSeen.current);
+    const next = readRoute();
+    setRoute(next);
+    setEntering(next.path === '/chat' && !introSeen.current);
   }, []);
   const navigate = (url) => {
-    window.history.pushState({}, '', url);
+    if (url !== window.location.pathname + window.location.search + window.location.hash) window.history.pushState({}, '', url);
     syncRoute();
   };
   const openFull = event => {
@@ -71,8 +86,13 @@ export default function App() {
   useEffect(() => {
     const update = () => { syncRoute(); setOpened(false); };
     window.addEventListener('popstate', update);
-    return () => window.removeEventListener('popstate', update);
+    window.addEventListener('hashchange', syncRoute);
+    return () => {
+      window.removeEventListener('popstate', update);
+      window.removeEventListener('hashchange', syncRoute);
+    };
   }, [syncRoute]);
+  useEffect(() => () => lab.destroy(), [lab]);
   useEffect(() => {
     const node = dialog.current;
     if (!node) return;
@@ -92,21 +112,31 @@ export default function App() {
     if (!full || showIntro || !chatReady) return;
     if (!window.matchMedia('(pointer: coarse)').matches) document.getElementById('chat-input')?.focus({ preventScroll: true });
   }, [full, showIntro, chatReady]);
+  useEffect(() => {
+    if (route.path !== '/' || route.project || !route.section) return;
+    const frame = requestAnimationFrame(() => {
+      const node = document.getElementById(route.section);
+      if (!node) return;
+      node.scrollIntoView({ behavior: 'instant' });
+      if (!node.hasAttribute('tabindex')) node.setAttribute('tabindex', '-1');
+      node.focus({ preventScroll: true });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [route]);
   const selectSection = section => {
     if (section === 'full') return openFull();
     const id = ({ projects: 'projetos', skills: 'habilidades', proficiency: 'habilidades', contact: 'contato', about: 'sobre' })[section] || section;
     close();
     navigate('/#' + id);
-    requestAnimationFrame(() => {
-      const node = document.getElementById(id);
-      node?.scrollIntoView({ behavior: 'instant' });
-      node?.setAttribute('tabindex', '-1');
-      node?.focus({ preventScroll: true });
-    });
+  };
+  const actionUi = {
+    navigate: selectSection, setTheme, setLanguage: language => i18n.changeLanguage(language),
+    openProject: id => { close(); navigate('/?project=' + encodeURIComponent(id) + '#projetos'); },
   };
   if (!['/', '/chat'].includes(path)) return <main className="route-loading"><h1>404</h1><a href="/">{en ? 'Back to portfolio' : 'Voltar ao portfólio'}</a></main>;
-  return <AstraContext.Provider value={{ openAstra, openFull, returnPortfolio: event => { event.preventDefault(); close(); navigate('/'); } }}>
-    <div hidden={full}>{portfolioVisited.current && <PortfolioIntro en={en}><PortfolioPage /></PortfolioIntro>}</div>
+  return <AstraContext.Provider value={{ lab, actions, labHandoff, setLabHandoff, actionUi,
+    openAstra, openFull, returnPortfolio: event => { event.preventDefault(); close(); navigate('/'); } }}>
+    <div hidden={full}>{portfolioVisited.current && <PortfolioIntro en={en}><PortfolioPage projectFocus={route.project ? route : null} /></PortfolioIntro>}</div>
     <dialog inert={showIntro} style={showIntro ? { visibility: 'hidden' } : undefined} ref={dialog} role={full ? 'main' : undefined} className={`astra-shell ${full ? 'astra-shell-full' : 'astra-shell-modal'}`} aria-label={en ? 'Astra conversation' : 'Conversa com a Astra'} onCancel={() => setOpened(false)} onKeyDown={trapFocus}>
       <div className="astra-toolbar" hidden={full}>
         {full ? <a href="/" onClick={event => { event.preventDefault(); close(); navigate('/'); }}>{en ? '← Portfolio' : '← Portfólio'}</a> : <a href="/chat" onClick={openFull}>{en ? 'Open full Astra ↗' : 'Abrir Astra completa ↗'}</a>}

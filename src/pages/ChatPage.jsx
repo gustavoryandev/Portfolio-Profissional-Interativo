@@ -13,6 +13,9 @@ import { warmModelCatalog } from '../services/chatStream';
 import sendMessage from '../services/api';
 import useLiveContext from '../hooks/useLiveContext';
 import { sourcesForText } from '../services/liveContext';
+import { useAstra } from '../context/AstraContext';
+import LaboratoryReview from '../components/LaboratoryReview';
+import { actionReply } from '../services/astraActionReply';
 
 const FONT_SANS = "Inter, 'Geist Sans', Roboto, system-ui, sans-serif";
 
@@ -50,6 +53,7 @@ function TypingIndicator({ label }) {
 export default function ChatPage({ modal = false, visible = true, onReady, onSelectSection }) {
   const { t, i18n } = useTranslation();
   const viewportRef = useMobileViewport();
+  const { actions, actionUi, setLabHandoff } = useAstra();
 
   const [messages, setMessages] = useState(() => [{ id: 'welcome', sender: 'ai', text: t('chat.boasVindas'), translationKey: 'chat.boasVindas' }]);
   const [input, setInput] = useState('');
@@ -96,7 +100,7 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
       container.scrollTo({ top: container.scrollHeight, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
     }, 100);
     return () => clearTimeout(id);
-  }, [messages.length, loading, compact]);
+  }, [messages.length, loading, compact, visible]);
 
   // Devolve o foco ao input quando a resposta chega (não rouba foco na montagem)
   useEffect(() => {
@@ -125,20 +129,49 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
     setInput('');
     setLoading(true);
     const id = nextId();
+    const turn = idCounter.current;
     const controller = new AbortController();
     const buffer = createStreamBuffer();
     activeRequest.current = { controller, buffer };
     setStreaming({ id, buffer });
+    const updateHandoff = reply => setLabHandoff?.(current => current?.turn === turn ? { ...current, reply } : current);
     try {
       // O campo "id" é só da interface: não vai para o backend
       const history = messagesRef.current.map(({ sender, text, translationKey }) => ({ sender, text, translationKey }));
-      const data = await sendMessage(query, requestLanguage, history, conversationRef.current.chatContext, predefinedSuggestion, {
+      const options = {
         signal: controller.signal,
+        surface: modal ? 'compact' : 'full',
         onEvent: event => {
           if (mounted.current && !controller.signal.aborted) buffer.push(event);
         },
-      });
+      };
+      let data = await sendMessage(query, requestLanguage, history, conversationRef.current.chatContext, predefinedSuggestion, options);
+      controller.signal.throwIfAborted();
       if (!mounted.current) return;
+      const plan = actions && await actions.execute(turn, data.actions, {
+        ...actionUi,
+        navigate: section => {
+          if (section === 'laboratorio') setLabHandoff({ turn, modal });
+          actionUi.navigate(section);
+        },
+      }, { signal: controller.signal });
+      const notices = [...(plan?.notices ?? [])];
+      const cards = plan?.cards ?? [];
+      const requestEn = requestLanguage.startsWith('en');
+      if (plan?.snapshot) {
+        live.absorb(data.liveContext);
+        buffer.push({ type: 'reset' });
+        data = await sendMessage(query, requestLanguage, history, data.chatContext ?? conversationRef.current.chatContext,
+          false, { ...options, labSnapshot: plan.snapshot });
+        controller.signal.throwIfAborted();
+        if (!mounted.current) return;
+        const proposal = await actions.execute(turn, data.actions, actionUi, { base: plan.base, signal: controller.signal });
+        notices.push(...proposal.notices);
+      }
+      controller.signal.throwIfAborted();
+      const reply = [data.response || data.error, actionReply(notices, requestEn)].filter(Boolean).join('\n\n');
+      const response = [reply, ...cards].filter(Boolean).join('\n');
+      updateHandoff(reply);
       conversationRef.current = {
         chatContext: data.chatContext ?? conversationRef.current.chatContext,
         model: data.model ?? conversationRef.current.model,
@@ -146,14 +179,14 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
       appendMessage({
         id,
         sender: 'ai',
-        text: data.response || data.error,
+        text: response,
         translationKey: data.translationKey,
         context: data.liveContext,
         lang: requestLanguage,
         model: data.model,
       });
       live.absorb(data.liveContext);
-      const cardSources = sourcesForText(data.response);
+      const cardSources = sourcesForText(response);
       live.watch(cardSources);
       // Refresh only missing/stale sources; avoid a second forced HTTP request.
       void live.refresh(cardSources);
@@ -163,6 +196,7 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
       const notice = cancelled
         ? (requestLanguage.startsWith('en') ? 'Response stopped.' : 'Resposta interrompida.')
         : t('chat.erro', { lng: requestLanguage });
+      updateHandoff(notice);
       appendMessage({
         id,
         sender: 'ai',
@@ -241,6 +275,7 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
                     <StreamingReply key={streaming.id} buffer={streaming.buffer} containerRef={messagesContainerRef} followRef={followOutput}
                       fallback={<TypingIndicator label={t('chat.digitando', { defaultValue: en ? 'Generating reply' : 'Gerando resposta' })} />} />
                   )}
+                  {actions && <LaboratoryReview onOpenLab={() => onSelectSection?.('laboratorio')} />}
                 </div>
               </div>
 

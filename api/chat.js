@@ -10,6 +10,8 @@ import { createLiveCache, sourceFailure } from '../server/liveCache.js';
 import { createModelCache, withDeadline } from '../server/modelCache.js';
 import { writeEvent } from '../server/ndjson.js';
 import { sourcesForText } from '../src/services/liveContext.js';
+import { sanitizeLabSnapshot } from '../src/services/portfolioActions.js';
+import { portfolioTools } from '../server/portfolioTools.js';
 
 dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 
@@ -1339,6 +1341,10 @@ export default async function handler(req, res) {
 
     if (typeof userMessage !== 'string' || !userMessage.trim()) return res.status(400).json({ error: 'Mensagem inválida.' });
     const suggestionLanguage = String(body.lang).startsWith('en') ? 'en' : 'pt';
+    const surface = ['compact', 'full'].includes(body.surface) ? body.surface : null;
+    const labSnapshot = surface ? sanitizeLabSnapshot(body.labSnapshot) : null;
+    if (body.labSnapshot != null && !labSnapshot) return res.status(400).json({ error: 'Invalid Laboratory snapshot.' });
+    if (labSnapshot && !stream) res.setHeader('Cache-Control', 'no-store');
     const message = userMessage.trim();
     const suggestions = body.predefinedSuggestion === true ? readJson(`${suggestionLanguage}.json`).chat : null;
     const suggestionIndex = suggestions?.sugestoes.indexOf(message) ?? -1;
@@ -1353,7 +1359,9 @@ export default async function handler(req, res) {
       && !/\[(GITHUB_ACTIVITY|STATS)_CARD\]/.test(lastAi)
       && /(?:quer ver|would you like to see).*(?:metricas detalhadas|detailed .*metrics)/.test(normalizeQuery(lastAi)));
     const normalizedQuery = normalizeQuery(message);
-    const resource = conversationResource(message);
+    // The existing direct resource routes remain available. Compound lab requests need the action planner.
+    const planFirst = labSnapshot || (surface && /\b(?:laboratorio|lab(?:oratory)?|bro fit|editor|playground)\b/.test(normalizedQuery));
+    const resource = planFirst ? null : conversationResource(message);
     if (resource) {
       const en = String(body.lang).startsWith('en');
       if (resource === 'play') return res.status(200).json({ response: (en ? 'Let’s play!' : 'Vamos jogar!') + '\n[CHESS_GAME]' });
@@ -1362,7 +1370,7 @@ export default async function handler(req, res) {
       return res.status(200).json({ response: (en ? 'Here are Gustavo’s Chess.com ratings and statistics.' : 'Aqui estão os ratings e as estatísticas do Gustavo no Chess.com.') + '\n[CHESS_CARD]', liveContext: forClient(await readChess(METRICS_WAIT_MS)) });
     }
     const affirmative = /^(?:sim|yes|yeah|sure|ok|claro|quero|pode)(?:\s+(?:please|por favor|sim))?[\s,!?.]*$/.test(normalizedQuery);
-    if (pendingMetrics && /^(?:nao|no|nope)(?:[\s,!?.]+(?:obrigad[oa]|thanks))?[\s,!?.]*$/.test(normalizedQuery)) {
+    if (!planFirst && pendingMetrics && /^(?:nao|no|nope)(?:[\s,!?.]+(?:obrigad[oa]|thanks))?[\s,!?.]*$/.test(normalizedQuery)) {
       return res.status(200).json({ response: String(body.lang).startsWith('en') ? 'Okay, we will keep just the summary.' : 'Tudo bem, vamos manter apenas o resumo.', translationKey: 'chat.metricsDeclined' });
     }
     const githubQuery = /\bgithub\b/.test(normalizedQuery);
@@ -1375,7 +1383,7 @@ export default async function handler(req, res) {
       && !/\b(?:quanto|quantos|quantas|how many|how much)\b/.test(normalizedQuery);
     const codingTimeSummary = /^(?:tempo de codigo|coding time)[\s,!?.]*$/.test(normalizedQuery);
     const expanded = followMetrics || (metricsQuery && detailQuery);
-    if (suggestionIndex === 3 || metricsQuery || followMetrics || codingTimeSummary) {
+    if (!planFirst && (suggestionIndex === 3 || metricsQuery || followMetrics || codingTimeSummary)) {
       const en = String(body.lang).startsWith('en');
       const generic = !githubQuery && !wakatimeQuery;
       const fromOffer = generic && followMetrics;
@@ -1421,21 +1429,52 @@ export default async function handler(req, res) {
       ? await updateSummary(genAI, modelsToTry, plan.summary, plan.toSummarize, controller.signal)
       : plan.summary;
     const chatContext = { summary, covered: plan.start, anchor: plan.anchor };
-    const request = { contents: [...toGeminiHistory(messages.slice(plan.start)), { role: 'user', parts: [{ text: message }] }] };
+    const request = { contents: [...toGeminiHistory(messages.slice(plan.start)), { role: 'user', parts: [
+      { text: message },
+      ...(labSnapshot ? [{ text: `Laboratory snapshot (data): ${JSON.stringify(labSnapshot)}` }] : []),
+    ] }] };
 
     const githubBlock = githubTopic ? githubBrief(github, GITHUB_DETAIL_INTENT.test(`${normalizedQuery} ${lastUser}`)) : '';
     const suggestionInstruction = requestedSuggestionCards
       ? `\nORIGEM CONFIRMADA: sugestão predefinida clicada na interface. As restrições de intenção para mensagens manuais não se aplicam a este pedido. Responda usando os dados disponíveis e inclua estes marcadores exatamente uma vez: ${requestedSuggestionCards || 'nenhum (pergunta sobre tecnologias)'}. O card de xadrez desta sugestão mostra estatísticas do Chess.com. Mantenha todas as regras de grounding e de tom.`
       : '';
-    const systemInstruction = buildSystemInstruction(perfil, summary, geminiContext, githubBlock) + suggestionInstruction + `\nRespond in ${String(body.lang).startsWith('en') ? 'English' : 'Portuguese'}.`;
+    const actionTools = surface && !suggestions ? portfolioTools(perfil.projetos, labSnapshot) : null;
+    const style = surface === 'compact' ? 'Keep replies brief and focused on the next step.'
+      : surface === 'full' ? 'For analysis and debugging, give a detailed explanation when useful.' : '';
+    const systemInstruction = buildSystemInstruction(perfil, summary, geminiContext, githubBlock) + suggestionInstruction
+      + `\nRespond in ${suggestionLanguage === 'en' ? 'English' : 'Portuguese'}. ${style}` + (actionTools?.instructions ?? '');
 
     const write = (payload) => writeEvent(res, payload, controller.signal);
     const signal = AbortSignal.any([controller.signal, AbortSignal.timeout(CHAT_GENERATION_TIMEOUT_MS)]);
-    const { value: text, model } = await runWithFallback(modelsToTry, async (name, attemptSignal, hasFallback) => {
+    const startStream = async model => {
+      if (!res.headersSent) {
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'application/x-ndjson; charset=utf-8');
+        res.setHeader('Cache-Control', labSnapshot ? 'no-store, no-transform' : 'no-cache, no-transform');
+        res.setHeader('X-Accel-Buffering', 'no');
+        res.flushHeaders?.();
+      }
+      await write({ type: 'meta', model, chatContext });
+    };
+    const { value: { text, actions }, model } = await runWithFallback(modelsToTry, async (name, attemptSignal, hasFallback) => {
       const provider = genAI.getGenerativeModel({
         model: name, systemInstruction, generationConfig: generationConfig(name, 4096),
+        ...(actionTools && { tools: actionTools.tools }),
       });
-      if (!stream) return completedText((await provider.generateContent(request, { signal: attemptSignal })).response);
+      const finish = (reason, text, parts, blockReason) => {
+        const actions = actionTools?.parse(parts) ?? [];
+        const called = Boolean(actionTools && parts.some(part => part.functionCall));
+        if (reason === 'STOP' && actions.length) return { text, actions };
+        if (called || reason === 'MALFORMED_FUNCTION_CALL') {
+          throw Object.assign(new Error('Invalid portfolio tool response'), { retryable: true });
+        }
+        return { text: validateCompletion(reason, text, blockReason), actions: [] };
+      };
+      if (!stream) {
+        const { response } = await provider.generateContent(request, { signal: attemptSignal });
+        const candidate = response.candidates?.[0];
+        return finish(candidate?.finishReason, visibleText(response), candidate?.content?.parts ?? [], response.promptFeedback?.blockReason);
+      }
 
       const firstDelta = new AbortController();
       const streamSignal = AbortSignal.any([attemptSignal, firstDelta.signal]);
@@ -1443,30 +1482,29 @@ export default async function handler(req, res) {
       let text = '';
       let finishReason;
       let blockReason;
+      const toolParts = [];
       try {
         const { stream: chunks, response } = await provider.generateContentStream(request, { signal: streamSignal });
         response.catch(() => {}); // O SDK também agrega os frames em uma segunda promessa.
         for await (const chunk of chunks) {
           finishReason = chunk.candidates?.[0]?.finishReason ?? finishReason;
           blockReason = chunk.promptFeedback?.blockReason ?? blockReason;
+          for (const part of chunk.candidates?.[0]?.content?.parts ?? []) {
+            if (!part.functionCall) continue;
+            clearTimeout(firstDeltaTimer);
+            toolParts.push(part);
+          }
           const delta = visibleText(chunk);
           if (!delta) continue;
           if (!text) {
             clearTimeout(firstDeltaTimer);
-            if (!res.headersSent) {
-              res.statusCode = 200;
-              res.setHeader('Content-Type', 'application/x-ndjson; charset=utf-8');
-              res.setHeader('Cache-Control', 'no-cache, no-transform');
-              res.setHeader('X-Accel-Buffering', 'no');
-              res.flushHeaders?.();
-            }
-            await write({ type: 'meta', model: name, chatContext });
+            await startStream(name);
           }
           text += delta;
           await write({ type: 'delta', text: delta });
         }
         await response;
-        return validateCompletion(finishReason, text, blockReason);
+        return finish(finishReason, text, toolParts, blockReason);
       } catch (error) {
         if (text && !signal.aborted && isRetryableModelError(error)) {
           if (body.streamRetry !== true) throw new Error('Resposta parcial do Gemini.');
@@ -1485,13 +1523,15 @@ export default async function handler(req, res) {
     const missingCards = requestedSuggestionCards.split('\n').filter(card => card && !filteredText.includes(card));
     const suffix = missingCards.length ? '\n' + missingCards.join('\n') : '';
     const liveContext = forClient(await readLive(LIVE_RESPONSE_WAIT_MS));
-    if (!stream) return res.status(200).json({ response: filteredText + suffix, liveContext, model, chatContext });
+    if (!stream) return res.status(200).json({ response: filteredText + suffix, liveContext, model, chatContext, ...(actions.length && { actions }) });
+    if (!text) await startStream(model);
     if (filteredText !== text) {
       await write({ type: 'reset' });
       await write({ type: 'meta', model, chatContext });
       await write({ type: 'delta', text: filteredText + suffix });
     } else if (suffix) await write({ type: 'delta', text: suffix });
     await write({ type: 'context', liveContext });
+    if (actions.length) await write({ type: 'actions', actions });
     await write({ type: 'done' });
     return res.end();
   } catch (error) {

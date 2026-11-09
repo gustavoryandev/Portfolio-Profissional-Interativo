@@ -2,17 +2,8 @@ import { useAstra } from '../context/AstraContext';
 import { useTranslation } from 'react-i18next';
 import { Download, Sparkles } from 'lucide-react';
 import ThemeSelector from './ThemeSelector';
-
-export const portfolioLinks = [
-  ['inicio', 'Início', 'Home'],
-  ['sobre', 'Sobre', 'About'],
-  ['projetos', 'Projetos', 'Projects'],
-  ['laboratorio', 'Laboratório', 'Code Lab'],
-  ['habilidades', 'Habilidades', 'Skills'],
-  ['experience', 'Experiência', 'Experience'],
-  ['education', 'Formação', 'Education'],
-  ['contato', 'Contato', 'Contact'],
-];
+import { PORTFOLIO_SECTIONS as portfolioLinks } from '../services/portfolioActions';
+export { portfolioLinks };
 
 export default function Navbar({ portfolio = false }) {
   const { openFull, returnPortfolio } = useAstra();

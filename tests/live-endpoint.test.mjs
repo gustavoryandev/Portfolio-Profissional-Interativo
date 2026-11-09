@@ -224,3 +224,55 @@ test('explicit game and proficiency requests bypass generation with one appropri
     assert.equal(res.body.model, undefined);
   }
 });
+
+test('both Astra surfaces share the same tool contract and request editor data only in the second turn', async () => {
+  const originalFetch = globalThis.fetch;
+  process.env.GEMINI_API_KEY = 'portfolio-actions-test';
+  mockAdapter = async config => ({ status: 200, config, data: {
+    models: [{ name: 'models/gemini-3.8-flash', supportedGenerationMethods: ['generateContent'] }],
+  } });
+  const actions = [
+    { type: 'navigate', target: 'laboratorio' }, { type: 'lab.language', target: 'python' },
+    { type: 'lab.example', target: 'bro-fit' }, { type: 'lab.read', target: 'code' },
+  ];
+  const edits = [{ find: 'aluno = "Carlos"', replace: 'aluno = "Ana"' }];
+  const snapshot = { example: 'bro-fit', language: 'python', status: 'idle', code: edits[0].find };
+  let requests = 0;
+  globalThis.fetch = async (_url, options) => {
+    const body = JSON.parse(options.body);
+    const declarations = body.tools[0].functionDeclarations.map(item => item.name);
+    const parts = body.contents.at(-1).parts;
+    const snapshotTurn = requests++ % 2 === 1;
+    assert.deepEqual(declarations, snapshotTurn ? ['propose_lab_edit', 'propose_lab_run'] : ['portfolio_actions']);
+    assert.equal(parts.length, snapshotTurn ? 2 : 1);
+    if (snapshotTurn) assert.deepEqual(JSON.parse(parts[1].text.split(' (data): ')[1]), snapshot);
+    const functionCall = snapshotTurn ? { name: 'propose_lab_edit', args: { edits } }
+      : { name: 'portfolio_actions', args: { actions } };
+    const frames = [
+      { candidates: [{ content: { role: 'model', parts: [{ functionCall }] } }] },
+      { candidates: [{ content: { role: 'model', parts: [] }, finishReason: 'STOP' }] },
+    ];
+    return new Response(frames.map(frame => `data: ${JSON.stringify(frame)}\n\n`).join(''), {
+      headers: { 'Content-Type': 'text/event-stream' },
+    });
+  };
+  try {
+    for (const surface of ['full', 'compact']) {
+      const request = { userMessage: 'Open the Laboratory, select Python, load Bro Fit and rename the student to Ana.',
+        lang: 'en', surface, stream: true };
+      for (const [labSnapshot, expected] of [[undefined, actions], [snapshot, [{ type: 'lab.edit', edits, runAfter: false }]]]) {
+        const events = [];
+        const res = { ...response(), flushHeaders() { this.headersSent = true; },
+          write(line) { events.push(JSON.parse(line)); return true; }, end() {} };
+        await handler({ method: 'POST', body: { ...request, labSnapshot } }, res);
+        assert.deepEqual(events.map(event => event.type), ['meta', 'context', 'actions', 'done']);
+        assert.deepEqual(events[2].actions, expected);
+      }
+    }
+    assert.equal(requests, 4);
+  } finally {
+    globalThis.fetch = originalFetch;
+    process.env.GEMINI_API_KEY = '';
+    mockAdapter = undefined;
+  }
+});

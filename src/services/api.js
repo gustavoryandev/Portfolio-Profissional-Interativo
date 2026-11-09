@@ -2,7 +2,9 @@ import axios from "axios";
 import { requestChatStream } from './chatStream.js';
 
 const sendMessage = async (userMessage, lang, chatHistory = [], chatContext = null, predefinedSuggestion = false, options) => {
-  if (options?.onEvent) return requestChatStream({ userMessage, lang, chatHistory, chatContext, predefinedSuggestion }, options);
+  if (options?.onEvent) return requestChatStream({
+    userMessage, lang, chatHistory, chatContext, predefinedSuggestion, surface: options.surface, labSnapshot: options.labSnapshot,
+  }, options);
   try {
     const response = await axios.post("/api/chat", {
       userMessage,
