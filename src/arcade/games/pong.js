@@ -1,4 +1,4 @@
-import { clamp, dot, rect, stateFor } from './shared.js';
+import { clamp, rect, stateFor } from './shared.js';
 
 const width = 480;
 const height = 300;
@@ -81,12 +81,13 @@ export default function createPong(difficulty, random = Math.random) {
       if (ball.vx > 0 && previousX <= rightEdge && ball.x >= rightEdge && hit(state.cpu)) returnBall(state.cpu, -1);
       if (ball.x < -radius || ball.x > width + radius) score(ball.x > width);
     },
-    render(ctx) {
-      rect(ctx, '#0d1827', 0, 0, width, height);
-      for (let y = 8; y < height; y += 19) rect(ctx, '#2c4358', width / 2 - 1, y, 2, 10);
-      rect(ctx, '#84e3ff', left, state.player - half, paddleWidth, paddleHeight);
-      rect(ctx, '#fda6b8', right, state.cpu - half, paddleWidth, paddleHeight);
-      dot(ctx, '#f3fcff', state.ball.x, state.ball.y, radius);
+    render(ctx, _en, palette) {
+      const ink = palette?.ink ?? '#f5f5ee';
+      rect(ctx, palette?.background ?? '#101110', 0, 0, width, height);
+      for (let y = 8; y < height; y += 19) rect(ctx, palette?.muted ?? '#888982', width / 2 - 1, y, 2, 10);
+      rect(ctx, ink, left, state.player - half, paddleWidth, paddleHeight);
+      rect(ctx, ink, right, state.cpu - half, paddleWidth, paddleHeight);
+      rect(ctx, palette?.accent ?? ink, state.ball.x - radius, state.ball.y - radius, radius * 2, radius * 2);
     },
   };
 }
