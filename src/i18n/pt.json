@@ -32,6 +32,63 @@
       "Qual é o próximo jogo do Galo?",
       "Qual é o rating dele no xadrez?"
     ],
+    "resources": {
+      "title": "Recursos da Astra",
+      "close": "Fechar catálogo",
+      "note": "Escolha um recurso para enviar uma pergunta de exemplo. Converse em português ou inglês.",
+      "items": {
+        "about": {
+          "title": "Sobre o Gustavo",
+          "description": "Formação na PUC Minas e trajetória",
+          "prompt": "O que o Gustavo está estudando na PUC Minas?"
+        },
+        "projects": {
+          "title": "Projetos",
+          "description": "Projetos, tecnologias e repositórios",
+          "prompt": "Quais são os principais projetos do Gustavo?"
+        },
+        "skills": {
+          "title": "Ferramentas e proficiência",
+          "description": "Níveis de habilidade cadastrados",
+          "prompt": "Quais tecnologias o Gustavo domina?"
+        },
+        "github": {
+          "title": "GitHub",
+          "description": "Atividade, repositórios e linguagens",
+          "prompt": "Mostre as métricas detalhadas do GitHub do Gustavo."
+        },
+        "wakatime": {
+          "title": "WakaTime",
+          "description": "Tempo de código por linguagem",
+          "prompt": "Mostre as métricas detalhadas do WakaTime do Gustavo."
+        },
+        "chessGame": {
+          "title": "Jogar xadrez",
+          "description": "Jogue uma partida com a Astra",
+          "prompt": "Quero jogar xadrez com você"
+        },
+        "chessRating": {
+          "title": "Rating no xadrez",
+          "description": "Estatísticas do Chess.com",
+          "prompt": "Qual é o rating do Gustavo no xadrez?"
+        },
+        "spotify": {
+          "title": "Spotify",
+          "description": "Música atual e faixas recentes",
+          "prompt": "O que o Gustavo está ouvindo?"
+        },
+        "canvas": {
+          "title": "Canvas LMS",
+          "description": "Disciplinas ativas na PUC Minas",
+          "prompt": "Quais são as disciplinas ativas do Gustavo no Canvas LMS?"
+        },
+        "galo": {
+          "title": "Atlético Mineiro",
+          "description": "Agenda de jogos do Galo",
+          "prompt": "Qual é o próximo jogo do Galo?"
+        }
+      }
+    },
     "fallbackIdioma": "I can only communicate in Portuguese or English. Please choose one of these languages.",
     "metricsSummary": "Aqui está o resumo do GitHub.\n[GITHUB_CARD]\nQuer ver as métricas detalhadas do GitHub e WakaTime?",
     "metricsDeclined": "Tudo bem, vamos manter apenas o resumo.",

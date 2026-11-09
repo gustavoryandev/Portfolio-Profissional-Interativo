@@ -1339,18 +1339,19 @@ export default async function handler(req, res) {
 
     if (typeof userMessage !== 'string' || !userMessage.trim()) return res.status(400).json({ error: 'Mensagem inválida.' });
     const suggestionLanguage = String(body.lang).startsWith('en') ? 'en' : 'pt';
-    const suggestionIndex = body.predefinedSuggestion === true
-      ? readJson(`${suggestionLanguage}.json`).chat.sugestoes.indexOf(userMessage.trim())
-      : -1;
+    const message = userMessage.trim();
+    const suggestions = body.predefinedSuggestion === true ? readJson(`${suggestionLanguage}.json`).chat : null;
+    const suggestionIndex = suggestions?.sugestoes.indexOf(message) ?? -1;
     const suggestionCards = ['[PROJECTS_CARD]', '[SKILLS_CARD]', '[CANVAS_CARD]', '[GITHUB_CARD]\n[STATS_CARD]', '[GALO_CARD]', '[CHESS_CARD]'];
-    const requestedSuggestionCards = suggestionIndex >= 0 ? suggestionCards[suggestionIndex] : '';
+    const catalogCards = { spotify: '[SPOTIFY_CARD]', canvas: '[CANVAS_CARD]' };
+    const catalogItem = Object.keys(catalogCards).find(key => suggestions?.resources.items[key].prompt === message);
+    const requestedSuggestionCards = suggestionCards[suggestionIndex] ?? catalogCards[catalogItem] ?? '';
     const previous = chatHistory.findLast(item => item?.sender === 'ai');
     const lastAi = typeof previous?.text === 'string' ? previous.text : '';
     const legacyOffer = previous?.translationKey === 'chat.metricsSummary';
     const pendingMetrics = legacyOffer || (/\[(GITHUB|WAKATIME)_CARD\]/.test(lastAi)
       && !/\[(GITHUB_ACTIVITY|STATS)_CARD\]/.test(lastAi)
       && /(?:quer ver|would you like to see).*(?:metricas detalhadas|detailed .*metrics)/.test(normalizeQuery(lastAi)));
-    const message = userMessage.trim();
     const normalizedQuery = normalizeQuery(message);
     const resource = conversationResource(message);
     if (resource) {
@@ -1423,7 +1424,7 @@ export default async function handler(req, res) {
     const request = { contents: [...toGeminiHistory(messages.slice(plan.start)), { role: 'user', parts: [{ text: message }] }] };
 
     const githubBlock = githubTopic ? githubBrief(github, GITHUB_DETAIL_INTENT.test(`${normalizedQuery} ${lastUser}`)) : '';
-    const suggestionInstruction = suggestionIndex >= 0
+    const suggestionInstruction = requestedSuggestionCards
       ? `\nORIGEM CONFIRMADA: sugestão predefinida clicada na interface. As restrições de intenção para mensagens manuais não se aplicam a este pedido. Responda usando os dados disponíveis e inclua estes marcadores exatamente uma vez: ${requestedSuggestionCards || 'nenhum (pergunta sobre tecnologias)'}. O card de xadrez desta sugestão mostra estatísticas do Chess.com. Mantenha todas as regras de grounding e de tom.`
       : '';
     const systemInstruction = buildSystemInstruction(perfil, summary, geminiContext, githubBlock) + suggestionInstruction + `\nRespond in ${String(body.lang).startsWith('en') ? 'English' : 'Portuguese'}.`;

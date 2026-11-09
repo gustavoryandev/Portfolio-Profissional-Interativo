@@ -32,6 +32,63 @@
       "When is Galo's next match?",
       "What is his chess rating?"
     ],
+    "resources": {
+      "title": "Astra resources",
+      "close": "Close resource catalog",
+      "note": "Choose a resource to send an example question. Chat in English or Portuguese.",
+      "items": {
+        "about": {
+          "title": "About Gustavo",
+          "description": "PUC Minas studies and career",
+          "prompt": "What is Gustavo studying at PUC Minas?"
+        },
+        "projects": {
+          "title": "Projects",
+          "description": "Projects, tech stacks and repos",
+          "prompt": "What are Gustavo's main projects?"
+        },
+        "skills": {
+          "title": "Tools and proficiency",
+          "description": "Gustavo’s declared skill levels",
+          "prompt": "What technologies does Gustavo know?"
+        },
+        "github": {
+          "title": "GitHub",
+          "description": "Activity, repos and languages",
+          "prompt": "Show Gustavo's detailed GitHub metrics."
+        },
+        "wakatime": {
+          "title": "WakaTime",
+          "description": "Coding time by language",
+          "prompt": "Show Gustavo's detailed WakaTime metrics."
+        },
+        "chessGame": {
+          "title": "Play chess",
+          "description": "Play a game with Astra",
+          "prompt": "I want to play chess with you"
+        },
+        "chessRating": {
+          "title": "Chess rating",
+          "description": "Chess.com stats",
+          "prompt": "What is Gustavo's chess rating?"
+        },
+        "spotify": {
+          "title": "Spotify",
+          "description": "Current music and recent tracks",
+          "prompt": "What is Gustavo listening to?"
+        },
+        "canvas": {
+          "title": "Canvas LMS",
+          "description": "Active courses at PUC Minas",
+          "prompt": "What are Gustavo's active courses in Canvas LMS?"
+        },
+        "galo": {
+          "title": "Atlético Mineiro",
+          "description": "Galo’s upcoming matches",
+          "prompt": "When is Galo's next match?"
+        }
+      }
+    },
     "fallbackIdioma": "I can only communicate in Portuguese or English. Please choose one of these languages.",
     "metricsSummary": "Here is the GitHub summary.\n[GITHUB_CARD]\nWould you like to see the detailed GitHub and WakaTime metrics?",
     "metricsDeclined": "Okay, we will keep just the summary.",
