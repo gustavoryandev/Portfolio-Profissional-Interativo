@@ -4,8 +4,6 @@ import { Home, Code2, Sparkles, Menu, X } from 'lucide-react';
 import { HeaderActions, portfolioLinks } from './Navbar';
 import { sections } from './Sidebar';
 
-const mobilePortfolioLinks = portfolioLinks.filter(([id]) => id !== 'laboratorio');
-
 export default function MobileNav({ en, active, onSelect }) {
   const { openFull } = useAstra();
   const dialog = useRef(null);
@@ -32,7 +30,7 @@ export default function MobileNav({ en, active, onSelect }) {
       <div className="mb-4 flex items-center justify-between gap-4"><h2 id="mobile-menu-title" className="text-lg font-semibold">{en ? 'Explore portfolio' : 'Explorar portfólio'}</h2><button autoFocus className={target} aria-label={en ? 'Close menu' : 'Fechar menu'} onClick={() => dialog.current.close()}><X aria-hidden="true" /></button></div>
       <nav className="flex flex-col gap-3" aria-label={en ? 'More sections' : 'Mais seções'}>
         {chat && <a className={target} href="/"><Home size={20} aria-hidden="true" />{en ? 'Portfolio' : 'Portfólio'}</a>}
-        {(chat ? sections : mobilePortfolioLinks).map(row => {
+        {(chat ? sections : portfolioLinks).map(row => {
           const [id] = row;
           const label = chat ? row[en ? 3 : 2] : row[en ? 2 : 1];
           return chat ? <button key={id} className={target} aria-current={active === id ? 'page' : undefined} onClick={() => { onSelect(id); dialog.current.close(); }}>{label}</button> : <a key={id} className={target} href={`#${id}`} onClick={() => dialog.current.close()}>{label}</a>;

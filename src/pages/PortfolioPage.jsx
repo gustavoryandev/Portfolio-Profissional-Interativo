@@ -40,7 +40,7 @@ export default function PortfolioPage() {
         <ScrollReveal repeat><p className="section-eyebrow">01 / {en ? 'THE JOURNEY' : 'A TRAJETÓRIA'}</p><h2 id="about-title">{en ? 'About me' : 'Sobre mim'}</h2><div className="glass-panel about-scroll"><p>{perfil.bio[en ? 'en' : 'pt']}</p></div></ScrollReveal>
       </section>
       <ProjectsScrollSection />
-      <ScrollReveal repeat className="hidden min-[768px]:block"><CodePlayground /></ScrollReveal>
+      <CodePlayground />
       <section id="habilidades" className="scroll-section" aria-labelledby="skills-title">
         <ScrollReveal repeat><p className="section-eyebrow">04 / {en ? 'TOOLKIT' : 'TECNOLOGIAS'}</p><h2 id="skills-title">{en ? 'What I build with.' : 'Com o que eu construo.'}</h2></ScrollReveal>
         <div className="portfolio-skill-visuals"><SkillsGlobe skills={perfil.skills} en={en} /></div><div className="scroll-skills">{perfil.skills.map((skill, index) => <ScrollReveal repeat key={skill.nome} delay={(index % 4) * .04}><div className="glass-panel scroll-skill"><LanguageIcon name={skill.nome} size={28} /><h3>{skill.nome}</h3></div></ScrollReveal>)}</div>
