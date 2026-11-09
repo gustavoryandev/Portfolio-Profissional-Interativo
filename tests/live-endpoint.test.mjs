@@ -209,3 +209,18 @@ test('the chat retries incomplete Gemini output in JSON and replaces it in the s
     mockAdapter = undefined;
   }
 });
+
+test('explicit game and proficiency requests bypass generation with one appropriate card', async () => {
+  for (const [userMessage, tag] of [
+    ['Quero jogar xadrez com você', '[CHESS_GAME]'],
+    ['I want to play chess with you', '[CHESS_GAME]'],
+    ['Quais tecnologias ele domina?', '[SKILLS_CARD]'],
+    ['What technologies does he know?', '[SKILLS_CARD]'],
+  ]) {
+    const res = response();
+    await handler({ method: 'POST', body: { userMessage, lang: 'pt', stream: true } }, res);
+    assert.equal(res.code, 200);
+    assert.deepEqual(res.body.response.match(/\[[A-Z_]+\]/g), [tag]);
+    assert.equal(res.body.model, undefined);
+  }
+});

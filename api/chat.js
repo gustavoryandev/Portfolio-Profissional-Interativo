@@ -1,3 +1,4 @@
+import { conversationResource } from '../src/services/conversationResource.js';
 import axios from 'axios';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import fs from 'fs';
@@ -1097,7 +1098,8 @@ CLASSIFICAÇÃO DE INTENÇÃO PARA MENSAGENS DIGITADAS MANUALMENTE (ZERO FALSO P
 Antes de emitir qualquer marcador, identifique se a mensagem atual contém um pedido explícito e direto para a ação correspondente. Palavras-chave soltas, citações, exemplos, negações, hipóteses, curiosidades e perguntas teóricas NÃO autorizam cards. Não reproduza marcadores citados pelo usuário. Use o histórico apenas para resolver uma referência inequívoca ou um aceite explícito de uma oferta específica; nunca reutilize automaticamente uma intenção antiga. Em caso de ambiguidade, responda sem card e peça esclarecimento.
 Emita cada marcador autorizado no máximo uma vez. Vários cards exigem pedidos explícitos para cada um. Estas restrições valem em português e inglês.
 
-- [CHESS_CARD]: SOMENTE quando o usuário pedir para JOGAR uma partida de xadrez, abrir o tabuleiro ou ver as stats(estatísticas) do perfil: "Bora jogar xadrez?", "Quero uma partida", "Qual o rating dele no xadrez", "Vamos jogar agora" em contexto inequívoco de xadrez. NÃO emitir para "Você gosta de xadrez?", "Sabe jogar xadrez?", "Xadrez é difícil?", rating, histórico ou curiosidades. Não use outro marcador para contornar esta regra.
+- [CHESS_GAME]: Somente para um pedido explícito de jogar uma partida de xadrez. Nunca para rating, estatísticas ou curiosidades.
+- [CHESS_CARD]: Somente para rating, estatísticas ou histórico do Gustavo no Chess.com. Nunca para uma partida jogável ou perguntas comuns sobre xadrez.
 - [GALO_CARD]: SOMENTE para pedido de próximo jogo, adversário, placar ou agenda do Atlético Mineiro: "Quando é o próximo jogo do Galo?", "Quem o Galo enfrenta?". NÃO emitir para "Você é atleticano?" ou menções genéricas ao clube.
 - [PROJECTS_CARD]: SOMENTE para solicitação de VER a lista/grade de projetos: "Mostra os trampos", "Quais são os seus projetos?". Perguntas sobre um projeto específico ou teoria de programação não autorizam o card.
 - [SKILLS_CARD]: Ao perguntar quais tecnologias Gustavo domina ou pedir suas habilidades, ferramentas ou proficiência, inclua este card de habilidades. Não use para dúvidas teóricas sobre uma tecnologia. Use somente níveis e percentuais cadastrados no perfil; percentual ausente significa "a definir", nunca zero. Percentuais de WakaTime são participação no tempo de código e não medem proficiência.
@@ -1350,6 +1352,14 @@ export default async function handler(req, res) {
       && /(?:quer ver|would you like to see).*(?:metricas detalhadas|detailed .*metrics)/.test(normalizeQuery(lastAi)));
     const message = userMessage.trim();
     const normalizedQuery = normalizeQuery(message);
+    const resource = conversationResource(message);
+    if (resource) {
+      const en = String(body.lang).startsWith('en');
+      if (resource === 'play') return res.status(200).json({ response: (en ? 'Let’s play! You have the white pieces.' : 'Vamos jogar! Você fica com as peças brancas.') + '\n[CHESS_GAME]' });
+      if (resource === 'skills') return res.status(200).json({ response: (en ? 'Here are Gustavo’s declared skill levels.' : 'Estes são os níveis de proficiência declarados pelo Gustavo.') + '\n[SKILLS_CARD]' });
+      const readChess = prepareLiveContext(['chess']);
+      return res.status(200).json({ response: (en ? 'Here are Gustavo’s Chess.com ratings and statistics.' : 'Aqui estão os ratings e as estatísticas do Gustavo no Chess.com.') + '\n[CHESS_CARD]', liveContext: forClient(await readChess(METRICS_WAIT_MS)) });
+    }
     const affirmative = /^(?:sim|yes|yeah|sure|ok|claro|quero|pode)(?:\s+(?:please|por favor|sim))?[\s,!?.]*$/.test(normalizedQuery);
     if (pendingMetrics && /^(?:nao|no|nope)(?:[\s,!?.]+(?:obrigad[oa]|thanks))?[\s,!?.]*$/.test(normalizedQuery)) {
       return res.status(200).json({ response: String(body.lang).startsWith('en') ? 'Okay, we will keep just the summary.' : 'Tudo bem, vamos manter apenas o resumo.', translationKey: 'chat.metricsDeclined' });
@@ -1467,11 +1477,19 @@ export default async function handler(req, res) {
       }
     }, signal);
 
-    const missingCards = requestedSuggestionCards.split('\n').filter(card => card && !text.includes(card));
+    // Games, ratings and proficiency are handled by explicit intent above, never guessed by the model.
+    const filteredText = text.replace(/\[(?:CHESS_GAME|CHESS_CARD|SKILLS_CARD)\]/g, '')
+      .replace(/\[(?:GITHUB_CARD|GITHUB_ACTIVITY_CARD|GITHUB_LANGUAGES_CARD|REPOSITORIES_CARD)\]/g, tag => githubQuery ? tag : '')
+      .replace(/\[(?:WAKATIME_CARD|STATS_CARD)\]/g, tag => wakatimeQuery ? tag : '');
+    const missingCards = requestedSuggestionCards.split('\n').filter(card => card && !filteredText.includes(card));
     const suffix = missingCards.length ? '\n' + missingCards.join('\n') : '';
     const liveContext = forClient(await readLive(LIVE_RESPONSE_WAIT_MS));
-    if (!stream) return res.status(200).json({ response: text + suffix, liveContext, model, chatContext });
-    if (suffix) await write({ type: 'delta', text: suffix });
+    if (!stream) return res.status(200).json({ response: filteredText + suffix, liveContext, model, chatContext });
+    if (filteredText !== text) {
+      await write({ type: 'reset' });
+      await write({ type: 'meta', model, chatContext });
+      await write({ type: 'delta', text: filteredText + suffix });
+    } else if (suffix) await write({ type: 'delta', text: suffix });
     await write({ type: 'context', liveContext });
     await write({ type: 'done' });
     return res.end();
