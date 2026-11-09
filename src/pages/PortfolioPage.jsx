@@ -1,4 +1,6 @@
-import { ArrowDown, ArrowUpRight, Sparkles } from 'lucide-react';
+import SkillsGlobe from '../components/SkillsGlobe';
+import { useAstra } from '../context/AstraContext';
+import { ArrowDown, ArrowUpRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import Navbar from '../components/Navbar';
 import MobileNav from '../components/MobileNav';
@@ -11,6 +13,7 @@ import ScrollReveal from '../components/ui/ScrollReveal';
 import perfil from '../data/perfil.json';
 
 export default function PortfolioPage() {
+  const { openAstra, openFull } = useAstra();
   const { i18n } = useTranslation();
   const en = i18n.language.startsWith('en');
   return <div className="portfolio-app scroll-portfolio">
@@ -24,7 +27,7 @@ export default function PortfolioPage() {
           <h1 id="hero-title">Gustavo<br /><span className="neon-title">Ryan.</span></h1>
           <p className="hero-lead">{en ? 'Turning ideas into digital experiences.' : 'Transformando ideias em experiências digitais.'}</p>
           <p className="hero-description">{en ? 'Java, Spring Boot and React. Explore my projects, skills and the journey behind the code.' : 'Java, Spring Boot e React. Explore meus projetos, habilidades e a trajetória por trás do código.'}</p>
-          <div className="hero-actions"><a className="neon-cta" href="/chat"><Sparkles size={18} aria-hidden="true" />{en ? 'Talk to Astra' : 'Conversar com Astra'}<ArrowUpRight size={18} aria-hidden="true" /></a><a className="scroll-secondary" href="#projetos">{en ? 'Explore projects' : 'Explorar projetos'}<ArrowDown size={17} aria-hidden="true" /></a></div>
+          <div className="hero-actions"><a className="neon-cta" href="#projetos">{en ? 'Explore projects' : 'Explorar projetos'}<ArrowDown size={17} aria-hidden="true" /></a></div>
           <SocialLinks />
         </ScrollReveal>
         <ScrollReveal repeat delay={.12} className="hero-profile glass-panel">
@@ -40,11 +43,12 @@ export default function PortfolioPage() {
       <ScrollReveal repeat className="hidden min-[768px]:block"><CodePlayground /></ScrollReveal>
       <section id="habilidades" className="scroll-section" aria-labelledby="skills-title">
         <ScrollReveal repeat><p className="section-eyebrow">04 / {en ? 'TOOLKIT' : 'TECNOLOGIAS'}</p><h2 id="skills-title">{en ? 'What I build with.' : 'Com o que eu construo.'}</h2></ScrollReveal>
-        <div className="scroll-skills">{perfil.skills.map((skill, index) => <ScrollReveal repeat key={skill.nome} delay={(index % 4) * .04}><div className="glass-panel scroll-skill"><LanguageIcon name={skill.nome} size={28} /><h3>{skill.nome}</h3></div></ScrollReveal>)}</div>
+        <div className="portfolio-skill-visuals"><SkillsGlobe skills={perfil.skills} en={en} /></div><div className="scroll-skills">{perfil.skills.map((skill, index) => <ScrollReveal repeat key={skill.nome} delay={(index % 4) * .04}><div className="glass-panel scroll-skill"><LanguageIcon name={skill.nome} size={28} /><h3>{skill.nome}</h3></div></ScrollReveal>)}</div>
       </section>
       {['experience', 'education', 'contact'].map(section => <div key={section} id={section === 'contact' ? 'contato' : section} className="scroll-section"><ScrollReveal repeat><PortfolioSection active={section} en={en} /></ScrollReveal></div>)}
-      <ScrollReveal repeat><section className="glass-panel astra-scroll-cta" aria-labelledby="astra-cta-title"><img src="/astra-avatar.png" alt="" width="64" height="64" /><div><h2 id="astra-cta-title">{en ? 'Curious about my work?' : 'Quer conhecer melhor meu trabalho?'}</h2><p>{en ? 'Astra can guide you through my projects and live integrations.' : 'A Astra te guia pelos projetos e pelas integrações ao vivo.'}</p></div><a href="/chat" className="neon-cta">{en ? 'Talk to Astra' : 'Conversar com Astra'}<ArrowUpRight size={18} aria-hidden="true" /></a></section></ScrollReveal>
+      <ScrollReveal repeat><section className="glass-panel astra-scroll-cta" aria-labelledby="astra-cta-title"><img src="/astra-avatar.png" alt="" width="64" height="64" /><div><h2 id="astra-cta-title">{en ? 'Curious about my work?' : 'Quer conhecer melhor meu trabalho?'}</h2><p>{en ? 'Astra can guide you through my projects and live integrations.' : 'A Astra te guia pelos projetos e pelas integrações ao vivo.'}</p></div><a href="/chat" onClick={openFull} className="neon-cta">{en ? 'Talk to Astra' : 'Conversar com Astra'}<ArrowUpRight size={18} aria-hidden="true" /></a></section></ScrollReveal>
     </main>
+    <aside aria-label="Astra"><button type="button" className="astra-fab" onClick={openAstra} aria-haspopup="dialog"><img src="/astra-avatar.png" alt="" />{en ? 'Ask Astra' : 'Perguntar pra Astra'}</button></aside>
     <footer className="scroll-footer"><span>© {new Date().getFullYear()} Gustavo Ryan</span><a href="#inicio">{en ? 'Back to top ↑' : 'Voltar ao topo ↑'}</a></footer>
   </div>;
 }

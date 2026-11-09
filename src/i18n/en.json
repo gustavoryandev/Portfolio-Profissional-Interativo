@@ -16,6 +16,7 @@
     "loading": "Loading résumé…"
   },
   "chat": {
+    "quickWelcome": "Hi! I’m Astra. What would you like to know about Gustavo’s work?",
     "erro": "Your question could not be processed right now. Please try again shortly.",
     "boasVindas": "Hello! I am Gustavo's virtual assistant. How can I help you today?",
     "subtitulo": "Ask about projects, tech stack, university, or live metrics.",

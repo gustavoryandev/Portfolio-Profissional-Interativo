@@ -7,6 +7,8 @@ import MessageBubble from '../src/components/MessageBubble.jsx';
 import GithubCard from '../src/components/GithubCard.jsx';
 import StatsCard from '../src/components/StatsCard.jsx';
 import App from '../src/pages/ChatPage.jsx';
+import AstraEntrance from '../src/components/AstraEntrance.jsx';
+import PortfolioIntro from '../src/components/PortfolioIntro.jsx';
 import GaloCard from '../src/components/GaloCard.jsx';
 import SpotifyCard from '../src/components/SpotifyCard.jsx';
 import ChessCard from '../src/components/ChessCard.jsx';
@@ -21,6 +23,8 @@ import { ThemeContext } from '../src/context/ThemeContext.jsx';
 const dom = new JSDOM('<div id="root"></div>', { url: 'http://localhost' });
 globalThis.window = dom.window;
 globalThis.document = dom.window.document;
+globalThis.requestAnimationFrame = callback => setTimeout(callback, 0);
+globalThis.cancelAnimationFrame = clearTimeout;
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 const { default: i18n } = await import('../src/i18n/index.js');
 const root = createRoot(document.getElementById('root'));
@@ -95,27 +99,22 @@ globalThis.fetch = async (_url, options) => {
   return Response.json({ response: 'Test reply.', model: 'test-model' });
 };
 await render(true, <App />);
-assert.equal(document.querySelectorAll('main').length, 1);
 assert.equal(document.querySelector('[role="log"]').tagName, 'DIV');
 assert.equal(document.querySelectorAll('.astra-starter').length, 6);
-assert.equal(document.querySelector('.astra-hero-wrap').hasAttribute('inert'), false);
-await act(async () => document.querySelector('.astra-starter').click());
+assert.equal(document.querySelectorAll('.message-card').length, 0);
+assert.equal(document.querySelector('.astra-details'), null);
+await act(async () => document.querySelector('.astra-starter, .chat-composer button[type="button"]').click());
 assert.equal(submitted.length, 1);
 assert.equal(submitted[0].predefinedSuggestion, true);
 assert.equal(submitted[0].stream, true);
-assert.equal(document.querySelector('.astra-hero-wrap').hasAttribute('inert'), true);
 assert.match(document.querySelector('.astra-label .dim-tag').textContent, /test-model/);
-assert.equal(document.querySelectorAll('.chat-composer button[type="button"]').length, 6);
-await act(async () => document.querySelector('.nav-items button:nth-child(2)').click());
-await act(async () => document.querySelector('.astra-fab').click());
-assert.equal(document.activeElement.id, 'chat-input');
-await act(async () => document.querySelector('.sidebar-note').click());
-assert.equal(document.activeElement.id, 'chat-input');
 
 // The pending stream must display the user message before any token arrives.
 let streamController;
+let streamRequests = 0;
 globalThis.fetch = async (_url, options) => new Response(new ReadableStream({
   start(controller) {
+    streamRequests++;
     streamController = controller;
     options.signal.addEventListener('abort', () => controller.error(new DOMException('Stopped', 'AbortError')), { once: true });
   },
@@ -131,12 +130,37 @@ await act(async () => {
 });
 assert.match(document.querySelector('[data-streaming-reply]').textContent, /Incremental response/);
 assert.equal(document.querySelector('.chat-msg-in'), firstBubble);
+// Switching presentation or closing the modal must preserve the active stream and history.
+const countBeforeSwitch = document.querySelectorAll('.chat-msg-in').length;
+await render(true, <App modal visible={false} />);
+assert.equal(document.querySelectorAll('.chat-msg-in').length, countBeforeSwitch);
+await render(true, <App modal visible />);
+assert.equal(document.querySelector('.chat-msg-in'), firstBubble);
+await render(true, <App />);
+assert.match(document.querySelector('[data-streaming-reply]').textContent, /Incremental response/);
+assert.equal(document.querySelectorAll('.chat-msg-in').length, countBeforeSwitch);
+assert.equal(streamRequests, 1, 'mode changes must not resend the active request');
+
 await act(async () => document.querySelector('[aria-label="Stop response"]').click());
 assert.equal(document.querySelector('[data-streaming-reply]'), null);
 assert.match(document.body.textContent, /Incremental response/);
 assert.match(document.body.textContent, /Response stopped/);
 assert.equal(document.querySelector('button[type="submit"]').disabled, true); // empty input, no stuck loading state
 
+// Both entrances honor reduced motion; the full entrance can be skipped without replacing the chat.
+let finished = false;
+await render(true, <AstraEntrance en ready onFinish={() => { finished = true; }} />);
+await act(async () => { await new Promise(resolve => setTimeout(resolve, 10)); });
+assert.equal(finished, true);
+await render(true, <PortfolioIntro en><p>Portfolio ready</p></PortfolioIntro>);
+assert.equal(document.querySelector('.portfolio-opening'), null);
+assert.match(document.body.textContent, /Portfolio ready/);
+window.matchMedia = () => ({ matches: false, addEventListener() {}, removeEventListener() {} });
+finished = false;
+await render(true, <AstraEntrance en ready onFinish={() => { finished = true; }} />);
+assert.ok(document.querySelector('.astra-entrance'));
+await act(async () => document.querySelector('.astra-entrance-bottom button').click());
+assert.equal(finished, true);
 await act(async () => root.unmount());
 dom.window.close();
 console.log('UI checks passed: translations, deduplication, code, links, card identity, light/dark, unavailable breakdowns.');

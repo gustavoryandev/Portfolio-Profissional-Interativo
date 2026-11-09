@@ -1,17 +1,9 @@
-import { lazy, Suspense, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import './AstraEntrance.css';
 import useEntranceInteraction from '../hooks/useEntranceInteraction';
 
-const ChatPage = lazy(() => import('../pages/ChatPage'));
-
-function ReadyChat({ onReady }) {
-  useEffect(() => { onReady(true); }, [onReady]);
-  return <ChatPage />;
-}
-
-export default function AstraEntrance({ en }) {
+export default function AstraEntrance({ en, ready = true, onFinish }) {
   const interaction = useEntranceInteraction();
-  const [ready, setReady] = useState(false);
   const [elapsed, setElapsed] = useState(false);
   const entering = !ready || !elapsed;
 
@@ -24,14 +16,13 @@ export default function AstraEntrance({ en }) {
   }, []);
 
   useEffect(() => {
-    if (entering || window.matchMedia('(pointer: coarse)').matches) return;
+    if (entering) return;
+    onFinish?.();
+    if (window.matchMedia('(pointer: coarse)').matches) return;
     document.getElementById('chat-input')?.focus({ preventScroll: true });
   }, [entering]);
 
   return <>
-    <div hidden={entering} inert={entering}>
-      <Suspense fallback={null}><ReadyChat onReady={setReady} /></Suspense>
-    </div>
     {entering && <main {...interaction} className="astra-entrance" aria-busy="true">
       <div className="astra-entrance-grid" aria-hidden="true" />
       <header className="astra-entrance-top"><span>Gustavo Ryan<span>.ai</span></span><span>PORTFOLIO / ASTRA</span></header>

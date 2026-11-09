@@ -22,6 +22,10 @@ for (const lang of ['pt', 'en']) {
   assert.equal(doc.querySelectorAll('h1').length, 1);
   assert.equal(doc.querySelectorAll('[role="log"], #chat-input').length, 0);
   assert.ok(doc.querySelectorAll('a[href="/chat"]').length >= 2);
+  assert.equal(doc.querySelectorAll('button.astra-fab[aria-haspopup="dialog"]').length, 1);
+  assert.equal(doc.querySelectorAll('#habilidades [role="progressbar"]').length, 0);
+  assert.ok(doc.querySelector('#habilidades .scroll-skills'));
+  assert.equal(doc.querySelector('.nav-astra').hasAttribute('aria-haspopup'), false);
   for (const id of ['inicio', 'sobre', 'projetos', 'habilidades', 'experience', 'education', 'contato']) assert.ok(doc.getElementById(id));
   for (const anchor of doc.querySelectorAll('a[href^="#"]')) assert.ok(doc.getElementById(anchor.getAttribute('href').slice(1)));
   const ids = [...doc.querySelectorAll('[id]')].map(node => node.id);
@@ -30,7 +34,7 @@ for (const lang of ['pt', 'en']) {
   page.window.close();
 }
 const chat = render('/chat');
-assert.ok(chat.window.document.querySelector('[aria-busy="true"]'), 'chat loads as a separate lazy screen');
+assert.ok(chat.window.document.querySelector('.astra-shell-full'), 'direct chat route loads the full Astra shell');
 assert.equal(chat.window.document.querySelector('.scroll-portfolio'), null);
 chat.window.close();
 const unknown = render('/missing');

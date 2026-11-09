@@ -202,7 +202,7 @@ function Avatar({ isUser, children }) {
   );
 }
 
-function MessageBubble({ message, liveContext = {}, refreshing = [], onRefresh, onSelectSection }) {
+function MessageBubble({ message, liveContext = {}, refreshing = [], onRefresh, onSelectSection, compact = false }) {
   const { i18n } = useTranslation();
   const uiLanguage = i18n.language.startsWith('en') ? 'en' : 'pt';
   const ui = UI;
@@ -281,6 +281,10 @@ function MessageBubble({ message, liveContext = {}, refreshing = [], onRefresh, 
           if (!card) return <span key={index}>{segment.tag}</span>;
 
           const { Component, limit } = card;
+          if (compact) {
+            const target = segment.tag === '[PROJECTS_CARD]' ? 'projects' : segment.tag === '[SKILLS_CARD]' ? 'skills' : 'full';
+            return <button key={segment.tag} className="chip chip--accent" onClick={() => onSelectSection?.(target)}>{target === 'projects' ? (uiLanguage === 'en' ? 'Explore projects' : 'Explorar projetos') : target === 'skills' ? (uiLanguage === 'en' ? 'Explore skills' : 'Explorar habilidades') : (uiLanguage === 'en' ? 'Explore in full Astra' : 'Explorar na Astra completa')}</button>;
+          }
           const source = CARD_SOURCES[segment.tag.slice(1, -1).split(':')[0]];
           const data = context[source];
           return (

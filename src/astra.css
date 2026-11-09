@@ -1,0 +1,48 @@
+/* Conversation shell. Original AstraHero, card and glass styles remain in index.css/glass-neon.css. */
+.astra-shell { color: var(--ink); background: var(--panel); border: 0; padding: 0; }
+.astra-shell::backdrop { background: #060b18aa; backdrop-filter: blur(6px); }
+.astra-shell-modal { position: fixed; inset: 0 0 0 auto; margin: 0; width: min(540px, 100%); max-width: 100%; height: 100dvh; max-height: 100dvh; overflow: hidden; border-left: 1px solid var(--line); }
+.astra-shell-full { position: relative; inset: auto; margin: 0; width: 100%; max-width: none; max-height: none; min-height: 100dvh; }
+.astra-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 20px; min-height: 69px; border-bottom: 1px solid var(--line); }
+.astra-toolbar[hidden] { display: none; }
+.astra-toolbar a { color: var(--accent); }
+.astra-toolbar button { min-width: 44px; min-height: 44px; }
+.astra-conversation .app-frame { width: 100%; max-width: none; min-height: 0; height: auto; margin: 0; padding: 0; }
+.astra-workspace { display: block; padding: 6px 6px 6px 18px; }
+.astra-conversation .center-panel { min-width: 0; height: calc(100dvh - 92px); overflow: hidden; }
+.astra-conversation .chat-view { display: flex; height: 100%; flex-direction: column; }
+.astra-conversation .chat-messages { min-height: 0; flex: 1; }
+.astra-conversation .chat-composer { position: static; flex-shrink: 0; }
+.astra-conversation .chat-heading { flex-shrink: 0; }
+.astra-full .astra-hero-wrap[data-compact=true] { display: none; }
+.astra-shell-modal[open] { display: flex; flex-direction: column; }
+.astra-shell-modal .astra-toolbar { flex: 0 0 69px; }
+.astra-shell-modal .astra-compact { flex: 1; min-height: 0; height: 0; width: 100%; }
+.astra-compact .app-frame, .astra-compact .astra-workspace, .astra-compact .center-panel { height: 100%; min-height: 0; max-height: 100%; }
+.astra-compact .astra-workspace { padding: 0; }
+.astra-compact .center-panel { border: 0; border-radius: 0; }
+.astra-shell a:focus-visible, .astra-shell button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.portfolio-skill-visuals { margin: 32px auto; max-width: 800px; }
+@media(max-width: 767px) {
+ .astra-shell-modal { top: var(--chat-viewport-top, 0px); height: var(--chat-viewport-height, 100dvh); max-height: var(--chat-viewport-height, 100dvh); }
+ .astra-workspace { padding: 8px; }
+ .astra-conversation .center-panel { height: calc(var(--chat-viewport-height, 100dvh) - 156px); }
+ .astra-compact .center-panel { height: 100%; }
+ .astra-conversation .chat-composer { padding-bottom: max(12px, env(safe-area-inset-bottom)); }
+ .astra-conversation .chat-form input { font-size: 16px; }
+ .astra-conversation .chat-heading { padding: 12px; }
+ .astra-conversation .astra-hero { padding: 20px 16px; }
+ .astra-conversation .astra-starters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+ .astra-conversation .astra-starter { padding: 10px; font-size: 13px; height: 100%; }
+ .astra-conversation .chat-messages { padding: 12px; }
+ .portfolio-app.astra-conversation .site-header { flex-wrap: wrap; height: auto; position: static; }
+ .astra-conversation .site-header > .header-actions { display: flex; flex-wrap: wrap; margin-left: 0; }
+}
+@media(max-width: 359px) { .astra-conversation .astra-starters { grid-template-columns: 1fr; } }
+
+.scroll-portfolio .astra-fab { position: fixed; right: 16px; bottom: 16px; z-index: 45; }
+@media(max-width: 767px) { .scroll-portfolio .astra-fab { bottom: calc(96px + env(safe-area-inset-bottom)); } }
+.astra-full .astra-workspace { padding-left: 17px; padding-right: 5px; }
+.astra-full .chat-heading { padding-top: 16.5px; padding-bottom: 16.5px; }
+@media(max-width:767px) { .astra-full .astra-workspace { padding: 8px; } }
+.astra-starter b { flex-shrink: 0; white-space: nowrap; }

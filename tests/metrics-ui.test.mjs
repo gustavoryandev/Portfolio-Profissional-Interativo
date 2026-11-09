@@ -7,6 +7,6 @@ test('metrics cards and translation toggles', async () => {
   try {
     await build({ entryPoints: ['tests/metrics-ui.jsx'], outfile: fileURLToPath(output), bundle: true, platform: 'node', format: 'esm', packages: 'external', jsx: 'automatic', define: { 'import.meta.env': '{}' }, logLevel: 'silent', plugins: [{ name: 'unused-resume', setup(build) { build.onResolve({ filter: /ResumeCard$/ }, () => ({ path: 'resume', namespace: 'stub' })); build.onLoad({ filter: /.*/, namespace: 'stub' }, () => ({ contents: 'export default () => null' })); } }] });
     await import(output.href);
-  } finally { await unlink(output).catch(() => {}); }
+  } finally { await Promise.all([output, new URL('./.metrics-ui.css', import.meta.url)].map(file => unlink(file).catch(() => {}))); }
 });
 

@@ -1,3 +1,4 @@
+import { useAstra } from '../context/AstraContext';
 import { useEffect, useRef } from 'react';
 import { Home, Code2, Sparkles, Menu, X } from 'lucide-react';
 import { HeaderActions, portfolioLinks } from './Navbar';
@@ -6,6 +7,7 @@ import { sections } from './Sidebar';
 const mobilePortfolioLinks = portfolioLinks.filter(([id]) => id !== 'laboratorio');
 
 export default function MobileNav({ en, active, onSelect }) {
+  const { openFull } = useAstra();
   const dialog = useRef(null);
   useEffect(() => {
     const desktop = window.matchMedia('(min-width: 768px)');
@@ -21,10 +23,10 @@ export default function MobileNav({ en, active, onSelect }) {
         <button className={target} onClick={() => onSelect('home')} aria-current={active === 'home' ? 'page' : undefined}><Sparkles size={20} aria-hidden="true" />Astra</button>
         <button className={target} onClick={() => onSelect('projects')} aria-current={active === 'projects' ? 'page' : undefined}><Code2 size={20} aria-hidden="true" />{en ? 'Projects' : 'Projetos'}</button>
       </> : <>
-        <a className={target} href="/chat"><Sparkles size={20} aria-hidden="true" />Astra</a>
+        <a className={target} href="/chat" onClick={openFull}><Sparkles size={20} aria-hidden="true" />Astra</a>
         <a className={target} href="#projetos"><Code2 size={20} aria-hidden="true" />{en ? 'Projects' : 'Projetos'}</a>
       </>}
-      <button className={target} onClick={() => dialog.current.showModal()} aria-haspopup="dialog"><Menu size={20} aria-hidden="true" />Menu</button>
+      <button className={target} onClick={() => dialog.current.showModal()}><Menu size={20} aria-hidden="true" />Menu</button>
     </nav>
     <dialog ref={dialog} className="mobile-menu fixed inset-x-0 bottom-0 top-auto m-0 max-h-[80dvh] w-full max-w-none overflow-y-auto rounded-t-2xl border border-line bg-panel p-5 pb-[max(20px,env(safe-area-inset-bottom))] text-ink" aria-labelledby="mobile-menu-title" onClick={event => { if (event.target === event.currentTarget) dialog.current.close(); }}>
       <div className="mb-4 flex items-center justify-between gap-4"><h2 id="mobile-menu-title" className="text-lg font-semibold">{en ? 'Explore portfolio' : 'Explorar portfólio'}</h2><button autoFocus className={target} aria-label={en ? 'Close menu' : 'Fechar menu'} onClick={() => dialog.current.close()}><X aria-hidden="true" /></button></div>

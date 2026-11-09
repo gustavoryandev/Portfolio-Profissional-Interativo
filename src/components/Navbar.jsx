@@ -1,3 +1,4 @@
+import { useAstra } from '../context/AstraContext';
 import { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Sun, Moon, Download, Sparkles } from 'lucide-react';
@@ -15,11 +16,12 @@ export const portfolioLinks = [
 ];
 
 export default function Navbar({ portfolio = false }) {
+  const { openFull, returnPortfolio } = useAstra();
   const { i18n } = useTranslation();
   const en = i18n.language.startsWith('en');
   return <header className="site-header sticky top-0 z-40 bg-white bg-opacity-70 backdrop-blur-lg dark:bg-zinc-950 dark:bg-opacity-70">
-    <a href={portfolio ? '#inicio' : '/'} className="brand-lockup" aria-label={en ? 'Gustavo Ryan — portfolio' : 'Gustavo Ryan — portfólio'}><span className="brand-logo" aria-hidden="true" /><div><p className="brand-title">Gustavo Ryan</p><p>{portfolio ? (en ? 'Software Engineering' : 'Engenharia de Software') : (en ? '← Back to portfolio' : '← Voltar ao portfólio')}</p></div></a>
-    {portfolio && <nav className="scroll-nav" aria-label={en ? 'Portfolio sections' : 'Seções do portfólio'}>{portfolioLinks.map(([id, pt, english]) => <a key={id} href={`#${id}`}>{en ? english : pt}</a>)}<a href="/chat" className="nav-astra">Astra <Sparkles size={14} aria-hidden="true" /></a></nav>}
+    <a href={portfolio ? '#inicio' : '/'} onClick={portfolio ? undefined : returnPortfolio} className="brand-lockup" aria-label={en ? 'Gustavo Ryan — portfolio' : 'Gustavo Ryan — portfólio'}><span className="brand-logo" aria-hidden="true" /><div><p className="brand-title">Gustavo Ryan</p><p>{portfolio ? (en ? 'Software Engineering' : 'Engenharia de Software') : (en ? '← Back to portfolio' : '← Voltar ao portfólio')}</p></div></a>
+    {portfolio && <nav className="scroll-nav" aria-label={en ? 'Portfolio sections' : 'Seções do portfólio'}>{portfolioLinks.map(([id, pt, english]) => <a key={id} href={`#${id}`}>{en ? english : pt}</a>)}<a href="/chat" onClick={openFull} className="nav-astra">Astra <Sparkles size={14} aria-hidden="true" /></a></nav>}
     <HeaderActions />
   </header>;
 }
