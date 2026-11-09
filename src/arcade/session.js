@@ -4,7 +4,9 @@ import { validArcadeAction } from './commands.js';
 import { getRecords, saveSession } from './records.js';
 import { clamp } from './games/shared.js';
 
-const loaders = {};
+const loaders = {
+  snake: () => import('./games/snake.js'),
+};
 export const playableGames = gameIds.filter(game => Object.hasOwn(loaders, game));
 
 export const fixedStep = 1 / 120;
