@@ -20,7 +20,7 @@
       "compact": "Você está na Astra compacta, a conversa flutuante do portfólio.",
       "full": "Você está na Astra completa, a página dedicada à conversa.",
       "viewFull": "Ver na Astra completa",
-      "handoff": "Este recurso funciona na Astra completa. Você pode continuar a mesma conversa por lá."
+      "fullOnlyCard": "Este recurso só pode ser exibido na Astra completa."
     },
     "quickWelcome": "Olá! Sou a Astra. Pergunte sobre o Gustavo, explore um projeto ou experimente dizer “Abra o Laboratório”.",
     "erro": "Não foi possível processar sua pergunta agora. Tente novamente em instantes.",
@@ -78,7 +78,7 @@
       "title": "Recursos da Astra",
       "close": "Fechar catálogo",
       "note": "Escolha um atalho ou escreva seu próprio pedido em português ou inglês. Digite /help para voltar a esta lista.",
-      "cardHandoff": "Recursos que precisam da Astra completa, como jogar xadrez, abrem a página dedicada automaticamente. Nos outros cards, use “Ver na Astra completa” para abrir a mesma resposta.",
+      "cardHandoff": "Alguns recursos, como o tabuleiro de xadrez, só aparecem na Astra completa. Use “Ver na Astra completa” para abrir a mesma resposta quando quiser.",
       "groups": {
         "versions": "Versões da Astra",
         "portfolio": "Ações do portfólio",

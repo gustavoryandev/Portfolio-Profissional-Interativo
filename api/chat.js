@@ -1450,7 +1450,7 @@ export default async function handler(req, res) {
       ? `\nORIGEM CONFIRMADA: sugestão predefinida clicada na interface. As restrições de intenção para mensagens manuais não se aplicam a este pedido. Responda usando os dados disponíveis e inclua estes marcadores exatamente uma vez: ${requestedSuggestionCards || 'nenhum (pergunta sobre tecnologias)'}. O card de xadrez desta sugestão mostra estatísticas do Chess.com. Mantenha todas as regras de grounding e de tom.`
       : '';
     const actionTools = surface && !suggestions ? portfolioTools(perfil.projetos, labSnapshot) : null;
-    const style = surface === 'compact' ? 'Current interface: Compact Astra (the floating chat). Keep replies brief. If the user requests a resource that has an authorized card, include its marker so the interface can open it in Full Astra when needed. Never claim an unsupported action was performed.'
+    const style = surface === 'compact' ? 'Current interface: Compact Astra (the floating chat). Keep replies brief. Include authorized card markers so the interface can offer a link to Full Astra if needed. Only switch interfaces if the user explicitly asks. Never claim an unsupported action was performed.'
       : surface === 'full' ? 'Current interface: Full Astra (the dedicated /chat page). Give detailed explanations when useful.' : '';
     const systemInstruction = buildSystemInstruction(perfil, summary, geminiContext, githubBlock) + suggestionInstruction
       + `\nRespond in ${suggestionLanguage === 'en' ? 'English' : 'Portuguese'}. ${style}`

@@ -107,10 +107,6 @@ function compactCardMode(tag) {
   return 'full';
 }
 
-export function needsFullAstra(text) {
-  return splitMessage(text).some(segment => segment.type === 'card' && compactCardMode(segment.tag) === 'full');
-}
-
 // Separa blocos de código cercados do texto comum
 function parseBlocks(text) {
   const blocks = [];
@@ -242,6 +238,7 @@ function MessageBubble({ message, liveContext = {}, refreshing = [], onRefresh, 
   const segments = useMemo(() => (isUser ? [] : splitMessage(text)), [isUser, text]);
   const context = useMemo(() => mergeLiveContext(message?.context, liveContext), [message?.context, liveContext]);
   const hasCards = segments.some(segment => segment.type === 'card');
+  const hasFullOnlyCard = compact && segments.some(segment => segment.type === 'card' && compactCardMode(segment.tag) === 'full');
 
   if (isUser) {
     return (
@@ -276,6 +273,7 @@ function MessageBubble({ message, liveContext = {}, refreshing = [], onRefresh, 
         {translating && (
           <p role="status" className="text-xs text-muted">{i18n.t(translationFailed ? 'chat.translationFailed' : 'chat.translating')}</p>
         )}
+        {hasFullOnlyCard && <p className="text-sm text-muted">{i18n.t('chat.surface.fullOnlyCard')}</p>}
         {compact && hasCards && <FullAstraCardLink onOpen={onViewFull ? () => onViewFull(message.id) : undefined} />}
 
         {segments.map((segment, index) => {

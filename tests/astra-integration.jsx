@@ -222,18 +222,23 @@ try {
   assert.equal(window.location.pathname, '/', 'markers in code do not open Full Astra');
   assert.match($('.astra-compact [role="log"] pre').textContent, /\[CHESS_GAME\]/);
   await send('Can we play?');
-  assert.equal(window.location.pathname, '/', 'asking what to play does not navigate until the visitor accepts');
+  assert.equal(window.location.pathname, '/');
   assert.match($('.astra-compact [role="log"]').textContent, /Would you like to play a game of chess/);
+  await send('ss');
+  assert.equal(window.location.pathname, '/', 'confirming chess keeps the visitor in Compact Astra');
+  assert.equal(requests.at(-1).surface, 'compact');
+  const gameMessage = [...document.querySelectorAll('.astra-compact .chat-msg-in')]
+    .find(node => node.textContent.includes('This resource can only be shown in Full Astra.'));
+  assert.ok(gameMessage, 'the compact reply explains why the card is unavailable');
+  assert.equal(gameMessage.querySelector('[data-square="a1"]'), null);
   const random = Math.random;
   try {
     Math.random = () => 0;
-    await send('ss');
-    await until(() => $('.astra-full [data-square="a1"]'));
+    await click(gameMessage.querySelector('a[href="/chat"]'));
+    await until(() => gameMessage.querySelector('[data-square="a1"]'));
   } finally { Math.random = random; }
   assert.equal(window.location.pathname, '/chat');
-  assert.equal(requests.at(-1).surface, 'compact');
-  const gameMessage = $('.astra-full [data-square="a1"]').closest('.chat-msg-in');
-  assert.match(gameMessage.textContent, /This resource runs in Full Astra/);
+  assert.doesNotMatch(gameMessage.textContent, /This resource can only be shown in Full Astra/);
   await until(() => document.activeElement === gameMessage);
 } finally {
   await act(async () => activeRoot.unmount());
