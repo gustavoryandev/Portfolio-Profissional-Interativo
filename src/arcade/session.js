@@ -9,6 +9,7 @@ const loaders = {
   pong: () => import('./games/pong.js'),
   frogger: () => import('./games/frogger.js'),
   maze: () => import('./games/maze.js'),
+  blocks: () => import('./games/blocks.js'),
 };
 export const playableGames = gameIds.filter(game => Object.hasOwn(loaders, game));
 
