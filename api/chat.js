@@ -1356,7 +1356,7 @@ export default async function handler(req, res) {
     const resource = conversationResource(message);
     if (resource) {
       const en = String(body.lang).startsWith('en');
-      if (resource === 'play') return res.status(200).json({ response: (en ? 'Let’s play! You have the white pieces.' : 'Vamos jogar! Você fica com as peças brancas.') + '\n[CHESS_GAME]' });
+      if (resource === 'play') return res.status(200).json({ response: (en ? 'Let’s play!' : 'Vamos jogar!') + '\n[CHESS_GAME]' });
       if (resource === 'skills') return res.status(200).json({ response: (en ? 'Here are Gustavo’s declared skill levels.' : 'Estes são os níveis de proficiência declarados pelo Gustavo.') + '\n[SKILLS_CARD]' });
       const readChess = prepareLiveContext(['chess']);
       return res.status(200).json({ response: (en ? 'Here are Gustavo’s Chess.com ratings and statistics.' : 'Aqui estão os ratings e as estatísticas do Gustavo no Chess.com.') + '\n[CHESS_CARD]', liveContext: forClient(await readChess(METRICS_WAIT_MS)) });

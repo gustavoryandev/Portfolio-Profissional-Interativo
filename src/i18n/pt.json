@@ -35,7 +35,9 @@
     "chessGame": {
       "label": "Partida de xadrez com a Astra",
       "title": "Jogue xadrez com a Astra",
-      "instructions": "Você joga com as brancas. Arraste uma peça para jogar. A Astra usa o Stockfish neste dispositivo.",
+      "instructions": "Você joga com {{color}}. Arraste uma peça para jogar. A Astra usa o Stockfish neste dispositivo.",
+      "white": "as brancas",
+      "black": "as pretas",
       "difficulty": "Dificuldade",
       "difficultySelected": "Dificuldade ({{level}})",
       "levels": {

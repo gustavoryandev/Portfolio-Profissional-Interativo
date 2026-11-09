@@ -11,7 +11,7 @@ import AstraEntrance from '../src/components/AstraEntrance.jsx';
 import PortfolioIntro from '../src/components/PortfolioIntro.jsx';
 import GaloCard from '../src/components/GaloCard.jsx';
 import SpotifyCard from '../src/components/SpotifyCard.jsx';
-import ChessCard from '../src/components/ChessCard.jsx';
+import ChessCard, { ChessGame } from '../src/components/ChessCard.jsx';
 import WakaTimeCard from '../src/components/WakaTimeCard.jsx';
 import CanvasCard from '../src/components/CanvasCard.jsx';
 import ExperienceCard from '../src/components/ExperienceCard.jsx';
@@ -146,6 +146,51 @@ assert.equal(document.querySelector('[data-streaming-reply]'), null);
 assert.match(document.body.textContent, /Incremental response/);
 assert.match(document.body.textContent, /Response stopped/);
 assert.equal(document.querySelector('button[type="submit"]').disabled, true); // empty input, no stuck loading state
+
+// Restarting before the opening move must start a fresh search even if black is drawn again.
+const originalRandom = Math.random;
+const originalWorker = globalThis.Worker;
+const originalRect = window.HTMLElement.prototype.getBoundingClientRect;
+window.HTMLElement.prototype.getBoundingClientRect = function () {
+  // JSDOM has no layout, but the board needs a square width to animate the opening move.
+  return this.hasAttribute('data-square') ? new window.DOMRect(0, 0, 60, 60) : originalRect.call(this);
+};
+const workers = [];
+globalThis.Worker = class {
+  constructor() { workers.push(this); }
+  postMessage() {}
+  terminate() { this.terminated = true; }
+  emit(data) { this.onmessage?.({ data }); }
+};
+const restartChess = () => act(async () => {
+  [...document.querySelectorAll('button')].find(button => button.textContent === 'Restart game').click();
+});
+try {
+  Math.random = () => 0.75;
+  await render(true, <ChessGame />);
+  assert.match(document.body.textContent, /You play black/);
+  assert.equal(document.querySelector('[data-square]').dataset.square, 'h1');
+  assert.match(document.querySelector('[role="status"]').textContent, /Astra is thinking/);
+  assert.equal(workers.length, 1);
+  await restartChess();
+  assert.equal(workers[0].terminated, true);
+  assert.equal(workers.length, 2);
+  await act(async () => {
+    workers[1].emit('uciok');
+    workers[1].emit('readyok');
+    workers[1].emit('bestmove e2e4');
+  });
+  assert.equal(document.querySelector('[role="status"]').textContent, 'Your turn');
+  Math.random = () => 0.25;
+  await restartChess();
+  assert.match(document.body.textContent, /You play white/);
+  assert.equal(document.querySelector('[data-square]').dataset.square, 'a8');
+  assert.equal(workers.length, 2);
+} finally {
+  Math.random = originalRandom;
+  globalThis.Worker = originalWorker;
+  window.HTMLElement.prototype.getBoundingClientRect = originalRect;
+}
 
 await render(true, <PortfolioIntro en><p>Portfolio ready</p></PortfolioIntro>);
 assert.equal(document.querySelector('.portfolio-opening'), null);

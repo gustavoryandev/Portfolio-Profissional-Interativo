@@ -14,9 +14,13 @@ import { findStockfishMove, STOCKFISH_LEVELS } from '../services/stockfish';
 const MODE_ICONS = { rapid: Timer, blitz: Zap, bullet: Flame, daily: Calendar };
 const PROMOTIONS = ['q', 'r', 'b', 'n'];
 
+function newChessMatch() {
+  return { game: new Chess(), playerColor: Math.random() < 0.5 ? 'w' : 'b' };
+}
+
 export function ChessGame({ active = true }) {
   const { t } = useTranslation(undefined, { keyPrefix: 'chat.chessGame' });
-  const [game] = useState(() => new Chess());
+  const [{ game, playerColor }, setMatch] = useState(newChessMatch);
   const [fen, setFen] = useState(() => game.fen());
   const [difficulty, setDifficulty] = useState('medium');
   const [promotion, setPromotion] = useState(null);
@@ -36,7 +40,7 @@ export function ChessGame({ active = true }) {
   const id = useId();
 
   useEffect(() => {
-    if (!active || game.turn() !== 'b' || game.isGameOver()) return;
+    if (!active || game.turn() === playerColor || game.isGameOver()) return;
     const controller = new AbortController();
     search.current = controller;
     setEngineError(false);
@@ -53,11 +57,12 @@ export function ChessGame({ active = true }) {
       controller.abort();
       search.current = null;
     };
-  }, [active, difficulty, fen, game, retry]);
+  }, [active, difficulty, fen, game, playerColor, retry]);
 
   function onPieceDrop({ sourceSquare, targetSquare }) {
-    if (!active || !targetSquare || promotion || game.turn() !== 'w' || game.isGameOver()) return false;
-    if (game.get(sourceSquare)?.type === 'p' && targetSquare.endsWith('8')
+    if (!active || !targetSquare || promotion || game.turn() !== playerColor || game.isGameOver()) return false;
+    const promotionRank = playerColor === 'w' ? '8' : '1';
+    if (game.get(sourceSquare)?.type === 'p' && targetSquare.endsWith(promotionRank)
       && game.moves({ square: sourceSquare, verbose: true }).some(move => move.to === targetSquare && move.promotion)) {
       setPromotion({ from: sourceSquare, to: targetSquare });
       return false;
@@ -75,13 +80,15 @@ export function ChessGame({ active = true }) {
     search.current?.abort();
     setPromotion(null);
     setEngineError(false);
-    game.reset();
-    setFen(game.fen());
+    const match = newChessMatch();
+    setMatch(match);
+    setFen(match.game.fen());
   }
 
-  const thinking = game.turn() === 'b' && !game.isGameOver() && !engineError;
+  const playerTurn = game.turn() === playerColor;
+  const thinking = !playerTurn && !game.isGameOver() && !engineError;
   const status = game.isCheckmate()
-    ? t(game.turn() === 'w' ? 'astraWins' : 'playerWins')
+    ? t(playerTurn ? 'astraWins' : 'playerWins')
     : game.isStalemate() ? t('stalemate')
       : game.isDraw() ? t('draw')
         : engineError ? t('engineError')
@@ -90,7 +97,7 @@ export function ChessGame({ active = true }) {
   return (
     <CardShell as="section" aria-label={t('label')}>
       <h3 className="mb-2 text-lg font-semibold">{t('title')}</h3>
-      <p className="mb-3 text-sm text-muted">{t('instructions')}</p>
+      <p className="mb-3 text-sm text-muted">{t('instructions', { color: t(playerColor === 'w' ? 'white' : 'black') })}</p>
       <div className="mb-3 flex flex-wrap items-center gap-3">
         <div className="flex items-center gap-2 text-sm">
           <span className="text-muted">{t('difficulty')}</span>
@@ -131,9 +138,9 @@ export function ChessGame({ active = true }) {
         {active && boardReady && <Chessboard options={{
           id,
           position: fen,
-          boardOrientation: 'white',
-          allowDragging: !promotion && game.turn() === 'w' && !game.isGameOver(),
-          canDragPiece: ({ square }) => game.get(square)?.color === 'w',
+          boardOrientation: playerColor === 'w' ? 'white' : 'black',
+          allowDragging: !promotion && playerTurn && !game.isGameOver(),
+          canDragPiece: ({ square }) => game.get(square)?.color === playerColor,
           onPieceDrop,
           darkSquareStyle: { backgroundColor: 'var(--chess-dark-square, #3b6ea5)' },
           lightSquareStyle: { backgroundColor: 'var(--chess-light-square, #dbe9f7)' },

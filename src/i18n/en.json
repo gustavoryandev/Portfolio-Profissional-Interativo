@@ -35,7 +35,9 @@
     "chessGame": {
       "label": "Chess game with Astra",
       "title": "Play chess with Astra",
-      "instructions": "You play white. Drag a piece to move. Astra runs Stockfish on this device.",
+      "instructions": "You play {{color}}. Drag a piece to move. Astra runs Stockfish on this device.",
+      "white": "white",
+      "black": "black",
       "difficulty": "Difficulty",
       "difficultySelected": "Difficulty ({{level}})",
       "levels": {
