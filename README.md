@@ -32,7 +32,7 @@
 
 ## 📝 Sobre o projeto
 
-Portfólio de Gustavo Ryan Gomes Guedes, graduando em Engenharia de Software na PUC Minas. A página inicial (`/`) reúne projetos, tecnologias, experiência, formação e contato. A rota `/chat` abre a Astra, assistente baseada em Gemini que responde a perguntas sobre o portfólio e apresenta cards com conteúdo relacionado à conversa.
+Portfólio de Gustavo Ryan Gomes Guedes, graduando em Engenharia de Software na PUC Minas. A página inicial (`/`) reúne projetos, tecnologias, experiência, formação e contato. Os atalhos da Astra abrem uma conversa rápida em painel lateral (tela cheia no celular). “Abrir Astra completa” leva a `/chat`, com a mesma conversa, xadrez local e detalhes de GitHub, WakaTime e Chess.com. A bola de habilidades e a proficiência ficam juntas na seção de habilidades do portfólio.
 
 O conteúdo do perfil é mantido em `src/data/perfil.json`. A interface oferece português e inglês, temas claro e escuro e suporte a movimento reduzido.
 
@@ -207,3 +207,13 @@ Sugestões e correções podem ser enviadas por meio de *issues* ou *pull reques
 ## 📄 Licença
 
 O repositório não contém um arquivo de licença no momento. Consulte o autor antes de redistribuir ou reutilizar o código.
+
+### Reformulação da Astra
+
+O botão flutuante “Perguntar pra Astra”, recuperado do controle `astra-fab` histórico, é o único acionador do modal no portfólio. Cabeçalho, navegação mobile e CTA final abrem `/chat`, passando pela intro original da Astra. A intro do portfólio também foi preservada.
+
+Uma única instância de `ChatPage` mantém mensagens, rascunho, contexto do Gemini e streaming ao fechar/reabrir o modal ou navegar internamente para `/chat`. O histórico fica em memória nesta aba e é reiniciado ao recarregar. O modal usa `dialog.showModal()`, contém Tab/Shift+Tab, fecha com Escape e restaura foco e rolagem. Sua altura acompanha `visualViewport`.
+
+A abertura da página completa reutiliza `AstraHero` e os estilos originais do histórico (`6ba433b`, preservados em `700b12e`): seis sugestões, saudação e campo de mensagem. Recursos aparecem exclusivamente como cards da conversa após pedidos relevantes. Partida (`CHESS_GAME`), rating (`CHESS_CARD`) e proficiência (`SKILLS_CARD`) têm intenções distintas em PT/EN; as métricas mantêm a seleção de fontes existente. O portfólio contém o globo e a lista de tecnologias, sem o painel de proficiência.
+
+O xadrez usa `chess.js` e `react-chessboard`: visitante com brancas, lances locais aleatórios, promoção automática para dama e reinício. As integrações continuam com cache, atualização e indicação de dados indisponíveis.
