@@ -11,7 +11,7 @@ export default function EducationSection({ en = false }) {
       const technical = education.origemHabilidades === 'skills';
       const Icon = technical ? GraduationCap : Trophy;
       return <article key={education.id} aria-labelledby={`${headingId}-${education.id}`} className="overflow-hidden rounded-xl border border-[var(--line)] bg-[var(--panel)]">
-        <div className="h-1 bg-gradient-to-r from-blue-600 to-sky-400" />
+        <div className="palette-gradient h-1 bg-gradient-to-r from-blue-600 to-sky-400" />
         <div className="p-5 sm:p-6">
           <header className="flex flex-col gap-4 sm:flex-row sm:items-start">
             <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-[var(--line)] bg-white"><img src={education.logo} alt={en ? `${education.instituicao} logo` : `Logo ${education.instituicao}`} width="96" height="96" className="h-full w-full object-contain" /></div>

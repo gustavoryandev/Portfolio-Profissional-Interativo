@@ -1,8 +1,7 @@
 import { useAstra } from '../context/AstraContext';
-import { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Sun, Moon, Download, Sparkles } from 'lucide-react';
-import { ThemeContext } from '../context/ThemeContext';
+import { Download, Sparkles } from 'lucide-react';
+import ThemeSelector from './ThemeSelector';
 
 export const portfolioLinks = [
   ['inicio', 'Início', 'Home'],
@@ -27,14 +26,13 @@ export default function Navbar({ portfolio = false }) {
 }
 
 export function HeaderActions() {
-  const { darkMode, toggleTheme } = useContext(ThemeContext);
   const { i18n, t } = useTranslation();
   const en = i18n.language.startsWith('en');
   const cv = en ? '/Gustavo Ryan Resume (English).pdf' : '/Currículo Gustavo Ryan.pdf';
   return (
     <div className="header-actions">
       <div className="language-switch" aria-label={en ? 'Language' : 'Idioma'}>{['pt', 'en'].map(lang => <button key={lang} aria-pressed={i18n.language.startsWith(lang)} onClick={() => i18n.changeLanguage(lang)}>{lang.toUpperCase()}</button>)}</div>
-      <button className="icon-button" onClick={toggleTheme} aria-label={darkMode ? t('navbar.temaClaro') : t('navbar.temaEscuro')}>{darkMode ? <Sun size={19} /> : <Moon size={19} />}</button>
+      <ThemeSelector />
       <a className="cv-link" href={cv} download aria-label={t('navbar.baixarCv')}><Download size={16} /><span>{t('navbar.baixarCv')}</span></a>
     </div>
   );

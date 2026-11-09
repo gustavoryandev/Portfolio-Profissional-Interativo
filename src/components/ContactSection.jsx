@@ -95,7 +95,7 @@ export default function ContactSection({ lang = 'pt', variant = 'chat' }) {
       {result?.reference && <p className="mt-2 break-all">{t.reference}: {result.reference}</p>}
     </div>
     {status !== 'sent' && result?.code !== 'delivery_unknown' && <button type="submit" disabled={status === 'loading'}
-      className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-3 py-3 font-semibold text-white transition-colors hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-400 disabled:cursor-wait disabled:opacity-60">
+      className="contact-submit mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-3 py-3 font-semibold text-white transition-colors hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-400 disabled:cursor-wait disabled:opacity-60">
       {status === 'loading' ? <LoaderCircle size={18} className="animate-spin" aria-hidden="true" /> : <Send size={18} aria-hidden="true" />}
       {status === 'loading' ? t.sending : status === 'error' ? t.retry : t.send}</button>}
   </form>;

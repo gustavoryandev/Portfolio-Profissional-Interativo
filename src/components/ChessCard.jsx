@@ -79,8 +79,8 @@ export function ChessGame({ active = true }) {
           allowDragging: game.turn() === 'w' && !game.isGameOver(),
           canDragPiece: ({ square }) => game.get(square)?.color === 'w',
           onPieceDrop,
-          darkSquareStyle: { backgroundColor: '#3b6ea5' },
-          lightSquareStyle: { backgroundColor: '#dbe9f7' },
+          darkSquareStyle: { backgroundColor: 'var(--chess-dark-square, #3b6ea5)' },
+          lightSquareStyle: { backgroundColor: 'var(--chess-light-square, #dbe9f7)' },
         }} />}
       </div>
       <button type="button" onClick={reset} className="chip chip--accent mt-4 !px-4 !py-2 !text-sm">

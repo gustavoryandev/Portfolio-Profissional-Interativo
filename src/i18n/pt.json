@@ -97,6 +97,14 @@
     "translationFailed": "Tradução indisponível. Troque o idioma para tentar novamente."
   },
   "navbar": {
+    "appearance": {
+      "title": "Aparência",
+      "count": "{{count}} temas",
+      "original": "Temas originais",
+      "custom": "Temas personalizados",
+      "light": "Claro",
+      "dark": "Escuro"
+    },
     "baixarCv": "Baixar CV",
     "idioma": "Idioma",
     "temaEscuro": "Modo Escuro",

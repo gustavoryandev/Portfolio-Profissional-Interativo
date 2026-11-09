@@ -6,6 +6,17 @@
     <meta name="description" content="Portfólio interativo de Gustavo" />
     <link rel="icon" href="/favicon.ico" />
     <title>Portfólio Interativo</title>
+    <script>
+      // Set the saved palette before the first paint, including on a direct visit to /chat.
+      let savedTheme;
+      try { savedTheme = localStorage.getItem('theme'); } catch {}
+      const theme = /^(light|dark|galo|aurora|midnight-violet|obsidian-gold|porcelain-indigo|champagne-gold)$/.test(savedTheme)
+        ? savedTheme : 'dark';
+      const root = document.documentElement;
+      root.dataset.theme = theme;
+      root.classList.toggle('dark', !['light', 'porcelain-indigo', 'champagne-gold'].includes(theme));
+      root.toggleAttribute('data-custom-theme', theme !== 'light' && theme !== 'dark');
+    </script>
   </head>
   <body>
     <div id="root"></div>

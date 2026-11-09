@@ -97,6 +97,14 @@
     "translationFailed": "Translation unavailable. Switch languages to retry."
   },
   "navbar": {
+    "appearance": {
+      "title": "Appearance",
+      "count": "{{count}} themes",
+      "original": "Original themes",
+      "custom": "Custom themes",
+      "light": "Light",
+      "dark": "Dark"
+    },
     "baixarCv": "Download Resume",
     "idioma": "Language",
     "temaEscuro": "Dark Mode",
