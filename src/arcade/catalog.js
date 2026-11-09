@@ -23,7 +23,8 @@ export const games = {
   frogger: {
     name: 'Frogger', color: '#f6bf72', tag: ['Travessia', 'Crossing'], difficulty: 'medium', target: 900,
     description: ['Atravesse estradas e rios para ocupar cinco abrigos antes que o tempo acabe.', 'Cross roads and rivers to reach five shelters before time runs out.'],
-    controls: ['Setas, WASD ou deslize para saltar uma casa.', 'Use arrows, WASD or swipe to hop one tile.'],
+    rules: ['Desvie dos carros e use os troncos para cruzar o rio. Cada chegada a um abrigo livre reinicia o cronômetro. Preencha os cinco para avançar. Se o tempo acabar, você perde uma vida.', 'Dodge traffic and ride logs across the river. Reaching an empty shelter resets the timer. Fill all five to advance. Running out of time costs a life.'],
+    controls: ['Use as setas, WASD, o direcional na tela ou deslize no tabuleiro para saltar uma casa.', 'Use arrow keys, WASD, the on-screen directional pad, or swipe on the board to hop one tile.'],
     tip: ['Espere na margem por um tronco que vá na direção do abrigo desejado.', 'Wait on the bank for a log heading toward your target shelter.'],
     metrics: { homes: ['Abrigos', 'Shelters'], timeouts: ['Tempos esgotados', 'Timeouts'] },
   },
