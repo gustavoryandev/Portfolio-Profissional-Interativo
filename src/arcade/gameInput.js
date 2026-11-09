@@ -1,4 +1,5 @@
-import { useEffect, useRef } from 'react';
+import { useContext, useEffect, useRef } from 'react';
+import { ThemeContext } from '../context/ThemeContext.jsx';
 import { fixedStep } from './session.js';
 
 const keys = {
@@ -7,14 +8,21 @@ const keys = {
   ' ': 'drop', x: 'up', z: 'reverse', c: 'hold',
 };
 
-export function useArcadeCanvas(session, size, en) {
+export function useArcadeCanvas(session, size, en, visualMode) {
   const canvas = useRef(null);
+  const { theme } = useContext(ThemeContext) ?? {};
   const [width, height] = size ?? [];
   useEffect(() => {
     const node = canvas.current;
     if (!node || !width) return;
     const ctx = node.getContext('2d');
     if (!ctx) return;
+    const style = window.getComputedStyle(node);
+    const color = token => style.getPropertyValue(token).trim() || undefined;
+    const palette = visualMode === 'astra' ? {
+      background: color('--panel'), surface: color('--panel-soft'), ink: color('--ink'),
+      muted: color('--muted'), accent: color('--accent'),
+    } : undefined;
     let frame;
     let last;
     let accumulator = 0;
@@ -28,7 +36,7 @@ export function useArcadeCanvas(session, size, en) {
       if (node.width !== pixelWidth) node.width = pixelWidth;
       if (node.height !== pixelHeight) node.height = pixelHeight;
       ctx.setTransform(pixelWidth / width, 0, 0, pixelHeight / height, 0, 0);
-      session.render(ctx, en);
+      session.render(ctx, en, palette);
     };
 
     const tick = time => {
@@ -72,7 +80,7 @@ export function useArcadeCanvas(session, size, en) {
       observer.disconnect();
       cancelAnimationFrame(frame);
     };
-  }, [session, width, height, en]);
+  }, [session, width, height, en, theme, visualMode]);
   return canvas;
 }
 

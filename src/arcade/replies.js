@@ -69,6 +69,7 @@ export async function answerArcade(intent, { en, compact, session, openArcade })
       tr('Placar', 'Score') + ' · ' + state.score,
       tr('Nível', 'Level') + ' · ' + state.level,
       state.lives !== null && tr('Vidas', 'Lives') + ' · ' + state.lives,
+      state.timeLeft != null && tr('Tempo restante', 'Time left') + ' · ' + state.timeLeft + 's',
       tr('Dificuldade', 'Difficulty') + ' · ' + difficultyName[state.difficulty][lang],
       tr('Recorde', 'Personal best') + ' · ' + state.best,
       ...Object.entries(state.metrics).map(([key, value]) => current.metrics[key][lang] + ' · ' + value),

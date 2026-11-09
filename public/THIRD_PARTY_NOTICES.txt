@@ -1,0 +1,43 @@
+Astra Arcade — third-party notices
+
+Tetr.js — Simon M. Laroche
+Source: https://github.com/simonlc/tetr.js
+License: https://github.com/simonlc/tetr.js/blob/master/LICENSE
+Upstream files: tetris.js (SRS offset tables), piece.js (offset differences).
+Adaptation: src/arcade/games/blocks.js uses the offsets with its own rotation
+matrices, pivot, fixed-step loop and collision checks. No upstream assets,
+fonts, runtime dependencies, or other game code were included.
+
+The MIT License (MIT)
+
+Copyright (c) 2012 Simon M. Laroche
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+
+Basic Frogger HTML and JavaScript Game — Straker
+Source: https://gist.github.com/straker/82a4368849cbd441b05bd6a044f2b2d3
+License: CC0 1.0 Universal, as declared by the author on the source page.
+Legal text: https://creativecommons.org/publicdomain/zero/1.0/legalcode
+Upstream file: frogger.html (goal spacing and repeating road patterns).
+Adaptation: src/arcade/games/frogger.js incorporates the five destination
+columns and selected road gap patterns into the existing fixed-step engine.
+Speeds, layout, drawing, input, scoring, timer and lives are local to Astra.
+No upstream images, fonts, sounds, or runtime dependencies were included.
+
+The arcade uses original game artwork and synthesized sounds. The game
+references identify gameplay inspirations. Astra Arcade is unaffiliated
+with the original game publishers.

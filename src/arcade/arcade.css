@@ -179,6 +179,7 @@
   border-radius: inherit;
   touch-action: none;
 }
+.arcade[data-visual="astra"] .arcade-board { outline-color: var(--accent); }
 .arcade-board canvas:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 .arcade-overlay {
   position: absolute;

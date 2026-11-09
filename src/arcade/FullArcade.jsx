@@ -8,6 +8,8 @@ import { createArcadeSession, playableGames } from './session.js';
 import './arcade.css';
 
 const icons = { up: ArrowUp, down: ArrowDown, left: ArrowLeft, right: ArrowRight };
+const visualKey = 'astra-arcade-visual';
+const visualModes = { classic: ['Clássico', 'Classic'], astra: ['Tema Astra', 'Astra Theme'] };
 const controlLabels = {
   up: ['Cima', 'Up'], down: ['Baixo', 'Down'], left: ['Esquerda', 'Left'], right: ['Direita', 'Right'],
   drop: ['Soltar', 'Drop'], hold: ['Guardar', 'Hold'], reverse: ['Girar ↶', 'Rotate ↶'],
@@ -114,11 +116,11 @@ function Control({ action, en, session, disabled }) {
     }}>{Icon ? <Icon size={20} aria-hidden="true" /> : label}</button>;
 }
 
-function GameView({ session, state, en, onLobby }) {
+function GameView({ session, state, en, onLobby, visualMode }) {
   const game = games[state.game];
   const tr = (pt, english) => en ? english : pt;
   const lang = Number(en);
-  const canvas = useArcadeCanvas(session, state.size, en);
+  const canvas = useArcadeCanvas(session, state.size, en, visualMode);
   const handlers = useArcadeInput(session, state.game, canvas);
   const [showHelp, setShowHelp] = useState(false);
   const [coach, setCoach] = useState(false);
@@ -148,6 +150,7 @@ function GameView({ session, state, en, onLobby }) {
       <span>{tr('Recorde', 'Best')} <b>{state.best}</b></span>
       <span>{tr('Nível', 'Level')} <b>{state.level}</b></span>
       {state.lives !== null && <span>{tr('Vidas', 'Lives')} <b>{state.lives}</b></span>}
+      {state.timeLeft !== null && <span>{tr('Tempo', 'Time')} <b>{state.timeLeft}s</b></span>}
       {state.game === 'pong' && <span>CPU <b>{state.metrics.opponent ?? 0}</b></span>}
       {state.game === 'blocks' && <span>{tr('Linhas', 'Lines')} <b>{state.metrics.lines ?? 0} / 40</b></span>}
       {state.challenge && <span><Trophy size={15} aria-hidden="true" /> {tr('Meta', 'Goal')} <b>{Math.min(state.score, state.challenge)} / {state.challenge}</b></span>}
@@ -211,6 +214,10 @@ export default function FullArcade({ ref, en, initialGame, challenge, onClose })
   const state = useSyncExternalStore(session.subscribe, session.getSnapshot, session.getSnapshot);
   const [dashboard, setDashboard] = useState(false);
   const [difficulty, setDifficulty] = useState('medium');
+  const [visualMode, setVisualMode] = useState(() => {
+    try { if (localStorage.getItem(visualKey) === 'astra') return 'astra'; } catch {}
+    return 'classic';
+  });
   const tr = (pt, english) => en ? english : pt;
   const lang = Number(en);
   const records = state.status === 'lobby' || dashboard ? getRecords() : null;
@@ -241,10 +248,17 @@ export default function FullArcade({ ref, en, initialGame, challenge, onClose })
   }, [session]);
 
   const toLobby = () => { setDashboard(false); void session.dispatch({ type: 'game.exit' }); };
-  return <section className="arcade" ref={root} aria-labelledby="arcade-title">
+  return <section className="arcade" ref={root} aria-labelledby="arcade-title" data-visual={visualMode}>
     <header className="arcade-toolbar">
       <span><Gamepad2 size={21} aria-hidden="true" /> <b id="arcade-title">Astra Arcade</b></span>
       <div>
+        <OptionMenu label={tr('Visual do jogo', 'Game appearance')} width={185} value={visualMode}
+          triggerClassName="arcade-button" triggerContent={<>{visualModes[visualMode][lang]} <ChevronDown size={15} aria-hidden="true" /></>}
+          groups={[{ options: Object.entries(visualModes).map(([id, labels]) => ({ id, label: labels[lang] })) }]}
+          onChange={mode => {
+            setVisualMode(mode);
+            try { localStorage.setItem(visualKey, mode); } catch {}
+          }} />
         <button className="arcade-button" type="button" aria-pressed={state.sound} aria-label={tr('Som do arcade', 'Arcade sound')} title={tr('Som do arcade', 'Arcade sound')}
           onClick={() => session.toggleSound()}>{state.sound ? <Volume2 size={17} /> : <VolumeX size={17} />}</button>
         <button className="arcade-button" type="button" aria-pressed={dashboard} onClick={() => {
@@ -255,7 +269,7 @@ export default function FullArcade({ ref, en, initialGame, challenge, onClose })
       </div>
     </header>
     {dashboard ? <Dashboard records={records} en={en} />
-      : state.game ? <GameView key={state.game} session={session} state={state} en={en} onLobby={toLobby} />
+      : state.game ? <GameView key={state.game} session={session} state={state} en={en} onLobby={toLobby} visualMode={visualMode} />
         : <>
           <div className="arcade-hero">
             <div>

@@ -37,7 +37,8 @@ export function createArcadeSession({ isFull, load = game => loaders[game](), sa
     if (status === 'paused') availableActions.push('game.resume');
     const value = {
       game, status, difficulty: run?.difficulty, score: state?.score ?? 0, level: state?.level ?? 1,
-      lives: state?.lives ?? null, seconds: Math.floor(run?.seconds ?? 0), result: state?.result,
+      lives: state?.lives ?? null, timeLeft: state?.timeLeft == null ? null : Math.ceil(state.timeLeft),
+      seconds: Math.floor(run?.seconds ?? 0), result: state?.result,
       metrics: state ? { ...state.metrics } : {}, best: game ? records.games[game].best : 0,
       challenge: run?.challenge ? games[game].target : null, sound: audio.enabled, availableActions,
       size: engine ? [engine.width, engine.height] : null,
@@ -160,7 +161,7 @@ export function createArcadeSession({ isFull, load = game => loaders[game](), sa
     },
     resetInput,
     point(x, y) { if (isFull() && status === 'running') engine.point?.(x, y); },
-    render(ctx, en) { if (isFull()) engine?.render(ctx, en); },
+    render(ctx, en, palette) { if (isFull()) engine?.render(ctx, en, palette); },
     toggleSound() {
       if (!isFull()) return;
       audio.set(!audio.enabled);
