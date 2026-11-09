@@ -259,12 +259,19 @@ try {
   await click($('.astra-fab'));
   const beforeArcade = requests.length;
   const beforeCanvas = canvasStarts;
-  await send("Astra, let's play Snake.");
+  await send('/help');
+  const arcadeHelp = $('section[aria-labelledby="astra-resources-arcade"]');
+  assert.ok(arcadeHelp.querySelector('#astra-resource-arcadeBrowse'));
+  assert.equal(arcadeHelp.querySelector('#astra-resource-arcadeOpen'), null);
+  assert.equal(arcadeHelp.querySelectorAll('button').length, 7);
+  await click($('#astra-resource-arcade-snake').closest('button'));
   const handoff = $('.astra-compact a[href="/chat?arcade=snake"]');
   assert.ok(handoff);
+  assert.match($('.astra-compact [role="log"]').textContent, /Each pickup is worth 10 points/);
   assert.equal($('.arcade'), null);
   assert.equal(canvasStarts, beforeCanvas, 'the compact request does not initialize a game canvas');
-  await send('Show my records');
+  await send('/help');
+  await click($('#astra-resource-arcadeRecords').closest('button'));
   assert.match($('.astra-compact [role="log"]').textContent, /Personal bests saved in this browser/);
   await click(handoff);
   await until(() => $('.arcade-board canvas'));
@@ -278,8 +285,13 @@ try {
   await until(() => $('.arcade-game-header .arcade-difficulty-trigger')?.textContent === 'Hard' && $('.arcade-board canvas'));
   await send('Show game status');
   assert.match($('.astra-full [role="log"]').textContent, /Snake · Playing/);
+  await click(findButton($('.arcade-game-actions'), 'Controls'));
+  assert.match($('#arcade-game-help').textContent, /cannot reverse direction/);
+  await click(findButton($('#arcade-game-help'), 'Close instructions'));
+  assert.match($('.arcade-overlay').textContent, /Paused/);
+  await send('/help');
+  await click($('#astra-resource-arcadeOpen').closest('button'));
   assert.equal(requests.length, beforeArcade, 'arcade commands use local game state without the model');
-  await click(findButton($('.arcade-game-header'), 'Games'));
   assert.equal($('.arcade').dataset.visual, 'classic');
   await click($('.arcade-toolbar [aria-label="Game appearance"]'));
   await click(findButton($('.arcade-toolbar [role="menu"]'), 'Astra Theme'));
@@ -288,7 +300,10 @@ try {
   await click($('.arcade-hero .arcade-difficulty-trigger'));
   await click($('.arcade-hero [data-preview="easy"]'));
   assert.equal($('.arcade-hero .arcade-difficulty-trigger').textContent, 'Easy');
-  for (const name of ['Pong', 'Frogger', 'Pulse Maze', 'Orbit Blocks']) {
+  for (const [name, rule] of [
+    ['Pong', /left paddle/], ['Frogger', /resets the timer/],
+    ['Pulse Maze', /four sentinels/], ['Orbit Blocks', /once per piece/],
+  ]) {
     await click($(`button[aria-label="Play ${name}"]`));
     await until(() => $('.arcade-board canvas')?.getAttribute('aria-label')?.startsWith(name));
     if (name === 'Orbit Blocks') {
@@ -301,6 +316,8 @@ try {
       await act(async () => window.dispatchEvent(new window.Event('blur')));
       assert.match($('.arcade-overlay').textContent, /Paused/);
     }
+    await click(findButton($('.arcade-game-actions'), 'Controls'));
+    assert.match($('#arcade-game-help').textContent, rule);
     await click(findButton($('.arcade-game-header'), 'Games'));
   }
   const themeTrigger = $('.astra-full .header-actions button[aria-haspopup]');
