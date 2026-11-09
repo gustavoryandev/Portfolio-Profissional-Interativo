@@ -68,6 +68,9 @@ const root = createRoot(document.getElementById('root'));
 let activeRoot = root;
 const $ = selector => document.querySelector(selector);
 const click = node => act(async () => node.click());
+const clickDialog = (node, clientX, clientY) => act(async () => {
+  node.dispatchEvent(new window.MouseEvent('click', { bubbles: true, clientX, clientY }));
+});
 const findButton = (parent, label) => [...parent.querySelectorAll('button')].find(button => button.textContent.trim() === label);
 async function until(predicate) {
   for (let i = 0; i < 30 && !predicate(); i++) await act(async () => { await new Promise(resolve => setTimeout(resolve, 12)); });
@@ -186,12 +189,33 @@ try {
   assert.equal(requests.at(-1).surface, 'full');
   assert.match($('.astra-full [role="log"]').textContent, /You’re in Full Astra/);
 
+  const fullInput = $('#chat-input');
+  await act(async () => { fullInput.focus(); fullInput.click(); });
+  assert.equal($('#astra-resources').open, false, 'clicking outside the desktop Help panel closes it');
+  assert.equal(document.activeElement, fullInput, 'the clicked control keeps focus');
+
   await click($('.astra-full .brand-lockup'));
   await click($('.astra-fab'));
   const compactInput = $('#chat-input');
   $('.chat-form button[type="submit"]').focus();
   await send('Thanks');
   assert.equal(document.activeElement, compactInput, 'sending from Compact Astra returns focus to the composer');
+
+  const shell = $('.astra-shell-modal');
+  const help = $('#astra-resources');
+  for (const dialog of [shell, help]) dialog.getBoundingClientRect = () => ({ left: 100, right: 500, top: 50, bottom: 500 });
+  await send('/help');
+  await clickDialog(help, 200, 100);
+  assert.equal(help.open, true, 'a click inside Help does not dismiss it');
+  await clickDialog(help, 20, 100);
+  assert.equal(help.open, false, 'the Help backdrop dismisses only Help');
+  assert.equal(shell.open, true);
+  await clickDialog(shell, 200, 100);
+  assert.equal(shell.open, true, 'a click inside the Compact Astra panel leaves it open');
+  await clickDialog(shell, 20, 100);
+  assert.equal(shell.open, false, 'the Compact Astra backdrop returns to the portfolio');
+  assert.equal(document.activeElement, $('.astra-fab'));
+  await click($('.astra-fab'));
 
   await send('Show a code example');
   assert.equal(window.location.pathname, '/', 'markers in code do not open Full Astra');

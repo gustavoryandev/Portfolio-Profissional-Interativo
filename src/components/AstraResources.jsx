@@ -4,6 +4,7 @@ import {
   Languages, Maximize2, Palette, Pencil, Play, RotateCcw, Square, Swords, Terminal, Trophy, UserRound, X,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { clickedDialogBackdrop } from '../services/dialogInteraction';
 
 export const ASTRA_RESOURCES_ID = 'astra-resources';
 const MOBILE_DRAWER = '(max-width: 959px)';
@@ -48,11 +49,15 @@ export default function AstraResources({ open, compact, disabled, triggerRef, on
   const panelRef = useRef(null);
   const closeRef = useRef(null);
   const drawerRef = useRef(false);
+  const restoreFocus = useRef(true);
+  const closeHandler = useRef(onClose);
+  useLayoutEffect(() => { closeHandler.current = onClose; }, [onClose]);
 
   useLayoutEffect(() => {
     if (!open) return;
     const panel = panelRef.current;
     const trigger = triggerRef.current;
+    restoreFocus.current = true;
     const viewport = window.matchMedia(MOBILE_DRAWER);
 
     const showPanel = () => {
@@ -64,11 +69,18 @@ export default function AstraResources({ open, compact, disabled, triggerRef, on
     };
 
     showPanel();
+    const dismissOutside = event => {
+      if (drawerRef.current || panel.contains(event.target) || trigger?.contains(event.target)) return;
+      restoreFocus.current = false;
+      closeHandler.current();
+    };
+    document.addEventListener('click', dismissOutside, true);
     viewport.addEventListener('change', showPanel);
     return () => {
+      document.removeEventListener('click', dismissOutside, true);
       viewport.removeEventListener('change', showPanel);
       panel.close();
-      if (trigger?.isConnected && !trigger.closest('[hidden]')) trigger.focus({ preventScroll: true });
+      if (restoreFocus.current && trigger?.isConnected && !trigger.closest('[hidden]')) trigger.focus({ preventScroll: true });
     };
   }, [open, compact, triggerRef]);
 
@@ -100,6 +112,7 @@ export default function AstraResources({ open, compact, disabled, triggerRef, on
     <dialog id={ASTRA_RESOURCES_ID} ref={panelRef} className="astra-resources"
       aria-labelledby="astra-resources-title"
       onCancel={event => { event.preventDefault(); event.stopPropagation(); onClose(); }}
+      onClick={event => { if (drawerRef.current && clickedDialogBackdrop(event)) onClose(); }}
       onKeyDown={handleKey}>
       <header className="astra-resources-header">
         <h3 id="astra-resources-title">{t('chat.resources.title')}</h3>

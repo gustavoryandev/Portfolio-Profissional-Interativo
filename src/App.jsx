@@ -8,6 +8,7 @@ import useMobileViewport from './hooks/useMobileViewport';
 import { ThemeContext } from './context/ThemeContext';
 import { createLaboratory } from './services/laboratory';
 import { createAstraActionEngine } from './services/astraActionEngine';
+import { clickedDialogBackdrop } from './services/dialogInteraction';
 import perfil from './data/perfil.json';
 
 const ChatPage = lazy(() => import('./pages/ChatPage'));
@@ -138,7 +139,8 @@ export default function App() {
   return <AstraContext.Provider value={{ lab, actions, labHandoff, setLabHandoff, actionUi,
     openAstra, openFull, returnPortfolio: event => { event.preventDefault(); close(); navigate('/'); } }}>
     <div hidden={full}>{portfolioVisited.current && <PortfolioIntro en={en}><PortfolioPage projectFocus={route.project ? route : null} /></PortfolioIntro>}</div>
-    <dialog inert={showIntro} style={showIntro ? { visibility: 'hidden' } : undefined} ref={dialog} role={full ? 'main' : undefined} className={`astra-shell ${full ? 'astra-shell-full' : 'astra-shell-modal'}`} aria-label={en ? 'Astra conversation' : 'Conversa com a Astra'} onCancel={() => setOpened(false)} onKeyDown={trapFocus}>
+    <dialog inert={showIntro} style={showIntro ? { visibility: 'hidden' } : undefined} ref={dialog} role={full ? 'main' : undefined} className={`astra-shell ${full ? 'astra-shell-full' : 'astra-shell-modal'}`} aria-label={en ? 'Astra conversation' : 'Conversa com a Astra'} onCancel={() => setOpened(false)} onKeyDown={trapFocus}
+      onClick={event => { if (!full && opened && clickedDialogBackdrop(event)) close(); }}>
       <div className="astra-toolbar" hidden={full}>
         {full ? <a href="/" onClick={event => { event.preventDefault(); close(); navigate('/'); }}>{en ? '← Portfolio' : '← Portfólio'}</a> : <a href="/chat" onClick={openFull}>{en ? 'Open full Astra ↗' : 'Abrir Astra completa ↗'}</a>}
         {!full && <button autoFocus onClick={close} aria-label={en ? 'Close Astra' : 'Fechar Astra'}>✕</button>}
