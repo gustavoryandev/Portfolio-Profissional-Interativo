@@ -2,18 +2,24 @@ import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next';
 import PortfolioPage from './pages/PortfolioPage';
 import PortfolioIntro from './components/PortfolioIntro';
-import AstraEntrance, { hasSeenAstraIntro } from './components/AstraEntrance';
+import AstraEntrance from './components/AstraEntrance';
 import { AstraContext } from './context/AstraContext';
 import useMobileViewport from './hooks/useMobileViewport';
 
 const ChatPage = lazy(() => import('./pages/ChatPage'));
+const INTRO_SEEN_KEY = 'astra-intro-seen';
+const hasSeenAstraIntro = () => {
+  try { return window.sessionStorage.getItem(INTRO_SEEN_KEY) === '1'; } catch { return false; }
+};
 const readPath = () => window.location.pathname.replace(/\/+$/, '') || '/';
 
 export default function App() {
   const { i18n } = useTranslation();
   const en = i18n.language.startsWith('en');
   const [path, setPath] = useState(readPath);
-  const [entering, setEntering] = useState(() => path === '/chat' && !hasSeenAstraIntro());
+  const introSeen = useRef(null);
+  if (introSeen.current === null) introSeen.current = hasSeenAstraIntro();
+  const [entering, setEntering] = useState(() => path === '/chat' && !introSeen.current);
   const [chatReady, setChatReady] = useState(false);
   const [opened, setOpened] = useState(false);
   const [started, setStarted] = useState(path === '/chat');
@@ -22,14 +28,18 @@ export default function App() {
   const scroll = useRef(0);
   const full = path === '/chat';
   const showIntro = full && entering;
-  const finishIntro = useCallback(() => setEntering(false), []);
+  const finishIntro = useCallback(() => {
+    introSeen.current = true;
+    try { window.sessionStorage.setItem(INTRO_SEEN_KEY, '1'); } catch { /* The current page still remembers. */ }
+    setEntering(false);
+  }, []);
   const portfolioVisited = useRef(!full);
   if (!full) portfolioVisited.current = true;
   const close = () => { dialog.current?.close(); setOpened(false); };
   const syncRoute = useCallback(() => {
     const next = readPath();
     setPath(next);
-    setEntering(next === '/chat' && !hasSeenAstraIntro());
+    setEntering(next === '/chat' && !introSeen.current);
   }, []);
   const navigate = (url) => {
     window.history.pushState({}, '', url);

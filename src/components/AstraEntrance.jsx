@@ -3,22 +3,12 @@ import { useAstra } from '../context/AstraContext';
 import './AstraEntrance.css';
 import useEntranceInteraction from '../hooks/useEntranceInteraction';
 
-const INTRO_SEEN_KEY = 'astra-intro-seen';
-let seenInPage = false;
-
-export function hasSeenAstraIntro() {
-  if (seenInPage) return true;
-  try { return window.localStorage.getItem(INTRO_SEEN_KEY) === '1'; } catch { return false; }
-}
-
 export default function AstraEntrance({ en, onFinish }) {
   const interaction = useEntranceInteraction();
   const { returnPortfolio } = useAstra();
   const skipButton = useRef(null);
 
   useEffect(() => {
-    seenInPage = true;
-    try { window.localStorage.setItem(INTRO_SEEN_KEY, '1'); } catch {}
     skipButton.current.focus({ preventScroll: true });
     const timer = setTimeout(onFinish, 1600);
     const skip = event => { if (event.key === 'Escape') onFinish(); };

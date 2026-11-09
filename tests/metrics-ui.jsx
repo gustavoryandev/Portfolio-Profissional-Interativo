@@ -200,7 +200,6 @@ assert.match(document.body.textContent, /Portfolio ready/);
 let finished = false;
 await render(true, <AstraEntrance en onFinish={() => { finished = true; }} />);
 assert.ok(document.querySelector('.astra-entrance'));
-assert.equal(window.localStorage.getItem('astra-intro-seen'), '1');
 assert.equal(finished, false);
 await act(async () => document.querySelector('.astra-entrance-bottom button').click());
 assert.equal(finished, true);
