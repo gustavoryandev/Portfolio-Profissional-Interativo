@@ -39,7 +39,8 @@ export const games = {
   blocks: {
     name: 'Orbit Blocks', color: '#c7a3ff', aliases: ['tetris'], tag: ['Puzzle', 'Puzzle'], difficulty: 'medium', target: 1500,
     description: ['Encaixe sete tipos de blocos e limpe 40 linhas antes de atingir o topo.', 'Fit seven types of blocks and clear 40 lines before reaching the top.'],
-    controls: ['←/→ move, ↓ desce, ↑/X gira, Z gira ao contrário, Espaço solta e C guarda.', '←/→ move, ↓ soft drops, ↑/X rotates, Z reverses, Space drops and C holds.'],
+    rules: ['Complete uma linha para removê-la. A sombra mostra onde a peça vai cair, e a reserva pode ser usada uma vez por peça. Se uma nova peça não couber no topo, a partida acaba.', 'Complete a row to clear it. The ghost shows where the piece will land, and hold can be used once per piece. The game ends if a new piece cannot fit at the top.'],
+    controls: ['←/→ ou A/D move, ↓/S desce, ↑/W/X gira, Z gira ao contrário, Espaço solta e C guarda. No celular, use o direcional e os botões abaixo do tabuleiro.', '←/→ or A/D moves, ↓/S soft drops, ↑/W/X rotates, Z rotates the other way, Space hard drops, and C holds. On mobile, use the pad and buttons below the board.'],
     tip: ['Use a sombra para prever o encaixe. Guarde a peça longa para quando tiver um poço de quatro linhas.', 'Use the ghost to check placement. Hold the long piece until you have a four-line well.'],
     metrics: { lines: ['Linhas', 'Lines'], tetrises: ['Quadras', 'Four-line clears'] },
   },
