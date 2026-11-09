@@ -1,3 +1,4 @@
+.astra-loading { padding: 20px; color: var(--muted); }
 .astra-entrance { position: fixed; inset: 0; z-index: 100; overflow: auto; display: grid; place-items: center; padding: 100px 24px; min-height: 100dvh; color: #e4edff; background: radial-gradient(ellipse at 50% 45%, rgb(var(--brand-400) / .16), transparent 65%), #060c16; perspective: 1100px; }
 .astra-entrance-grid { position: absolute; inset: 0; pointer-events: none; background-image: linear-gradient(rgb(var(--brand-400) / .06) 1px, transparent 1px), linear-gradient(90deg, rgb(var(--brand-400) / .06) 1px, transparent 1px); background-size: 64px 64px; mask-image: radial-gradient(ellipse, #000, transparent 75%); }
 .astra-entrance-top, .astra-entrance-bottom { position: absolute; left: 6%; right: 6%; display: flex; align-items: center; justify-content: space-between; gap: 20px; }

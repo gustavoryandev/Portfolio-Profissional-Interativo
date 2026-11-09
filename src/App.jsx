@@ -2,7 +2,7 @@ import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import PortfolioPage from './pages/PortfolioPage';
 import PortfolioIntro from './components/PortfolioIntro';
-import AstraEntrance from './components/AstraEntrance';
+import AstraEntrance, { markAstraVisited } from './components/AstraEntrance';
 import { AstraContext } from './context/AstraContext';
 import useMobileViewport from './hooks/useMobileViewport';
 
@@ -13,7 +13,6 @@ export default function App() {
   const en = i18n.language.startsWith('en');
   const [path, setPath] = useState(() => window.location.pathname.replace(/\/+$/, '') || '/');
   const [chatReady, setChatReady] = useState(false);
-  const [entering, setEntering] = useState(path === '/chat');
   const [opened, setOpened] = useState(false);
   const [started, setStarted] = useState(path === '/chat');
   const dialog = useMobileViewport();
@@ -32,7 +31,6 @@ export default function App() {
     dialog.current?.close();
     setOpened(false);
     setStarted(true);
-    setEntering(true);
     navigate('/chat');
   };
   const trapFocus = event => {
@@ -52,7 +50,7 @@ export default function App() {
     setOpened(true);
   };
   useEffect(() => {
-    const update = () => { setPath(window.location.pathname); setEntering(window.location.pathname === '/chat'); setOpened(false); };
+    const update = () => { setPath(window.location.pathname); setOpened(false); };
     window.addEventListener('popstate', update);
     return () => window.removeEventListener('popstate', update);
   }, []);
@@ -72,9 +70,10 @@ export default function App() {
     };
   }, [full, opened]);
   useEffect(() => {
-    if (!full || entering || !chatReady || window.matchMedia('(pointer: coarse)').matches) return;
-    document.getElementById('chat-input')?.focus({ preventScroll: true });
-  }, [full, entering, chatReady]);
+    if (!full || !chatReady) return;
+    markAstraVisited();
+    if (!window.matchMedia('(pointer: coarse)').matches) document.getElementById('chat-input')?.focus({ preventScroll: true });
+  }, [full, chatReady]);
   const selectSection = section => {
     if (section === 'full') return openFull();
     const id = ({ projects: 'projetos', skills: 'habilidades', proficiency: 'habilidades', contact: 'contato', about: 'sobre' })[section] || section;
@@ -90,13 +89,12 @@ export default function App() {
   if (!['/', '/chat'].includes(path)) return <main className="route-loading"><h1>404</h1><a href="/">{en ? 'Back to portfolio' : 'Voltar ao portfólio'}</a></main>;
   return <AstraContext.Provider value={{ openAstra, openFull, returnPortfolio: event => { event.preventDefault(); close(); navigate('/'); } }}>
     <div hidden={full}>{portfolioVisited.current && <PortfolioIntro en={en}><PortfolioPage /></PortfolioIntro>}</div>
-    <dialog inert={full && entering} style={full && entering ? { visibility: 'hidden' } : undefined} ref={dialog} role={full ? 'main' : undefined} className={`astra-shell ${full ? 'astra-shell-full' : 'astra-shell-modal'}`} aria-label={en ? 'Astra conversation' : 'Conversa com a Astra'} onCancel={() => setOpened(false)} onKeyDown={trapFocus}>
+    <dialog ref={dialog} role={full ? 'main' : undefined} className={`astra-shell ${full ? 'astra-shell-full' : 'astra-shell-modal'}`} aria-label={en ? 'Astra conversation' : 'Conversa com a Astra'} onCancel={() => setOpened(false)} onKeyDown={trapFocus}>
       <div className="astra-toolbar" hidden={full}>
         {full ? <a href="/" onClick={event => { event.preventDefault(); close(); navigate('/'); }}>{en ? '← Portfolio' : '← Portfólio'}</a> : <a href="/chat" onClick={openFull}>{en ? 'Open full Astra ↗' : 'Abrir Astra completa ↗'}</a>}
         {!full && <button autoFocus onClick={close} aria-label={en ? 'Close Astra' : 'Fechar Astra'}>✕</button>}
       </div>
-      {started && <Suspense fallback={<p role="status">{en ? "Opening Astra…" : "Abrindo Astra…"}</p>}><ChatPage onReady={setChatReady} modal={!full} visible={full || opened} onSelectSection={selectSection} /></Suspense>}
+      {started && <Suspense fallback={<AstraEntrance key={full ? 'full' : 'quick'} en={en} full={full} />}><ChatPage onReady={setChatReady} modal={!full} visible={full || opened} onSelectSection={selectSection} /></Suspense>}
     </dialog>
-    {full && entering && <AstraEntrance en={en} ready={chatReady} onFinish={() => setEntering(false)} />}
   </AstraContext.Provider>;
 }

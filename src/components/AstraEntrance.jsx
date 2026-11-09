@@ -1,29 +1,46 @@
 import { useEffect, useState } from 'react';
+import { useAstra } from '../context/AstraContext';
 import './AstraEntrance.css';
 import useEntranceInteraction from '../hooks/useEntranceInteraction';
 
-export default function AstraEntrance({ en, ready = true, onFinish }) {
+const VISITED_KEY = 'astra-visited';
+let visitedInPage = false;
+
+export function markAstraVisited() {
+  visitedInPage = true;
+  try { window.localStorage.setItem(VISITED_KEY, '1'); } catch {}
+}
+
+function hasVisitedAstra() {
+  if (visitedInPage) return true;
+  try { return window.localStorage.getItem(VISITED_KEY) === '1'; } catch { return false; }
+}
+
+export default function AstraEntrance({ en, full }) {
   const interaction = useEntranceInteraction();
-  const [elapsed, setElapsed] = useState(false);
-  const entering = !ready || !elapsed;
+  const { returnPortfolio } = useAstra();
+  const [showIntro, setShowIntro] = useState(false);
 
   useEffect(() => {
-    const media = window.matchMedia('(max-width: 767px), (prefers-reduced-motion: reduce)');
-    const timer = setTimeout(() => setElapsed(true), media.matches ? 0 : 1600);
-    const skip = event => { if (event.key === 'Escape') setElapsed(true); };
+    if (!full || hasVisitedAstra()) return;
+    // The Suspense fallback unmounts when the chat is ready. Fast loads never reach this timer.
+    const timer = setTimeout(() => {
+      markAstraVisited();
+      setShowIntro(true);
+    }, 180);
+    return () => clearTimeout(timer);
+  }, [full]);
+
+  useEffect(() => {
+    if (!showIntro) return;
+    const skip = event => { if (event.key === 'Escape') setShowIntro(false); };
     window.addEventListener('keydown', skip);
-    return () => { clearTimeout(timer); window.removeEventListener('keydown', skip); };
-  }, []);
+    return () => window.removeEventListener('keydown', skip);
+  }, [showIntro]);
 
-  useEffect(() => {
-    if (entering) return;
-    onFinish?.();
-    if (window.matchMedia('(pointer: coarse)').matches) return;
-    document.getElementById('chat-input')?.focus({ preventScroll: true });
-  }, [entering]);
-
-  return <>
-    {entering && <main {...interaction} className="astra-entrance" aria-busy="true">
+  if (!showIntro) return <p className="astra-loading" role="status">{en ? 'Opening Astra…' : 'Abrindo Astra…'}</p>;
+  return (
+    <div {...interaction} className="astra-entrance">
       <div className="astra-entrance-grid" aria-hidden="true" />
       <header className="astra-entrance-top"><span>Gustavo Ryan<span>.ai</span></span><span>PORTFOLIO / ASTRA</span></header>
       <div className="astra-entrance-word" aria-hidden="true">ASTRA</div>
@@ -35,7 +52,7 @@ export default function AstraEntrance({ en, ready = true, onFinish }) {
         <div className="astra-entrance-status" role="status"><span />{en ? 'Opening your conversation with Astra' : 'Abrindo sua conversa com a Astra'}</div>
         <div className="astra-entrance-line" aria-hidden="true" />
       </section>
-      <footer className="astra-entrance-bottom"><a href="/">← {en ? 'Portfolio' : 'Portfólio'}</a><button type="button" onClick={() => setElapsed(true)}>{en ? 'Skip animation' : 'Pular animação'} ↗</button></footer>
-    </main>}
-  </>;
+      <footer className="astra-entrance-bottom"><a href="/" onClick={returnPortfolio}>← {en ? 'Portfolio' : 'Portfólio'}</a><button type="button" onClick={() => setShowIntro(false)}>{en ? 'Skip animation' : 'Pular animação'} ↗</button></footer>
+    </div>
+  );
 }

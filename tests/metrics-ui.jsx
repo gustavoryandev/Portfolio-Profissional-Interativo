@@ -147,20 +147,28 @@ assert.match(document.body.textContent, /Incremental response/);
 assert.match(document.body.textContent, /Response stopped/);
 assert.equal(document.querySelector('button[type="submit"]').disabled, true); // empty input, no stuck loading state
 
-// Both entrances honor reduced motion; the full entrance can be skipped without replacing the chat.
-let finished = false;
-await render(true, <AstraEntrance en ready onFinish={() => { finished = true; }} />);
-await act(async () => { await new Promise(resolve => setTimeout(resolve, 10)); });
-assert.equal(finished, true);
+// Fast chat loads and the quick modal never need the full loading animation.
+await render(true, <AstraEntrance en full />);
+assert.equal(document.querySelector('.astra-entrance'), null);
+await render(true, <AstraEntrance en />);
+await act(async () => { await new Promise(resolve => setTimeout(resolve, 200)); });
+assert.equal(document.querySelector('.astra-entrance'), null);
+assert.equal(window.localStorage.getItem('astra-visited'), null);
 await render(true, <PortfolioIntro en><p>Portfolio ready</p></PortfolioIntro>);
 assert.equal(document.querySelector('.portfolio-opening'), null);
 assert.match(document.body.textContent, /Portfolio ready/);
-window.matchMedia = () => ({ matches: false, addEventListener() {}, removeEventListener() {} });
-finished = false;
-await render(true, <AstraEntrance en ready onFinish={() => { finished = true; }} />);
+
+// On a slow first visit, skip leaves the loading status. A later visit stays plain.
+await render(true, <AstraEntrance en full />);
+await act(async () => { await new Promise(resolve => setTimeout(resolve, 200)); });
 assert.ok(document.querySelector('.astra-entrance'));
+assert.equal(window.localStorage.getItem('astra-visited'), '1');
 await act(async () => document.querySelector('.astra-entrance-bottom button').click());
-assert.equal(finished, true);
+assert.equal(document.querySelector('.astra-entrance'), null);
+assert.match(document.querySelector('[role="status"]').textContent, /Opening Astra/);
+await render(true, <AstraEntrance key="return" en full />);
+await act(async () => { await new Promise(resolve => setTimeout(resolve, 200)); });
+assert.equal(document.querySelector('.astra-entrance'), null);
 await act(async () => root.unmount());
 dom.window.close();
 console.log('UI checks passed: translations, deduplication, code, links, card identity, light/dark, unavailable breakdowns.');
