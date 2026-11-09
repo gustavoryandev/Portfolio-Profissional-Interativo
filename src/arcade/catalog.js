@@ -31,7 +31,8 @@ export const games = {
   maze: {
     name: 'Pulse Maze', color: '#ffc768', aliases: ['pac man', 'pacman'], tag: ['Labirinto', 'Maze'], difficulty: 'hard', target: 900,
     description: ['Limpe três labirintos. Use orbes de energia para virar o jogo contra os guardiões.', 'Clear three mazes. Use energy orbs to turn the tables on the sentinels.'],
-    controls: ['Setas, WASD ou deslize para preparar a próxima curva.', 'Use arrows, WASD or swipe to queue your next turn.'],
+    rules: ['Recolha todos os pulsos para avançar. Os quatro guardiões saem da base aos poucos. Um orbe grande permite capturá-los por alguns segundos. Fora desse efeito, o contato custa uma vida.', 'Collect every pulse to advance. The four sentinels leave their home in stages. A large orb lets you catch them for a few seconds. Otherwise, contact costs a life.'],
+    controls: ['Use as setas, WASD, o direcional na tela ou deslize para preparar a próxima curva.', 'Use arrow keys, WASD, the on-screen directional pad, or swipe to queue the next turn.'],
     tip: ['Guarde um orbe para quando os guardiões fecharem duas saídas. Depois de comê-los, eles voltam à base.', 'Save an orb for when sentinels cut off two exits. After you catch them, they return to base.'],
     metrics: { pellets: ['Pulsos', 'Pulses'], sentinels: ['Guardiões', 'Sentinels'] },
   },
