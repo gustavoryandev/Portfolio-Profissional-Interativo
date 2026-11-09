@@ -15,7 +15,8 @@ export const games = {
   pong: {
     name: 'Pong', color: '#72d6ff', tag: ['Duelo', 'Duel'], difficulty: 'easy', target: 7,
     description: ['Rebata a bola e marque sete pontos antes da CPU.', 'Return the ball and score seven points before the CPU.'],
-    controls: ['↑/↓, W/S ou mova o ponteiro sobre a quadra.', 'Use ↑/↓, W/S or move your pointer over the court.'],
+    rules: ['Você controla a raquete da esquerda. A bola acelera a cada rebatida e muda de ângulo conforme o ponto de contato. Cada bola que passa pela raquete adversária vale um ponto.', 'You control the left paddle. The ball speeds up with each return and changes angle depending on where it hits the paddle. Each ball past the opposing paddle earns one point.'],
+    controls: ['Use ↑/↓ ou W/S, mova o mouse sobre a quadra ou arraste o dedo nela. Os botões ↑/↓ também movem a raquete.', 'Use ↑/↓ or W/S, move the mouse over the court, or drag your finger on it. The ↑/↓ buttons also move the paddle.'],
     tip: ['A ponta da raquete muda o ângulo do rebote. Alterne seus ataques entre os cantos.', 'The paddle tip changes the rebound angle. Alternate your shots between the corners.'],
     metrics: { opponent: ['Pontos da CPU', 'CPU points'], rally: ['Maior troca', 'Longest rally'] },
   },
