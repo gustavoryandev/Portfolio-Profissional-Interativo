@@ -18,11 +18,71 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# Environment variables and local secrets
+# Local environment files. The root example contains placeholders only.
 .env
 .env.*
-!.env.example
-!.env.template
+.env-*
+.envrc
+.envrc.*
+*.env
+*.env.*
+!/.env.example
+
+# Private credentials, certificates and service configuration
+secrets/
+credentials/
+/private/
+.secrets
+.credentials
+secrets.json
+secrets.*.json
+secrets.yaml
+secrets.yml
+credentials.json
+credentials.*.json
+credentials.yaml
+credentials.yml
+service-account*.json
+*-service-account.json
+.npmrc
+.netrc
+.pypirc
+.aws/
+.docker/
+.gnupg/
+.ssh/
+id_rsa
+id_dsa
+id_ecdsa
+id_ed25519
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+
+# Local databases, exports and backups. SQL migrations stay versioned.
+/supabase/.branches/
+/supabase/.temp/
+backups/
+dumps/
+*.db
+*.db-wal
+*.db-shm
+*.db-journal
+*.sqlite
+*.sqlite-*
+*.sqlite3
+*.sqlite3-*
+*.dump
+dump.sql
+*.dump.sql
+*.sql.gz
+*.bak
+*.backup
+*.orig
+*~
 
 # Local and generated JSON files
 *.local.json
@@ -44,9 +104,13 @@ coverage/
 playwright-report/
 test-results/
 *.tsbuildinfo
+/tests/.*.mjs
+/tests/.*.css
 
 # Package manager and temporary files
 .pnpm-store/
 *.tgz
+*.zip
+*.7z
 *.swp
 *.swo
