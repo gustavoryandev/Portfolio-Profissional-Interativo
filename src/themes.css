@@ -112,22 +112,6 @@
   --wave-glow: #F9E5B4;
 }
 
-:root[data-theme="neon-green"], .menu-option[data-preview="neon-green"] {
-  --palette-bg: #080B09;
-  --palette-surface: #121A15;
-  --palette-primary: #64FF38;
-  --palette-accent: #39D916;
-  --palette-text: #E9FFF0;
-  --palette-muted: #9CB6A3;
-  --palette-border: #294432;
-  --palette-tint: 18 26 21;
-  --palette-accent-rgb: 57 217 22;
-  --palette-primary-rgb: 100 255 56;
-  --wave-one: #64FF38;
-  --wave-two: #1A9E39;
-  --wave-glow: #39FF14;
-}
-
 :root[data-theme="mint-frost"], .menu-option[data-preview="mint-frost"] {
   --palette-bg: #F3FCF5;
   --palette-surface: #FFFFFF;
@@ -198,10 +182,6 @@
 :root[data-custom-theme]:not(.dark) {
   --primary-hover: color-mix(in srgb, var(--primary), black 10%);
   --wave-intensity: .36;
-}
-:root[data-theme="neon-green"] {
-  --neon-strength: .22;
-  --wave-intensity: .5;
 }
 :root:is([data-theme="porcelain-indigo"], [data-theme="mint-frost"]) {
   --accent: var(--primary);
@@ -293,13 +273,12 @@
 :root[data-theme|="galo"] .hero-galo-watermark {
   position: absolute;
   z-index: -1;
-  top: 3%;
-  right: max(-350px, calc((100% - 100vw) / 2 - 48px));
-  width: clamp(230px, 23vw, 416px);
+  top: 4%;
+  right: max(-270px, calc((100% - 100vw) / 2 + 24px));
+  width: clamp(150px, 15vw, 270px);
   opacity: var(--galo-watermark-opacity);
   pointer-events: none;
 }
-:root[data-theme="galo"] .hero-galo-watermark { filter: drop-shadow(0 0 2px var(--ink)) drop-shadow(0 0 3px var(--ink)); }
 :root[data-theme="galo-light"] .hero-galo-watermark { filter: grayscale(1); }
 :root[data-theme|="galo"] .portfolio-hero .section-eyebrow { font-weight: 800; }
 :root[data-theme="galo-light"] .portfolio-hero .section-eyebrow { color: var(--ink); }
@@ -351,9 +330,7 @@
 }
 :root[data-theme|="galo"] .galo-monogram { width: 40px; height: 38px; }
 :root[data-theme|="galo"] .galo-brand-badge { padding-inline-start: 14px; border-inline-start: 1px solid var(--muted); }
-:root[data-theme|="galo"] .galo-brand-badge img { width: 49px; height: 49px; max-width: none; margin-inline: -9px; }
-:root[data-theme="galo"] .galo-brand-badge img,
-.menu-option[data-preview="galo"] .theme-swatch img { filter: drop-shadow(0 0 1px #fff); }
+:root[data-theme|="galo"] .galo-brand-badge .galo-crest { width: 39px; height: 54px; }
 :root[data-theme|="galo"] .scroll-nav a { color: var(--ink); font-weight: 650; }
 :root[data-theme|="galo"] :is(.scroll-nav .nav-astra, .scroll-nav [aria-current], .site-header .language-switch button[aria-pressed="true"]),
 :root[data-theme="galo-light"] .hero-actions .neon-cta {
@@ -382,7 +359,7 @@
 @media (max-width: 767px) {
   :root[data-custom-theme] { --glass-alpha: .94; --neon-strength: .18; }
   :root[data-theme|="galo"] .galo-waves { opacity: .52; }
-  :root[data-theme|="galo"] .hero-galo-watermark { top: 14%; right: -40px; opacity: calc(var(--galo-watermark-opacity) * .57); }
+  :root[data-theme|="galo"] .hero-galo-watermark { top: 14%; right: 0; opacity: calc(var(--galo-watermark-opacity) * .57); }
 }
 @media (forced-colors: active) {
   :root[data-custom-theme] {
@@ -445,7 +422,6 @@
   border-radius: 4px;
   background: linear-gradient(135deg, var(--palette-bg) 40%, var(--palette-primary) 40% 70%, var(--palette-accent) 70%);
 }
-.theme-swatch img { width: 15px; height: 16px; object-fit: contain; }
-.menu-option[data-preview|="galo"] .theme-swatch img { width: 19px; height: 18px; }
+.theme-swatch .galo-crest { width: 15px; height: 17px; margin: 0; }
 .menu-option[data-preview="light"] { --palette-bg: #f4f4f5; --palette-primary: #0b5ed7; --palette-accent: #0866d9; }
 .menu-option[data-preview="dark"] { --palette-bg: #030a10; --palette-primary: #0b5ed7; --palette-accent: #38bdf8; }

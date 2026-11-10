@@ -38,8 +38,8 @@ for (const lang of ['pt', 'en']) {
 for (const theme of ['galo', 'galo-light']) {
   const page = render('/', theme);
   const doc = page.window.document;
-  assert.equal(doc.querySelector('.site-header .galo-brand-badge img').getAttribute('src'), '/galo-logo.png');
-  assert.equal(doc.querySelector('.portfolio-hero .hero-galo-watermark').getAttribute('src'), '/galo-logo.png');
+  assert.equal(doc.querySelector('.site-header .galo-brand-badge image').getAttribute('href'), '/galo-logo.png');
+  assert.equal(doc.querySelector('.portfolio-hero .hero-galo-watermark image').getAttribute('href'), '/galo-logo.png');
   assert.equal(doc.querySelector('.hero-actions .neon-cta').getAttribute('href'), '/chat');
   assert.equal(doc.querySelector('.hero-actions .scroll-secondary').getAttribute('href'), '#projetos');
   assert.ok(doc.querySelector('svg.theme-waves.galo-waves'));

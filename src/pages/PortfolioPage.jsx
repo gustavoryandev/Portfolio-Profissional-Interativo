@@ -12,8 +12,9 @@ import PortfolioSection from '../components/PortfolioSection';
 import LanguageIcon from '../components/LanguageIcon';
 import { SocialLinks } from '../components/ProfilePanel';
 import ScrollReveal from '../components/ui/ScrollReveal';
+import GaloCrest from '../components/GaloCrest';
 import perfil from '../data/perfil.json';
-import { GALO_LOGO, isGaloTheme } from '../data/themes.js';
+import { isGaloTheme } from '../data/themes.js';
 
 export default function PortfolioPage({ activeSection, projectFocus }) {
   const { openAstra, openFull } = useAstra();
@@ -26,7 +27,7 @@ export default function PortfolioPage({ activeSection, projectFocus }) {
     <MobileNav en={en} />
     <main id="main-content" tabIndex={-1} className="scroll-content">
       <section id="inicio" className="portfolio-hero" aria-labelledby="hero-title">
-        {galo && <img className="hero-galo-watermark" src={GALO_LOGO} alt="" />}
+        {galo && <GaloCrest className="hero-galo-watermark" />}
         <ScrollReveal repeat>
           <p className="section-eyebrow">{en ? 'SOFTWARE ENGINEERING · PUC MINAS' : 'ENGENHARIA DE SOFTWARE · PUC MINAS'}</p>
           <h1 id="hero-title">Gustavo<br /><span className="neon-title">Ryan.</span></h1>
