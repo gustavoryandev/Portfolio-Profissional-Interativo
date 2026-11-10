@@ -148,14 +148,7 @@ letter-spacing: 0.12em;
 }
 .brand-lockup { display: flex; align-items: center; gap: 14px; }
 .brand-logo {
-  display: block; flex-shrink: 0; width: 76px; height: 58px;
-  background: var(--accent);
-  mask: url('/logo-astra-ai.png') center / cover no-repeat;
-}
-.dark .brand-logo {
-  mask: none;
-  background: url('/logo-astra-ai.png') center / cover no-repeat;
-  filter: hue-rotate(155deg) saturate(1.3);
+  display: block; flex-shrink: 0; height: auto; color: var(--ink);
 }
 .brand-lockup h1 { font-size: 21px; font-weight: 700; letter-spacing: -.6px; line-height: 1.3; }
 .brand-lockup p { color: var(--accent); font-size: 13px; margin-top: 3px; }
@@ -177,7 +170,7 @@ letter-spacing: 0.12em;
 .workspace { display: grid; grid-template-columns: 174px minmax(0, 1fr) 294px; gap: 18px; width: 100%; max-width: 1660px; margin: 0 auto; padding: 22px; flex: 1; min-height: 0; }
 .sidebar { display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: 10px; padding: 12px 9px; background: var(--panel); }
 .sidebar-brand { display: flex; align-items: center; gap: 4px; margin-bottom: 24px; }
-.sidebar-brand .brand-logo { width: 55px; height: 44px; }
+.sidebar-brand .brand-logo { width: 55px; }
 .sidebar-brand span { font-size: 12px; letter-spacing: 1px; color: var(--muted); }
 .nav-items { display: flex; flex-direction: column; gap: 8px; }
 .nav-item { display: flex; align-items: center; gap: 12px; padding: 11px 10px; border: 1px solid transparent; border-radius: 6px; font-size: 12px; text-align: left; }
@@ -245,7 +238,6 @@ letter-spacing: 0.12em;
 }
 @media (max-width: 639px) {
   .site-header { padding: 12px 14px; gap: 10px; flex-wrap: wrap; }
-  .brand-logo { width: 54px; height: 42px; }
   .brand-lockup { gap: 7px; }
   .brand-lockup h1 { font-size: 17px; }
   .brand-lockup p { font-size: 12px; }

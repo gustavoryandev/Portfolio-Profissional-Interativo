@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import useEntranceInteraction from '../hooks/useEntranceInteraction';
+import PortfolioLogo from './PortfolioLogo';
 
 function shouldPlay() {
   if (new URLSearchParams(window.location.search).get('intro') === '1') return true;
@@ -42,7 +43,7 @@ export default function PortfolioIntro({ children, en }) {
   if (!playing) return children;
   return <div {...interaction} className="portfolio-opening" role="dialog" aria-modal="true" aria-label={en ? 'Gustavo Ryan opening' : 'Abertura Gustavo Ryan'}>
     <div className="opening-glow" aria-hidden="true" />
-    <div className="opening-brand"><span className="opening-monogram" aria-hidden="true">GR<span>.</span></span><p>Gustavo Ryan<span>.ai</span></p><small>{en ? 'ENGINEERING · AI · EXPERIENCE' : 'ENGENHARIA · IA · EXPERIÊNCIA'}</small></div>
+    <div className="opening-brand"><PortfolioLogo className="opening-monogram" /><p>Gustavo Ryan<span>.ai</span></p><small>{en ? 'ENGINEERING · AI · EXPERIENCE' : 'ENGENHARIA · IA · EXPERIÊNCIA'}</small></div>
     <button ref={button} type="button" className="opening-skip">{en ? 'Skip intro' : 'Pular abertura'} <span aria-hidden="true">↗</span></button>
   </div>;
 }

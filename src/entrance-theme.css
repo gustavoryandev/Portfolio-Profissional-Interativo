@@ -40,11 +40,9 @@
 [data-entrance-theme] .astra-entrance-status,
 [data-entrance-theme] .astra-entrance-bottom,
 [data-entrance-theme] .astra-entrance-top > span:last-child { color: var(--entrance-muted); }
-[data-entrance-theme] .opening-brand span span,
 [data-entrance-theme] .opening-brand p span,
 [data-entrance-theme] .astra-entrance-label,
 [data-entrance-theme] .astra-entrance-top > span > span { color: var(--entrance-blue); }
-[data-entrance-theme='light'] .opening-monogram { text-shadow: 0 0 35px var(--entrance-outline, rgb(37 135 223 / .1)); }
 [data-entrance-theme='light'] .astra-entrance-word { -webkit-text-stroke-color: var(--entrance-outline, rgb(8 105 180 / .25)); text-shadow: none; }
 [data-entrance-theme='light'] .astra-entrance-avatar { box-shadow: 0 0 25px var(--entrance-outline, rgb(37 135 223 / .12)); border-color: var(--entrance-avatar-border, rgb(8 105 180 / .4)); }
 [data-entrance-theme] .opening-skip:hover,

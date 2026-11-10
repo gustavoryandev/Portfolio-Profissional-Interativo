@@ -14,14 +14,7 @@
   gap: 12px;
   text-decoration: none;
 }
-.site-header .brand-logo {
-  width: 48px;
-  height: 42px;
-  background-size: contain;
-  background-repeat: no-repeat;
-  mask-size: contain;
-  mask-repeat: no-repeat;
-}
+.site-header .brand-logo { width: 48px; }
 .site-header .brand-lockup .brand-title {
   margin: 0;
   color: var(--ink);
@@ -130,7 +123,7 @@
 }
 @media (max-width: 767px) {
   .portfolio-app .site-header { min-height: 72px; padding: 12px 20px; gap: 12px; }
-  .site-header .brand-logo { width: 40px; height: 36px; }
+  .site-header .brand-logo { width: 40px; }
   .site-header .brand-lockup .brand-title { font-size: 17px; }
   .site-header .brand-lockup p:not(.brand-title) { font-size: 10px; }
 }
