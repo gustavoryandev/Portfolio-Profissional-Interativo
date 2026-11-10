@@ -3,6 +3,7 @@ import React from 'react';
 import { renderToString } from 'react-dom/server';
 import { JSDOM } from 'jsdom';
 import App from '../src/App';
+import ThemeWaves from '../src/components/ThemeWaves';
 import { ThemeContext } from '../src/context/ThemeContext';
 import perfil from '../src/data/perfil.json';
 
@@ -10,9 +11,9 @@ const environment = new JSDOM('', { url: 'http://localhost/' });
 globalThis.window = environment.window;
 globalThis.document = environment.window.document;
 const { default: i18n } = await import('../src/i18n/index.js');
-function render(path) {
+function render(path, theme = 'dark') {
   window.history.replaceState({}, '', path);
-  return new JSDOM(renderToString(<ThemeContext.Provider value={{ darkMode: true, toggleTheme() {} }}><App /></ThemeContext.Provider>));
+  return new JSDOM(renderToString(<ThemeContext.Provider value={{ theme, darkMode: theme !== 'galo-light' }}><ThemeWaves /><App /></ThemeContext.Provider>));
 }
 for (const lang of ['pt', 'en']) {
   await i18n.changeLanguage(lang);
@@ -31,6 +32,17 @@ for (const lang of ['pt', 'en']) {
   const ids = [...doc.querySelectorAll('[id]')].map(node => node.id);
   assert.equal(new Set(ids).size, ids.length, 'section and form IDs must be unique');
   assert.equal(doc.querySelectorAll('.project-tile').length, perfil.projetos.length);
+  page.window.close();
+}
+
+for (const theme of ['galo', 'galo-light']) {
+  const page = render('/', theme);
+  const doc = page.window.document;
+  assert.equal(doc.querySelector('.site-header .galo-brand-badge img').getAttribute('src'), '/galo-logo.png');
+  assert.equal(doc.querySelector('.portfolio-hero .hero-galo-watermark').getAttribute('src'), '/galo-logo.png');
+  assert.equal(doc.querySelector('.hero-actions .neon-cta').getAttribute('href'), '/chat');
+  assert.equal(doc.querySelector('.hero-actions .scroll-secondary').getAttribute('href'), '#projetos');
+  assert.ok(doc.querySelector('svg.theme-waves.galo-waves'));
   page.window.close();
 }
 // Flags left by previous visits must not skip the intro on a fresh load.

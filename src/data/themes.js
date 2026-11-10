@@ -11,3 +11,6 @@ export const themes = [
   { id: 'neon-green', name: 'Neon Green' },
   { id: 'mint-frost', name: 'Mint Frost', light: true },
 ];
+
+export const isGaloTheme = theme => theme === 'galo' || theme === 'galo-light';
+export const GALO_LOGO = '/galo-logo.png';

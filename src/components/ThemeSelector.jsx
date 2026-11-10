@@ -2,6 +2,7 @@ import { useContext } from 'react';
 import { Palette } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { ThemeContext, themes } from '../context/ThemeContext';
+import { GALO_LOGO, isGaloTheme } from '../data/themes.js';
 import OptionMenu from './OptionMenu';
 
 const groups = [
@@ -24,8 +25,7 @@ export default function ThemeSelector() {
         id: option.id,
         label: t(`navbar.appearance.${option.id}`, { defaultValue: option.name }),
         preview: <span className="theme-swatch" aria-hidden="true">
-          {option.id === 'galo-light' && <img src="/logos/galo-cam.svg" alt="" loading="lazy" />}
-          {option.id === 'galo' && <img src="https://a.espncdn.com/i/teamlogos/soccer/500/7632.png" alt="" loading="lazy" />}
+          {isGaloTheme(option.id) && <img src={GALO_LOGO} alt="" loading="lazy" />}
         </span>,
       })),
     }))}

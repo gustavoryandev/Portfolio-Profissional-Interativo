@@ -13,10 +13,11 @@ import LanguageIcon from '../components/LanguageIcon';
 import { SocialLinks } from '../components/ProfilePanel';
 import ScrollReveal from '../components/ui/ScrollReveal';
 import perfil from '../data/perfil.json';
+import { GALO_LOGO, isGaloTheme } from '../data/themes.js';
 
 export default function PortfolioPage({ activeSection, projectFocus }) {
   const { openAstra, openFull } = useAstra();
-  const galoLight = useContext(ThemeContext)?.theme === 'galo-light';
+  const galo = isGaloTheme(useContext(ThemeContext)?.theme);
   const { i18n } = useTranslation();
   const en = i18n.language.startsWith('en');
   return <div className="portfolio-app scroll-portfolio">
@@ -25,15 +26,15 @@ export default function PortfolioPage({ activeSection, projectFocus }) {
     <MobileNav en={en} />
     <main id="main-content" tabIndex={-1} className="scroll-content">
       <section id="inicio" className="portfolio-hero" aria-labelledby="hero-title">
-        {galoLight && <img className="hero-galo-watermark" src="/logos/galo-cam.svg" alt="" />}
+        {galo && <img className="hero-galo-watermark" src={GALO_LOGO} alt="" />}
         <ScrollReveal repeat>
           <p className="section-eyebrow">{en ? 'SOFTWARE ENGINEERING · PUC MINAS' : 'ENGENHARIA DE SOFTWARE · PUC MINAS'}</p>
           <h1 id="hero-title">Gustavo<br /><span className="neon-title">Ryan.</span></h1>
           <p className="hero-lead">{en ? 'Turning ideas into digital experiences.' : 'Transformando ideias em experiências digitais.'}</p>
           <p className="hero-description">{en ? 'Java, Spring Boot and React. Explore my projects, skills and the journey behind the code.' : 'Java, Spring Boot e React. Explore meus projetos, habilidades e a trajetória por trás do código.'}</p>
           <div className="hero-actions">
-            {galoLight && <a className="neon-cta" href="/chat" onClick={openFull}><Sparkles size={18} aria-hidden="true" />{en ? 'Talk to Astra' : 'Conversar com Astra'}<ArrowUpRight size={18} aria-hidden="true" /></a>}
-            <a className={galoLight ? 'scroll-secondary' : 'neon-cta'} href="#projetos">{en ? 'Explore projects' : 'Explorar projetos'}<ArrowDown size={17} aria-hidden="true" /></a>
+            {galo && <a className="neon-cta" href="/chat" onClick={openFull}><Sparkles size={18} aria-hidden="true" />{en ? 'Talk to Astra' : 'Conversar com Astra'}<ArrowUpRight size={18} aria-hidden="true" /></a>}
+            <a className={galo ? 'scroll-secondary' : 'neon-cta'} href="#projetos">{en ? 'Explore projects' : 'Explorar projetos'}<ArrowDown size={17} aria-hidden="true" /></a>
           </div>
           <SocialLinks />
         </ScrollReveal>
@@ -42,7 +43,7 @@ export default function PortfolioPage({ activeSection, projectFocus }) {
           <img className="hero-photo" src="/perfil-foto.jpeg" alt={en ? 'Gustavo Ryan' : 'Foto de Gustavo Ryan'} width="572" height="777" fetchPriority="high" />
           <div className="hero-profile-caption">
             <span>{en ? 'DEVELOPER' : 'DESENVOLVEDOR'} <b>/</b> {en ? 'STUDENT' : 'ESTUDANTE'}</span>
-            <strong>{galoLight && <MapPin size={16} aria-hidden="true" />}{perfil.localizacao}</strong>
+            <strong>{galo && <MapPin size={16} aria-hidden="true" />}{perfil.localizacao}</strong>
           </div>
         </ScrollReveal>
       </section>
