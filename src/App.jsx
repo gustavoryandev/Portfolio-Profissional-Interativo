@@ -134,7 +134,7 @@ export default function App() {
   if (!['/', '/chat'].includes(path)) return <main className="route-loading"><h1>404</h1><a href="/">{en ? 'Back to portfolio' : 'Voltar ao portfólio'}</a></main>;
   return <AstraContext.Provider value={{ lab, actions, labHandoff, setLabHandoff, actionUi,
     openAstra, openFull, returnPortfolio: event => { event.preventDefault(); close(); navigate('/'); } }}>
-    <div hidden={full}>{portfolioVisited.current && <PortfolioIntro en={en}><PortfolioPage projectFocus={route.project ? route : null} /></PortfolioIntro>}</div>
+    <div hidden={full}>{portfolioVisited.current && <PortfolioIntro en={en}><PortfolioPage activeSection={route.section || 'inicio'} projectFocus={route.project ? route : null} /></PortfolioIntro>}</div>
     <dialog inert={showIntro} style={showIntro ? { visibility: 'hidden' } : undefined} ref={dialog} role={full ? 'main' : undefined} className={`astra-shell ${full ? 'astra-shell-full' : 'astra-shell-modal'}`} aria-label={en ? 'Astra conversation' : 'Conversa com a Astra'} onCancel={() => setOpened(false)} onKeyDown={trapFocus}
       onClick={event => { if (!full && opened && clickedDialogBackdrop(event)) close(); }}>
       <div className="astra-toolbar" hidden={full}>

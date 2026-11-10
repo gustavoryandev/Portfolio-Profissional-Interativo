@@ -24,6 +24,7 @@ export default function ThemeSelector() {
         id: option.id,
         label: t(`navbar.appearance.${option.id}`, { defaultValue: option.name }),
         preview: <span className="theme-swatch" aria-hidden="true">
+          {option.id === 'galo-light' && <img src="/logos/galo-cam.svg" alt="" loading="lazy" />}
           {option.id === 'galo' && <img src="https://a.espncdn.com/i/teamlogos/soccer/500/7632.png" alt="" loading="lazy" />}
         </span>,
       })),

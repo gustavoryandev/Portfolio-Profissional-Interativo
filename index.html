@@ -10,11 +10,11 @@
       // Set the saved palette before the first paint, including on a direct visit to /chat.
       let savedTheme;
       try { savedTheme = localStorage.getItem('theme'); } catch {}
-      const theme = /^(light|dark|galo|aurora|midnight-violet|obsidian-gold|porcelain-indigo|champagne-gold|neon-green|mint-frost)$/.test(savedTheme)
+      const theme = /^(light|dark|galo|galo-light|aurora|midnight-violet|obsidian-gold|porcelain-indigo|champagne-gold|neon-green|mint-frost)$/.test(savedTheme)
         ? savedTheme : 'dark';
       const root = document.documentElement;
       root.dataset.theme = theme;
-      root.classList.toggle('dark', !['light', 'porcelain-indigo', 'champagne-gold', 'mint-frost'].includes(theme));
+      root.classList.toggle('dark', !['light', 'galo-light', 'porcelain-indigo', 'champagne-gold', 'mint-frost'].includes(theme));
       root.toggleAttribute('data-custom-theme', theme !== 'light' && theme !== 'dark');
     </script>
   </head>
