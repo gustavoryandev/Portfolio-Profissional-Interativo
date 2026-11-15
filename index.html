@@ -13,13 +13,14 @@
       // Keep these aliases in sync with src/data/themes.js.
       const legacyThemeIds = {
         'obsidian-gold': 'grafite-coral',
+        'champagne-gold': 'ardosia-cobalto',
       };
       if (Object.hasOwn(legacyThemeIds, savedTheme)) savedTheme = legacyThemeIds[savedTheme];
-      const theme = /^(light|dark|galo|galo-light|aurora|midnight-violet|grafite-coral|porcelain-indigo|champagne-gold|mint-frost)$/.test(savedTheme)
+      const theme = /^(light|dark|galo|galo-light|aurora|midnight-violet|grafite-coral|porcelain-indigo|ardosia-cobalto|mint-frost)$/.test(savedTheme)
         ? savedTheme : 'dark';
       const root = document.documentElement;
       root.dataset.theme = theme;
-      root.classList.toggle('dark', !['light', 'galo-light', 'porcelain-indigo', 'champagne-gold', 'mint-frost'].includes(theme));
+      root.classList.toggle('dark', !['light', 'galo-light', 'porcelain-indigo', 'ardosia-cobalto', 'mint-frost'].includes(theme));
       root.toggleAttribute('data-custom-theme', theme !== 'light' && theme !== 'dark');
     </script>
   </head>

@@ -7,13 +7,14 @@ export const themes = [
   { id: 'midnight-violet', name: 'Midnight Violet' },
   { id: 'grafite-coral', name: 'Grafite e Coral' },
   { id: 'porcelain-indigo', name: 'Porcelain Indigo', light: true },
-  { id: 'champagne-gold', name: 'Champagne Gold', light: true },
+  { id: 'ardosia-cobalto', name: 'Ardósia e Cobalto', light: true },
   { id: 'mint-frost', name: 'Mint Frost', light: true },
 ];
 
 // Keep these aliases in sync with the first-paint script in index.html.
 export const legacyThemeIds = {
   'obsidian-gold': 'grafite-coral',
+  'champagne-gold': 'ardosia-cobalto',
 };
 
 export const isGaloTheme = theme => theme === 'galo' || theme === 'galo-light';
