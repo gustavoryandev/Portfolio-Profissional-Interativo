@@ -6,6 +6,7 @@ import { languages } from '../data/playgroundLanguages';
 import { LAB_CODE_LIMIT, LAB_MODES as MODES } from '../services/portfolioActions';
 import { useAstra, useLaboratory } from '../context/AstraContext';
 import LaboratoryReview from './LaboratoryReview';
+import ScrollReveal from './ui/ScrollReveal';
 
 export default function CodePlayground() {
   const { i18n } = useTranslation();
@@ -22,7 +23,7 @@ export default function CodePlayground() {
     done: 'Execução concluída.', stopped: 'Execução interrompida.', timeout: 'Tempo limite atingido. Tente um exemplo menor.', error: 'Não foi possível concluir. Confira o código e a conexão com a internet.',
   };
 
-  return <section id="laboratorio" className="scroll-section code-lab" aria-labelledby="code-lab-title">
+  return <ScrollReveal as="section" id="laboratorio" className="scroll-section code-lab" aria-labelledby="code-lab-title">
     <p className="section-eyebrow">03 / {en ? 'CODE LAB' : 'LABORATÓRIO'}</p>
     <h2 id="code-lab-title">{en ? 'Make the code yours.' : 'Experimente. Altere. Execute.'}</h2>
     <p className="code-lab-intro">{en ? 'Explore Bro Fit and Shopping Cart in Java, Python and JavaScript.' : 'Explore o Bro Fit e o Carrinho de Compras em Java, Python e JavaScript.'}</p>
@@ -51,5 +52,5 @@ export default function CodePlayground() {
       </div>
       <div className="code-lab-footer"><p>{language === 'java' ? (en ? 'Your code is sent to Wandbox (OpenJDK 21). Stopping ends the wait, not the remote execution.' : 'Seu código é enviado ao Wandbox (OpenJDK 21). Parar encerra a espera, não a execução remota.') : (en ? 'Runs in your browser. Python requires internet on first load. Up to 10 seconds per run.' : 'Executa no navegador. Python requer internet no primeiro carregamento. Até 10 segundos por execução.')}</p>{busy ? <button type="button" className="neon-cta" onClick={lab.stop}><Square size={16} />{en ? 'Stop' : 'Parar'}</button> : <button type="button" className="neon-cta" disabled={!code.trim()} onClick={lab.run}><Play size={16} />{en ? 'Run code' : 'Executar código'}</button>}</div>
     </div>
-  </section>;
+  </ScrollReveal>;
 }
