@@ -1,7 +1,34 @@
 import test from 'node:test';
+import assert from 'node:assert/strict';
 import { build } from 'esbuild';
 import { fileURLToPath } from 'node:url';
-import { unlink } from 'node:fs/promises';
+import { readFile, unlink } from 'node:fs/promises';
+import { JSDOM } from 'jsdom';
+import { legacyThemeIds, themes } from '../src/data/themes.js';
+
+test('The first paint honors current and legacy saved themes', async () => {
+  const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
+  const cases = [
+    ...themes.map(theme => [theme.id, theme]),
+    ...Object.entries(legacyThemeIds).map(([oldId, newId]) => [oldId, themes.find(theme => theme.id === newId)]),
+    ['unknown-theme', themes.find(theme => theme.id === 'dark')],
+  ];
+  for (const [saved, expected] of cases) {
+    const { window } = new JSDOM(html, {
+      url: 'https://portfolio.test/chat',
+      runScripts: 'dangerously',
+      beforeParse({ localStorage }) { localStorage.setItem('theme', saved); },
+    });
+    try {
+      const root = window.document.documentElement;
+      assert.equal(root.dataset.theme, expected.id, saved);
+      assert.equal(root.classList.contains('dark'), !expected.light, saved);
+      assert.equal(root.hasAttribute('data-custom-theme'), Boolean(expected.name), saved);
+    } finally {
+      window.close();
+    }
+  }
+});
 
 test('Full and Compact Astra use the same live Laboratory and review', async () => {
   const output = new URL('./.astra-integration.mjs', import.meta.url);

@@ -1,5 +1,5 @@
 import React, { createContext, useLayoutEffect, useState } from 'react';
-import { themes } from '../data/themes.js';
+import { legacyThemeIds, themes } from '../data/themes.js';
 export { themes };
 
 export const ThemeContext = createContext(null);
@@ -10,6 +10,7 @@ export function ThemeProvider({ children }) {
     if (!initial) {
       try { initial = localStorage.getItem('theme'); } catch {}
     }
+    if (Object.hasOwn(legacyThemeIds, initial)) initial = legacyThemeIds[initial];
     return themes.find(option => option.id === initial)?.id ?? 'dark';
   });
   const palette = themes.find(option => option.id === theme);

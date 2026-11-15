@@ -64,20 +64,21 @@
   --wave-glow: #6D28D9;
 }
 
-:root[data-theme="obsidian-gold"], .menu-option[data-preview="obsidian-gold"] {
-  --palette-bg: #080808;
-  --palette-surface: rgb(20 20 20);
-  --palette-primary: #FACC15;
-  --palette-accent: #EAB308;
-  --palette-text: #F5F5F4;
-  --palette-muted: #A3A3A3;
-  --palette-border: #303030;
-  --palette-tint: 20 20 20;
-  --palette-accent-rgb: 234 179 8;
-  --palette-primary-rgb: 250 204 21;
-  --wave-one: #FACC15;
-  --wave-two: #D97706;
-  --wave-glow: #A16207;
+:root[data-theme="grafite-coral"], .menu-option[data-preview="grafite-coral"] {
+  --palette-bg: #111318;
+  --palette-surface: #1B2029;
+  --palette-primary: #FFA091;
+  --palette-on-primary: #221214;
+  --palette-accent: #A7B9DF;
+  --palette-text: #F1F4FA;
+  --palette-muted: #A9B4C8;
+  --palette-border: #374052;
+  --palette-tint: 27 32 41;
+  --palette-accent-rgb: 167 185 223;
+  --palette-primary-rgb: 255 160 145;
+  --wave-one: var(--palette-accent);
+  --wave-two: #707E9D;
+  --wave-glow: #66789E;
 }
 
 :root[data-theme="porcelain-indigo"], .menu-option[data-preview="porcelain-indigo"] {
@@ -135,7 +136,7 @@
   --panel-soft: color-mix(in srgb, var(--panel), var(--palette-accent) 5%);
   --primary: var(--palette-primary);
   --primary-hover: color-mix(in srgb, var(--primary), white 12%);
-  --on-primary: #080808;
+  --on-primary: var(--palette-on-primary, #080808);
   --accent: var(--palette-accent);
   --ink: var(--palette-text);
   --muted: var(--palette-muted);
