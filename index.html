@@ -16,13 +16,15 @@
         'grafite-coral': 'midnight-pink',
         'champagne-gold': 'ardosia-cobalto',
         'mint-frost': 'petroleo-gelo',
+        'porcelain-indigo': 'papel-violeta',
       };
       if (Object.hasOwn(legacyThemeIds, savedTheme)) savedTheme = legacyThemeIds[savedTheme];
-      const theme = /^(light|dark|galo|galo-light|aurora|midnight-violet|midnight-pink|porcelain-indigo|ardosia-cobalto|petroleo-gelo)$/.test(savedTheme)
-        ? savedTheme : 'dark';
+      const lightThemes = ['light', 'galo-light', 'papel-violeta', 'ardosia-cobalto', 'petroleo-gelo'];
+      const darkThemes = ['dark', 'galo', 'aurora', 'midnight-violet', 'midnight-pink'];
+      const theme = lightThemes.includes(savedTheme) || darkThemes.includes(savedTheme) ? savedTheme : 'dark';
       const root = document.documentElement;
       root.dataset.theme = theme;
-      root.classList.toggle('dark', !['light', 'galo-light', 'porcelain-indigo', 'ardosia-cobalto', 'petroleo-gelo'].includes(theme));
+      root.classList.toggle('dark', darkThemes.includes(theme));
       root.toggleAttribute('data-custom-theme', theme !== 'light' && theme !== 'dark');
     </script>
   </head>

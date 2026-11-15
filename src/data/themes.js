@@ -5,8 +5,8 @@ export const themes = [
   { id: 'galo-light', name: 'Galo CAM Light', light: true },
   { id: 'aurora', name: 'Aurora' },
   { id: 'midnight-violet', name: 'Midnight Violet' },
+  { id: 'papel-violeta', name: 'Papel violeta', light: true },
   { id: 'midnight-pink', name: 'Midnight Pink' },
-  { id: 'porcelain-indigo', name: 'Porcelain Indigo', light: true },
   { id: 'ardosia-cobalto', name: 'Ardósia e Cobalto', light: true },
   { id: 'petroleo-gelo', name: 'Petróleo e Gelo', light: true },
 ];
@@ -17,6 +17,7 @@ export const legacyThemeIds = {
   'grafite-coral': 'midnight-pink',
   'champagne-gold': 'ardosia-cobalto',
   'mint-frost': 'petroleo-gelo',
+  'porcelain-indigo': 'papel-violeta',
 };
 
 export const isGaloTheme = theme => theme === 'galo' || theme === 'galo-light';
