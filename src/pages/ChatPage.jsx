@@ -1,11 +1,13 @@
 // src/App.jsx
-import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { CircleHelp, Gamepad2, Send, Sparkles, Square } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import Navbar from '../components/Navbar';
 import useMobileViewport from '../hooks/useMobileViewport';
 import AstraHero from '../components/AstraHero';
 import AstraAvatar from '../components/AstraAvatar';
+import { ThemeContext } from '../context/ThemeContext';
+import { isGaloTheme } from '../data/themes';
 import AstraResources, { ASTRA_RESOURCES_ID } from '../components/AstraResources';
 import MessageBubble from '../components/MessageBubble';
 import StreamingReply from '../components/StreamingReply';
@@ -61,6 +63,8 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
   const { t, i18n } = useTranslation();
   const viewportRef = useMobileViewport();
   const { actions, actionUi, openFull, setLabHandoff } = useAstra();
+  const galo = isGaloTheme(useContext(ThemeContext)?.theme);
+  const welcomeKey = galo ? 'chat.galoWelcome.greeting' : modal ? 'chat.quickWelcome' : 'chat.boasVindas';
 
   const [messages, setMessages] = useState(() => [{ id: 'welcome', sender: 'ai', text: t('chat.boasVindas'), translationKey: 'chat.boasVindas' }]);
   const [input, setInput] = useState('');
@@ -179,7 +183,9 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
     const updateHandoff = reply => setLabHandoff?.(current => current?.turn === turn ? { ...current, reply } : current);
     try {
       // O campo "id" é só da interface: não vai para o backend
-      const history = messagesRef.current.map(({ sender, text, translationKey }) => ({ sender, text, translationKey }));
+      const history = messagesRef.current.map(({ id, sender, text, translationKey }) => id === 'welcome'
+        ? { sender, text: t(welcomeKey), translationKey: welcomeKey }
+        : { sender, text, translationKey });
       const options = {
         signal: controller.signal,
         surface: modal ? 'compact' : 'full',
@@ -261,6 +267,18 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
 
   const rawPrompts = t('chat.sugestoes', { returnObjects: true });
   const prompts = Array.isArray(rawPrompts) ? rawPrompts : [];
+  const showGaloHero = galo && !modal && !compact && !showArcade;
+  const galoShortcuts = galo && !compact && !showArcade && (
+    <div role="group" aria-label={t('chat.galoWelcome.shortcuts')} className="mt-2 flex flex-wrap gap-2">
+      <button type="button" className="chip chip--accent min-h-11" onClick={() => onSelectSection?.('projects')}>
+        {t('chat.galoWelcome.projects')}
+      </button>
+      <button type="button" className="chip chip--accent min-h-11 disabled:opacity-50" disabled={loading}
+        onClick={() => handleSend(t('chat.galoWelcome.matchPrompt'), true)}>
+        {t('chat.galoWelcome.lastMatch')}
+      </button>
+    </div>
+  );
 
   return (
     <div
@@ -320,12 +338,15 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
                 className="chat-messages custom-scrollbar flex min-h-0 w-full flex-1 flex-col gap-6 overflow-y-auto p-4 sm:p-6"
               >
                 <div className="space-y-6">
-                  {!modal && !showArcade && <AstraHero en={en} compact={compact} prompts={prompts} disabled={loading} onPick={prompt => handleSend(prompt, true)} />}
+                  {!modal && !showArcade && <AstraHero en={en} compact={compact} prompts={prompts} disabled={loading}
+                    onPick={prompt => handleSend(prompt, true)} greeting={showGaloHero ? t(welcomeKey) : undefined}
+                    shortcuts={showGaloHero ? galoShortcuts : undefined} />}
 
-                  {messages.map(message => (
+                  {messages.filter(message => !showGaloHero || message.id !== 'welcome').map(message => (
                     <div id={messageAnchor(message.id)} tabIndex={-1} className="chat-msg-in outline-none" key={message.id}>
-                      <MessageBubble message={message.id === 'welcome' && modal ? { ...message, text: t('chat.quickWelcome'), translationKey: 'chat.quickWelcome' } : message} liveContext={live.context} refreshing={live.refreshing} onRefresh={live.refresh} onSelectSection={onSelectSection}
+                      <MessageBubble message={message.id === 'welcome' ? { ...message, text: t(welcomeKey), translationKey: welcomeKey } : message} liveContext={live.context} refreshing={live.refreshing} onRefresh={live.refresh} onSelectSection={onSelectSection}
                         onViewFull={openFull ? viewFullMessage : undefined} compact={modal}>
+                        {message.id === 'welcome' && modal && galoShortcuts}
                         {message.reviewId && <LaboratoryReview reviewId={message.reviewId} onOpenLab={() => onSelectSection?.('laboratorio')}
                           onViewFull={modal && openFull ? () => viewFullMessage(message.id) : undefined} />}
                         {message.arcadeLink && <a className="chip chip--accent self-start" href={message.arcadeLink} onClick={event => {

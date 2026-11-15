@@ -658,6 +658,15 @@ async function fetchGalo() {
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
     const now = Date.now();
+    const completed = [...lists[2], ...lists[0], ...lists[1]]
+      .filter(event => new Date(event?.date).getTime() <= now && getEventState(event) === 'post'
+        && !/POSTPONED|CANCEL+ED|SUSPENDED|ABANDONED|FORFEIT/i.test(getEventStatusName(event)))
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
+    const lastMatch = completed ? {
+      date: completed.date,
+      home: galoResultTeam(completed, 'home'),
+      away: galoResultTeam(completed, 'away'),
+    } : null;
 
     const isUpcomingOrLive = (event) => {
       const state = getEventState(event);
@@ -676,8 +685,6 @@ async function fetchGalo() {
       const past = events.filter((e) => new Date(e.date).getTime() <= now);
       if (past.length > 0) validEvents = [past[past.length - 1]];
     }
-
-    if (validEvents.length === 0) return { status: 'ok', games: [] };
 
     const getLogo = (teamData) => teamData?.team?.logos?.[0]?.href || GALO_FALLBACK_LOGO;
 
@@ -709,11 +716,38 @@ async function fetchGalo() {
       };
     });
 
-    return { status: 'ok', games };
+    return { status: 'ok', games, lastMatch };
   } catch (e) {
     console.error('[Galo API Error]:', e.message);
     return { status: 'error' };
   }
+}
+
+function galoResultTeam(match, side) {
+  const competitor = match.competitions?.[0]?.competitors?.find(team => team.homeAway === side);
+  const score = competitor?.score;
+  const value = score?.value ?? score?.displayValue ?? score;
+  return {
+    name: competitor?.team?.shortDisplayName || competitor?.team?.displayName || competitor?.team?.name,
+    score: /^\d+$/.test(String(value)) ? Number(value) : null,
+  };
+}
+
+function formatGaloResult(match, language) {
+  if (!match?.home?.name || !match.away?.name) return null;
+  const en = language === 'en';
+  const date = new Intl.DateTimeFormat(en ? 'en-US' : 'pt-BR', {
+    dateStyle: 'long', timeZone: 'America/Sao_Paulo',
+  }).format(new Date(match.date));
+  const { home, away } = match;
+  if (home.score == null || away.score == null) {
+    return en
+      ? `Galo’s last completed match was **${home.name} vs. ${away.name}** on ${date}. ESPN hasn’t provided a final score.`
+      : `O último jogo do Galo foi **${home.name} x ${away.name}** em ${date}. A ESPN não informou o placar final.`;
+  }
+  const score = `**${home.name} ${home.score} × ${away.score} ${away.name}**`;
+  return en ? `Galo’s last match ended ${score} on ${date}. Source: ESPN.`
+    : `O último jogo do Galo terminou ${score}, em ${date}. Fonte: ESPN.`;
 }
 
 async function fetchCanvas() {
@@ -1347,6 +1381,14 @@ export default async function handler(req, res) {
     if (labSnapshot && !stream) res.setHeader('Cache-Control', 'no-store');
     const message = userMessage.trim();
     const suggestions = body.predefinedSuggestion === true ? readJson(`${suggestionLanguage}.json`).chat : null;
+    if (!labSnapshot && message === suggestions?.galoWelcome?.matchPrompt) {
+      res.setHeader('Cache-Control', 'no-store');
+      const { galo } = await fetchLiveContext(['galo'], { retryFailed: true });
+      const result = formatGaloResult(galo?.lastMatch, suggestionLanguage);
+      if (result) return res.status(200).json({ response: result });
+      return res.status(200).json({ response: suggestions.galoWelcome.matchUnavailable,
+        translationKey: 'chat.galoWelcome.matchUnavailable' });
+    }
     const suggestionIndex = suggestions?.sugestoes.indexOf(message) ?? -1;
     const suggestionCards = ['[PROJECTS_CARD]', '[SKILLS_CARD]', '[CANVAS_CARD]', '[GITHUB_CARD]\n[STATS_CARD]', '[GALO_CARD]', '[CHESS_CARD]'];
     const catalogCards = { spotify: '[SPOTIFY_CARD]', canvas: '[CANVAS_CARD]' };

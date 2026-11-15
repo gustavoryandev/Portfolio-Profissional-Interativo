@@ -15,7 +15,7 @@ const SPARKS = [
   { x: '30%', y: '64%', dx: '40px',  dy: '-50px', d: '.18s' },
 ];
 
-export default function AstraHero({ en, compact, prompts, onPick, disabled }) {
+export default function AstraHero({ en, compact, prompts, onPick, disabled, greeting, shortcuts }) {
   const { t } = useTranslation();
   return (
     <div className="astra-hero-wrap" data-compact={compact} aria-hidden={compact || undefined} inert={compact}>
@@ -42,7 +42,8 @@ export default function AstraHero({ en, compact, prompts, onPick, disabled }) {
             {en ? 'Gustavo’s AI assistant' : 'Assistente IA do Gustavo'}
             <span className="bp-handles" aria-hidden="true"><i /><i /><i /><i /></span>
           </span>
-          <p className="hud astra-sub">{`// ${t('chat.subtitulo')}`}</p>
+          <p className="hud astra-sub">{greeting ?? `// ${t('chat.subtitulo')}`}</p>
+          {shortcuts}
 
           {prompts.length > 0 && (
             <ul className="astra-starters" aria-label={en ? 'Suggested questions' : 'Sugestões de perguntas'}>

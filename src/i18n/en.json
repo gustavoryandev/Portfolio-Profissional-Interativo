@@ -23,6 +23,14 @@
       "fullOnlyCard": "This resource can only be shown in Full Astra."
     },
     "quickWelcome": "Hi! I’m Astra. Ask about Gustavo’s work, explore a project, or try “Open the Laboratory.”",
+    "galoWelcome": {
+      "greeting": "Hey, Galo fans! Want to explore Gustavo’s projects or see how Galo did in their last match?",
+      "shortcuts": "Astra shortcuts",
+      "projects": "Explore projects",
+      "lastMatch": "Galo’s last match",
+      "matchPrompt": "How did Galo do in their last match?",
+      "matchUnavailable": "I couldn’t confirm Galo’s last match on ESPN right now. Please try again shortly."
+    },
     "erro": "Your question could not be processed right now. Please try again shortly.",
     "boasVindas": "Hello! I am Gustavo's virtual assistant. How can I help you today?",
     "subtitulo": "Ask about projects, tech stack, university, or live metrics.",

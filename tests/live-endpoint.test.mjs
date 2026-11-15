@@ -149,6 +149,42 @@ test('declining details makes no additional integration or model request', async
   } finally { mockAdapter = undefined; }
 });
 
+test('the Galo welcome shortcut returns the most recent completed score without Gemini', async () => {
+  const match = (id, date, state, status) => ({
+    id, date,
+    competitions: [{
+      status: { type: { state, name: status } },
+      competitors: [
+        { homeAway: 'home', team: { id: '7632', shortDisplayName: 'Atlético-MG' }, score: { value: 2 } },
+        { homeAway: 'away', team: { id: '123', shortDisplayName: 'Cruzeiro' }, score: '0' },
+      ],
+    }],
+  });
+  const matches = [
+    match('previous', '2024-06-01T20:00:00Z', 'post', 'STATUS_FINAL'),
+    match('last', '2024-06-03T00:30:00Z', 'post', 'STATUS_FINAL'),
+    match('cancelled', '2024-06-04T20:00:00Z', 'post', 'STATUS_CANCELLED'),
+    match('upcoming', '2099-06-05T20:00:00Z', 'pre', 'STATUS_SCHEDULED'),
+  ];
+  mockAdapter = async config => {
+    assert.match(config.url, /^https:\/\/site\.(?:api|web\.api)\.espn\.com\//);
+    return { status: 200, config, data: { events: config.url.includes('fixture=true') ? matches.slice(-1) : matches } };
+  };
+  try {
+    for (const [lang, userMessage, date] of [
+      ['pt', 'Como foi o último jogo do Galo?', '2 de junho de 2024'],
+      ['en', 'How did Galo do in their last match?', 'June 2, 2024'],
+    ]) {
+      const res = response();
+      await handler({ method: 'POST', body: { userMessage, lang, predefinedSuggestion: true, stream: true } }, res);
+      assert.equal(res.code, 200);
+      assert.ok(res.body.response.includes('Atlético-MG 2 × 0 Cruzeiro'));
+      assert.ok(res.body.response.includes(date), 'use the most recent completed match in Brasília time');
+      assert.equal(res.body.model, undefined);
+    }
+  } finally { mockAdapter = undefined; }
+});
+
 test('the chat retries incomplete Gemini output in JSON and replaces it in the stream', async () => {
   const originalFetch = globalThis.fetch;
   const calls = [];

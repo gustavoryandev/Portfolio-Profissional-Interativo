@@ -52,6 +52,9 @@ globalThis.fetch = async (_url, options) => {
     liveContext: { wakatime: { status: 'ok', week: { totalFormatted: '2h 30m' } } },
   });
   if (body.userMessage === 'Thanks') return Response.json({ response: 'You’re welcome.' });
+  if (body.userMessage === 'Como foi o último jogo do Galo?') {
+    return Response.json({ response: 'O último jogo do Galo terminou Atlético-MG 2 × 0 Cruzeiro.' });
+  }
   if (body.userMessage === 'Show a code example') return Response.json({ response: '```js\nconsole.log("[CHESS_GAME]");\n```' });
   if (body.userMessage === 'Can we play?') return Response.json({
     response: 'Would you like to play a game of chess with me?', translationKey: 'chat.chessGame.offer',
@@ -333,6 +336,31 @@ try {
   assert.ok([...Array(window.localStorage.length)].some((_, index) => window.localStorage.key(index).startsWith('astra-arcade-session-v1:')));
   await click($('.astra-full .brand-lockup'));
   assert.equal($('.arcade'), null);
+
+  await act(async () => activeRoot.unmount());
+  window.history.replaceState(null, '', '/chat');
+  document.documentElement.dataset.theme = 'galo';
+  await i18n.changeLanguage('pt');
+  activeRoot = createRoot(document.getElementById('root'));
+  await act(async () => activeRoot.render(<ThemeProvider><App /></ThemeProvider>));
+  assert.equal($('.astra-entrance-avatar img').getAttribute('src'), '/astra-avatar-galo.jpg');
+  await click($('.astra-entrance button'));
+  await until(() => $('.astra-full .astra-hero [role="group"]'));
+  assert.match($('.astra-full .astra-hero').textContent, /Fala, Massa!/);
+  await click($('.astra-full .header-actions button[aria-haspopup]'));
+  await click($('.astra-full [data-preview="galo-light"]'));
+  assert.equal($('.astra-full .astra-avatar img').getAttribute('src'), '/astra-avatar-galo-light.jpg');
+  const fullGaloShortcuts = $('.astra-full .astra-hero [role="group"]');
+  await click(findButton(fullGaloShortcuts, 'Explorar projetos'));
+  await until(() => window.location.hash === '#projetos' && $('.astra-fab'));
+  assert.equal($('.astra-fab img').getAttribute('src'), '/astra-avatar-galo-light.jpg');
+  await click($('.astra-fab'));
+  await until(() => $('.astra-compact [role="log"] [role="group"]'));
+  const compactLog = $('.astra-compact [role="log"]');
+  assert.match(compactLog.textContent, /Fala, Massa!/);
+  await click(findButton(compactLog, 'Último jogo do Galo'));
+  await until(() => compactLog.textContent.includes('Atlético-MG 2 × 0 Cruzeiro'));
+  assert.equal(requests.at(-1).predefinedSuggestion, true);
 } finally {
   await act(async () => activeRoot.unmount());
   dom.window.close();
