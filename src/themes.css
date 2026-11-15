@@ -64,21 +64,21 @@
   --wave-glow: #6D28D9;
 }
 
-:root[data-theme="grafite-coral"], .menu-option[data-preview="grafite-coral"] {
-  --palette-bg: #111318;
-  --palette-surface: #1B2029;
-  --palette-primary: #FFA091;
-  --palette-on-primary: #221214;
-  --palette-accent: #A7B9DF;
-  --palette-text: #F1F4FA;
-  --palette-muted: #A9B4C8;
-  --palette-border: #374052;
-  --palette-tint: 27 32 41;
-  --palette-accent-rgb: 167 185 223;
-  --palette-primary-rgb: 255 160 145;
-  --wave-one: var(--palette-accent);
-  --wave-two: #707E9D;
-  --wave-glow: #66789E;
+:root[data-theme="midnight-pink"], .menu-option[data-preview="midnight-pink"] {
+  --palette-bg: #0C0910;
+  --palette-surface: #19121E;
+  --palette-primary: #FF3BA7;
+  --palette-on-primary: #0C0910;
+  --palette-accent: #FF3BA7;
+  --palette-text: #F8EBF6;
+  --palette-muted: #C5AFC7;
+  --palette-border: #542344;
+  --palette-tint: 25 18 30;
+  --palette-accent-rgb: 255 59 167;
+  --palette-primary-rgb: 255 59 167;
+  --wave-one: #8A295F;
+  --wave-two: #522442;
+  --wave-glow: #6B1E50;
 }
 
 :root[data-theme="porcelain-indigo"], .menu-option[data-preview="porcelain-indigo"] {
@@ -160,6 +160,10 @@
 }
 :root[data-theme="aurora"] {
   --accent: color-mix(in srgb, var(--palette-accent), var(--ink) 38%);
+}
+:root[data-theme="midnight-pink"] {
+  --neon-strength: .18;
+  --wave-intensity: .38;
 }
 :root[data-theme="galo"] {
   --panel-soft: color-mix(in srgb, var(--panel), var(--ink) 7%);

@@ -12,12 +12,13 @@
       try { savedTheme = localStorage.getItem('theme'); } catch {}
       // Keep these aliases in sync with src/data/themes.js.
       const legacyThemeIds = {
-        'obsidian-gold': 'grafite-coral',
+        'obsidian-gold': 'midnight-pink',
+        'grafite-coral': 'midnight-pink',
         'champagne-gold': 'ardosia-cobalto',
         'mint-frost': 'petroleo-gelo',
       };
       if (Object.hasOwn(legacyThemeIds, savedTheme)) savedTheme = legacyThemeIds[savedTheme];
-      const theme = /^(light|dark|galo|galo-light|aurora|midnight-violet|grafite-coral|porcelain-indigo|ardosia-cobalto|petroleo-gelo)$/.test(savedTheme)
+      const theme = /^(light|dark|galo|galo-light|aurora|midnight-violet|midnight-pink|porcelain-indigo|ardosia-cobalto|petroleo-gelo)$/.test(savedTheme)
         ? savedTheme : 'dark';
       const root = document.documentElement;
       root.dataset.theme = theme;
