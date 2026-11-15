@@ -64,7 +64,26 @@
 .scroll-section { padding-block: 60px; }
 .scroll-section h2 { font-size: clamp(28px, 4vw, 42px); font-weight: 600; letter-spacing: -.045em; line-height: 1.2; margin-bottom: 28px; }
 .scroll-section .section-eyebrow { margin-bottom: 16px; }
-.about-scroll { padding: clamp(24px, 4vw, 48px); }
+.about-scroll {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, .38fr);
+  align-items: center;
+  gap: clamp(24px, 4vw, 48px);
+  padding: clamp(24px, 4vw, 48px);
+}
+.about-summary {
+  display: grid;
+  gap: 24px;
+  padding-left: clamp(24px, 3vw, 36px);
+  border-left: 1px solid var(--line);
+}
+.about-summary dt { color: var(--accent); font-size: 12px; font-weight: 600; margin-bottom: 6px; }
+.about-summary dd { color: var(--ink); font-size: 15px; line-height: 1.5; font-weight: 600; }
+.about-summary dd span { display: block; color: var(--muted); font-size: 14px; font-weight: 400; margin-top: 3px; }
+@media (max-width: 767px) {
+  .about-scroll { grid-template-columns: minmax(0, 1fr); }
+  .about-summary { border-left: 0; border-top: 1px solid var(--line); padding: 24px 0 0; }
+}
 .about-scroll p { max-width: 85ch; font-size: 16px; line-height: 1.95; color: var(--muted); }
 .scroll-portfolio .portfolio-section { padding: 0; overflow: visible; }
 .scroll-portfolio .projects-card { padding: clamp(16px, 3vw, 32px); }

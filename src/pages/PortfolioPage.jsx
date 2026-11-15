@@ -50,7 +50,27 @@ export default function PortfolioPage({ activeSection, projectFocus }) {
         </ScrollReveal>
       </section>
       <section id="sobre" className="scroll-section" aria-labelledby="about-title">
-        <ScrollReveal><p className="section-eyebrow">01 / {en ? 'THE JOURNEY' : 'A TRAJETÓRIA'}</p><h2 id="about-title">{en ? 'About me' : 'Sobre mim'}</h2><div className="glass-panel about-scroll"><p>{perfil.bio[en ? 'en' : 'pt']}</p></div></ScrollReveal>
+        <ScrollReveal>
+          <p className="section-eyebrow">01 / {en ? 'THE JOURNEY' : 'A TRAJETÓRIA'}</p>
+          <h2 id="about-title">{en ? 'About me' : 'Sobre mim'}</h2>
+          <div className="glass-panel about-scroll">
+            <p>{perfil.bio[en ? 'en' : 'pt']}</p>
+            <dl className="about-summary">
+              <div>
+                <dt>{en ? 'Education' : 'Formação'}</dt>
+                <dd>{en ? 'Software Engineering' : 'Engenharia de Software'}<span>PUC Minas</span></dd>
+              </div>
+              <div>
+                <dt>{en ? 'Focus' : 'Foco'}</dt>
+                <dd>Back-end<span>Java · Spring Boot</span></dd>
+              </div>
+              <div>
+                <dt>{en ? 'Goal' : 'Objetivo'}</dt>
+                <dd>{en ? 'First opportunity in software development' : 'Primeira oportunidade na área'}</dd>
+              </div>
+            </dl>
+          </div>
+        </ScrollReveal>
       </section>
       <ProjectsScrollSection projectFocus={projectFocus} />
       <CodePlayground />
