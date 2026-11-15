@@ -123,6 +123,23 @@
   --wave-glow: #D4ABCF;
 }
 
+:root[data-theme="cobalto-intenso"], .menu-option[data-preview="cobalto-intenso"] {
+  --palette-bg: #101D44;
+  --palette-surface: #1B274C;
+  --palette-primary: #97AEFF;
+  --palette-on-primary: #080808;
+  --palette-accent: #86D4FF;
+  --palette-text: #E9EBEE;
+  --palette-muted: #B6BAC6;
+  --palette-border: #365279;
+  --palette-tint: 27 39 76;
+  --palette-accent-rgb: 134 212 255;
+  --palette-primary-rgb: 151 174 255;
+  --wave-one: var(--palette-primary);
+  --wave-two: #86D4FF;
+  --wave-glow: #4964AD;
+}
+
 :root[data-theme="ardosia-cobalto"], .menu-option[data-preview="ardosia-cobalto"] {
   --palette-bg: #E7EDF5;
   --palette-surface: #F7F9FD;
