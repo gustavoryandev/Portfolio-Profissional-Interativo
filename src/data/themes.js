@@ -11,6 +11,7 @@ export const themes = [
   { id: 'ardosia-cobalto', name: 'Ardósia e Cobalto', light: true },
   { id: 'cobalto-intenso', name: 'Cobalto intenso' },
   { id: 'petroleo-gelo', name: 'Petróleo e Gelo', light: true },
+  { id: 'petroleo-eletrico', name: 'Petróleo elétrico' },
 ];
 
 // Keep these aliases in sync with the first-paint script in index.html.

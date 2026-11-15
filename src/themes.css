@@ -140,6 +140,23 @@
   --wave-glow: #4964AD;
 }
 
+:root[data-theme="petroleo-eletrico"], .menu-option[data-preview="petroleo-eletrico"] {
+  --palette-bg: #0B2529;
+  --palette-surface: #162F33;
+  --palette-primary: #79E0D1;
+  --palette-on-primary: #080808;
+  --palette-accent: #79BBFF;
+  --palette-text: #E9EBEC;
+  --palette-muted: #B4BCBE;
+  --palette-border: #2F5266;
+  --palette-tint: 22 47 51;
+  --palette-accent-rgb: 121 187 255;
+  --palette-primary-rgb: 121 224 209;
+  --wave-one: var(--palette-primary);
+  --wave-two: #79BBFF;
+  --wave-glow: #3E9089;
+}
+
 :root[data-theme="ardosia-cobalto"], .menu-option[data-preview="ardosia-cobalto"] {
   --palette-bg: #E7EDF5;
   --palette-surface: #F7F9FD;

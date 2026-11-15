@@ -20,7 +20,7 @@
       };
       if (Object.hasOwn(legacyThemeIds, savedTheme)) savedTheme = legacyThemeIds[savedTheme];
       const lightThemes = ['light', 'galo-light', 'papel-violeta', 'quartzo-framboesa', 'ardosia-cobalto', 'petroleo-gelo'];
-      const darkThemes = ['dark', 'galo', 'aurora', 'midnight-violet', 'midnight-pink', 'cobalto-intenso'];
+      const darkThemes = ['dark', 'galo', 'aurora', 'midnight-violet', 'midnight-pink', 'cobalto-intenso', 'petroleo-eletrico'];
       const theme = lightThemes.includes(savedTheme) || darkThemes.includes(savedTheme) ? savedTheme : 'dark';
       const root = document.documentElement;
       root.dataset.theme = theme;
