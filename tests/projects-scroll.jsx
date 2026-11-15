@@ -4,55 +4,106 @@ import { createRoot } from 'react-dom/client';
 import { JSDOM } from 'jsdom';
 import ProjectsScrollSection from '../src/components/ProjectsScrollSection';
 
-const dom = new JSDOM('<header class="site-header"></header><div id="root"></div>', { url: 'http://localhost' });
-globalThis.window = dom.window;
-globalThis.document = dom.window.document;
-globalThis.IS_REACT_ACT_ENVIRONMENT = true;
-globalThis.MutationObserver = dom.window.MutationObserver;
-globalThis.requestAnimationFrame = callback => setTimeout(callback, 0);
-globalThis.cancelAnimationFrame = clearTimeout;
-let resize;
-globalThis.ResizeObserver = class { constructor(callback) { resize = callback; } observe() {} disconnect() {} };
-const media = { matches: false, addEventListener() {}, removeEventListener() {} };
-const desktop = { matches: true };
-window.matchMedia = query => query.includes('min-width') ? desktop : media;
-Object.defineProperty(window, 'innerHeight', { value: 900 });
-let sectionTop = 1000;
-let trackWidth = 2000;
-Object.defineProperty(window.HTMLElement.prototype, 'offsetHeight', { get() { return 600; } });
-Object.defineProperty(window.HTMLElement.prototype, 'scrollWidth', { get() { return trackWidth; } });
-Object.defineProperty(window.HTMLElement.prototype, 'clientWidth', { get() { return 1000; } });
+const dom = new JSDOM('<div class="scroll-portfolio"><header class="site-header"></header><div id="root"></div></div>', { url: 'http://localhost' });
+const { window } = dom;
+Object.assign(globalThis, {
+  window, document: window.document, IS_REACT_ACT_ENVIRONMENT: true,
+  requestAnimationFrame: callback => setTimeout(callback, 0),
+  cancelAnimationFrame: clearTimeout,
+});
+globalThis.ResizeObserver = class { observe() {} disconnect() {} };
+const desktop = { matches: true, addEventListener() {}, removeEventListener() {} };
+const reduced = { ...desktop, matches: false };
+window.matchMedia = query => query.includes('pointer: fine') ? desktop : reduced;
+Object.defineProperty(window, 'innerHeight', { writable: true, value: 900 });
+const start = 904;
+let scrollY = 0;
+Object.defineProperty(window, 'scrollY', { get: () => scrollY });
+window.scrollTo = ({ top }) => { scrollY = top; };
+const children = el => [...el.querySelectorAll('[data-project-slide]')];
+Object.defineProperties(window.HTMLElement.prototype, {
+  clientWidth: { get() { return 1000; } },
+  scrollWidth: { get() { return Math.max(1000, children(this).length * 320); } },
+  offsetWidth: { get() { return 300; } },
+  offsetHeight: { get() { return this.classList.contains('site-header') ? 80 : 590; } },
+  offsetLeft: { get() { return [...this.parentElement.children].indexOf(this) * 320; } },
+});
 window.HTMLElement.prototype.getBoundingClientRect = function () {
-  return { top: this.id === 'projetos' ? sectionTop : 0, height: this.classList.contains('site-header') ? 100 : 600, left: 0 };
+  if (this.id === 'projetos') return { top: 1000 - scrollY };
+  return { height: this.classList.contains('projects-pin') ? 590 : 80 };
 };
+let nativeDirect;
+window.HTMLElement.prototype.scrollIntoView = function () { nativeDirect = this.dataset.projectId; };
 await import('../src/i18n/index.js');
 const root = createRoot(document.getElementById('root'));
-await act(async () => { root.render(<ProjectsScrollSection />); });
+await act(async () => root.render(<ProjectsScrollSection />));
 const section = document.getElementById('projetos');
 const track = section.querySelector('[data-projects-track]');
-const scroll = async (top) => {
-  sectionTop = top;
-  await act(async () => { window.dispatchEvent(new window.Event('scroll')); await new Promise(resolve => setTimeout(resolve, 10)); });
-};
+const ids = () => children(track).map(node => node.dataset.projectId);
+const renderFrame = () => new Promise(resolve => setTimeout(resolve, 15));
+async function scroll(top) {
+  window.scrollTo({ top });
+  window.dispatchEvent(new window.Event('scroll'));
+  await renderFrame();
+}
+const run = track.scrollWidth - track.clientWidth;
 assert.equal(section.dataset.pinned, 'true');
-assert.equal(section.style.height, '1788px');
-await scroll(112);
+assert.equal(parseFloat(section.style.height), 590 + run);
+assert.deepEqual(ids().slice(0, 3), ['portfolio', 'car-rental', 'geosolar']);
+assert.equal(new Set(ids()).size, ids().length);
+await scroll(start);
 assert.equal(track.scrollLeft, 0);
-await scroll(-388);
-assert.equal(track.scrollLeft, 500);
-assert.ok(sectionTop + parseFloat(section.style.height) > window.innerHeight, 'next section stays below viewport until track ends');
-await scroll(-888);
-assert.equal(track.scrollLeft, 1000);
-assert.equal(sectionTop + parseFloat(section.style.height), window.innerHeight);
-await scroll(-138);
-assert.equal(track.scrollLeft, 250, 'scrolling back reverses horizontal movement');
-await act(async () => { desktop.matches = false; resize(); });
-assert.equal(section.dataset.pinned, 'false', 'touch screens retain native swipe without a vertical runway');
-assert.equal(section.style.height, '');
-await act(async () => { desktop.matches = true; media.matches = true; resize(); });
+await scroll(start + run);
+assert.equal(track.scrollLeft, run);
+assert.equal(section.querySelector('.projects-scroll-progress span').style.transform, 'scaleX(1)');
+await scroll(start + run + 60);
+assert.equal(track.scrollLeft, run);
+assert.ok(section.getBoundingClientRect().top + parseFloat(section.style.height) < 96 + 590, 'the stage can leave the viewport when the run is over');
+await scroll(start + run / 2);
+assert.equal(track.scrollLeft, run / 2, 'reverse document scroll moves the rail backward');
+const key = name => track.dispatchEvent(new window.KeyboardEvent('keydown', { key: name, bubbles: true, cancelable: true }));
+key('End');
+assert.equal(window.scrollY, start + run);
+key('Home');
+assert.equal(window.scrollY, start);
+const filter = label => [...section.querySelectorAll('.project-filter')].find(button => button.textContent === label);
+const game = filter('Jogos') || filter('Games');
+await act(async () => game.click());
+assert.deepEqual(ids(), ['snakepy']);
+assert.equal(track.scrollLeft, 0);
 assert.equal(section.dataset.pinned, 'false');
 assert.equal(section.style.height, '');
-await act(async () => { media.matches = false; trackWidth = 1000; resize(); });
-assert.equal(section.dataset.pinned, 'false', 'no empty scroll runway when all cards fit');
+assert.equal(game.getAttribute('aria-pressed'), 'true');
+
+await act(async () => root.render(<ProjectsScrollSection projectFocus={{ project: 'academia' }} />));
+await renderFrame();
+assert.equal(document.activeElement, section.querySelector('[data-project-id="academia"] h4'));
+assert.equal(game.getAttribute('aria-pressed'), 'false');
+assert.ok(window.scrollY > start);
+const oldLeft = track.scrollLeft;
+window.innerHeight = 560;
+window.dispatchEvent(new window.Event('resize'));
+assert.equal(section.dataset.pinned, 'false');
+assert.equal(track.scrollLeft, oldLeft);
+const oldY = window.scrollY;
+key('End');
+assert.equal(window.scrollY, oldY, 'keyboard controls in native mode only scroll the rail');
+assert.equal(track.scrollLeft, run);
+window.innerHeight = 900;
+reduced.matches = true;
+window.dispatchEvent(new window.Event('resize'));
+assert.equal(section.dataset.pinned, 'false');
+
+await act(async () => root.render(<ProjectsScrollSection projectFocus={{ project: 'oficina-java' }} />));
+await renderFrame();
+assert.equal(nativeDirect, 'oficina-java');
+assert.equal(track.scrollLeft, run);
+
+const first = section.querySelector('[data-project-id="portfolio"]');
+const techButton = first.querySelector('.project-tech-toggle');
+assert.equal(first.querySelectorAll('ul li').length, 3);
+await act(async () => techButton.click());
+assert.equal(techButton.getAttribute('aria-expanded'), 'true');
+assert.ok(first.querySelectorAll('ul li').length > 3);
 await act(async () => root.unmount());
 dom.window.close();

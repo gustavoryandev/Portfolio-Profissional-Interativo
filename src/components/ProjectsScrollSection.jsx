@@ -1,109 +1,186 @@
-import { useEffect, useRef } from 'react';
+import { useCallback, useLayoutEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAstra } from '../context/AstraContext';
 import ProjectsCard from './ProjectsCard';
 import ScrollReveal from './ui/ScrollReveal';
 
-// Native document scrolling drives the horizontal track; no wheel interception.
-export default function ProjectsScrollSection({ projectFocus }) {
-  const sectionRef = useRef(null);
-  const { openAstra } = useAstra();
-  const { i18n } = useTranslation();
-  const en = i18n.language.startsWith('en');
+const EPSILON = 2;
+const clamp = (value, max) => Math.min(max, Math.max(0, value));
 
-  useEffect(() => {
-    const section = sectionRef.current;
-    const pin = section.querySelector('.projects-pin');
-    const track = section.querySelector('[data-projects-track]');
-    const meter = section.querySelector('.projects-scroll-progress > span');
-    const header = document.querySelector('.site-header');
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
-    let distance = 0;
-    let top = 0;
-    let pinned = false;
-    let frame = 0;
+function connectTrack(section) {
+  const stage = section.querySelector('.projects-pin');
+  const track = section.querySelector('[data-projects-track]');
+  const meter = section.querySelector('.projects-scroll-progress > span');
+  const previous = section.querySelector('[data-project-step="-1"]');
+  const next = section.querySelector('[data-project-step="1"]');
+  const header = section.closest('.scroll-portfolio')?.querySelector('.site-header');
+  const desktop = window.matchMedia('(min-width: 768px) and (hover: hover) and (pointer: fine)');
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+  let distance = 0;
+  let top = 0;
+  let pinned = false;
+  let frame = 0;
 
-    const update = () => {
-      frame = 0;
-      if (!pinned) return;
-      const position = Math.min(distance, Math.max(0, top - section.getBoundingClientRect().top));
-      track.scrollLeft = position;
-      meter.style.transform = `scaleX(${distance ? position / distance : 1})`;
-    };
-    const schedule = () => { if (pinned && !frame) frame = requestAnimationFrame(update); };
-    const measure = () => {
-      top = (header?.getBoundingClientRect().height || 0) + 12;
-      section.style.setProperty('--projects-pin-top', `${top}px`);
-      const stageHeight = window.innerHeight - top;
-      section.style.setProperty('--projects-stage-height', `${stageHeight}px`);
-      distance = Math.max(0, track.scrollWidth - track.clientWidth);
-      // Short screens keep all card content readable instead of clipping it.
-      pinned = window.matchMedia('(min-width: 768px) and (hover: hover) and (pointer: fine)').matches && !reduced.matches && distance > 1 && pin.offsetHeight <= stageHeight + 1;
-      section.dataset.pinned = String(pinned);
-      section.style.height = pinned ? `${stageHeight + distance}px` : '';
-      if (!pinned) meter.style.transform = 'scaleX(0)';
-      schedule();
-    };
-    const start = () => window.scrollY + section.getBoundingClientRect().top - top;
-    const moveTo = (position) => window.scrollTo({ top: start() + Math.min(distance, Math.max(0, position)), behavior: 'instant' });
-    const keydown = (event) => {
-      if (!pinned || event.target !== track) return;
-      const current = Math.min(distance, Math.max(0, top - section.getBoundingClientRect().top));
-      const step = track.querySelector('[data-project-slide]')?.offsetWidth + 24 || 344;
-      const positions = { ArrowRight: current + step, ArrowLeft: current - step, Home: 0, End: distance };
-      if (positions[event.key] === undefined) return;
-      event.preventDefault();
-      moveTo(positions[event.key]);
-    };
-    const focus = (event) => {
-      if (!pinned || !event.target.matches(':focus-visible')) return;
-      const slide = event.target.closest('[data-project-slide]');
-      if (!slide) return;
-      const position = slide.getBoundingClientRect().left - track.getBoundingClientRect().left + track.scrollLeft;
-      moveTo(position);
-    };
-    const observer = new ResizeObserver(measure);
-    observer.observe(pin);
-    observer.observe(track);
-    if (header) observer.observe(header);
-    const mutations = new MutationObserver(measure);
-    mutations.observe(track, { childList: true, subtree: true, characterData: true });
-    window.addEventListener('scroll', schedule, { passive: true });
-    window.addEventListener('resize', measure);
-    reduced.addEventListener('change', measure);
-    track.addEventListener('keydown', keydown);
-    track.addEventListener('focusin', focus);
-    measure();
-    const focusFrame = projectFocus && requestAnimationFrame(() => {
-      const slide = [...track.querySelectorAll('[data-project-slide]')].find(node => node.dataset.projectId === projectFocus.project);
-      if (!slide) return;
-      const heading = slide.querySelector('h4');
-      const position = slide.getBoundingClientRect().left - track.getBoundingClientRect().left + track.scrollLeft;
-      if (pinned) { moveTo(position); update(); }
-      else { section.scrollIntoView({ behavior: 'instant' }); track.scrollLeft = position; }
-      heading?.setAttribute('tabindex', '-1');
-      heading?.focus({ preventScroll: true });
-    });
-    return () => {
+  const bounds = () => section.getBoundingClientRect();
+  const position = () => clamp(top - bounds().top, distance);
+  const slidePosition = slide => slide.offsetLeft - track.clientLeft - parseFloat(window.getComputedStyle(track).paddingLeft || '0');
+  const slides = () => [...track.querySelectorAll('[data-project-slide]')];
+  const goTo = (left, movePage = pinned) => {
+    const target = clamp(left, distance);
+    if (movePage) window.scrollTo({ top: window.scrollY + bounds().top - top + target, behavior: 'instant' });
+    track.scrollLeft = target;
+    showProgress();
+  };
+  function showProgress() {
+    const left = track.scrollLeft;
+    meter.style.transform = `scaleX(${distance ? clamp(left, distance) / distance : 0})`;
+    previous.setAttribute('aria-disabled', String(left < EPSILON));
+    next.setAttribute('aria-disabled', String(distance - left < EPSILON));
+  }
+  const update = () => {
+    frame = 0;
+    if (pinned) {
+      const left = position();
+      if (Math.abs(track.scrollLeft - left) >= 1) track.scrollLeft = left;
+    }
+    showProgress();
+  };
+  const schedule = () => { if (!frame) frame = requestAnimationFrame(update); };
+  const onPageScroll = () => { if (pinned) schedule(); };
+  const onTrackScroll = () => { if (!pinned) schedule(); };
+
+  function measure(reset = false) {
+    if (!track.clientWidth) return;
+    const wasPinned = pinned;
+    const sectionTop = bounds().top;
+    const progress = pinned ? position() : track.scrollLeft;
+    const inRun = pinned && sectionTop <= top + EPSILON && sectionTop >= top - distance - EPSILON;
+    top = (header?.offsetHeight ?? 0) + 16;
+    distance = Math.max(0, track.scrollWidth - track.clientWidth);
+    section.dataset.overflow = String(distance > EPSILON);
+    // Measure the actual stage, including the controls and any expanded technologies.
+    const height = stage.getBoundingClientRect().height;
+    pinned = desktop.matches && !reduced.matches && distance > EPSILON && top + height + 12 <= window.innerHeight;
+    section.dataset.pinned = String(pinned);
+    section.style.setProperty('--projects-pin-top', `${top}px`);
+    section.style.height = pinned ? `${height + distance}px` : '';
+
+    if (reset) {
+      goTo(0, inRun);
+    } else if (inRun && !pinned) {
+      // Keep the stage on screen when resizing out of the pinned mode.
+      window.scrollTo({ top: window.scrollY + bounds().top - top, behavior: 'instant' });
+      track.scrollLeft = clamp(progress, distance);
+    } else if (!wasPinned && pinned && progress > EPSILON && sectionTop <= top && sectionTop + height > top) {
+      goTo(progress);
+    }
+    update();
+  }
+
+  function step(direction) {
+    if (distance <= EPSILON) return;
+    const current = pinned ? position() : track.scrollLeft;
+    const stops = slides().map(slidePosition);
+    const target = direction > 0 ? stops.find(left => left > current + EPSILON)
+      : stops.findLast(left => left < current - EPSILON);
+    goTo(target ?? (direction > 0 ? distance : 0));
+  }
+  const goBack = () => step(-1);
+  const goForward = () => step(1);
+  function keydown(event) {
+    if (event.target !== track || distance <= EPSILON || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+    switch (event.key) {
+      case 'ArrowLeft': goBack(); break;
+      case 'ArrowRight': goForward(); break;
+      case 'Home': goTo(0); break;
+      case 'End': goTo(distance); break;
+      default: return;
+    }
+    event.preventDefault();
+  }
+  function reveal(slide, direct = false) {
+    const left = slidePosition(slide);
+    const current = pinned ? position() : track.scrollLeft;
+    const outside = left < current - EPSILON || left + slide.offsetWidth > current + track.clientWidth + EPSILON;
+    if (direct && !pinned) slide.scrollIntoView({ block: 'start', inline: 'nearest', behavior: 'instant' });
+    if (direct || outside) goTo(left);
+  }
+  const focus = event => {
+    if (!event.target.matches(':focus-visible')) return;
+    const slide = event.target.closest('[data-project-slide]');
+    if (slide) reveal(slide);
+  };
+
+  const resize = () => measure();
+  const observer = new ResizeObserver(resize);
+  observer.observe(stage);
+  observer.observe(track);
+  if (header) observer.observe(header, { box: 'border-box' });
+  window.addEventListener('scroll', onPageScroll, { passive: true });
+  window.addEventListener('resize', resize);
+  desktop.addEventListener('change', resize);
+  reduced.addEventListener('change', resize);
+  track.addEventListener('scroll', onTrackScroll, { passive: true });
+  track.addEventListener('keydown', keydown);
+  track.addEventListener('focusin', focus);
+  previous.addEventListener('click', goBack);
+  next.addEventListener('click', goForward);
+  measure();
+  return {
+    reset: () => measure(true),
+    focus(project) {
+      measure();
+      const slide = slides().find(item => item.dataset.projectId === project);
+      const heading = slide?.querySelector('h4');
+      if (!heading) return;
+      reveal(slide, true);
+      heading.tabIndex = -1;
+      heading.focus({ preventScroll: true });
+    },
+    disconnect() {
       cancelAnimationFrame(frame);
-      if (focusFrame) cancelAnimationFrame(focusFrame);
       observer.disconnect();
-      mutations.disconnect();
-      window.removeEventListener('scroll', schedule);
-      window.removeEventListener('resize', measure);
-      reduced.removeEventListener('change', measure);
+      window.removeEventListener('scroll', onPageScroll);
+      window.removeEventListener('resize', resize);
+      desktop.removeEventListener('change', resize);
+      reduced.removeEventListener('change', resize);
+      track.removeEventListener('scroll', onTrackScroll);
       track.removeEventListener('keydown', keydown);
       track.removeEventListener('focusin', focus);
-    };
+      previous.removeEventListener('click', goBack);
+      next.removeEventListener('click', goForward);
+    },
+  };
+}
+
+export default function ProjectsScrollSection({ projectFocus }) {
+  const sectionRef = useRef(null);
+  const controller = useRef(null);
+  const { openAstra } = useAstra();
+  const { t } = useTranslation();
+  const reset = useCallback(() => controller.current?.reset(), []);
+
+  useLayoutEffect(() => {
+    controller.current = connectTrack(sectionRef.current);
+    return () => { controller.current.disconnect(); controller.current = null; };
+  }, []);
+
+  useLayoutEffect(() => {
+    if (!projectFocus) return;
+    const frame = requestAnimationFrame(() => controller.current?.focus(projectFocus.project));
+    return () => cancelAnimationFrame(frame);
   }, [projectFocus]);
 
   return <section ref={sectionRef} id="projetos" className="projects-scroll-section" aria-labelledby="projects-title">
     <div className="projects-pin">
       <ScrollReveal>
-        <div className="projects-scroll-heading"><div><p className="section-eyebrow">02 / {en ? 'SELECTED WORK' : 'PROJETOS'}</p><h2 id="projects-title">{en ? 'Ideas put into practice.' : 'Ideias colocadas em prática.'}</h2></div><span className="projects-scroll-hint">{en ? 'Scroll to explore →' : 'Role para explorar →'}</span></div>
+        <div className="projects-scroll-heading">
+          <div><p className="section-eyebrow">02 / {t('projetos.sectionLabel')}</p>
+            <h2 id="projects-title">{t('projetos.sectionTitle')}</h2></div>
+          <p className="projects-scroll-hint"><span className="projects-hint-pinned">{t('projetos.scrollHint')}</span><span className="projects-hint-native">{t('projetos.swipeHint')}</span></p>
+        </div>
       </ScrollReveal>
-      <ProjectsCard horizontal projectFocus={projectFocus} onAskAstra={openAstra} />
-      <div className="projects-scroll-progress" aria-hidden="true"><span /></div>
+      <ProjectsCard showcase projectFocus={projectFocus} onAskAstra={openAstra} onResultsChange={reset} />
     </div>
   </section>;
 }
