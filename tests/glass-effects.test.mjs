@@ -39,8 +39,8 @@ test('spotlight batches pointer updates, respects reduced motion and cleans up',
   dom.window.close();
 });
 
-test('scroll sections reveal once and horizontal cards replay, including dynamically mounted cards', async () => {
-  const dom = new JSDOM('<div class="scroll-reveal"></div><section class="projects-scroll-section"><div data-project-slide></div></section>');
+test('scroll sections and horizontal cards replay their reveals when they reenter the viewport', async () => {
+  const dom = new JSDOM('<section id="laboratorio" class="scroll-reveal"><div class="scroll-reveal-content"></div></section><section class="projects-scroll-section"><div data-project-slide></div></section>');
   const win = dom.window;
   let preferenceChanged;
   const preference = { matches: true, addEventListener(_, callback) { preferenceChanged = callback; }, removeEventListener() {} };
@@ -61,18 +61,17 @@ test('scroll sections reveal once and horizontal cards replay, including dynamic
   assert.equal(first.classList.contains('gn-reveal-ready'), false);
   preference.matches = false;
   preferenceChanged();
-  assert.ok(observed.has(first));
-  assert.ok(observed.has(section));
-  notify([{ target: section, isIntersecting: true }]);
-  assert.ok(section.classList.contains('gn-in-view'));
-  assert.equal(observed.has(section), false, 'sections stop observing after their first reveal');
-  notify([{ target: first, isIntersecting: true }]);
-  assert.ok(first.classList.contains('gn-in-view'));
-  assert.ok(observed.has(first), 'keep watching to replay on return');
-  notify([{ target: first, isIntersecting: false }]);
-  assert.equal(first.classList.contains('gn-in-view'), false);
-  notify([{ target: first, isIntersecting: true }]);
-  assert.ok(first.classList.contains('gn-in-view'), 'reveal again when scrolling back');
+  assert.equal(observed.has(section.firstElementChild), false, 'the moving content is not observed');
+  for (const target of [section, first]) {
+    assert.ok(observed.has(target));
+    notify([{ target, isIntersecting: true }]);
+    assert.ok(target.classList.contains('gn-in-view'));
+    assert.ok(observed.has(target), 'keep watching to replay on return');
+    notify([{ target, isIntersecting: false }]);
+    assert.equal(target.classList.contains('gn-in-view'), false);
+    notify([{ target, isIntersecting: true }]);
+    assert.ok(target.classList.contains('gn-in-view'), 'reveal again when scrolling back');
+  }
   const next = win.document.createElement('div');
   next.setAttribute('data-project-slide', '');
   first.parentElement.append(next);

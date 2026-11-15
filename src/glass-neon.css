@@ -380,7 +380,7 @@ a.tile:hover, .tile--hover:hover, .stat-tile:hover {
 /* Keep the scroll portfolio's reveals separate from the chat panel entrances. */
 .scroll-content, .scroll-footer { position: relative; z-index: 1; }
 .projects-card .glass-panel { -webkit-backdrop-filter: none; backdrop-filter: none; }
-.scroll-portfolio .scroll-reveal > .portfolio-section { animation: none; }
+.scroll-portfolio .scroll-reveal-content > .portfolio-section { animation: none; }
 .scroll-portfolio .neon-cta {
   box-shadow: 0 0 24px -8px rgb(var(--neon-rgb) / var(--neon-strength));
 }

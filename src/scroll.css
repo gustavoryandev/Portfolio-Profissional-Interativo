@@ -72,6 +72,7 @@
 .scroll-portfolio .project-tile { width: 100%; transition: border-color 220ms ease, box-shadow 220ms ease; }
 .scroll-portfolio .project-tile:hover, .scroll-portfolio .project-tile:focus-within { border-color: rgb(var(--brand-400) / .55); box-shadow: 0 12px 32px -16px rgb(var(--brand-400) / .3); }
 .scroll-skills { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+.scroll-skills .scroll-reveal-content { height: 100%; }
 .scroll-skill { display: flex; align-items: center; gap: 14px; padding: 24px; height: 100%; }
 .scroll-skill h3 { font-size: 14px; overflow-wrap: anywhere; }
 .scroll-skill svg { flex-shrink: 0; filter: drop-shadow(0 0 8px rgb(var(--brand-400) / .15)); }
@@ -135,10 +136,15 @@
   .gn-reveal-ready {
     --scroll-reveal-distance: 8px;
     --scroll-reveal-duration: 260ms;
+    --scroll-reveal-timing: var(--scroll-reveal-duration) cubic-bezier(.22, 1, .36, 1) var(--scroll-reveal-delay, 0s) backwards;
   }
   .gn-reveal-ready:not(.gn-in-view):not(:focus-within) { opacity: 0; }
   .gn-in-view:not(:has(:focus-visible)) {
-    animation: scroll-reveal-in var(--scroll-reveal-duration) cubic-bezier(.22, 1, .36, 1) var(--scroll-reveal-delay, 0s) backwards;
+    animation: scroll-reveal-fade var(--scroll-reveal-timing);
+  }
+  /* Move the content while leaving the observed bounds stable at viewport edges. */
+  .gn-in-view:not(:has(:focus-visible)) > .scroll-reveal-content {
+    animation: scroll-reveal-slide var(--scroll-reveal-timing);
   }
 }
 @media (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
@@ -147,10 +153,11 @@
     --scroll-reveal-duration: 340ms;
   }
 }
-.projects-scroll-section [data-project-slide] { --scroll-reveal-distance: 0px; }
-@keyframes scroll-reveal-in {
-  from { opacity: 0; transform: translateY(var(--scroll-reveal-distance)); }
-  to { opacity: 1; transform: translateY(0); }
+@keyframes scroll-reveal-fade {
+  from { opacity: 0; }
+}
+@keyframes scroll-reveal-slide {
+  from { transform: translateY(var(--scroll-reveal-distance)); }
 }
 @media (prefers-reduced-motion: reduce) {
   .scroll-portfolio *, .scroll-portfolio *::before, .scroll-portfolio *::after { transition: none !important; }

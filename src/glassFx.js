@@ -42,10 +42,7 @@ export function installGlassEffects(win) {
     for (const entry of entries) {
       const { target, isIntersecting } = entry;
       if (!target.classList.contains('gn-reveal-ready')) continue;
-      const once = target.classList.contains('scroll-reveal');
-      if (once && target.classList.contains('gn-in-view')) continue;
       target.classList.toggle('gn-in-view', isIntersecting);
-      if (isIntersecting && once) intersection.unobserve(target);
     }
   }) : null;
   const revealNodes = node => {

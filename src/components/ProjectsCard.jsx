@@ -46,7 +46,7 @@ export default function ProjectsCard({ reveal = false, horizontal = false, previ
         {projects.map(project => (
           <div key={project.id} data-project-slide={horizontal ? '' : undefined} data-project-id={horizontal ? project.id : undefined} className={horizontal ? 'flex flex-shrink-0 w-80 max-w-full snap-start [&>article]:w-full' : 'flex min-w-0 [&>article]:w-full'}>
             {reveal
-              ? <ScrollReveal className="flex w-full [&>article]:w-full"><ProjectCard project={project} /></ScrollReveal>
+              ? <ScrollReveal className="w-full [&_article]:w-full"><ProjectCard project={project} /></ScrollReveal>
               : <ProjectCard project={project} />}
           </div>
         ))}
