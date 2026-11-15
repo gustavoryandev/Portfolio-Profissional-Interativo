@@ -13,10 +13,12 @@ import './glassFx.js';
 import './i18n';
 import { ThemeProvider } from './context/ThemeContext.jsx';
 import ThemeWaves from './components/ThemeWaves.jsx';
+import ThemedFavicon from './components/ThemedFavicon.jsx';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <ThemeProvider>
+      <ThemedFavicon />
       <ThemeWaves />
       <App />
     </ThemeProvider>
