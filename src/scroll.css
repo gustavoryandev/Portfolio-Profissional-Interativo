@@ -134,9 +134,9 @@
 @media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
   html, .chat-messages { scroll-behavior: smooth; }
   .gn-reveal-ready {
-    --scroll-reveal-distance: 8px;
-    --scroll-reveal-duration: 320ms;
-    --scroll-reveal-timing: var(--scroll-reveal-duration) cubic-bezier(.22, 1, .36, 1) var(--scroll-reveal-delay, 0s) backwards;
+    --scroll-reveal-distance: 44px;
+    --scroll-reveal-duration: 600ms;
+    --scroll-reveal-timing: var(--scroll-reveal-duration) cubic-bezier(.2, .55, .35, 1) var(--scroll-reveal-delay, 0s) backwards;
   }
   .gn-reveal-ready:not(.gn-in-view):not(:focus-within) { opacity: 0; }
   .gn-in-view:not(:has(:focus-visible)) {
@@ -149,8 +149,8 @@
 }
 @media (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
   .gn-reveal-ready {
-    --scroll-reveal-distance: 14px;
-    --scroll-reveal-duration: 420ms;
+    --scroll-reveal-distance: 60px;
+    --scroll-reveal-duration: 720ms;
   }
 }
 @keyframes scroll-reveal-fade {
