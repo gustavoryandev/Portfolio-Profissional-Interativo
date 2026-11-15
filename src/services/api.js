@@ -33,6 +33,15 @@ export async function refreshLiveContext(sources, signal, force = false) {
   return response.data;
 }
 
+export async function readWakaTime(range, signal) {
+  const body = range ? { action: 'wakatimeDetails', range } : { action: 'wakatimeActivity' };
+  const response = await fetch('/api/chat', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), signal,
+  });
+  if (!response.ok) throw new Error('WakaTime request failed');
+  return response.json();
+}
+
 // Share pending and completed translations across toggles and message instances.
 const translationCache = new Map();
 export function translateMessage(text, lang) {

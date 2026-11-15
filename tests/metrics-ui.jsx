@@ -70,6 +70,39 @@ for (const dark of [false,true]) {
   assert.match(document.body.textContent, /0h 0m/);
 }
 
+await render(false, null);
+const originalFetch = globalThis.fetch;
+const periods = [];
+try {
+  globalThis.fetch = async (_url, { body }) => {
+    const { action, range } = JSON.parse(body);
+    if (action === 'wakatimeActivity') {
+      const now = Date.now();
+      return Response.json({ today: { status: 'ok', formatted: '0h 45m' }, codingNow: {
+        status: 'ok', active: true, last: { at: now, project: 'Featured project', branch: 'main',
+          sessionStart: now - 180_000, sessionSeconds: 180, editor: 'VS Code', projectTodaySeconds: 540 },
+      } });
+    }
+    assert.equal(action, 'wakatimeDetails');
+    periods.push(range);
+    return Response.json({ status: 'ok', summary: { totalFormatted: range === 'all_time' ? '80h 0m' : '30h 0m',
+      bestDay: { date: '2026-11-14', formatted: '3h 0m' } },
+    categories: [{ name: 'Coding', formatted: '2h 0m' }], projects: [{ name: 'Public project', formatted: '1h 0m' }],
+    libraries: [{ name: 'React', formatted: '1h 30m', percent: '100.0' }] });
+  };
+  await render(false, <StatsCard />);
+  const days = [...document.querySelectorAll('button')].find(button => button.textContent === '30 days');
+  await act(async () => days.click());
+  assert.deepEqual(periods, ['all_time', 'last_30_days']);
+  assert.equal(days.getAttribute('aria-pressed'), 'true');
+  for (const text of ['30h 0m', '0h 45m', 'Best day', 'Coding now', 'Featured project', 'main', 'VS Code', 'Activity categories', 'Public project', 'React']) {
+    assert.ok(document.body.textContent.includes(text), text);
+  }
+  await render(false, null);
+} finally {
+  globalThis.fetch = originalFetch;
+}
+
 // The rewritten shells must render both unavailable and populated integration data.
 for (const Component of [WakaTimeCard, CanvasCard, SpotifyCard, ChessCard, ExperienceCard, GithubLanguagesCard, RepositoriesCard, GithubActivityCard]) {
   await render(false, <Component context={{}} />);
