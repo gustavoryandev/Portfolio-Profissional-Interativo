@@ -433,6 +433,7 @@
 }
 :root[data-theme|="galo"] .galo-brand-badge { padding-inline-start: 14px; border-inline-start: 1px solid var(--muted); }
 :root[data-theme|="galo"] .galo-brand-badge .galo-crest { width: 39px; height: 54px; }
+:root[data-theme|="galo"] .galo-brand-badge:hover .galo-crest { filter: brightness(1.2); }
 :root[data-theme|="galo"] .scroll-nav a { color: var(--ink); font-weight: 650; }
 :root[data-theme|="galo"] :is(.scroll-nav .nav-astra, .scroll-nav [aria-current], .site-header .language-switch button[aria-pressed="true"]),
 :root[data-theme="galo-light"] .hero-actions .neon-cta {

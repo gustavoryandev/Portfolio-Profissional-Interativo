@@ -317,6 +317,10 @@
     "translationFailed": "Tradução indisponível. Troque o idioma para tentar novamente."
   },
   "navbar": {
+    "anthem": {
+      "play": "Tocar o hino do Galo",
+      "pause": "Pausar o hino do Galo"
+    },
     "appearance": {
       "title": "Aparência",
       "count": "{{count}} temas",

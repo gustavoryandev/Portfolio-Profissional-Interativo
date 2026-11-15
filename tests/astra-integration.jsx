@@ -23,9 +23,19 @@ window.HTMLDialogElement.prototype.showModal = window.HTMLDialogElement.prototyp
 window.HTMLDialogElement.prototype.close = function () { this.open = false; };
 const anthemEvents = [];
 window.Audio = class {
+  paused = true;
   constructor(src) { this.src = src; }
-  play() { anthemEvents.push(['play', this.src]); return Promise.resolve(); }
-  pause() { anthemEvents.push(['pause']); }
+  play() {
+    this.paused = false;
+    anthemEvents.push(['play', this.src]);
+    this.onplay?.();
+    return Promise.resolve();
+  }
+  pause() {
+    this.paused = true;
+    anthemEvents.push(['pause']);
+    this.onpause?.();
+  }
 };
 globalThis.IntersectionObserver = class { observe() {} unobserve() {} disconnect() {} };
 globalThis.ResizeObserver = class {
@@ -431,6 +441,15 @@ try {
   await click(findButton(fullGaloShortcuts, 'Explorar projetos'));
   await until(() => window.location.hash === '#projetos' && $('.astra-fab'));
   assert.equal($('.astra-fab img').getAttribute('src'), '/astra-avatar-galo-light.jpg');
+  const anthemButton = $('.site-header .galo-brand-badge');
+  assert.equal(anthemButton.getAttribute('aria-label'), 'Tocar o hino do Galo');
+  await click(anthemButton);
+  assert.equal(anthemButton.getAttribute('aria-label'), 'Pausar o hino do Galo');
+  await click(anthemButton);
+  assert.equal(anthemButton.getAttribute('aria-label'), 'Tocar o hino do Galo');
+  await click(anthemButton);
+  assert.deepEqual(anthemEvents, [['play', '/hino-do-galo.mp3'], ['pause'], ['play', '/hino-do-galo.mp3']]);
+  assert.equal(window.location.hash, '#projetos');
   await click($('.astra-fab'));
   await until(() => $('.astra-compact [role="log"] [role="group"]'));
   const compactLog = $('.astra-compact [role="log"]');

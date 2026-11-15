@@ -18,8 +18,26 @@ export function ThemeProvider({ children }) {
   });
   const selectedTheme = useRef(theme);
   const anthem = useRef(null);
+  const [anthemPlaying, setAnthemPlaying] = useState(false);
   const palette = themes.find(option => option.id === theme);
   const darkMode = !palette.light;
+
+  const playAnthem = useCallback(() => {
+    if (!anthem.current) {
+      const audio = new window.Audio(galoAnthemUrl);
+      audio.onplay = () => setAnthemPlaying(true);
+      audio.onpause = audio.onended = audio.onerror = () => setAnthemPlaying(false);
+      anthem.current = audio;
+    }
+    // Start within the click so browsers can use its user activation.
+    anthem.current.play().catch(() => {});
+  }, []);
+
+  const toggleAnthem = useCallback(() => {
+    if (!isGaloTheme(selectedTheme.current)) return;
+    if (anthem.current?.paused === false) anthem.current.pause();
+    else playAnthem();
+  }, [playAnthem]);
 
   const setTheme = useCallback(nextTheme => {
     const wasGalo = isGaloTheme(selectedTheme.current);
@@ -28,16 +46,20 @@ export function ThemeProvider({ children }) {
     setSelectedTheme(nextTheme);
 
     if (isGalo && !wasGalo) {
-      anthem.current ??= new window.Audio(galoAnthemUrl);
-      // Start within the selection event so browsers can use its user activation.
-      anthem.current.play().catch(() => {});
+      playAnthem();
     } else if (!isGalo && wasGalo && anthem.current) {
       anthem.current.pause();
       anthem.current.currentTime = 0;
     }
-  }, []);
+  }, [playAnthem]);
 
-  useEffect(() => () => anthem.current?.pause(), []);
+  useEffect(() => () => {
+    const audio = anthem.current;
+    if (!audio) return;
+    audio.onplay = audio.onpause = audio.onended = audio.onerror = null;
+    audio.pause();
+    anthem.current = null;
+  }, []);
 
   useLayoutEffect(() => {
     const root = document.documentElement;
@@ -48,7 +70,7 @@ export function ThemeProvider({ children }) {
   }, [theme, darkMode, palette]);
 
   return (
-    <ThemeContext.Provider value={{ theme, darkMode, setTheme }}>
+    <ThemeContext.Provider value={{ theme, darkMode, setTheme, anthemPlaying, toggleAnthem }}>
       {children}
     </ThemeContext.Provider>
   );

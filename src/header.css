@@ -9,8 +9,13 @@
   -webkit-backdrop-filter: blur(18px);
   backdrop-filter: blur(18px);
 }
-.site-header .brand-lockup {
+.site-header .header-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   flex-shrink: 0;
+}
+.site-header .brand-lockup {
   gap: 12px;
   text-decoration: none;
 }
@@ -101,7 +106,7 @@
     margin: 0;
     overflow: visible;
   }
-  .scroll-portfolio .site-header .brand-lockup { justify-self: start; }
+  .scroll-portfolio .site-header .header-brand { justify-self: start; }
   .scroll-portfolio .site-header .header-actions { justify-self: end; margin: 0; }
 }
 @media (min-width: 768px) and (max-width: 1279px) {

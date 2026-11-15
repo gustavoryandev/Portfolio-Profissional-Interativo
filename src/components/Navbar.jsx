@@ -12,16 +12,22 @@ export { portfolioLinks };
 
 export default function Navbar({ ref, portfolio = false, activeSection, onSectionLink }) {
   const { openFull, returnPortfolio } = useAstra();
-  const galo = isGaloTheme(useContext(ThemeContext)?.theme);
-  const { i18n } = useTranslation();
+  const { theme, anthemPlaying, toggleAnthem } = useContext(ThemeContext) ?? {};
+  const galo = isGaloTheme(theme);
+  const { i18n, t } = useTranslation();
   const en = i18n.language.startsWith('en');
+  const anthemLabel = t(anthemPlaying ? 'navbar.anthem.pause' : 'navbar.anthem.play');
   const sectionLabel = portfolioLinks.find(([id]) => id === activeSection)?.[en ? 2 : 1];
   return <header ref={ref} className="site-header sticky top-0 z-40 bg-white bg-opacity-70 backdrop-blur-lg dark:bg-zinc-950 dark:bg-opacity-70">
-    <a href={portfolio ? '#inicio' : '/'} onClick={portfolio ? onSectionLink : returnPortfolio} className="brand-lockup" aria-label={en ? 'Gustavo Ryan — portfolio' : 'Gustavo Ryan — portfólio'}>
-      <PortfolioLogo />
-      <div><p className="brand-title">Gustavo Ryan</p><p>{portfolio ? (en ? 'Software Engineering' : 'Engenharia de Software') : (en ? '← Back to portfolio' : '← Voltar ao portfólio')}</p></div>
-      {portfolio && galo && <span className="galo-brand-badge"><GaloCrest /></span>}
-    </a>
+    <div className="header-brand">
+      <a href={portfolio ? '#inicio' : '/'} onClick={portfolio ? onSectionLink : returnPortfolio} className="brand-lockup" aria-label={en ? 'Gustavo Ryan — portfolio' : 'Gustavo Ryan — portfólio'}>
+        <PortfolioLogo />
+        <div><p className="brand-title">Gustavo Ryan</p><p>{portfolio ? (en ? 'Software Engineering' : 'Engenharia de Software') : (en ? '← Back to portfolio' : '← Voltar ao portfólio')}</p></div>
+      </a>
+      {portfolio && galo && <button type="button" className="galo-brand-badge" onClick={toggleAnthem} aria-label={anthemLabel} title={anthemLabel}>
+        <GaloCrest />
+      </button>}
+    </div>
     {portfolio && <nav className="scroll-nav" aria-label={en ? 'Portfolio sections' : 'Seções do portfólio'}>
       {portfolioLinks.map(([id, pt, english]) => (
         <a key={id} href={`#${id}`} onClick={onSectionLink} aria-current={activeSection === id ? 'location' : undefined}>
