@@ -143,7 +143,8 @@
     animation: scroll-reveal-fade var(--scroll-reveal-timing);
   }
   /* Move the content while leaving the observed bounds stable at viewport edges. */
-  .gn-in-view:not(:has(:focus-visible)) > .scroll-reveal-content {
+  .gn-in-view:not(:has(:focus-visible)) > .scroll-reveal-content,
+  .projects-scroll-section [data-project-slide].gn-in-view:not(:has(:focus-visible)) > .project-tile {
     animation: scroll-reveal-slide var(--scroll-reveal-timing);
   }
 }
