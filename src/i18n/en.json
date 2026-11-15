@@ -318,7 +318,7 @@
   },
   "navbar": {
     "anthem": {
-      "notice": "Plays the Galo anthem",
+      "notice": "Galo anthem · Pause via the header crest",
       "play": "Play the Galo anthem",
       "pause": "Pause the Galo anthem"
     },
