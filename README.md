@@ -121,13 +121,17 @@ Copie [`.env.example`](.env.example) para `.env.local` e preencha apenas as vari
 | --- | --- |
 | `GEMINI_API_KEY` | Respostas e tradução da assistente Astra |
 | `GITHUB_USERNAME`, `GITHUB_TOKEN` | Métricas e repositórios do GitHub |
-| `WAKATIME_API_KEY` ou `WAKATIME_ACCESS_TOKEN` | Métricas de tempo de programação |
+| `WAKATIME_ACCESS_TOKEN` ou `WAKATIME_USERNAME` | Métricas de programação via OAuth ou perfil público |
 | `SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET`, `SPOTIFY_REFRESH_TOKEN` | Música atual no Spotify |
 | `CANVAS_API_TOKEN`, `CANVAS_BASE_URL` | Informações acadêmicas do Canvas LMS |
 | `CHESS_USERNAME` | Perfil e dados de xadrez do Chess.com |
 | `VITE_EMAILJS_SERVICE_ID`, `VITE_EMAILJS_TEMPLATE_ID_FOR_ME`, `VITE_EMAILJS_TEMPLATE_ID_FOR_SENDER`, `VITE_EMAILJS_PUBLIC_KEY` | Formulário e confirmação de contato |
 
 Para detalhes dos templates de contato, consulte [`docs/contact-email.md`](docs/contact-email.md).
+
+Para autorizar o card completo, cadastre `http://localhost:8787/callback` no seu [app WakaTime](https://wakatime.com/apps), preencha `WAKATIME_APP_ID` e `WAKATIME_APP_SECRET` e rode `npm run wakatime:oauth`. O script salva os tokens em `.env.local`. Na Vercel, configure o token de acesso e, para renová-lo automaticamente, o ID, o segredo e o token de renovação. Se o token foi emitido com outro endereço de callback, configure `WAKATIME_REDIRECT_URI` com esse endereço.
+
+Em `WAKATIME_PUBLIC_PROJECTS`, informe os nomes que podem aparecer no ranking e no status de atividade. A atividade em outros projetos aparece como “Projeto privado”. `WAKATIME_HIDDEN_DEPENDENCIES` aceita nomes ou prefixos com `*` para omitir bibliotecas do ranking. Ajuste `WAKATIME_TIMEZONE` se o fuso da conta for diferente de `America/Sao_Paulo`.
 
 ### 3. Inicie o servidor de desenvolvimento
 

@@ -38,9 +38,9 @@ const PORTA = 8787;
 const REDIRECT_URI = `http://localhost:${PORTA}/callback`;
 
 // Escopos separados por vírgula (só leitura):
-//   read_stats      → GET /users/current/stats/:range          (/api/wakatime)
+//   read_stats      → GET /users/current/stats/:range e /user_agents
 //   read_summaries  → GET /users/current/status_bar/today      (indicador "Hoje")
-//   read_heartbeats → GET /users/current/heartbeats e /user_agents (/api/codando)
+//   read_heartbeats → GET /users/current/heartbeats (atividade no editor)
 // Se alguma rota responder 403, acrescente o que a documentação de OAuth do
 // WakaTime pedir (https://wakatime.com/developers#authentication) e rode de novo.
 const SCOPE = "read_stats,read_summaries,read_heartbeats";

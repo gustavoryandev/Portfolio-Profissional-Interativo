@@ -30,11 +30,27 @@ test('refreshContext validates its allowlist before any integration call', async
   }
 });
 
+test('WakaTime details validate the period and dispatch independently of chat', async () => {
+  const rejected = response();
+  await handler({ method: 'POST', body: { action: 'wakatimeDetails', range: '../users' } }, rejected);
+  assert.equal(rejected.code, 400);
+  mockAdapter = async config => {
+    assert.ok(config.url.endsWith('/stats/last_30_days'));
+    return { status: 200, config, data: { data: { total_seconds: 1800 } } };
+  };
+  try {
+    const res = response();
+    await handler({ method: 'POST', body: { action: 'wakatimeDetails', range: 'last_30_days' } }, res);
+    assert.equal(res.body.summary.totalFormatted, '0h 30m');
+    assert.equal(res.headers['Cache-Control'], 'no-store');
+  } finally { mockAdapter = undefined; }
+});
+
 test('integration refresh completes without a Gemini key or model request', async () => {
   let calls = 0;
   mockAdapter = async config => {
     calls++;
-    assert.match(config.url, /^https:\/\/wakatime\.com\//);
+    assert.match(config.url, /^https:\/\/api\.wakatime\.com\//);
     return { status: 200, statusText: 'OK', headers: {}, config,
       data: { data: { total_seconds: 3600, is_up_to_date: true, daily_average: 3600, days_minus_holidays: 1, days_including_holidays: 1,
         languages: [{ name: 'Java', total_seconds: 3600, percent: 100 }], editors: [{ name: 'VS Code', total_seconds: 3600, percent: 100 }], operating_systems: [{ name: 'Linux', total_seconds: 3600, percent: 100 }] } } };

@@ -7,6 +7,7 @@ import { createHash } from 'crypto';
 import dotenv from 'dotenv';
 import { proficiencyValue, proficiencyLevel } from '../src/data/skillProficiency.js';
 import { createLiveCache, sourceFailure } from '../server/liveCache.js';
+import { codingBreakdown, createWakaTime, formatCodingTime, WAKATIME_RANGES } from '../server/wakatime.js';
 import { createModelCache, withDeadline } from '../server/modelCache.js';
 import { writeEvent } from '../server/ndjson.js';
 import { sourcesForText } from '../src/services/liveContext.js';
@@ -16,6 +17,7 @@ import { astraSurfaceIntent, portfolioTools } from '../server/portfolioTools.js'
 dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 
 const client = axios.create({ timeout: 8000 });
+const wakaTime = createWakaTime(client);
 const fallbackLanguage = 'I can only communicate in Portuguese or English. Please choose one of these languages.';
 
 // Modelos ativos na API (ai.google.dev/gemini-api/docs/deprecations, atualizado em 22/10/2026).
@@ -566,28 +568,22 @@ async function fetchGithub() {
 }
 
 async function fetchWakatime() {
-  const key = process.env.WAKATIME_ACCESS_TOKEN || process.env.WAKATIME_API_KEY;
-  if (!key) return { status: 'not_configured' };
-  const auth = process.env.WAKATIME_ACCESS_TOKEN
-    ? { headers: { Authorization: `Bearer ${key}` } } : { auth: { username: key, password: '' } };
-  const weekPromise = client.get('https://wakatime.com/api/v1/users/current/stats/last_7_days', auth).catch(() => null);
-  const results = await Promise.allSettled(['stats/all_time', 'all_time_since_today'].map(path =>
-    client.get(`https://wakatime.com/api/v1/users/current/${path}`, auth)));
+  if (!wakaTime.configured) return { status: 'not_configured' };
+  const weekPromise = wakaTime.get('stats/last_7_days').catch(() => null);
+  const results = await Promise.allSettled([
+    wakaTime.get('stats/all_time'),
+    wakaTime.hasPrivateAccess ? wakaTime.get('all_time_since_today') : null,
+  ]);
   const statsResponse = results[0].status === 'fulfilled' ? results[0].value : null;
   const totalResponse = results[1].status === 'fulfilled' ? results[1].value : null;
   const stats = statsResponse?.data?.data || {};
   const total = totalResponse?.data?.data || {};
-  const formatTime = secs => Number.isFinite(secs) ? `${Math.floor(secs / 3600)}h ${Math.floor(secs % 3600 / 60)}m` : null;
-  const breakdown = items => (Array.isArray(items) ? items : []).map(item => ({
-    name: item.name, seconds: item.total_seconds, formatted: formatTime(item.total_seconds),
-    percent: Number.isFinite(item.percent) ? item.percent.toFixed(1) : null,
-  }));
   if (!Number.isFinite(total.total_seconds) && !Number.isFinite(stats.total_seconds)) {
-    return results.every(result => result.status === 'rejected')
+    return results[0].status === 'rejected' && (!wakaTime.hasPrivateAccess || results[1].status === 'rejected')
       ? sourceFailure(results[0].reason) : { status: 'error', reason: 'processing' };
   }
   const weekData = (await weekPromise)?.data?.data || {};
-  const editors = breakdown(stats.editors);
+  const editors = codingBreakdown(stats.editors);
   return {
     status: 'ok',
     stale: results.some(result => result.status === 'rejected') || [statsResponse, totalResponse].some(response =>
@@ -596,17 +592,17 @@ async function fetchWakatime() {
       ? sourceFailure(results.find(result => result.status === 'rejected').reason).reason : 'processing',
     range: { start: stats.start, end: stats.end, includingToday: stats.is_including_today },
     summary: {
-      totalFormatted: formatTime(total.total_seconds ?? stats.total_seconds_including_other_language ?? stats.total_seconds),
-      dailyAverageFormatted: formatTime(stats.daily_average_including_other_language ?? stats.daily_average),
+      totalFormatted: formatCodingTime(total.total_seconds ?? stats.total_seconds_including_other_language ?? stats.total_seconds),
+      dailyAverageFormatted: formatCodingTime(stats.daily_average_including_other_language ?? stats.daily_average),
       activeDays: stats.days_minus_holidays, totalDays: stats.days_including_holidays,
       topEditorName: editors[0]?.name, topEditorPercent: editors[0]?.percent,
     },
-    languages: breakdown(stats.languages), editors, operatingSystems: breakdown(stats.operating_systems),
+    languages: codingBreakdown(stats.languages), editors, operatingSystems: codingBreakdown(stats.operating_systems),
     week: {
-      totalFormatted: formatTime(weekData.total_seconds_including_other_language ?? weekData.total_seconds),
-      dailyAverageFormatted: formatTime(weekData.daily_average_including_other_language ?? weekData.daily_average),
-      topEditorName: breakdown(weekData.editors)[0]?.name ?? null,
-      languages: breakdown(weekData.languages).slice(0, 5),
+      totalFormatted: formatCodingTime(weekData.total_seconds_including_other_language ?? weekData.total_seconds),
+      dailyAverageFormatted: formatCodingTime(weekData.daily_average_including_other_language ?? weekData.daily_average),
+      topEditorName: codingBreakdown(weekData.editors)[0]?.name ?? null,
+      languages: codingBreakdown(weekData.languages).slice(0, 5),
     },
   };
 }
@@ -1332,6 +1328,12 @@ export default async function handler(req, res) {
   res.once?.('close', disconnect);
   try {
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body || {};
+    if (body.action === 'wakatimeDetails' || body.action === 'wakatimeActivity') {
+      res.setHeader('Cache-Control', 'no-store');
+      if (body.action === 'wakatimeActivity') return res.status(200).json(await wakaTime.activity());
+      if (!WAKATIME_RANGES.includes(body.range)) return res.status(400).json({ error: 'Período inválido.' });
+      return res.status(200).json(await wakaTime.stats(body.range));
+    }
     if (body.action === 'models') {
       const apiKey = process.env.GEMINI_API_KEY;
       if (!apiKey) return res.status(503).json({ error: 'Model catalog unavailable' });
