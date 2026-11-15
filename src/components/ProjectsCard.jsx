@@ -10,7 +10,7 @@ import { projectContent } from '../data/projectContent';
 const normalize = value => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 const FEATURED_IDS = ['portfolio', 'terminal-portfolio', 'pokedex', 'geosolar', 'secure-login', 'github-profile'];
 
-export default function ProjectsCard({ reveal = false, horizontal = false, preview = false, onViewAll, projectFocus }) {
+export default function ProjectsCard({ reveal = false, horizontal = false, preview = false, onViewAll, projectFocus, onAskAstra }) {
   const { t, i18n } = useTranslation();
   const headingId = useId();
   const searchId = useId();
@@ -43,13 +43,12 @@ export default function ProjectsCard({ reveal = false, horizontal = false, previ
         tabIndex={horizontal ? 0 : undefined}
         className={horizontal ? 'flex overflow-x-auto gap-6 snap-x snap-mandatory scroll-smooth motion-reduce:scroll-auto px-1 py-3 scroll-px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent' : 'projects-grid'}
       >
-        {projects.map(project => (
-          <div key={project.id} data-project-slide={horizontal ? '' : undefined} data-project-id={horizontal ? project.id : undefined} className={horizontal ? 'flex flex-shrink-0 w-80 max-w-full snap-start [&>article]:w-full' : 'flex min-w-0 [&>article]:w-full'}>
-            {reveal
-              ? <ScrollReveal className="w-full [&_article]:w-full"><ProjectCard project={project} /></ScrollReveal>
-              : <ProjectCard project={project} />}
-          </div>
-        ))}
+        {projects.map(project => {
+          const card = <ProjectCard project={project} onAskAstra={onAskAstra} />;
+          return <div key={project.id} data-project-slide={horizontal ? '' : undefined} data-project-id={horizontal ? project.id : undefined} className={horizontal ? 'flex flex-shrink-0 w-80 max-w-full snap-start [&>article]:w-full' : 'flex min-w-0 [&>article]:w-full'}>
+            {reveal ? <ScrollReveal className="w-full [&_article]:w-full">{card}</ScrollReveal> : card}
+          </div>;
+        })}
       </div>
       {!projects.length && <p className="py-8 text-center text-sm text-[var(--muted)]">{t('projetos.noResults')}</p>}
       {preview && <button type="button" onClick={onViewAll} className="project-action mt-5 w-full">{i18n.language.startsWith('en') ? 'View more projects' : 'Ver mais projetos'} →</button>}

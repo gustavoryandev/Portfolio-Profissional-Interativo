@@ -127,6 +127,9 @@
 .projects-scroll-section .project-tile p { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
 .projects-scroll-section .project-tile ul { max-height: 54px; overflow-y: auto; }
 .projects-scroll-section .project-tile .mt-auto { padding-top: 12px; }
+.project-ask-astra { display: flex; align-items: center; gap: 8px; min-height: 44px; margin-top: 4px; color: var(--accent); font-size: 13px; font-weight: 600; text-align: left; }
+.project-ask-astra:hover { text-decoration: underline; }
+.project-ask-astra svg { flex-shrink: 0; }
 .projects-scroll-progress { height: 2px; margin-top: 10px; background: var(--line); visibility: hidden; }
 .projects-scroll-section[data-pinned="true"] .projects-scroll-progress { visibility: visible; }
 .projects-scroll-progress > span { display: block; height: 100%; background: var(--accent); transform: scaleX(0); transform-origin: left; box-shadow: 0 0 10px rgb(var(--brand-400) / .3); }

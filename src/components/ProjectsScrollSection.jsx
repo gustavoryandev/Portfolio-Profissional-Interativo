@@ -1,11 +1,13 @@
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useAstra } from '../context/AstraContext';
 import ProjectsCard from './ProjectsCard';
 import ScrollReveal from './ui/ScrollReveal';
 
 // Native document scrolling drives the horizontal track; no wheel interception.
 export default function ProjectsScrollSection({ projectFocus }) {
   const sectionRef = useRef(null);
+  const { openAstra } = useAstra();
   const { i18n } = useTranslation();
   const en = i18n.language.startsWith('en');
 
@@ -100,7 +102,7 @@ export default function ProjectsScrollSection({ projectFocus }) {
       <ScrollReveal>
         <div className="projects-scroll-heading"><div><p className="section-eyebrow">02 / {en ? 'SELECTED WORK' : 'PROJETOS'}</p><h2 id="projects-title">{en ? 'Ideas put into practice.' : 'Ideias colocadas em prática.'}</h2></div><span className="projects-scroll-hint">{en ? 'Scroll to explore →' : 'Role para explorar →'}</span></div>
       </ScrollReveal>
-      <ProjectsCard horizontal projectFocus={projectFocus} />
+      <ProjectsCard horizontal projectFocus={projectFocus} onAskAstra={openAstra} />
       <div className="projects-scroll-progress" aria-hidden="true"><span /></div>
     </div>
   </section>;

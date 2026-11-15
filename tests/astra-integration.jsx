@@ -52,6 +52,7 @@ globalThis.fetch = async (_url, options) => {
     liveContext: { wakatime: { status: 'ok', week: { totalFormatted: '2h 30m' } } },
   });
   if (body.userMessage === 'Thanks') return Response.json({ response: 'You’re welcome.' });
+  if (body.userMessage.startsWith('Which part of ')) return Response.json({ response: 'Here is Gustavo’s contribution.' });
   if (body.userMessage === 'Como foi o último jogo do Galo?') {
     return Response.json({ response: 'O último jogo do Galo terminou Atlético-MG 2 × 0 Cruzeiro.' });
   }
@@ -103,12 +104,43 @@ try {
   assert.ok($('.astra-entrance'), 'direct entry shows the intro even with stale storage flags');
   await click($('.astra-entrance a[href="/"]'));
   await until(() => $('.astra-fab'));
+  const featuredProject = $('[data-project-id="portfolio"]');
+  const featuredTitle = featuredProject.querySelector('h4').textContent;
+  const askProject = featuredProject.querySelector('.project-ask-astra');
+  assert.equal(askProject.getAttribute('aria-label'), `Ask Astra about ${featuredTitle}`);
+  assert.ok([...document.querySelectorAll('#projetos [data-project-slide]')].every(slide => slide.querySelector('.project-ask-astra')));
+  await click(askProject);
+  await until(() => document.activeElement?.id === 'chat-input');
+  assert.ok($('.astra-shell-modal').open);
+  assert.equal($('#chat-input').value, `What did Gustavo contribute to the ${featuredTitle} project?`);
+  assert.equal(requests.length, 0, 'the project shortcut leaves the draft unsent');
+  await click($('.astra-toolbar button'));
+  assert.equal(document.activeElement, askProject);
+  await click($('.astra-fab'));
+  assert.equal($('#chat-input').value, `What did Gustavo contribute to the ${featuredTitle} project?`);
+  const editedQuestion = `Which part of ${featuredTitle} did Gustavo implement?`;
+  await send(editedQuestion);
+  assert.equal(requests.at(-1).userMessage, editedQuestion);
+  assert.equal(requests.at(-1).surface, 'compact');
+  assert.equal($('#chat-input').value, '');
+  await click($('.astra-toolbar button'));
+  const broFit = $('[data-project-id="academia"]');
+  await act(async () => i18n.changeLanguage('pt'));
+  await click(broFit.querySelector('.project-ask-astra'));
+  assert.equal($('#chat-input').value, `Qual foi a contribuição do Gustavo no projeto ${broFit.querySelector('h4').textContent}?`);
+  await send('/help');
+  assert.match($('#astra-resource-askProject-description').textContent, /Perguntar à Astra sobre este projeto/);
+  await click($('#astra-resource-askProject').closest('button'));
+  assert.equal(window.location.hash, '#projetos');
+  assert.equal($('.astra-shell-modal').open, false);
+  assert.equal(requests.length, 1);
+  await act(async () => i18n.changeLanguage('en'));
   await click($('.astra-fab'));
   await until(() => $('.astra-compact #chat-input'));
   assert.equal($('.astra-entrance'), null, 'opening compact Astra does not consume the intro');
   await send('Open Full Astra');
   assert.equal(window.location.pathname, '/chat');
-  assert.equal(requests[0].surface, 'compact');
+  assert.equal(requests.at(-1).surface, 'compact');
   assert.ok($('.astra-entrance'), 'first Full Astra opening from compact plays the intro');
   await click($('.astra-entrance button'));
   assert.equal($('.astra-entrance'), null);
@@ -125,6 +157,7 @@ try {
   await send('/help');
   assert.ok($('#astra-resources[open]'));
   assert.ok($('#astra-resource-identifyVersion'));
+  assert.match($('#astra-resource-askProject-description').textContent, /Ask Astra about this project/);
   assert.equal($('#astra-resource-openFullVersion'), null);
   assert.ok($('#astra-resource-labAnalyze'));
   assert.ok($('#astra-resource-chessGame'), 'full Astra keeps its existing integrations');

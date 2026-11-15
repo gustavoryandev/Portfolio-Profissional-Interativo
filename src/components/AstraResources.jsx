@@ -1,7 +1,7 @@
 import { useLayoutEffect, useRef } from 'react';
 import {
   BarChart3, Clock, Code2, Compass, FileCode2, Folder, Gamepad2, Github, GraduationCap, Headphones, Info, Layers,
-  Languages, Maximize2, Palette, Pencil, Play, RotateCcw, Square, Swords, Terminal, Trophy, UserRound, X,
+  Languages, Maximize2, Palette, Pencil, Play, RotateCcw, Sparkles, Square, Swords, Terminal, Trophy, UserRound, X,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { gameIds, games } from '../arcade/catalog';
@@ -17,6 +17,7 @@ const portfolioActions = [
   ['designSystem', Layers, [DESIGN_SYSTEM_ACTION]],
   ['navigate', Compass, [{ type: 'navigate', target: 'sobre' }]],
   ['openProject', Folder, [{ type: 'project.open', target: 'academia' }]],
+  ['askProject', Sparkles, [{ type: 'navigate', target: 'projetos' }]],
   ['theme', Palette, [{ type: 'theme.set', target: 'aurora' }]],
   ['language', Languages, en => [{ type: 'language.set', target: en ? 'pt' : 'en' }]],
   ['metrics', BarChart3, [{ type: 'metrics.open', target: 'all' }]],

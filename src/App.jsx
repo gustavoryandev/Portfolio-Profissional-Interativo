@@ -38,6 +38,7 @@ export default function App() {
   const [chatReady, setChatReady] = useState(false);
   const [opened, setOpened] = useState(false);
   const [started, setStarted] = useState(path === '/chat');
+  const [chatDraft, setChatDraft] = useState(null);
   const dialog = useMobileViewport();
   const trigger = useRef(null);
   const scroll = useRef(0);
@@ -72,10 +73,11 @@ export default function App() {
     if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
     else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
   };
-  const openAstra = event => {
+  const openAstra = (event, draft) => {
     event?.preventDefault();
     trigger.current = event?.currentTarget || document.activeElement;
     scroll.current = window.scrollY;
+    setChatDraft(draft ? { text: draft } : null);
     setStarted(true);
     setOpened(true);
   };
@@ -146,7 +148,7 @@ export default function App() {
         {full ? <a href="/" onClick={event => { event.preventDefault(); close(); navigate('/'); }}>{en ? '← Portfolio' : '← Portfólio'}</a> : <a href="/chat" onClick={openFull}>{en ? 'Open full Astra ↗' : 'Abrir Astra completa ↗'}</a>}
         {!full && <button autoFocus onClick={close} aria-label={en ? 'Close Astra' : 'Fechar Astra'}>✕</button>}
       </div>
-      {started && <Suspense fallback={<p className="astra-loading" role="status">{en ? 'Opening Astra…' : 'Abrindo Astra…'}</p>}><ChatPage onReady={setChatReady} modal={!full} visible={full ? !showIntro : opened} onSelectSection={selectSection}
+      {started && <Suspense fallback={<p className="astra-loading" role="status">{en ? 'Opening Astra…' : 'Abrindo Astra…'}</p>}><ChatPage onReady={setChatReady} modal={!full} visible={full ? !showIntro : opened} onSelectSection={selectSection} draft={chatDraft}
         arcade={full ? route.arcade : null} arcadeChallenge={route.challenge} onOpenArcade={openArcade} onCloseArcade={() => navigate('/chat')} /></Suspense>}
     </dialog>
     {showIntro && <AstraEntrance en={en} onFinish={finishIntro} />}

@@ -202,6 +202,11 @@
           "description": "See the Bro Fit project card as an example",
           "prompt": "Open the Bro Fit project."
         },
+        "askProject": {
+          "title": "Ask about a project",
+          "description": "Open Projects and select “Ask Astra about this project” on any card. You can edit the question before sending it.",
+          "prompt": "Open the Projects section."
+        },
         "theme": {
           "title": "Change theme",
           "description": "Switch to the Aurora theme",
@@ -476,6 +481,9 @@
     "technologies": "Technologies and concepts",
     "openProject": "View project: {{title}} (new tab)",
     "viewProject": "View project",
+    "askAstra": "Ask Astra about this project",
+    "askAstraLabel": "Ask Astra about {{title}}",
+    "astraPrompt": "What did Gustavo contribute to the {{title}} project?",
     "portfolio_proj_title": "Interactive AI Portfolio",
     "portfolio_proj_desc": "Portfolio built with React, Tailwind CSS, and Vercel Serverless Functions simulating an AI chat (Gemini API) with dynamic visual cards.",
     "geosolar_proj_title": "GEOSOLAR - Auth System",

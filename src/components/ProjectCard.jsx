@@ -1,5 +1,5 @@
 import { useId, useState } from 'react';
-import { ArrowUpRight, ImageOff } from 'lucide-react';
+import { ArrowUpRight, ImageOff, Sparkles } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import TechnologyLink from './TechnologyLink';
 import { projectContent } from '../data/projectContent';
@@ -23,7 +23,7 @@ function ProjectPreview({ image, title }) {
   </div>;
 }
 
-export default function ProjectCard({ project }) {
+export default function ProjectCard({ project, onAskAstra }) {
   const { t, i18n } = useTranslation();
   const titleId = useId();
   const title = projectContent(project, 'titulo', i18n.language, t);
@@ -43,6 +43,10 @@ export default function ProjectCard({ project }) {
             {t('projetos.viewProject')}<ArrowUpRight size={17} aria-hidden="true" />
           </a>}
           {project.demoUrl && <a href={project.demoUrl} target="_blank" rel="noopener noreferrer" className="project-action" aria-label={t('projetos.openDemo', { title })}>{t('projetos.viewDemo')}<ArrowUpRight size={17} aria-hidden="true" /></a>}
+          {onAskAstra && <button type="button" className="project-ask-astra" aria-haspopup="dialog"
+            aria-label={t('projetos.askAstraLabel', { title })} onClick={event => onAskAstra(event, t('projetos.astraPrompt', { title }))}>
+            <Sparkles size={16} aria-hidden="true" />{t('projetos.askAstra')}
+          </button>}
         </div>
       </div>
     </article>

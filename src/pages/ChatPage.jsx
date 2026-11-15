@@ -59,7 +59,7 @@ function TypingIndicator({ label }) {
   );
 }
 
-export default function ChatPage({ modal = false, visible = true, onReady, onSelectSection,
+export default function ChatPage({ modal = false, visible = true, onReady, onSelectSection, draft,
   arcade, arcadeChallenge, onOpenArcade, onCloseArcade }) {
   const { t, i18n } = useTranslation();
   const viewportRef = useMobileViewport();
@@ -100,6 +100,15 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
   }, []);
 
   useEffect(() => { onReady?.(true); }, [onReady]);
+  useEffect(() => {
+    if (!draft) return;
+    setInput(draft.text);
+    const frame = requestAnimationFrame(() => {
+      const input = inputRef.current;
+      if (input?.closest('dialog')?.open) input.focus({ preventScroll: true });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [draft]);
   useEffect(() => {
     setResourcesOpen(false);
   }, [modal, visible]);
