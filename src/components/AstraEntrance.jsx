@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { useAstra } from '../context/AstraContext';
 import './AstraEntrance.css';
 import useEntranceInteraction from '../hooks/useEntranceInteraction';
+import AstraAvatar from './AstraAvatar';
 
 export default function AstraEntrance({ en, onFinish }) {
   const interaction = useEntranceInteraction();
@@ -25,7 +26,7 @@ export default function AstraEntrance({ en, onFinish }) {
       <header className="astra-entrance-top"><span>Gustavo Ryan<span>.ai</span></span><span>PORTFOLIO / ASTRA</span></header>
       <div className="astra-entrance-word" aria-hidden="true">ASTRA</div>
       <section className="astra-entrance-panel" aria-labelledby="astra-entrance-title">
-        <div className="astra-entrance-avatar"><img src="/astra-avatar.png" alt="" width="80" height="80" /></div>
+        <div className="astra-entrance-avatar"><AstraAvatar width="80" height="80" /></div>
         <span className="astra-entrance-label">{en ? 'A NEW PERSPECTIVE' : 'UMA NOVA PERSPECTIVA'}</span>
         <h1 id="astra-entrance-title">{en ? 'Meet the mind behind' : 'Conheça as ideias'}<br />{en ? 'the experience.' : 'por trás da experiência.'}</h1>
         <p>{en ? 'Projects, ideas and the journey. Let’s talk.' : 'Projetos, ideias e trajetória. Vamos conversar.'}</p>

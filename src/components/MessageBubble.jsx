@@ -2,6 +2,7 @@
 import { lazy, memo, Suspense, useEffect, useMemo, useState } from 'react';
 import { AlertTriangle, Check, Copy, Sparkles, User } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import AstraAvatar from './AstraAvatar';
 import SpotifyCard from './SpotifyCard';
 import GithubCard from './GithubCard';
 import StatsCard from './StatsCard';
@@ -260,7 +261,7 @@ function MessageBubble({ message, liveContext = {}, refreshing = [], onRefresh, 
       <Avatar>
         {isError
           ? <AlertTriangle className={`h-[18px] w-[18px] ${ui.errorIcon}`} aria-hidden="true" />
-          : <img src="/astra-avatar.png" alt="" />}
+          : <AstraAvatar />}
       </Avatar>
 
       <div className={hasCards ? 'message-content message-with-cards' : 'message-content'}>

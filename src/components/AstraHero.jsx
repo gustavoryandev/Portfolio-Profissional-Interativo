@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import AstraAvatar from './AstraAvatar';
 
 // Posições fixas (sem Math.random): render estável e sem hydration mismatch.
 const SPARKS = [
@@ -27,7 +28,7 @@ export default function AstraHero({ en, compact, prompts, onPick, disabled }) {
 
           <div className="astra-intro">
             <span className="astra-avatar" aria-hidden="true">
-              <img src="/astra-avatar.png" alt="" width="56" height="56" />
+              <AstraAvatar width="56" height="56" />
             </span>
             <p className="astra-greet">{en ? 'Hello, I’m' : 'Olá, eu sou'}</p>
           </div>

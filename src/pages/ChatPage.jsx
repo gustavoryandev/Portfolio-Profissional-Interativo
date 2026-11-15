@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import Navbar from '../components/Navbar';
 import useMobileViewport from '../hooks/useMobileViewport';
 import AstraHero from '../components/AstraHero';
+import AstraAvatar from '../components/AstraAvatar';
 import AstraResources, { ASTRA_RESOURCES_ID } from '../components/AstraResources';
 import MessageBubble from '../components/MessageBubble';
 import StreamingReply from '../components/StreamingReply';
@@ -40,7 +41,7 @@ function TypingIndicator({ label }) {
   return (
     <div className="my-2 flex w-full justify-start gap-3" role="status" aria-label={label}>
       <div aria-hidden="true" className="avatar-astra mt-2 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border">
-        <img src="/astra-avatar.png" alt="" />
+        <AstraAvatar />
       </div>
       <div className="message-content">
         <div className="astra-label" aria-hidden="true"><span>Astra</span></div>
@@ -285,7 +286,7 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
             <div className="chat-view">
               <div className="chat-heading">
                 <div>
-                  <span className="astra-mini" aria-hidden="true"><img src="/astra-avatar.png" alt="" /></span>
+                  <span className="astra-mini" aria-hidden="true"><AstraAvatar /></span>
                   <h2>{en ? 'Talk to Astra' : 'Converse com a Astra'}</h2>
                 </div>
                 <span className="astra-heading-actions">
