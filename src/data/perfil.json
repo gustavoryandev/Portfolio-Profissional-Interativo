@@ -33,8 +33,8 @@
 { "nome": "HTML", "proficienciaPercentual": 30, "categoria": "Frontend" },
 { "nome": "CSS", "proficienciaPercentual": 30, "categoria": "Frontend" },
 { "nome": "Tailwind CSS", "proficienciaPercentual": 30, "categoria": "Frontend" },
-{ "nome": "Git", "proficienciaPercentual": 30, "categoria": "Ferramentas" },
-{ "nome": "GitHub", "proficienciaPercentual": 30, "categoria": "Ferramentas" },
+{ "nome": "Git", "proficienciaPercentual": 60, "categoria": "Ferramentas" },
+{ "nome": "GitHub", "proficienciaPercentual": 80, "categoria": "Ferramentas" },
 { "nome": "Node.js", "proficienciaPercentual": 30, "categoria": "Backend" },
 { "nome": "Maven", "proficienciaPercentual": 30, "categoria": "Ferramentas" },
 { "nome": "JSON", "proficienciaPercentual": 30, "categoria": "Formato de dados" }
