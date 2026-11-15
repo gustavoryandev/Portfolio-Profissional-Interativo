@@ -8,7 +8,7 @@ import OptionMenu from './OptionMenu';
 
 const groups = [
   { label: 'original', options: themes.slice(0, 2) },
-  { label: 'custom', options: themes.slice(2) },
+  { label: 'custom', options: themes.slice(2), expandable: true },
 ];
 
 export default function ThemeSelector() {
@@ -22,6 +22,7 @@ export default function ThemeSelector() {
     triggerContent={<Palette size={19} aria-hidden="true" />}
     groups={groups.map(group => ({
       name: t(`navbar.appearance.${group.label}`),
+      disclosure: group.expandable ? t('navbar.appearance.more') : undefined,
       options: group.options.map(option => ({
         id: option.id,
         label: t(`navbar.appearance.${option.id}`, { defaultValue: option.name }),

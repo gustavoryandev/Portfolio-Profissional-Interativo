@@ -381,7 +381,16 @@ try {
   const { themes } = await import('../src/data/themes.js');
   for (const theme of themes) {
     await click(themeTrigger);
-    await click($(`.astra-full [data-preview="${theme.id}"]`));
+    const option = $(`.astra-full [data-preview="${theme.id}"]`);
+    const moreThemes = $('.astra-full .option-menu-disclosure');
+    assert.equal(moreThemes.getAttribute('aria-expanded'), 'false');
+    if (theme.name) {
+      assert.ok(option.closest('[hidden]'));
+      await click(moreThemes);
+      assert.equal(moreThemes.getAttribute('aria-expanded'), 'true');
+      assert.equal(option.closest('[hidden]'), null);
+    }
+    await click(option);
     assert.equal(document.documentElement.dataset.theme, theme.id);
     assert.equal(document.querySelectorAll('.arcade-card').length, 5);
   }
@@ -402,6 +411,8 @@ try {
   await until(() => $('.astra-full .astra-hero [role="group"]'));
   assert.match($('.astra-full .astra-hero').textContent, /Fala, Massa!/);
   await click($('.astra-full .header-actions button[aria-haspopup]'));
+  assert.match($('.astra-full .option-menu-disclosure').textContent, /Mais temasGalo CAM Dark/);
+  await click($('.astra-full .option-menu-disclosure'));
   await click($('.astra-full [data-preview="galo-light"]'));
   assert.equal($('.astra-full .astra-avatar img').getAttribute('src'), '/astra-avatar-galo-light.jpg');
   const fullGaloShortcuts = $('.astra-full .astra-hero [role="group"]');

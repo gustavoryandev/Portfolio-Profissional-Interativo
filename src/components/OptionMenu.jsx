@@ -1,5 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react';
-import { Check } from 'lucide-react';
+import { Check, ChevronDown } from 'lucide-react';
+
+const menuItemSelector = '[role="menuitemradio"], [role="menuitem"]';
 
 export default function OptionMenu({
   label, triggerLabel = label, triggerClassName, triggerContent, groups,
@@ -9,6 +11,7 @@ export default function OptionMenu({
   const trigger = useRef(null);
   const menu = useRef(null);
   const [open, setOpen] = useState(false);
+  const [expandedGroup, setExpandedGroup] = useState(null);
 
   function placeMenu() {
     const bounds = trigger.current.getBoundingClientRect();
@@ -39,6 +42,7 @@ export default function OptionMenu({
 
   const close = () => {
     menu.current.hidePopover();
+    setExpandedGroup(null);
     trigger.current.focus();
   };
 
@@ -51,12 +55,12 @@ export default function OptionMenu({
     }
     if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) return;
     event.preventDefault();
-    const options = [...menu.current.querySelectorAll('[role="menuitemradio"]')];
+    const options = [...menu.current.querySelectorAll(menuItemSelector)].filter(item => !item.closest('[hidden]'));
     const index = options.indexOf(document.activeElement);
     const step = event.key === 'ArrowUp' ? -1 : 1;
     const next = event.key === 'Home' ? 0 : event.key === 'End' ? options.length - 1
       : (index + step + options.length) % options.length;
-    options[next].focus();
+    options[next]?.focus();
   };
 
   return <>
@@ -75,14 +79,21 @@ export default function OptionMenu({
       onToggle={event => {
         const opened = event.newState === 'open';
         setOpen(opened);
-        if (opened) menu.current.querySelector('[aria-checked="true"]')?.focus();
+        if (!opened) {
+          setExpandedGroup(null);
+          return;
+        }
+        const selected = menu.current.querySelector('[aria-checked="true"]');
+        const focusTarget = selected?.closest('[hidden]')?.previousElementSibling
+          ?? selected ?? menu.current.querySelector(menuItemSelector);
+        focusTarget?.focus();
       }}
       onKeyDown={handleKeys} onBlur={event => {
         const next = event.relatedTarget;
         if (next && next !== trigger.current && !event.currentTarget.contains(next)) menu.current.hidePopover();
       }}>
       {caption && <div className="option-menu-title" aria-hidden="true"><strong>{label}</strong><span>{caption}</span></div>}
-      {groups.map(({ name, options }, index) => {
+      {groups.map(({ name, options, disclosure }, index) => {
         const items = options.map(option => (
           <button key={option.id} type="button" className="menu-option" data-preview={option.preview ? option.id : undefined}
             role="menuitemradio" aria-checked={value === option.id} tabIndex={-1}
@@ -93,6 +104,23 @@ export default function OptionMenu({
           </button>
         ));
         if (!name) return items;
+        if (disclosure) {
+          const expanded = expandedGroup === index;
+          const activeOption = options.find(option => option.id === value);
+          return (
+            <div className="option-menu-group" key={name}>
+              <button type="button" className="menu-option option-menu-disclosure" role="menuitem" tabIndex={-1}
+                aria-expanded={expanded} aria-controls={`${id}-group-${index}`}
+                onClick={() => setExpandedGroup(expanded ? null : index)}>
+                <span>{disclosure}{activeOption && <small>{activeOption.label}</small>}</span>
+                <ChevronDown size={16} aria-hidden="true" />
+              </button>
+              <div id={`${id}-group-${index}`} role="group" aria-label={name} hidden={!expanded}>
+                {items}
+              </div>
+            </div>
+          );
+        }
         return (
           <div className="option-menu-group" key={name} role="group" aria-labelledby={`${id}-${index}`}>
             <p id={`${id}-${index}`}>{name}</p>

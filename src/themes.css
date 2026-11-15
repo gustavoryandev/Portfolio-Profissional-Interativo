@@ -446,6 +446,8 @@
   text-align: start;
 }
 .menu-option svg { margin-inline-start: auto; color: var(--accent); }
+.option-menu-disclosure small { display: block; color: var(--muted); font-size: 12px; }
+.option-menu-disclosure[aria-expanded="true"] svg { transform: rotate(180deg); }
 .menu-option:is([aria-checked="true"], :hover) { background: var(--panel-soft); }
 .option-menu .menu-option:focus-visible { outline-offset: -2px; }
 .option-menu .menu-option[aria-checked="true"]:focus-visible { outline-color: currentColor; }
