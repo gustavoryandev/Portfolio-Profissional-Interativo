@@ -318,6 +318,7 @@
   },
   "navbar": {
     "anthem": {
+      "notice": "Plays the Galo anthem",
       "play": "Play the Galo anthem",
       "pause": "Pause the Galo anthem"
     },

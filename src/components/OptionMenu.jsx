@@ -99,7 +99,7 @@ export default function OptionMenu({
             role="menuitemradio" aria-checked={value === option.id} tabIndex={-1}
             onClick={() => { onChange(option.id); close(); }}>
             {option.preview}
-            <span>{option.label}</span>
+            <span>{option.label}{option.description && <small className="menu-option-description">{option.description}</small>}</span>
             {value === option.id && <Check size={16} aria-hidden="true" />}
           </button>
         ));

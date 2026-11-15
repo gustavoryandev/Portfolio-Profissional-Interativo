@@ -318,6 +318,7 @@
   },
   "navbar": {
     "anthem": {
+      "notice": "Toca o hino do Galo",
       "play": "Tocar o hino do Galo",
       "pause": "Pausar o hino do Galo"
     },

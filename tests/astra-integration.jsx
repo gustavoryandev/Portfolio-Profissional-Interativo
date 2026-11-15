@@ -434,6 +434,9 @@ try {
   await click($('.astra-full .header-actions button[aria-haspopup]'));
   assert.match($('.astra-full .option-menu-disclosure').textContent, /Mais temasGalo CAM Dark/);
   await click($('.astra-full .option-menu-disclosure'));
+  for (const theme of ['galo', 'galo-light']) {
+    assert.match($(`.astra-full [data-preview="${theme}"]`).textContent, /Toca o hino do Galo/);
+  }
   await click($('.astra-full [data-preview="galo-light"]'));
   assert.equal($('.astra-full .astra-avatar img').getAttribute('src'), '/astra-avatar-galo-light.jpg');
   assert.deepEqual(anthemEvents, [], 'restoring Galo and switching variants does not start the anthem');

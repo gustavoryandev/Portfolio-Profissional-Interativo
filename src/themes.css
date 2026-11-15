@@ -512,6 +512,7 @@
   text-align: start;
 }
 .menu-option svg { margin-inline-start: auto; color: var(--accent); }
+.menu-option-description { display: block; font-size: 11px; }
 .option-menu-disclosure small { display: block; color: var(--muted); font-size: 12px; }
 .option-menu-disclosure[aria-expanded="true"] svg { transform: rotate(180deg); }
 .menu-option:is([aria-checked="true"], :hover) { background: var(--panel-soft); }
