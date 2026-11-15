@@ -310,7 +310,7 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
                   <h2>{en ? 'Talk to Astra' : 'Converse com a Astra'}</h2>
                 </div>
                 <span className="astra-heading-actions">
-                  {en ? 'AI assistant' : 'Assistente de IA'}
+                  <span className="astra-heading-description">{en ? 'AI assistant' : 'Assistente de IA'}</span>
                   <button type="button" className="icon-button astra-arcade-trigger" aria-label="Astra Arcade" title="Astra Arcade"
                     aria-expanded={modal ? undefined : showArcade} onClick={() => {
                       setResourcesOpen(false);

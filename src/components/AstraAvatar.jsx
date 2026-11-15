@@ -8,5 +8,5 @@ const themedAvatars = {
 
 export default function AstraAvatar({ alt = '', ...props }) {
   const theme = useContext(ThemeContext)?.theme;
-  return <img {...props} alt={alt} src={themedAvatars[theme] ?? '/astra-avatar.png'} />;
+  return <img {...props} alt={alt} src={themedAvatars[theme] ?? '/astra-avatar-mobile.png'} />;
 }
