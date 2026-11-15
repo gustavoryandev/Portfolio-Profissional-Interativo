@@ -5,6 +5,7 @@
   min-height: 100dvh;
   overflow-x: clip;
 }
+.portfolio-app.scroll-portfolio { background-attachment: fixed; }
 .brand-lockup .brand-title { margin: 0; color: var(--ink); font-size: 20px; font-weight: 700; letter-spacing: -.04em; }
 .scroll-nav {
   display: flex; align-items: center; gap: 3px; min-width: 0;
