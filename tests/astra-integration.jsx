@@ -21,6 +21,12 @@ window.HTMLElement.prototype.scrollIntoView = function ({ behavior } = {}) { sec
 window.HTMLElement.prototype.hidePopover = () => {};
 window.HTMLDialogElement.prototype.showModal = window.HTMLDialogElement.prototype.show = function () { this.open = true; };
 window.HTMLDialogElement.prototype.close = function () { this.open = false; };
+const anthemEvents = [];
+window.Audio = class {
+  constructor(src) { this.src = src; }
+  play() { anthemEvents.push(['play', this.src]); return Promise.resolve(); }
+  pause() { anthemEvents.push(['pause']); }
+};
 globalThis.IntersectionObserver = class { observe() {} unobserve() {} disconnect() {} };
 globalThis.ResizeObserver = class {
   constructor(callback) { this.callback = callback; }
@@ -394,6 +400,10 @@ try {
     assert.equal(document.documentElement.dataset.theme, theme.id);
     assert.equal(document.querySelectorAll('.arcade-card').length, 5);
   }
+  assert.deepEqual(anthemEvents, [
+    ['play', '/hino-do-galo.mp3'],
+    ['pause'],
+  ]);
   await click(findButton($('.arcade-toolbar'), 'Stats'));
   assert.match($('.arcade-dashboard').textContent, /Orbit Blocks/);
   assert.ok([...Array(window.localStorage.length)].some((_, index) => window.localStorage.key(index).startsWith('astra-arcade-session-v1:')));
@@ -401,6 +411,7 @@ try {
   assert.equal($('.arcade'), null);
 
   await act(async () => activeRoot.unmount());
+  anthemEvents.length = 0;
   window.history.replaceState(null, '', '/chat');
   document.documentElement.dataset.theme = 'galo';
   await i18n.changeLanguage('pt');
@@ -415,6 +426,7 @@ try {
   await click($('.astra-full .option-menu-disclosure'));
   await click($('.astra-full [data-preview="galo-light"]'));
   assert.equal($('.astra-full .astra-avatar img').getAttribute('src'), '/astra-avatar-galo-light.jpg');
+  assert.deepEqual(anthemEvents, [], 'restoring Galo and switching variants does not start the anthem');
   const fullGaloShortcuts = $('.astra-full .astra-hero [role="group"]');
   await click(findButton(fullGaloShortcuts, 'Explorar projetos'));
   await until(() => window.location.hash === '#projetos' && $('.astra-fab'));
