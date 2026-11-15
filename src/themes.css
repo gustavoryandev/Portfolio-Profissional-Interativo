@@ -374,6 +374,7 @@
   isolation: isolate;
 }
 :root[data-theme|="galo"] .hero-galo-watermark {
+  display: none;
   position: absolute;
   z-index: -1;
   top: 4%;
@@ -456,13 +457,13 @@
 .galo-wave-halo { display: none; }
 :root[data-theme="galo"] .galo-wave-halo { display: block; opacity: .3; filter: blur(11px); }
 @media (min-width: 1280px) {
+  :root[data-theme|="galo"] .hero-galo-watermark { display: block; }
   :root[data-theme|="galo"] .portfolio-app .site-header { padding-inline: max(24px, calc((100% - 1540px) / 2)); }
   :root[data-theme|="galo"] .portfolio-hero { min-height: calc(100svh - 80px); padding-block: 60px; }
 }
 @media (max-width: 767px) {
   :root[data-custom-theme] { --glass-alpha: .94; --neon-strength: .18; }
   :root[data-theme|="galo"] .galo-waves { opacity: .52; }
-  :root[data-theme|="galo"] .hero-galo-watermark { top: 14%; right: 0; opacity: calc(var(--galo-watermark-opacity) * .57); }
 }
 @media (forced-colors: active) {
   :root[data-custom-theme] {
