@@ -11,11 +11,13 @@ Object.assign(globalThis, { window, document, HTMLElement: window.HTMLElement, M
 window.localStorage.setItem('astra-intro-seen', '1'); // Left by a previous visit.
 Object.defineProperty(globalThis, 'localStorage', { configurable: true, value: window.localStorage });
 window.sessionStorage.setItem('astra-intro-seen', '1');
-window.matchMedia = query => ({ matches: query.includes('prefers-reduced-motion') || query.includes('pointer: coarse'),
+let reducedMotion = true;
+window.matchMedia = query => ({ matches: (reducedMotion && query.includes('prefers-reduced-motion')) || query.includes('pointer: coarse'),
   addEventListener() {}, removeEventListener() {}, addListener() {}, removeListener() {} });
 window.scrollTo = () => {};
 window.HTMLElement.prototype.scrollTo = () => {};
-window.HTMLElement.prototype.scrollIntoView = () => {};
+const sectionScrolls = [];
+window.HTMLElement.prototype.scrollIntoView = function ({ behavior } = {}) { sectionScrolls.push([this.id, behavior]); };
 window.HTMLElement.prototype.hidePopover = () => {};
 window.HTMLDialogElement.prototype.showModal = window.HTMLDialogElement.prototype.show = function () { this.open = true; };
 window.HTMLDialogElement.prototype.close = function () { this.open = false; };
@@ -104,6 +106,15 @@ try {
   assert.ok($('.astra-entrance'), 'direct entry shows the intro even with stale storage flags');
   await click($('.astra-entrance a[href="/"]'));
   await until(() => $('.astra-fab'));
+  reducedMotion = false;
+  await click($('.scroll-nav a[href="#sobre"]'));
+  await until(() => document.activeElement?.id === 'sobre');
+  assert.equal(window.location.hash, '#sobre');
+  assert.deepEqual(sectionScrolls.at(-1), ['sobre', 'smooth']);
+  reducedMotion = true;
+  await click($('.scroll-nav a[href="#inicio"]'));
+  await until(() => document.activeElement?.id === 'inicio');
+  assert.deepEqual(sectionScrolls.at(-1), ['inicio', 'instant']);
   const featuredProject = $('[data-project-id="portfolio"]');
   const featuredTitle = featuredProject.querySelector('h4').textContent;
   const askProject = featuredProject.querySelector('.project-ask-astra');

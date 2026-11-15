@@ -41,7 +41,6 @@
 @media(max-width: 359px) { .astra-conversation .astra-starters { grid-template-columns: 1fr; } }
 
 .scroll-portfolio .astra-fab { position: fixed; right: 16px; bottom: 16px; z-index: 45; }
-@media(max-width: 767px) { .scroll-portfolio .astra-fab { bottom: calc(96px + env(safe-area-inset-bottom)); } }
 .astra-full .astra-workspace { padding-left: 17px; padding-right: 5px; }
 .astra-full .chat-heading { padding-top: 16.5px; padding-bottom: 16.5px; }
 @media(max-width:767px) { .astra-full .astra-workspace { padding: 8px; } }

@@ -53,9 +53,16 @@ export default function App() {
   if (!full) portfolioVisited.current = true;
   const close = () => { dialog.current?.close(); setOpened(false); };
   const syncRoute = useCallback(() => setRoute(readRoute()), []);
-  const navigate = (url) => {
+  const navigate = (url, smoothSection = false) => {
     if (url !== window.location.pathname + window.location.search + window.location.hash) window.history.pushState({}, '', url);
-    syncRoute();
+    setRoute({ ...readRoute(), smoothSection });
+  };
+  const followSectionLink = event => {
+    if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    const target = new URL(event.currentTarget.href);
+    target.searchParams.delete('project');
+    event.preventDefault();
+    navigate(target.pathname + target.search + target.hash, true);
   };
   const openFull = event => {
     event?.preventDefault();
@@ -115,7 +122,8 @@ export default function App() {
     const frame = requestAnimationFrame(() => {
       const node = document.getElementById(route.section);
       if (!node) return;
-      node.scrollIntoView({ behavior: 'instant' });
+      const smooth = route.smoothSection && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      node.scrollIntoView({ behavior: smooth ? 'smooth' : 'instant' });
       if (!node.hasAttribute('tabindex')) node.setAttribute('tabindex', '-1');
       node.focus({ preventScroll: true });
     });
@@ -141,7 +149,7 @@ export default function App() {
   if (!['/', '/chat'].includes(path)) return <main className="route-loading"><h1>404</h1><a href="/">{en ? 'Back to portfolio' : 'Voltar ao portfólio'}</a></main>;
   return <AstraContext.Provider value={{ lab, actions, labHandoff, setLabHandoff, actionUi,
     openAstra, openFull, returnPortfolio: event => { event.preventDefault(); close(); navigate('/'); } }}>
-    <div hidden={full}>{portfolioVisited.current && <PortfolioIntro en={en}><PortfolioPage activeSection={route.section || 'inicio'} projectFocus={route.project ? route : null} /></PortfolioIntro>}</div>
+    <div hidden={full}>{portfolioVisited.current && <PortfolioIntro en={en}><PortfolioPage activeSection={route.section || 'inicio'} projectFocus={route.project ? route : null} onSectionLink={followSectionLink} /></PortfolioIntro>}</div>
     <dialog inert={showIntro} style={showIntro ? { visibility: 'hidden' } : undefined} ref={dialog} role={full ? 'main' : undefined} className={`astra-shell ${full ? 'astra-shell-full' : 'astra-shell-modal'}`} aria-label={en ? 'Astra conversation' : 'Conversa com a Astra'} onCancel={() => setOpened(false)} onKeyDown={trapFocus}
       onClick={event => { if (!full && opened && clickedDialogBackdrop(event)) close(); }}>
       <div className="astra-toolbar" hidden={full}>

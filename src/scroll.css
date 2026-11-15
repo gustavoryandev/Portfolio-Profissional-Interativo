@@ -1,5 +1,10 @@
 /* Scroll portfolio: all rules are scoped away from Astra's dashboard. */
-.scroll-portfolio { min-height: 100dvh; overflow-x: clip; }
+.scroll-portfolio {
+  --section-padding: 60px;
+  --anchor-clearance: calc(var(--portfolio-header-height, 80px) + 16px);
+  min-height: 100dvh;
+  overflow-x: clip;
+}
 .brand-lockup .brand-title { margin: 0; color: var(--ink); font-size: 20px; font-weight: 700; letter-spacing: -.04em; }
 .scroll-nav {
   display: flex; align-items: center; gap: 3px; min-width: 0;
@@ -40,7 +45,8 @@
 .scroll-content, .scroll-footer { width: min(1180px, 90%); margin-inline: auto; }
 /* Programmatic focus after the intro/skip link should not frame the entire page. */
 .scroll-content:focus { outline: none; }
-.scroll-portfolio [id] { scroll-margin-top: 180px; }
+.scroll-portfolio :is(#main-content, #inicio, #projetos, [data-project-id]) { scroll-margin-top: var(--anchor-clearance); }
+.scroll-portfolio .scroll-section[id] { scroll-margin-top: calc(var(--anchor-clearance) - var(--section-padding)); }
 /* Route navigation focuses a non-interactive destination for keyboard and screen reader users. */
 .scroll-portfolio :is(.portfolio-hero, .scroll-section, .projects-scroll-section, [data-project-slide] h4)[tabindex="-1"]:focus {
   outline: none;
@@ -61,7 +67,7 @@
 .hero-profile-caption { display: grid; gap: 8px; position: relative; padding: 20px 4px 4px; }
 .hero-profile-caption span { color: var(--accent); font: 12px ui-monospace, monospace; letter-spacing: .08em; }
 .hero-profile-caption strong { color: var(--muted); font-size: 13px; font-weight: 400; }
-.scroll-section { padding-block: 60px; }
+.scroll-section { padding-block: var(--section-padding, 60px); }
 .scroll-section h2 { font-size: clamp(28px, 4vw, 42px); font-weight: 600; letter-spacing: -.045em; line-height: 1.2; margin-bottom: 28px; }
 .scroll-section .section-eyebrow { margin-bottom: 16px; }
 .about-scroll {
@@ -135,23 +141,14 @@
 .projects-scroll-progress > span { display: block; height: 100%; background: var(--accent); transform: scaleX(0); transform-origin: left; box-shadow: 0 0 10px rgb(var(--brand-400) / .3); }
 @media (max-width: 700px) { .projects-scroll-heading { align-items: start; flex-direction: column; } }
 @media (max-width: 1100px) {
-  .scroll-portfolio .site-header { flex-wrap: wrap; gap: 12px; }
-  .scroll-nav { order: 3; width: 100%; justify-content: center; }
   .scroll-skills { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-}
-@media (max-width: 1400px) {
-  .scroll-portfolio .site-header { flex-wrap: wrap; gap: 12px; }
-  .scroll-portfolio .scroll-nav { order: 3; width: max-content; max-width: 100%; justify-content: flex-start; overflow-x: auto; padding: 5px; scroll-padding-inline: 5px; }
 }
 @media (max-width: 700px) {
   .portfolio-hero { min-height: auto; grid-template-columns: 1fr; padding-block: 48px; }
-  .scroll-section { padding-block: 36px; }
-  .scroll-nav { gap: 2px; justify-content: flex-start; overflow-x: auto; }
   .scroll-skills { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
   .scroll-skill { padding: 18px 12px; gap: 10px; }
   .astra-scroll-cta { flex-wrap: wrap; }
   .astra-scroll-cta .neon-cta { margin-left: 0; }
-  .scroll-portfolio [id] { scroll-margin-top: 210px; }
 }
 @media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
   html, .chat-messages { scroll-behavior: smooth; }

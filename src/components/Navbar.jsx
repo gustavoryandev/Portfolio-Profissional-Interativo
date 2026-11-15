@@ -10,18 +10,25 @@ import { isGaloTheme } from '../data/themes.js';
 import { PORTFOLIO_SECTIONS as portfolioLinks } from '../services/portfolioActions';
 export { portfolioLinks };
 
-export default function Navbar({ portfolio = false, activeSection }) {
+export default function Navbar({ ref, portfolio = false, activeSection, onSectionLink }) {
   const { openFull, returnPortfolio } = useAstra();
   const galo = isGaloTheme(useContext(ThemeContext)?.theme);
   const { i18n } = useTranslation();
   const en = i18n.language.startsWith('en');
-  return <header className="site-header sticky top-0 z-40 bg-white bg-opacity-70 backdrop-blur-lg dark:bg-zinc-950 dark:bg-opacity-70">
-    <a href={portfolio ? '#inicio' : '/'} onClick={portfolio ? undefined : returnPortfolio} className="brand-lockup" aria-label={en ? 'Gustavo Ryan — portfolio' : 'Gustavo Ryan — portfólio'}>
+  return <header ref={ref} className="site-header sticky top-0 z-40 bg-white bg-opacity-70 backdrop-blur-lg dark:bg-zinc-950 dark:bg-opacity-70">
+    <a href={portfolio ? '#inicio' : '/'} onClick={portfolio ? onSectionLink : returnPortfolio} className="brand-lockup" aria-label={en ? 'Gustavo Ryan — portfolio' : 'Gustavo Ryan — portfólio'}>
       <PortfolioLogo />
       <div><p className="brand-title">Gustavo Ryan</p><p>{portfolio ? (en ? 'Software Engineering' : 'Engenharia de Software') : (en ? '← Back to portfolio' : '← Voltar ao portfólio')}</p></div>
       {portfolio && galo && <span className="galo-brand-badge"><GaloCrest /></span>}
     </a>
-    {portfolio && <nav className="scroll-nav" aria-label={en ? 'Portfolio sections' : 'Seções do portfólio'}>{portfolioLinks.map(([id, pt, english]) => <a key={id} href={`#${id}`} aria-current={activeSection === id ? 'location' : undefined}>{en ? english : pt}</a>)}<a href="/chat" onClick={openFull} className="nav-astra">Astra <Sparkles size={14} aria-hidden="true" /></a></nav>}
+    {portfolio && <nav className="scroll-nav" aria-label={en ? 'Portfolio sections' : 'Seções do portfólio'}>
+      {portfolioLinks.map(([id, pt, english]) => (
+        <a key={id} href={`#${id}`} onClick={onSectionLink} aria-current={activeSection === id ? 'location' : undefined}>
+          {en ? english : pt}
+        </a>
+      ))}
+      <a href="/chat" onClick={openFull} className="nav-astra">Astra <Sparkles size={14} aria-hidden="true" /></a>
+    </nav>}
     <HeaderActions />
   </header>;
 }

@@ -107,8 +107,8 @@
   .scroll-portfolio .site-header {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
-    gap: 12px 24px;
-    padding-block: 12px;
+    gap: 6px 24px;
+    padding-block: 8px;
   }
   .scroll-portfolio .site-header .scroll-nav {
     grid-column: 1 / -1;
@@ -118,7 +118,10 @@
     max-width: 100%;
     margin-inline: auto;
     overflow-x: auto;
+    padding: 2px;
   }
+  .scroll-portfolio .site-header .scroll-nav a { min-height: 36px; padding-block: 5px; }
+  .scroll-portfolio .site-header .scroll-nav a:focus-visible { outline-offset: -2px; }
   .site-header .header-actions { grid-column: 2; grid-row: 1; }
 }
 @media (max-width: 767px) {

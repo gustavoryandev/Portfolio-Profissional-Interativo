@@ -4,7 +4,7 @@ import { Home, Code2, Sparkles, Menu, X } from 'lucide-react';
 import { HeaderActions, portfolioLinks } from './Navbar';
 import { sections } from './Sidebar';
 
-export default function MobileNav({ en, active, onSelect }) {
+export default function MobileNav({ en, active, onSelect, onSectionLink }) {
   const { openFull } = useAstra();
   const dialog = useRef(null);
   useEffect(() => {
@@ -22,7 +22,7 @@ export default function MobileNav({ en, active, onSelect }) {
         <button className={target} onClick={() => onSelect('projects')} aria-current={active === 'projects' ? 'page' : undefined}><Code2 size={20} aria-hidden="true" />{en ? 'Projects' : 'Projetos'}</button>
       </> : <>
         <a className={target} href="/chat" onClick={openFull}><Sparkles size={20} aria-hidden="true" />Astra</a>
-        <a className={target} href="#projetos"><Code2 size={20} aria-hidden="true" />{en ? 'Projects' : 'Projetos'}</a>
+        <a className={target} href="#projetos" onClick={onSectionLink}><Code2 size={20} aria-hidden="true" />{en ? 'Projects' : 'Projetos'}</a>
       </>}
       <button className={target} onClick={() => dialog.current.showModal()}><Menu size={20} aria-hidden="true" />Menu</button>
     </nav>
@@ -33,7 +33,12 @@ export default function MobileNav({ en, active, onSelect }) {
         {(chat ? sections : portfolioLinks).map(row => {
           const [id] = row;
           const label = chat ? row[en ? 3 : 2] : row[en ? 2 : 1];
-          return chat ? <button key={id} className={target} aria-current={active === id ? 'page' : undefined} onClick={() => { onSelect(id); dialog.current.close(); }}>{label}</button> : <a key={id} className={target} href={`#${id}`} onClick={() => dialog.current.close()}>{label}</a>;
+          return chat ? <button key={id} className={target} aria-current={active === id ? 'page' : undefined} onClick={() => { onSelect(id); dialog.current.close(); }}>{label}</button> : (
+            <a key={id} className={target} href={`#${id}`} onClick={event => {
+              dialog.current.close();
+              onSectionLink?.(event);
+            }}>{label}</a>
+          );
         })}
       </nav>
       <div className="mt-5 border-t border-line pt-5"><HeaderActions /></div>

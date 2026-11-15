@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { useContext, useLayoutEffect, useRef } from 'react';
 import SkillsGlobe from '../components/SkillsGlobe';
 import { useAstra } from '../context/AstraContext';
 import { ThemeContext } from '../context/ThemeContext';
@@ -17,15 +17,29 @@ import AstraAvatar from '../components/AstraAvatar';
 import perfil from '../data/perfil.json';
 import { isGaloTheme } from '../data/themes.js';
 
-export default function PortfolioPage({ activeSection, projectFocus }) {
+export default function PortfolioPage({ activeSection, projectFocus, onSectionLink }) {
   const { openAstra, openFull } = useAstra();
   const galo = isGaloTheme(useContext(ThemeContext)?.theme);
   const { i18n } = useTranslation();
   const en = i18n.language.startsWith('en');
-  return <div className="portfolio-app scroll-portfolio">
+  const pageRef = useRef(null);
+  const headerRef = useRef(null);
+
+  useLayoutEffect(() => {
+    const page = pageRef.current;
+    const header = headerRef.current;
+    const measure = () => page.style.setProperty('--portfolio-header-height', `${header.offsetHeight}px`);
+    measure();
+    if (typeof ResizeObserver === 'undefined') return;
+    const observer = new ResizeObserver(measure);
+    observer.observe(header, { box: 'border-box' });
+    return () => observer.disconnect();
+  }, []);
+
+  return <div ref={pageRef} className="portfolio-app scroll-portfolio">
     <a className="skip-link" href="#main-content">{en ? 'Skip to content' : 'Pular para o conteúdo'}</a>
-    <Navbar portfolio activeSection={activeSection} />
-    <MobileNav en={en} />
+    <Navbar ref={headerRef} portfolio activeSection={activeSection} onSectionLink={onSectionLink} />
+    <MobileNav en={en} onSectionLink={onSectionLink} />
     <main id="main-content" tabIndex={-1} className="scroll-content">
       <section id="inicio" className="portfolio-hero" aria-labelledby="hero-title">
         {galo && <GaloCrest className="hero-galo-watermark" />}
@@ -36,7 +50,7 @@ export default function PortfolioPage({ activeSection, projectFocus }) {
           <p className="hero-description">{en ? 'Java, Spring Boot and React. Explore my projects, skills and the journey behind the code.' : 'Java, Spring Boot e React. Explore meus projetos, habilidades e a trajetória por trás do código.'}</p>
           <div className="hero-actions">
             {galo && <a className="neon-cta" href="/chat" onClick={openFull}><Sparkles size={18} aria-hidden="true" />{en ? 'Talk to Astra' : 'Conversar com Astra'}<ArrowUpRight size={18} aria-hidden="true" /></a>}
-            <a className={galo ? 'scroll-secondary' : 'neon-cta'} href="#projetos">{en ? 'Explore projects' : 'Explorar projetos'}<ArrowDown size={17} aria-hidden="true" /></a>
+            <a className={galo ? 'scroll-secondary' : 'neon-cta'} href="#projetos" onClick={onSectionLink}>{en ? 'Explore projects' : 'Explorar projetos'}<ArrowDown size={17} aria-hidden="true" /></a>
           </div>
           <SocialLinks />
         </ScrollReveal>
@@ -81,7 +95,7 @@ export default function PortfolioPage({ activeSection, projectFocus }) {
       {['experience', 'education', 'contact'].map(section => <div key={section} id={section === 'contact' ? 'contato' : section} className="scroll-section"><ScrollReveal><PortfolioSection active={section} en={en} /></ScrollReveal></div>)}
       <ScrollReveal><section className="glass-panel astra-scroll-cta" aria-labelledby="astra-cta-title"><AstraAvatar width="64" height="64" /><div><h2 id="astra-cta-title">{en ? 'Curious about my work?' : 'Quer conhecer melhor meu trabalho?'}</h2><p>{en ? 'Astra can guide you through my projects and live integrations.' : 'A Astra te guia pelos projetos e pelas integrações ao vivo.'}</p></div><a href="/chat" onClick={openFull} className="neon-cta">{en ? 'Talk to Astra' : 'Conversar com Astra'}<ArrowUpRight size={18} aria-hidden="true" /></a></section></ScrollReveal>
     </main>
-    <aside aria-label="Astra"><button type="button" className="astra-fab" onClick={openAstra} aria-haspopup="dialog"><AstraAvatar />{en ? 'Ask Astra' : 'Perguntar pra Astra'}</button></aside>
+    <aside className="astra-fab-shortcut" aria-label="Astra"><button type="button" className="astra-fab" onClick={openAstra} aria-haspopup="dialog"><AstraAvatar />{en ? 'Ask Astra' : 'Perguntar pra Astra'}</button></aside>
     <footer className="scroll-footer"><span>© {new Date().getFullYear()} Gustavo Ryan</span><a href="#inicio">{en ? 'Back to top ↑' : 'Voltar ao topo ↑'}</a></footer>
   </div>;
 }
