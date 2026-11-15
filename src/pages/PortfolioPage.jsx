@@ -1,10 +1,10 @@
-import { useContext, useLayoutEffect, useRef } from 'react';
+import { useContext, useLayoutEffect, useRef, useState } from 'react';
 import SkillsGlobe from '../components/SkillsGlobe';
 import { useAstra } from '../context/AstraContext';
 import { ThemeContext } from '../context/ThemeContext';
 import { ArrowDown, ArrowUpRight, MapPin, Sparkles } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import Navbar from '../components/Navbar';
+import Navbar, { portfolioLinks } from '../components/Navbar';
 import MobileNav from '../components/MobileNav';
 import ProjectsScrollSection from '../components/ProjectsScrollSection';
 import CodePlayground from '../components/CodePlayground';
@@ -24,22 +24,55 @@ export default function PortfolioPage({ activeSection, projectFocus, onSectionLi
   const en = i18n.language.startsWith('en');
   const pageRef = useRef(null);
   const headerRef = useRef(null);
+  const [visibleSection, setVisibleSection] = useState(() => (
+    portfolioLinks.some(([id]) => id === activeSection) ? activeSection : 'inicio'
+  ));
 
   useLayoutEffect(() => {
     const page = pageRef.current;
     const header = headerRef.current;
-    const measure = () => page.style.setProperty('--portfolio-header-height', `${header.offsetHeight}px`);
+    const sections = portfolioLinks.map(([id]) => page.querySelector(`#${id}`));
+    let frame = null;
+
+    function updateSection() {
+      frame = null;
+      if (!header.offsetHeight) return;
+
+      const viewportHeight = window.innerHeight;
+      // Match the anchor clearance and allow for fractional scroll positions.
+      const readingLine = Math.min(viewportHeight, header.getBoundingClientRect().bottom + 17);
+      const atBottom = window.scrollY > 0 && window.scrollY + viewportHeight >= document.documentElement.scrollHeight - 1;
+      const section = atBottom ? sections.at(-1) : sections.findLast(node => node.getBoundingClientRect().top <= readingLine);
+      setVisibleSection(section?.id ?? 'inicio');
+    }
+
+    function scheduleUpdate() {
+      if (frame === null) frame = requestAnimationFrame(updateSection);
+    }
+
+    function measure() {
+      page.style.setProperty('--portfolio-header-height', `${header.offsetHeight}px`);
+      scheduleUpdate();
+    }
+
     measure();
-    if (typeof ResizeObserver === 'undefined') return;
-    const observer = new ResizeObserver(measure);
-    observer.observe(header, { box: 'border-box' });
-    return () => observer.disconnect();
+    window.addEventListener('scroll', scheduleUpdate, { passive: true });
+    window.addEventListener('resize', measure);
+    const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(measure);
+    observer?.observe(header, { box: 'border-box' });
+    observer?.observe(page);
+    return () => {
+      window.removeEventListener('scroll', scheduleUpdate);
+      window.removeEventListener('resize', measure);
+      observer?.disconnect();
+      if (frame !== null) cancelAnimationFrame(frame);
+    };
   }, []);
 
   return <div ref={pageRef} className="portfolio-app scroll-portfolio">
     <a className="skip-link" href="#main-content">{en ? 'Skip to content' : 'Pular para o conteúdo'}</a>
-    <Navbar ref={headerRef} portfolio activeSection={activeSection} onSectionLink={onSectionLink} />
-    <MobileNav en={en} onSectionLink={onSectionLink} />
+    <Navbar ref={headerRef} portfolio activeSection={visibleSection} onSectionLink={onSectionLink} />
+    <MobileNav en={en} active={visibleSection} onSectionLink={onSectionLink} />
     <main id="main-content" tabIndex={-1} className="scroll-content">
       <section id="inicio" className="portfolio-hero" aria-labelledby="hero-title">
         {galo && <GaloCrest className="hero-galo-watermark" />}

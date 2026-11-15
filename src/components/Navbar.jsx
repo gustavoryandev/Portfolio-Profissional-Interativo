@@ -15,6 +15,7 @@ export default function Navbar({ ref, portfolio = false, activeSection, onSectio
   const galo = isGaloTheme(useContext(ThemeContext)?.theme);
   const { i18n } = useTranslation();
   const en = i18n.language.startsWith('en');
+  const sectionLabel = portfolioLinks.find(([id]) => id === activeSection)?.[en ? 2 : 1];
   return <header ref={ref} className="site-header sticky top-0 z-40 bg-white bg-opacity-70 backdrop-blur-lg dark:bg-zinc-950 dark:bg-opacity-70">
     <a href={portfolio ? '#inicio' : '/'} onClick={portfolio ? onSectionLink : returnPortfolio} className="brand-lockup" aria-label={en ? 'Gustavo Ryan — portfolio' : 'Gustavo Ryan — portfólio'}>
       <PortfolioLogo />
@@ -29,6 +30,7 @@ export default function Navbar({ ref, portfolio = false, activeSection, onSectio
       ))}
       <a href="/chat" onClick={openFull} className="nav-astra">Astra <Sparkles size={14} aria-hidden="true" /></a>
     </nav>}
+    {portfolio && sectionLabel && <span className="mobile-current-section">{sectionLabel}</span>}
     <HeaderActions />
   </header>;
 }

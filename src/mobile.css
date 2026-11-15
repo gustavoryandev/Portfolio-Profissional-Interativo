@@ -2,6 +2,11 @@
    New navigation uses mobile-first Tailwind utilities in MobileNav.jsx. */
 .mobile-menu::backdrop { background: rgb(0 0 0 / .65); }
 .mobile-nav [aria-current="page"] { color: var(--accent); background: var(--panel-soft); }
+:is(.mobile-nav, .mobile-menu) [aria-current="location"] {
+  color: var(--ink);
+  background: rgb(var(--brand-400) / .16);
+  box-shadow: inset 0 0 0 1px rgb(var(--brand-400) / .3);
+}
 @media (min-width: 768px) {
   .mobile-nav, .mobile-menu { display: none; }
 }
