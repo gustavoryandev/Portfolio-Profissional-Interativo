@@ -157,6 +157,23 @@
   --wave-glow: #3E9089;
 }
 
+:root[data-theme="floresta-mineral"], .menu-option[data-preview="floresta-mineral"] {
+  --palette-bg: #16261C;
+  --palette-surface: #203026;
+  --palette-primary: #94DDB0;
+  --palette-on-primary: #080808;
+  --palette-accent: #C5E794;
+  --palette-text: #EAEBEB;
+  --palette-muted: #B8BCBA;
+  --palette-border: #495E42;
+  --palette-tint: 32 48 38;
+  --palette-accent-rgb: 197 231 148;
+  --palette-primary-rgb: 148 221 176;
+  --wave-one: var(--palette-primary);
+  --wave-two: #C5E794;
+  --wave-glow: #518F68;
+}
+
 :root[data-theme="ardosia-cobalto"], .menu-option[data-preview="ardosia-cobalto"] {
   --palette-bg: #E7EDF5;
   --palette-surface: #F7F9FD;
