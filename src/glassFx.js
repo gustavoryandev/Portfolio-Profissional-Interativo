@@ -2,11 +2,11 @@ import { STATIC_MOTION_QUERY } from './motionPreferences.js';
 
 // Delegation also covers cards added by chat replies and project filters.
 const TARGETS = '.portfolio-card, .profile-card, .project-tile';
-const SLIDES = '.projects-scroll-section [data-project-slide]';
+const REVEALS = '.scroll-reveal, .projects-scroll-section [data-project-slide]';
 
 export function installGlassEffects(win) {
   const doc = win.document;
-  const reduced = win.matchMedia(STATIC_MOTION_QUERY);
+  const staticMotion = win.matchMedia(STATIC_MOTION_QUERY);
   let frame = 0;
   let pending;
   let active;
@@ -19,7 +19,7 @@ export function installGlassEffects(win) {
     active = null;
   };
   const move = event => {
-    if (event.pointerType !== 'mouse' || reduced.matches || doc.hidden) return;
+    if (event.pointerType !== 'mouse' || staticMotion.matches || doc.hidden) return;
     const card = event.target.closest?.(TARGETS);
     if (!card) { clear(); return; }
     if (active !== card) { clear(); active = card; }
@@ -38,36 +38,50 @@ export function installGlassEffects(win) {
     if (active && !active.contains(event.relatedTarget)) clear();
   };
   const intersection = win.IntersectionObserver ? new win.IntersectionObserver(entries => {
+    if (staticMotion.matches) return;
     for (const entry of entries) {
-      entry.target.classList.toggle('gn-in-view', entry.isIntersecting);
+      const { target, isIntersecting } = entry;
+      if (!target.classList.contains('gn-reveal-ready')) continue;
+      const once = target.classList.contains('scroll-reveal');
+      if (once && target.classList.contains('gn-in-view')) continue;
+      target.classList.toggle('gn-in-view', isIntersecting);
+      if (isIntersecting && once) intersection.unobserve(target);
     }
-  }, { threshold: .08 }) : null;
+  }) : null;
+  const revealNodes = node => {
+    const targets = [...node.querySelectorAll(REVEALS)];
+    if (node.matches(REVEALS)) targets.unshift(node);
+    return targets;
+  };
   const observe = node => {
-    if (!intersection || reduced.matches || node.nodeType !== 1) return;
-    const slides = [...node.querySelectorAll(SLIDES)];
-    if (node.matches(SLIDES)) slides.unshift(node);
-    for (const slide of slides) {
-      if (slide.classList.contains('gn-reveal-ready')) continue;
-      slide.classList.add('gn-reveal-ready');
-      intersection.observe(slide);
+    if (node.nodeType !== 1 || !node.isConnected) return;
+    for (const target of revealNodes(node)) {
+      if (target.classList.contains('gn-reveal-ready')) continue;
+      target.classList.add('gn-reveal-ready');
+      intersection.observe(target);
     }
+  };
+  const resetReveals = () => {
+    intersection?.disconnect();
+    doc.querySelectorAll('.gn-reveal-ready').forEach(target => target.classList.remove('gn-reveal-ready', 'gn-in-view'));
   };
   const mutations = new win.MutationObserver(records => {
     for (const record of records) {
       for (const node of record.addedNodes) observe(node);
       for (const node of record.removedNodes) {
         if (node.nodeType !== 1 || node.isConnected) continue;
-        if (node.matches('[data-project-slide]')) intersection?.unobserve(node);
-        node.querySelectorAll('[data-project-slide]').forEach(slide => intersection?.unobserve(slide));
+        for (const target of revealNodes(node)) {
+          intersection.unobserve(target);
+          target.classList.remove('gn-reveal-ready', 'gn-in-view');
+        }
       }
     }
   });
   const preference = () => {
     clear();
-    if (reduced.matches) {
+    if (staticMotion.matches) {
       mutations.disconnect();
-      intersection?.disconnect();
-      doc.querySelectorAll('.gn-reveal-ready').forEach(slide => slide.classList.remove('gn-reveal-ready', 'gn-in-view'));
+      resetReveals();
     } else if (intersection) {
       mutations.observe(doc.documentElement, { childList: true, subtree: true });
       observe(doc.documentElement);
@@ -77,16 +91,15 @@ export function installGlassEffects(win) {
   win.addEventListener('pointermove', move, { passive: true });
   win.addEventListener('pointerout', out, { passive: true });
   doc.addEventListener('visibilitychange', clear);
-  reduced.addEventListener('change', preference);
+  staticMotion.addEventListener('change', preference);
   return () => {
     clear();
     mutations.disconnect();
-    intersection?.disconnect();
+    resetReveals();
     win.removeEventListener('pointermove', move);
     win.removeEventListener('pointerout', out);
     doc.removeEventListener('visibilitychange', clear);
-    reduced.removeEventListener('change', preference);
-    doc.querySelectorAll('.gn-reveal-ready').forEach(slide => slide.classList.remove('gn-reveal-ready', 'gn-in-view'));
+    staticMotion.removeEventListener('change', preference);
   };
 }
 

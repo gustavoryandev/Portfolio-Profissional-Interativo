@@ -377,7 +377,7 @@ a.tile:hover, .tile--hover:hover, .stat-tile:hover {
 }
 
 /* ── Acessibilidade e fallback ────────────────────────────────────── */
-/* Current scroll home: keep its Framer reveals and sticky runway independent. */
+/* Keep the scroll portfolio's reveals separate from the chat panel entrances. */
 .scroll-content, .scroll-footer { position: relative; z-index: 1; }
 .projects-card .glass-panel { -webkit-backdrop-filter: none; backdrop-filter: none; }
 .scroll-portfolio .scroll-reveal > .portfolio-section { animation: none; }
@@ -387,13 +387,6 @@ a.tile:hover, .tile--hover:hover, .stat-tile:hover {
 .scroll-portfolio .neon-cta:hover,
 .scroll-portfolio .neon-cta:focus-visible {
   box-shadow: 0 0 32px -6px rgb(var(--neon-rgb) / var(--neon-strength));
-}
-@media (prefers-reduced-motion: no-preference) {
-  .projects-scroll-section .gn-reveal-ready:not(.gn-in-view):not(:focus-within) { opacity: 0; }
-  .projects-scroll-section .gn-in-view > .project-tile {
-    --gn-y: 16px; --gn-rx: 10deg;
-    animation: gn-panel-in .6s var(--gn-ease) backwards;
-  }
 }
 @supports not ((mask-composite: exclude) or (-webkit-mask-composite: xor)) {
   .glass-panel::before { display: none; }

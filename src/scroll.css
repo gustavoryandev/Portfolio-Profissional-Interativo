@@ -132,8 +132,26 @@
 }
 @media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
   html, .chat-messages { scroll-behavior: smooth; }
+  .gn-reveal-ready {
+    --scroll-reveal-distance: 8px;
+    --scroll-reveal-duration: 260ms;
+  }
+  .gn-reveal-ready:not(.gn-in-view):not(:focus-within) { opacity: 0; }
+  .gn-in-view:not(:has(:focus-visible)) {
+    animation: scroll-reveal-in var(--scroll-reveal-duration) cubic-bezier(.22, 1, .36, 1) var(--scroll-reveal-delay, 0s) backwards;
+  }
+}
+@media (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
+  .gn-reveal-ready {
+    --scroll-reveal-distance: 14px;
+    --scroll-reveal-duration: 340ms;
+  }
+}
+.projects-scroll-section [data-project-slide] { --scroll-reveal-distance: 0px; }
+@keyframes scroll-reveal-in {
+  from { opacity: 0; transform: translateY(var(--scroll-reveal-distance)); }
+  to { opacity: 1; transform: translateY(0); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .scroll-portfolio .scroll-reveal { opacity: 1 !important; transform: none !important; }
   .scroll-portfolio *, .scroll-portfolio *::before, .scroll-portfolio *::after { transition: none !important; }
 }
