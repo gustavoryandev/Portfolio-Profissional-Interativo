@@ -72,14 +72,14 @@ export default function ContactSection({ lang = 'pt', variant = 'chat' }) {
     className={`portfolio-card contact-card card-surface mt-2 w-full min-w-0 p-5 sm:p-6 ${variant === 'chat' ? 'max-w-md' : ''}`}>
     <div className="mb-4 flex items-center gap-3"><Mail size={24} className="shrink-0 text-brand-400" aria-hidden="true" />
       <h3 id={`${id}-title`} className="card-heading">{t.title}</h3></div>
-    <p className="mb-4 text-sm text-[var(--muted)]">{t.note}</p>
+    <p className="mb-4 text-base text-[var(--muted)]">{t.note}</p>
     <fieldset disabled={locked} className="min-w-0 space-y-4">
       {['name', 'email', 'subject', 'message'].map(key => {
         const props = { id: `${id}-${key}`, name: key, required: true, value: fields[key],
           minLength: key === 'name' ? 2 : key === 'subject' ? 3 : key === 'message' ? 10 : undefined,
           maxLength: { name: 100, email: 254, subject: 160, message: 5000 }[key],
           onChange: event => setFields(previous => ({ ...previous, [key]: event.target.value })),
-          className: 'mt-1 w-full rounded-xl border border-[var(--line)] bg-[var(--panel-soft)] p-3 text-[var(--ink)] outline-none focus-visible:ring-2 focus-visible:ring-brand-400 disabled:opacity-70',
+          className: 'contact-field mt-1 w-full rounded-xl border bg-[var(--panel-soft)] p-3 text-[var(--ink)] disabled:opacity-70',
         };
         return <div key={key}><label htmlFor={props.id} className="text-sm font-medium">{t[key]}</label>
           {key === 'message' ? <textarea {...props} rows={5} />
@@ -95,7 +95,7 @@ export default function ContactSection({ lang = 'pt', variant = 'chat' }) {
       {result?.reference && <p className="mt-2 break-all">{t.reference}: {result.reference}</p>}
     </div>
     {status !== 'sent' && result?.code !== 'delivery_unknown' && <button type="submit" disabled={status === 'loading'}
-      className="contact-submit mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-3 py-3 font-semibold text-white transition-colors hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-400 disabled:cursor-wait disabled:opacity-60">
+      className="contact-submit mt-4 flex w-full items-center justify-center gap-2 rounded-xl px-3 py-3 font-semibold transition-colors disabled:cursor-wait disabled:opacity-60">
       {status === 'loading' ? <LoaderCircle size={18} className="animate-spin" aria-hidden="true" /> : <Send size={18} aria-hidden="true" />}
       {status === 'loading' ? t.sending : status === 'error' ? t.retry : t.send}</button>}
   </form>;
