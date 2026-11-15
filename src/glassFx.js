@@ -1,10 +1,12 @@
+import { STATIC_MOTION_QUERY } from './motionPreferences.js';
+
 // Delegation also covers cards added by chat replies and project filters.
 const TARGETS = '.portfolio-card, .profile-card, .project-tile';
 const SLIDES = '.projects-scroll-section [data-project-slide]';
 
 export function installGlassEffects(win) {
   const doc = win.document;
-  const reduced = win.matchMedia('(prefers-reduced-motion: reduce)');
+  const reduced = win.matchMedia(STATIC_MOTION_QUERY);
   let frame = 0;
   let pending;
   let active;
@@ -60,15 +62,18 @@ export function installGlassEffects(win) {
       }
     }
   });
-  mutations.observe(doc.documentElement, { childList: true, subtree: true });
-  observe(doc.documentElement);
   const preference = () => {
     clear();
     if (reduced.matches) {
+      mutations.disconnect();
       intersection?.disconnect();
-      doc.querySelectorAll('.gn-reveal-ready').forEach(slide => slide.classList.add('gn-in-view'));
+      doc.querySelectorAll('.gn-reveal-ready').forEach(slide => slide.classList.remove('gn-reveal-ready', 'gn-in-view'));
+    } else if (intersection) {
+      mutations.observe(doc.documentElement, { childList: true, subtree: true });
+      observe(doc.documentElement);
     }
   };
+  preference();
   win.addEventListener('pointermove', move, { passive: true });
   win.addEventListener('pointerout', out, { passive: true });
   doc.addEventListener('visibilitychange', clear);

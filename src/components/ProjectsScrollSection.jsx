@@ -27,7 +27,7 @@ export default function ProjectsScrollSection({ projectFocus }) {
       track.scrollLeft = position;
       meter.style.transform = `scaleX(${distance ? position / distance : 1})`;
     };
-    const schedule = () => { if (!frame) frame = requestAnimationFrame(update); };
+    const schedule = () => { if (pinned && !frame) frame = requestAnimationFrame(update); };
     const measure = () => {
       top = (header?.getBoundingClientRect().height || 0) + 12;
       section.style.setProperty('--projects-pin-top', `${top}px`);

@@ -123,7 +123,7 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
     const container = messagesContainerRef.current;
     if (!visible || !container || !compact || !followOutput.current || fullCardTarget.current) return undefined;
     const id = setTimeout(() => {
-      container.scrollTo({ top: container.scrollHeight, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+      container.scrollTo({ top: container.scrollHeight, behavior: 'auto' });
     }, 100);
     return () => clearTimeout(id);
   }, [messages.length, loading, compact, visible]);

@@ -42,7 +42,9 @@ test('spotlight batches pointer updates, respects reduced motion and cleans up',
 test('horizontal cards reveal on intersection, including dynamically mounted cards', async () => {
   const dom = new JSDOM('<section class="projects-scroll-section"><div data-project-slide></div></section>');
   const win = dom.window;
-  win.matchMedia = () => ({ matches: false, addEventListener() {}, removeEventListener() {} });
+  let preferenceChanged;
+  const preference = { matches: true, addEventListener(_, callback) { preferenceChanged = callback; }, removeEventListener() {} };
+  win.matchMedia = () => preference;
   const observed = new Set();
   let notify;
   win.IntersectionObserver = class {
@@ -54,6 +56,10 @@ test('horizontal cards reveal on intersection, including dynamically mounted car
   win.cancelAnimationFrame = () => {};
   const dispose = installGlassEffects(win);
   const first = win.document.querySelector('[data-project-slide]');
+  assert.equal(observed.size, 0, 'static viewports skip observation');
+  assert.equal(first.classList.contains('gn-reveal-ready'), false);
+  preference.matches = false;
+  preferenceChanged();
   assert.ok(observed.has(first));
   notify([{ target: first, isIntersecting: true }]);
   assert.ok(first.classList.contains('gn-in-view'));
@@ -67,6 +73,10 @@ test('horizontal cards reveal on intersection, including dynamically mounted car
   first.parentElement.append(next);
   await new Promise(resolve => setTimeout(resolve, 0));
   assert.ok(observed.has(next));
+  preference.matches = true;
+  preferenceChanged();
+  assert.equal(observed.size, 0);
+  assert.equal(next.classList.contains('gn-reveal-ready'), false);
   dispose();
   assert.equal(observed.size, 0);
   assert.equal(first.classList.contains('gn-reveal-ready'), false);

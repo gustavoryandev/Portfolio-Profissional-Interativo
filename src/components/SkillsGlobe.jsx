@@ -1,11 +1,17 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Pause, Play } from 'lucide-react';
 import LanguageIcon from './LanguageIcon';
+import useMobileLayout from '../hooks/useMobileLayout';
 
 const GOLDEN_ANGLE = Math.PI * (3 - Math.sqrt(5));
 const spherePoint = (latitude, longitude) => [Math.cos(latitude) * Math.cos(longitude), Math.sin(latitude), Math.cos(latitude) * Math.sin(longitude)];
 
-export default function SkillsGlobe({ skills, en = false }) {
+export default function SkillsGlobe(props) {
+  const mobile = useMobileLayout();
+  return mobile ? null : <InteractiveSkillsGlobe {...props} />;
+}
+
+function InteractiveSkillsGlobe({ skills, en = false }) {
   const stage = useRef(null);
   const items = useRef([]);
   const mesh = useRef(null);

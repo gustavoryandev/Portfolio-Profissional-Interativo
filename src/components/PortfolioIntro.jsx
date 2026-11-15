@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import useEntranceInteraction from '../hooks/useEntranceInteraction';
 import PortfolioLogo from './PortfolioLogo';
+import { STATIC_MOTION_QUERY } from '../motionPreferences';
 
 function shouldPlay() {
+  if (!window.matchMedia || window.matchMedia(STATIC_MOTION_QUERY).matches) return false;
   if (new URLSearchParams(window.location.search).get('intro') === '1') return true;
-  return Boolean(window.matchMedia) && !window.matchMedia('(max-width: 767px), (prefers-reduced-motion: reduce)').matches && !window.location.hash;
+  return !window.location.hash;
 }
 
 export default function PortfolioIntro({ children, en }) {
@@ -21,7 +23,7 @@ export default function PortfolioIntro({ children, en }) {
       setPlaying(false);
     };
     const timer = setTimeout(finish, 2200);
-    const media = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const media = window.matchMedia(STATIC_MOTION_QUERY);
     const preference = () => { if (media.matches) finish(); };
     const key = event => { if (event.key === 'Escape') finish(); };
     const skip = button.current;

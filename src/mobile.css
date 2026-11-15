@@ -5,7 +5,16 @@
 @media (min-width: 768px) {
   .mobile-nav, .mobile-menu { display: none; }
 }
-@media (max-width: 767px) {
+@media (width < 768px) {
+  html {
+    scroll-behavior: auto;
+  }
+  #root, #root *, #root *::before, #root *::after, #root dialog::backdrop {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+  .portfolio-skill-visuals:empty { display: none; }
   :root, .dark {
     --glass-blur: 6px;
     --glass-alpha: .94;
@@ -88,7 +97,6 @@
   .astra-chat-page .astra-fab { display: none; }
   .glass-panel:is(.sidebar, .center-panel, .profile-card) { backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
   .portfolio-app .glass-panel:hover { box-shadow: var(--glass-shadow); }
-  .portfolio-app :is(.astra-hero, .astra-wordmark, .astra-starters > li, .chat-msg-in, .message-card, .portfolio-section, .project-tile) { animation: none !important; }
   .projects-scroll-section .gn-reveal-ready:not(.gn-in-view):not(:focus-within) { opacity: 1; }
 }
 @media (max-width: 767px) and (prefers-reduced-transparency: reduce) {

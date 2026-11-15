@@ -5,6 +5,7 @@ import PortfolioIntro from './components/PortfolioIntro';
 import AstraEntrance from './components/AstraEntrance';
 import { AstraContext } from './context/AstraContext';
 import useMobileViewport from './hooks/useMobileViewport';
+import useMobileLayout from './hooks/useMobileLayout';
 import { ThemeContext } from './context/ThemeContext';
 import { createLaboratory } from './services/laboratory';
 import { createAstraActionEngine } from './services/astraActionEngine';
@@ -41,8 +42,12 @@ export default function App() {
   const trigger = useRef(null);
   const scroll = useRef(0);
   const full = path === '/chat';
-  const showIntro = full && !introSeen;
+  const mobile = useMobileLayout();
+  const showIntro = full && !introSeen && !mobile;
   const finishIntro = useCallback(() => setIntroSeen(true), []);
+  useEffect(() => {
+    if (full && mobile) finishIntro();
+  }, [full, mobile, finishIntro]);
   const portfolioVisited = useRef(!full);
   if (!full) portfolioVisited.current = true;
   const close = () => { dialog.current?.close(); setOpened(false); };
