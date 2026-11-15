@@ -23,7 +23,7 @@ export default function EducationSection({ en = false }) {
           </header>
           <p className="my-5 text-sm leading-relaxed text-[var(--muted)]">{education.descricao[lang]}</p>
           <div className="border-t border-[var(--line)] pt-4"><h4 className="mb-3 text-xs font-semibold text-[var(--ink)]">{technical ? (en ? 'Stacks and tools I am developing' : 'Stacks e ferramentas que desenvolvo') : (en ? 'Skills developed at school and through futsal' : 'Competências desenvolvidas na escola e no futsal')}</h4>
-            <ul className="m-0 flex list-none flex-wrap gap-2 p-0">{technical ? perfil.skills.map(skill => <li key={skill.nome} className="flex items-center gap-1.5 rounded-lg border border-[var(--line)] bg-[var(--panel-soft)] px-2.5 py-2 text-xs text-[var(--ink)]"><LanguageIcon name={skill.nome} size={15} className={skill.nome === 'GitHub' ? 'dark:invert' : ''} />{skill.nome}</li>) : education.habilidades.map(skill => <li key={skill.pt} className="rounded-lg border border-[var(--line)] bg-[var(--panel-soft)] px-2.5 py-2 text-xs text-[var(--ink)]">{skill[lang]}</li>)}</ul>
+            <ul className="m-0 flex list-none flex-wrap gap-2 p-0">{technical ? perfil.skills.map(skill => <li key={skill.nome} className="flex items-center gap-1.5 rounded-lg border border-[var(--line)] bg-[var(--panel-soft)] px-2.5 py-2 text-xs text-[var(--ink)]"><LanguageIcon name={skill.nome} size={15} />{skill.nome}</li>) : education.habilidades.map(skill => <li key={skill.pt} className="rounded-lg border border-[var(--line)] bg-[var(--panel-soft)] px-2.5 py-2 text-xs text-[var(--ink)]">{skill[lang]}</li>)}</ul>
           </div>
         </div>
       </article>;

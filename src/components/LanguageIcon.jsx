@@ -5,6 +5,7 @@ import { getLanguageIcon } from '../data/languageIcons';
 // Decorative: every consumer already displays the language name alongside it.
 export default function LanguageIcon({ name, size = 20, color = 'currentColor', className = '' }) {
   const src = getLanguageIcon(name);
+  const contrast = src === '/icons/github.svg' ? 'dark:invert' : '';
   const [failedSrc, setFailedSrc] = useState(null);
 
   if (!src || failedSrc === src) {
@@ -17,7 +18,7 @@ export default function LanguageIcon({ name, size = 20, color = 'currentColor', 
     aria-hidden="true"
     width={size}
     height={size}
-    className={`shrink-0 object-contain ${className}`}
+    className={`shrink-0 object-contain ${contrast} ${className}`}
     style={{ width: size, height: size }}
     decoding="async"
     onError={() => setFailedSrc(src)}
