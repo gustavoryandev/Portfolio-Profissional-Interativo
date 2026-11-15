@@ -111,9 +111,11 @@ export default function AstraResources({ open, compact, disabled, triggerRef, on
   ];
   const groups = [
     ['versions', compact ? [identifyVersion, openFullVersion] : [identifyVersion]],
-    ['arcade', arcadeItems],
-    ['portfolio', portfolioActions], ['laboratory', labActions],
-    ...(!compact ? [['integrations', integrations]] : [])];
+    compact ? ['arcade', arcadeItems] : ['integrations', integrations],
+    ['portfolio', portfolioActions],
+    ['laboratory', labActions],
+    ...(compact ? [] : [['arcade', arcadeItems]]),
+  ];
 
   return (
     <dialog id={ASTRA_RESOURCES_ID} ref={panelRef} className="astra-resources"
