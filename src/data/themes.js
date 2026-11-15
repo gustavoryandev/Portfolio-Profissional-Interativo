@@ -7,6 +7,7 @@ export const themes = [
   { id: 'midnight-violet', name: 'Midnight Violet' },
   { id: 'papel-violeta', name: 'Papel violeta', light: true },
   { id: 'midnight-pink', name: 'Midnight Pink' },
+  { id: 'quartzo-framboesa', name: 'Quartzo framboesa', light: true },
   { id: 'ardosia-cobalto', name: 'Ardósia e Cobalto', light: true },
   { id: 'petroleo-gelo', name: 'Petróleo e Gelo', light: true },
 ];
