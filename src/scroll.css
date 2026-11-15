@@ -55,7 +55,7 @@
 .portfolio-hero h1 { font-size: clamp(64px, 8vw, 112px); font-weight: 750; letter-spacing: -.07em; line-height: .98; }
 .neon-title { color: var(--accent); filter: drop-shadow(0 0 22px rgb(var(--brand-400) / .2)); }
 .hero-lead { margin-top: 28px; max-width: 28ch; font-size: clamp(20px, 2vw, 26px); line-height: 1.45; letter-spacing: -.02em; }
-.hero-description { margin-top: 18px; max-width: 48ch; color: var(--muted); font-size: 15px; line-height: 1.8; }
+.hero-description { margin-top: 18px; max-width: 48ch; color: var(--muted); font-size: 16px; line-height: 1.7; }
 .hero-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 22px; margin-block: 30px; }
 .neon-cta, .scroll-secondary { display: inline-flex; align-items: center; justify-content: center; gap: 10px; font-size: 14px; font-weight: 600; }
 .neon-cta { border: 1px solid rgb(var(--brand-400) / .65); border-radius: 12px; padding: 14px 20px; background: var(--primary); color: #fff; box-shadow: 0 4px 24px -8px rgb(var(--brand-400) / .35); transition: transform 180ms ease, box-shadow 180ms ease; }
@@ -72,7 +72,7 @@
 .scroll-section .section-eyebrow { margin-bottom: 16px; }
 .about-scroll {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(220px, .38fr);
+  grid-template-columns: minmax(0, 1fr);
   align-items: center;
   gap: clamp(24px, 4vw, 48px);
   padding: clamp(24px, 4vw, 48px);
@@ -80,17 +80,20 @@
 .about-summary {
   display: grid;
   gap: 24px;
-  padding-left: clamp(24px, 3vw, 36px);
-  border-left: 1px solid var(--line);
 }
 .about-summary dt { color: var(--accent); font-size: 12px; font-weight: 600; margin-bottom: 6px; }
 .about-summary dd { color: var(--ink); font-size: 15px; line-height: 1.5; font-weight: 600; }
 .about-summary dd span { display: block; color: var(--muted); font-size: 14px; font-weight: 400; margin-top: 3px; }
 @media (max-width: 767px) {
-  .about-scroll { grid-template-columns: minmax(0, 1fr); }
-  .about-summary { border-left: 0; border-top: 1px solid var(--line); padding: 24px 0 0; }
+  .about-summary { gap: 16px; border-bottom: 1px solid var(--line); padding-bottom: 20px; }
 }
-.about-scroll p { max-width: 85ch; font-size: 16px; line-height: 1.95; color: var(--muted); }
+.about-bio { display: grid; gap: 14px; }
+.about-bio p { max-width: 68ch; font-size: 16px; line-height: 1.65; color: var(--muted); }
+@media (min-width: 768px) {
+  .about-scroll { grid-template-columns: minmax(0, 1fr) minmax(220px, .38fr); }
+  .about-bio { grid-area: 1 / 1; }
+  .about-summary { grid-area: 1 / 2; padding-inline-start: clamp(24px, 3vw, 36px); border-inline-start: 1px solid var(--line); }
+}
 .scroll-portfolio .portfolio-section { padding: 0; overflow: visible; }
 .scroll-portfolio .projects-card { padding: clamp(16px, 3vw, 32px); }
 .scroll-portfolio .projects-grid > .scroll-reveal { display: flex; min-width: 0; }

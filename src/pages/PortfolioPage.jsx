@@ -68,7 +68,6 @@ export default function PortfolioPage({ activeSection, projectFocus, onSectionLi
           <p className="section-eyebrow">01 / {en ? 'THE JOURNEY' : 'A TRAJETÓRIA'}</p>
           <h2 id="about-title">{en ? 'About me' : 'Sobre mim'}</h2>
           <div className="glass-panel about-scroll">
-            <p>{perfil.bio[en ? 'en' : 'pt']}</p>
             <dl className="about-summary">
               <div>
                 <dt>{en ? 'Education' : 'Formação'}</dt>
@@ -83,6 +82,9 @@ export default function PortfolioPage({ activeSection, projectFocus, onSectionLi
                 <dd>{en ? 'First opportunity in software development' : 'Primeira oportunidade na área'}</dd>
               </div>
             </dl>
+            <div className="about-bio">
+              {perfil.bio[en ? 'en' : 'pt'].split('\n\n').map(paragraph => <p key={paragraph}>{paragraph}</p>)}
+            </div>
           </div>
         </ScrollReveal>
       </section>
