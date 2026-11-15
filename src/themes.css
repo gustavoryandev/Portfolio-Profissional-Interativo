@@ -114,20 +114,21 @@
   --wave-glow: #84A2DC;
 }
 
-:root[data-theme="mint-frost"], .menu-option[data-preview="mint-frost"] {
-  --palette-bg: #F3FCF5;
-  --palette-surface: #FFFFFF;
-  --palette-primary: #16803B;
-  --palette-accent: #65C98B;
-  --palette-text: #102619;
-  --palette-muted: #5B7966;
-  --palette-border: #D2EBDD;
-  --palette-tint: 255 255 255;
-  --palette-accent-rgb: 101 201 139;
-  --palette-primary-rgb: 22 128 59;
-  --wave-one: #16803B;
-  --wave-two: #A7E8BC;
-  --wave-glow: #C8F5D7;
+:root[data-theme="petroleo-gelo"], .menu-option[data-preview="petroleo-gelo"] {
+  --palette-bg: #EAF6F5;
+  --palette-surface: #F7FCFC;
+  --palette-primary: #0D675F;
+  --palette-on-primary: #FFFFFF;
+  --palette-accent: #215A87;
+  --palette-text: #102F38;
+  --palette-muted: #49656C;
+  --palette-border: #BDD9D8;
+  --palette-tint: 247 252 252;
+  --palette-accent-rgb: 33 90 135;
+  --palette-primary-rgb: 13 103 95;
+  --wave-one: var(--palette-primary);
+  --wave-two: #76AFBC;
+  --wave-glow: #90CED3;
 }
 
 /* Map custom palettes to the same semantic tokens consumed by both Astra surfaces and the portfolio. */
@@ -185,7 +186,7 @@
   --primary-hover: color-mix(in srgb, var(--primary), black 10%);
   --wave-intensity: .36;
 }
-:root:is([data-theme="porcelain-indigo"], [data-theme="mint-frost"]) {
+:root[data-theme="porcelain-indigo"] {
   --accent: var(--primary);
   --on-primary: #fff;
 }
