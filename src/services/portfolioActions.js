@@ -1,6 +1,7 @@
 import { playgroundExamples } from '../data/playgroundExamples.js';
 import { languages } from '../data/playgroundLanguages.js';
 import { themes } from '../data/themes.js';
+import { DESIGN_SYSTEM_ACTION } from '../data/designSystem.js';
 
 export const LAB_CODE_LIMIT = 20000;
 export const LAB_OUTPUT_LIMIT = 16000;
@@ -17,6 +18,7 @@ export const PORTFOLIO_SECTIONS = [
 ];
 export const ACTION_TARGETS = {
   'astra.openFull': [undefined],
+  [DESIGN_SYSTEM_ACTION.type]: [undefined],
   'navigate': PORTFOLIO_SECTIONS.map(([id]) => id),
   'theme.set': themes.map(({ id }) => id),
   'language.set': ['pt', 'en'],

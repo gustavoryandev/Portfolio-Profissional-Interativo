@@ -133,6 +133,13 @@ try {
   assert.equal(document.documentElement.dataset.theme, 'aurora');
   assert.equal($('#astra-resources').open, false);
   assert.equal(requests.length, 0, 'a fixed shortcut does not require the model');
+  await send('/help');
+  await click($('#astra-resource-designSystem').closest('button'));
+  await until(() => $('.astra-full .ds-card'));
+  assert.equal($('#astra-resources').open, false);
+  assert.match($('.ds-card').textContent, /Portfolio Design System/);
+  assert.match($('.ds-theme').textContent, /Aurora/);
+  assert.equal(requests.length, 0, 'the Design System shortcut stays local');
   await send('Open the Laboratory, select Python, load Bro Fit and rename the student to Ana.');
   await until(() => $('#laboratorio .lab-review'));
   assert.equal(window.location.hash, '#laboratorio');
@@ -164,6 +171,9 @@ try {
   assert.ok($('.astra-compact .lab-review a[href="/chat"]'));
   assert.equal(requests.length, beforeHelp);
   assert.equal(workers.length, 0, 'the run shortcut still requires approval');
+  await send('/ds');
+  await until(() => $('.astra-compact .ds-card'));
+  assert.equal(requests.length, beforeHelp, 'the typed Design System command stays local');
   await click(findButton($('.astra-compact .lab-review'), 'Run code'));
   assert.equal(workers.length, 1);
   assert.match(workers[0].code, /aluno = "Ana"/);

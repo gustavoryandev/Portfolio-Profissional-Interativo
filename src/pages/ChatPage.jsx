@@ -8,6 +8,7 @@ import AstraHero from '../components/AstraHero';
 import AstraAvatar from '../components/AstraAvatar';
 import { ThemeContext } from '../context/ThemeContext';
 import { isGaloTheme } from '../data/themes';
+import { DESIGN_SYSTEM_ACTION, isDesignSystemRequest } from '../data/designSystem';
 import AstraResources, { ASTRA_RESOURCES_ID } from '../components/AstraResources';
 import MessageBubble from '../components/MessageBubble';
 import StreamingReply from '../components/StreamingReply';
@@ -152,6 +153,7 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
       return;
     }
     if (!query || sendingRef.current) return;
+    const selectedActions = resourceActions ?? (isDesignSystemRequest(query) ? [DESIGN_SYSTEM_ACTION] : undefined);
     sendingRef.current = true;
     const requestLanguage = i18n.language;
     followOutput.current = true;
@@ -159,7 +161,7 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
     appendMessage({ id: nextId(), sender: 'user', text: query, lang: requestLanguage });
     setInput('');
     const session = showArcade ? arcadeSession.current : null;
-    const intent = arcadeShortcut ?? (!resourceActions && !predefinedSuggestion && arcadeIntent(query, session?.getState().game, showArcade));
+    const intent = arcadeShortcut ?? (!selectedActions && !predefinedSuggestion && arcadeIntent(query, session?.getState().game, showArcade));
     if (intent) {
       setLoading(true);
       try {
@@ -194,7 +196,7 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
         },
       };
       // Catalog shortcuts provide a fixed plan; typed requests use Gemini to choose the same actions.
-      let data = resourceActions ? { actions: resourceActions }
+      let data = selectedActions ? { actions: selectedActions }
         : await sendMessage(query, requestLanguage, history, conversationRef.current.chatContext, predefinedSuggestion, options);
       controller.signal.throwIfAborted();
       if (!mounted.current) return;

@@ -1,4 +1,5 @@
 import { validateActions } from './portfolioActions.js';
+import { DESIGN_SYSTEM_ACTION, DESIGN_SYSTEM_CARD } from '../data/designSystem.js';
 
 const metricsCards = {
   github: '[GITHUB_CARD]',
@@ -25,6 +26,7 @@ export function createAstraActionEngine({ lab, projectIds }) {
       for (const { type, target, edits, runAfter } of actions) {
         if (signal?.aborted) break;
         if (type === 'astra.openFull') result.notices.push(ui.openFull() ? 'fullOpened' : 'alreadyFull');
+        else if (type === DESIGN_SYSTEM_ACTION.type) result.cards.push(DESIGN_SYSTEM_CARD);
         else if (type === 'navigate') { ui.navigate(target); result.notices.push('navigated'); }
         else if (type === 'project.open') { ui.openProject(target); result.notices.push('project'); }
         else if (type === 'theme.set') { ui.setTheme(target); result.notices.push('theme'); }

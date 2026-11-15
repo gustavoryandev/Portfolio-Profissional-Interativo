@@ -1,0 +1,109 @@
+.ds-card {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: var(--panel);
+  color: var(--ink);
+  font-size: .875rem;
+}
+
+.ds-header {
+  display: grid;
+  gap: 14px;
+  padding: clamp(12px, 3vw, 24px);
+  border-bottom: 1px solid var(--line);
+  background: var(--panel-soft);
+}
+
+.ds-heading, .ds-theme, .ds-demo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.ds-heading > div { flex: 1 1 11rem; }
+.ds-heading h3 { font-size: clamp(1.15rem, 3vw, 1.65rem); font-weight: 700; line-height: 1.15; }
+.ds-heading p { margin-top: 5px; }
+.ds-card p, .ds-theme, .ds-color-value { color: var(--muted); }
+.ds-theme { justify-content: space-between; font-size: .75rem; }
+.ds-theme strong, .ds-card h4 { color: var(--ink); font-weight: 650; }
+.ds-theme-strip { display: flex; width: 80px; height: 12px; overflow: hidden; border: 1px solid var(--line); border-radius: 999px; }
+.ds-theme-strip span { flex: 1; }
+.ds-icon {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-control);
+  background: var(--panel);
+  color: var(--accent);
+}
+
+.ds-section + .ds-section { border-top: 1px solid var(--line); }
+.ds-section summary {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 8px clamp(12px, 3vw, 24px);
+  list-style: none;
+  font-weight: 650;
+  cursor: pointer;
+}
+.ds-section summary::-webkit-details-marker { display: none; }
+.ds-section summary svg { color: var(--accent); }
+.ds-section summary:hover, .ds-section[open] > summary { background: var(--panel-soft); }
+.ds-section[open] > summary svg:last-child { transform: rotate(90deg); }
+.ds-card :is(summary, button):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+.ds-section-body { display: grid; gap: 12px; padding: 12px clamp(12px, 3vw, 24px) 16px; }
+.ds-card code { font-family: var(--font-mono); overflow-wrap: anywhere; }
+.ds-brand, .ds-swatches, .ds-radii {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 8rem), 1fr));
+  gap: 8px;
+}
+.ds-brand figure, .ds-swatches li, .ds-radii span {
+  min-width: 0;
+  border: 1px solid var(--line);
+  background: var(--panel-soft);
+}
+.ds-brand figure { display: grid; place-items: center; gap: 8px; padding: 12px; border-radius: var(--radius-card); }
+.ds-brand .brand-logo { width: 88px; height: 48px; }
+.ds-brand img { border-radius: 50%; object-fit: cover; }
+.ds-swatches li { display: grid; gap: 3px; padding: 8px; border-radius: var(--radius-control); font-size: .75rem; }
+.ds-swatch { height: 28px; border: 1px solid var(--line); border-radius: 4px; }
+.ds-color-value { overflow-wrap: anywhere; }
+.ds-contrast, .ds-type { border-top: 1px solid var(--line); }
+.ds-contrast li, .ds-type li {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 4px 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line);
+}
+.ds-contrast li, .ds-type li span:last-child { font-size: .75rem; }
+.ds-type-display { font-size: clamp(1.6rem, 5vw, 2.35rem); font-weight: 750; letter-spacing: -.07em; line-height: .98; }
+.ds-type-heading { font-size: 1.25rem; font-weight: 600; letter-spacing: -.045em; line-height: 1.2; }
+.ds-type-body { font-size: 15px; line-height: 1.8; }
+.ds-type-mono { font: 12px/1.4 var(--font-mono); }
+.ds-spacing { display: flex; flex-wrap: wrap; gap: 12px; }
+.ds-spacing li { display: grid; gap: 4px; font-size: .75rem; }
+.ds-spacing li span { height: 10px; border-radius: 2px; background: var(--accent); }
+.ds-radii span { padding: 8px; border-radius: var(--radius-control); }
+.ds-radii span:last-child { border-radius: var(--radius-card); }
+.ds-notes { display: grid; gap: 6px; padding-inline-start: 1.15em; list-style: disc; }
+.ds-demo, .ds-handoff { padding: 12px; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--panel-soft); }
+.ds-demo .project-action { color: var(--on-primary); }
+.ds-demo p { flex-basis: 100%; min-height: 1.25em; }
+.ds-reset { min-height: 44px; padding-inline: 12px; border: 1px solid var(--line); border-radius: var(--radius-control); }
+.ds-reset:not(:disabled):hover { border-color: var(--accent); }
+.ds-reset:disabled { opacity: .55; }
+.ds-handoff ul { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 6px; font-size: .75rem; }

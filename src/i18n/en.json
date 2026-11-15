@@ -82,6 +82,70 @@
       "cancel": "Cancel",
       "source": "Stockfish · source and license"
     },
+    "designSystem": {
+      "title": "Portfolio Design System",
+      "intro": "Explore the visual identity, theme tokens, and interface patterns used in the portfolio and Astra.",
+      "activeTheme": "Active theme",
+      "themes": {
+        "light": "Light",
+        "dark": "Dark"
+      },
+      "sections": {
+        "brand": "Brand and icons",
+        "colors": "Colors and contrast",
+        "type": "Typography",
+        "layout": "Spacing and responsive layout",
+        "components": "Components and interaction"
+      },
+      "portfolio": "Portfolio",
+      "brandUsage": "Use the portfolio logo in navigation and Astra’s avatar in conversations. Lucide icons help identify actions. Give icon-only controls an accessible name.",
+      "colors": {
+        "page": "Page background",
+        "panel": "Surface",
+        "panel-soft": "Soft surface",
+        "line": "Borders",
+        "primary": "Primary action",
+        "primary-hover": "Primary hover",
+        "on-primary": "Action text",
+        "accent": "Accent",
+        "ink": "Primary text",
+        "muted": "Secondary text"
+      },
+      "contrastTitle": "Contrast for normal text",
+      "contrastNote": "The AA threshold is 4.5:1. Measurements compare solid token colors in the active theme.",
+      "on": "on",
+      "pass": "Passes AA",
+      "review": "Below AA",
+      "unavailable": "Unavailable",
+      "fonts": "The interface uses Inter with a system font fallback. Code and technical labels use JetBrains Mono, Fira Code, or the system monospace font.",
+      "typeNote": "The scale shows the portfolio defaults. On mobile, the hero title uses 52–80 px. The Galo themes adjust the hero.",
+      "type": {
+        "display": "Hero title",
+        "heading": "Section heading",
+        "body": "Body text",
+        "mono": "const theme = 'astra';"
+      },
+      "spacing": "Spacing samples",
+      "layoutUsage": "Use 4–8 px between related elements, 12–16 px in controls and panels, and 24 px between larger groups.",
+      "breakpoints": {
+        "projects": "The project header stacks its controls.",
+        "mobile": "Astra uses tighter margins and the portfolio switches to its mobile layout.",
+        "help": "Full Astra resources open in a modal panel. In Compact Astra, the panel is always modal."
+      },
+      "demo": "Try the button states and see confirmation in text.",
+      "confirm": "Confirm",
+      "reset": "Clear",
+      "confirmed": "Example confirmed.",
+      "cleared": "Example cleared.",
+      "patterns": [
+        "Use buttons for actions and links for navigation. In Astra’s catalog, describe what each shortcut opens.",
+        "Keep keyboard focus visible and let users dismiss modal panels with Escape.",
+        "Show a status message during loading or on error. Combine color and text to communicate the outcome.",
+        "Respect reduced-motion preferences in portfolio and chat transitions."
+      ],
+      "handoff": "Code references",
+      "handoffNote": "Shared tokens and controls live in index.css. themes.css defines theme variants, scroll.css lays out portfolio sections, and astra.css styles Astra’s layout and resources."
+    },
     "resources": {
       "title": "Astra resources",
       "close": "Close resource catalog",
@@ -98,6 +162,11 @@
         "integrations": "Profile and integrations"
       },
       "items": {
+        "designSystem": {
+          "title": "Design System",
+          "description": "Explore the portfolio’s brand, themes, components, and patterns",
+          "prompt": "Show the portfolio design system."
+        },
         "arcadeBrowse": {
           "title": "List arcade games",
           "description": "See the catalog and get a link to Full Astra",

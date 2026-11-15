@@ -1,10 +1,11 @@
 import { useLayoutEffect, useRef } from 'react';
 import {
-  BarChart3, Clock, Code2, Compass, FileCode2, Folder, Gamepad2, Github, GraduationCap, Headphones, Info,
+  BarChart3, Clock, Code2, Compass, FileCode2, Folder, Gamepad2, Github, GraduationCap, Headphones, Info, Layers,
   Languages, Maximize2, Palette, Pencil, Play, RotateCcw, Square, Swords, Terminal, Trophy, UserRound, X,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { gameIds, games } from '../arcade/catalog';
+import { DESIGN_SYSTEM_ACTION } from '../data/designSystem';
 import { clickedDialogBackdrop } from '../services/dialogInteraction';
 
 export const ASTRA_RESOURCES_ID = 'astra-resources';
@@ -13,6 +14,7 @@ const MOBILE_DRAWER = '(max-width: 959px)';
 const identifyVersion = ['identifyVersion', Info];
 const openFullVersion = ['openFullVersion', Maximize2, [{ type: 'astra.openFull' }]];
 const portfolioActions = [
+  ['designSystem', Layers, [DESIGN_SYSTEM_ACTION]],
   ['navigate', Compass, [{ type: 'navigate', target: 'sobre' }]],
   ['openProject', Folder, [{ type: 'project.open', target: 'academia' }]],
   ['theme', Palette, [{ type: 'theme.set', target: 'aurora' }]],

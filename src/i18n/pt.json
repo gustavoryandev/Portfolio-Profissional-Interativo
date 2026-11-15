@@ -82,6 +82,70 @@
       "cancel": "Cancelar",
       "source": "Stockfish · código-fonte e licença"
     },
+    "designSystem": {
+      "title": "Design System do portfólio",
+      "intro": "Consulte a identidade visual, os tokens do tema e os padrões usados nas interfaces do portfólio e da Astra.",
+      "activeTheme": "Tema ativo",
+      "themes": {
+        "light": "Claro",
+        "dark": "Escuro"
+      },
+      "sections": {
+        "brand": "Marca e ícones",
+        "colors": "Cores e contraste",
+        "type": "Tipografia",
+        "layout": "Espaçamento e responsividade",
+        "components": "Componentes e interação"
+      },
+      "portfolio": "Portfólio",
+      "brandUsage": "Use o logotipo do portfólio na navegação e o avatar da Astra nas conversas. Os ícones Lucide ajudam a identificar ações. Em controles sem texto visível, dê ao botão um nome acessível.",
+      "colors": {
+        "page": "Fundo da página",
+        "panel": "Superfície",
+        "panel-soft": "Superfície suave",
+        "line": "Bordas",
+        "primary": "Ação principal",
+        "primary-hover": "Ação sob o cursor",
+        "on-primary": "Texto da ação",
+        "accent": "Destaque",
+        "ink": "Texto principal",
+        "muted": "Texto secundário"
+      },
+      "contrastTitle": "Contraste para texto normal",
+      "contrastNote": "A referência AA é 4,5:1. As medições comparam cores sólidas dos tokens no tema ativo.",
+      "on": "sobre",
+      "pass": "Passa AA",
+      "review": "Abaixo de AA",
+      "unavailable": "Sem medição",
+      "fonts": "Inter é a fonte da interface, com fallback para a fonte do sistema. Código e rótulos técnicos usam JetBrains Mono, Fira Code ou a fonte monoespaçada do sistema.",
+      "typeNote": "A escala mostra a base do portfólio. No layout móvel, o título de abertura usa 52–80 px. Os temas Galo ajustam a abertura.",
+      "type": {
+        "display": "Título de abertura",
+        "heading": "Título de seção",
+        "body": "Texto de leitura",
+        "mono": "const tema = 'astra';"
+      },
+      "spacing": "Amostras de espaçamento",
+      "layoutUsage": "Use 4–8 px entre elementos próximos, 12–16 px em controles e painéis, e 24 px para separar grupos maiores.",
+      "breakpoints": {
+        "projects": "O cabeçalho de projetos passa a empilhar os controles.",
+        "mobile": "A Astra usa margens menores e o layout móvel do portfólio entra em ação.",
+        "help": "Os recursos da Astra completa abrem em um painel modal. Na Astra compacta, o painel é sempre modal."
+      },
+      "demo": "Experimente os estados dos botões e a confirmação por texto.",
+      "confirm": "Confirmar",
+      "reset": "Limpar",
+      "confirmed": "Exemplo confirmado.",
+      "cleared": "Exemplo limpo.",
+      "patterns": [
+        "Use botões para ações e links para navegação. No catálogo da Astra, descreva o que cada atalho abre.",
+        "Mantenha o foco visível por teclado e permita sair de painéis modais com Esc.",
+        "Em carregamento ou erro, mostre uma mensagem de estado. Combine cor e texto para comunicar o resultado.",
+        "Respeite a preferência por movimento reduzido nas transições do portfólio e do chat."
+      ],
+      "handoff": "Referências no código",
+      "handoffNote": "Os tokens e controles compartilhados ficam em index.css. themes.css define as variações de tema, scroll.css organiza as seções e astra.css contém o layout e os recursos da Astra."
+    },
     "resources": {
       "title": "Recursos da Astra",
       "close": "Fechar catálogo",
@@ -98,6 +162,11 @@
         "integrations": "Perfil e integrações"
       },
       "items": {
+        "designSystem": {
+          "title": "Design System",
+          "description": "Consulte a marca, os temas, os componentes e os padrões do portfólio",
+          "prompt": "Mostre o design system do portfólio."
+        },
         "arcadeBrowse": {
           "title": "Listar jogos do arcade",
           "description": "Veja o catálogo e receba um link para a Astra completa",

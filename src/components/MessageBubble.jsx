@@ -22,11 +22,14 @@ import { CARD_SOURCES, mergeLiveContext } from '../services/liveContext';
 
 import { translateMessage } from '../services/api';
 import FullAstraCardLink from './FullAstraCardLink';
+import { DESIGN_SYSTEM_CARD } from '../data/designSystem';
 
 const ResumeCard = lazy(() => import('./ResumeCard'));
+const DesignSystemCard = lazy(() => import('./DesignSystemCard'));
 
 // Tags fixas que viram cards. Esta é a única lista: a regex abaixo é derivada dela.
 const cards = {
+  [DESIGN_SYSTEM_CARD]: DesignSystemCard,
   '[RESUME_CARD]': ResumeCard,
   '[SPOTIFY_CARD]': SpotifyCard,
   '[GITHUB_CARD]': GithubCard,
@@ -101,6 +104,7 @@ function splitMessage(text) {
 }
 
 function compactCardMode(tag) {
+  if (tag === DESIGN_SYSTEM_CARD) return 'inline';
   const source = CARD_SOURCES[tag.slice(1, -1).split(':')[0]];
   if (source === 'github' || source === 'wakatime') return 'inline';
   if (tag === '[PROJECTS_CARD]') return 'projects';
@@ -221,24 +225,26 @@ function MessageBubble({ message, liveContext = {}, refreshing = [], onRefresh, 
   const isError = message?.tone === 'error';
   const original = message?.text || '';
   const sourceLanguage = message?.lang?.startsWith('en') ? 'en' : 'pt';
+  const needsTranslation = !isUser && !message.translationKey && original !== DESIGN_SYSTEM_CARD && sourceLanguage !== uiLanguage;
   const [translations, setTranslations] = useState({});
   const [translationFailed, setTranslationFailed] = useState(false);
   useEffect(() => {
-    if (isUser || message.translationKey || sourceLanguage === uiLanguage || translations[uiLanguage]) return;
+    if (!needsTranslation || translations[uiLanguage]) return;
     let active = true;
     setTranslationFailed(false);
     translateMessage(original, uiLanguage).then(text => {
       if (active) setTranslations(previous => ({ ...previous, [uiLanguage]: text }));
     }).catch(() => { if (active) setTranslationFailed(true); });
     return () => { active = false; };
-  }, [original, uiLanguage, sourceLanguage, isUser, message.translationKey, translations]);
+  }, [original, uiLanguage, needsTranslation, translations]);
   const text = isUser ? original : message.translationKey ? i18n.t(message.translationKey, { defaultValue: original })
     : sourceLanguage === uiLanguage ? original : translations[uiLanguage] || original;
-  const translating = !isUser && !message.translationKey && sourceLanguage !== uiLanguage && !translations[uiLanguage];
+  const translating = needsTranslation && !translations[uiLanguage];
 
   const segments = useMemo(() => (isUser ? [] : splitMessage(text)), [isUser, text]);
   const context = useMemo(() => mergeLiveContext(message?.context, liveContext), [message?.context, liveContext]);
   const hasCards = segments.some(segment => segment.type === 'card');
+  const hasShareableCards = hasCards && segments.some(segment => segment.type === 'card' && segment.tag !== DESIGN_SYSTEM_CARD);
   const hasFullOnlyCard = compact && segments.some(segment => segment.type === 'card' && compactCardMode(segment.tag) === 'full');
 
   if (isUser) {
@@ -275,7 +281,7 @@ function MessageBubble({ message, liveContext = {}, refreshing = [], onRefresh, 
           <p role="status" className="text-xs text-muted">{i18n.t(translationFailed ? 'chat.translationFailed' : 'chat.translating')}</p>
         )}
         {hasFullOnlyCard && <p className="text-sm text-muted">{i18n.t('chat.surface.fullOnlyCard')}</p>}
-        {compact && hasCards && <FullAstraCardLink onOpen={onViewFull ? () => onViewFull(message.id) : undefined} />}
+        {compact && hasShareableCards && <FullAstraCardLink onOpen={onViewFull ? () => onViewFull(message.id) : undefined} />}
 
         {segments.map((segment, index) => {
           if (segment.type === 'text') {
