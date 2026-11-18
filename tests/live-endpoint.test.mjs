@@ -367,3 +367,28 @@ test('both Astra surfaces share the same tool contract and request editor data o
     mockAdapter = undefined;
   }
 });
+
+test('model discovery excludes unapproved models and quota stops generation immediately', async () => {
+  const originalFetch = globalThis.fetch;
+  process.env.GEMINI_API_KEY = 'quota-policy-test';
+  mockAdapter = async config => ({ status: 200, config, data: { models: [
+    'gemini-4-carbon', 'gemini-3.1-pro-preview', 'gemini-3.8-flash', 'gemini-3.6-flash',
+  ].map(name => ({name: `models/${name}`, supportedGenerationMethods:['generateContent']})) } });
+  let calls = 0;
+  globalThis.fetch = async () => {
+    calls++;
+    return Response.json({error:{code:429, status:'RESOURCE_EXHAUSTED', message:'quota exceeded'}}, {status:429});
+  };
+  try {
+    const catalog = response();
+    await handler({method:'POST',body:{action:'models'}},catalog);
+    assert.ok(catalog.body.models.every(name => ['gemini-3.8-flash','gemini-3.6-flash','gemini-3.5-flash-lite'].includes(name)));
+    const res = response();
+    await handler({method:'POST',body:{userMessage:'Quem é Gustavo?'}},res);
+    assert.equal(res.code,503);
+    assert.equal(calls,1,'quota must stop after the first request');
+    assert.match(res.body.error,/Nenhum modelo alternativo/);
+  } finally {
+    globalThis.fetch=originalFetch; process.env.GEMINI_API_KEY=''; mockAdapter=undefined;
+  }
+});

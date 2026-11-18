@@ -13,6 +13,7 @@ import { writeEvent } from '../server/ndjson.js';
 import { sourcesForText } from '../src/services/liveContext.js';
 import { sanitizeLabSnapshot } from '../src/services/portfolioActions.js';
 import { astraSurfaceIntent, portfolioTools } from '../server/portfolioTools.js';
+import { FREE_TIER_MODELS, MAX_MODEL_ATTEMPTS, isApprovedModel, isQuotaOrBillingError } from '../server/aiUsagePolicy.js';
 
 dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 
@@ -20,16 +21,7 @@ const client = axios.create({ timeout: 8000 });
 const wakaTime = createWakaTime(client);
 const fallbackLanguage = 'I can only communicate in Portuguese or English. Please choose one of these languages.';
 
-// Modelos ativos na API (ai.google.dev/gemini-api/docs/deprecations, atualizado em 22/10/2026).
-// Removidos: gemini-3.7-flash (alias sem seleção no AI Studio), gemini-3.1-flash (nome inexistente),
-// gemini-2.0-flash (desligado em 1/6/2026) e gemini-1.5-flash (desligado).
-const fallbackModels = [
-  'gemini-3.8-flash',       // GA desde 2/9/2026; recomendado para novos projetos
-  'gemini-3.6-flash',       // GA desde 21/7/2026; sem data de desligamento
-  'gemini-3.5-flash-lite',  // GA desde 21/7/2026; mais leve e rápido
-  'gemini-3.1-flash-lite',  // GA; desligamento previsto para 7/5/2027
-  'gemini-2.5-flash'        // Não descontinuado, mas restrito a contas com uso anterior; último recurso
-];
+const fallbackModels = FREE_TIER_MODELS;
 
 const GEMINI_TIMEOUT_MS = 12000;
 const FIRST_DELTA_TIMEOUT_MS = 4500;
@@ -68,7 +60,7 @@ async function discoverModels(apiKey) {
     const models = response.data.models
       ?.filter((model) => model.supportedGenerationMethods?.includes('generateContent'))
       .map((model) => model.name.replace(/^models\//, ''))
-      .filter((name) => /^gemini-\d+(?:\.\d+)?-(?:flash(?:-lite)?|pro)(?:-(?:latest|preview|001))?$/i.test(name));
+      .filter(isApprovedModel);
 
     if (!models?.length) return [];
     return [...new Set(models)].sort((left, right) => modelPriority(left) - modelPriority(right));
@@ -1094,6 +1086,7 @@ async function updateSummary(genAI, models, previous, rolled, parentSignal) {
     return clipHead(value, HISTORY_POLICY.summaryMaxChars);
   } catch (error) {
     parentSignal.throwIfAborted();
+    if (isQuotaOrBillingError(error)) throw error;
     console.warn('[Chat] Resumo indisponível; usando resumo local:', error.message);
     return fallbackSummary(previous, rolled);
   }
@@ -1275,8 +1268,9 @@ function forClient(liveContext) {
 
 async function runWithFallback(modelsToTry, run, signal) {
   const now = Date.now();
-  const healthy = modelsToTry.filter((name) => (modelCooldown.get(name) || 0) <= now);
-  const queue = healthy.length ? healthy : modelsToTry;
+  const approved = [...new Set(modelsToTry.filter(isApprovedModel))];
+  const healthy = approved.filter((name) => (modelCooldown.get(name) || 0) <= now);
+  const queue = (healthy.length ? healthy : approved).slice(0, MAX_MODEL_ATTEMPTS);
 
   let lastError;
   for (const [index, modelName] of queue.entries()) {
@@ -1286,6 +1280,8 @@ async function runWithFallback(modelsToTry, run, signal) {
       return { value: await run(modelName, attemptSignal, index < queue.length - 1), model: modelName };
     } catch (error) {
       if (signal.aborted) throw error;
+      // Never try to work around quota/payment errors with another model.
+      if (isQuotaOrBillingError(error)) throw error;
       lastError = error;
       if (!isRetryableModelError(error)) throw error;
       if (!error.retryable) modelCooldown.set(modelName, Date.now() + cooldownMs(error));
@@ -1604,7 +1600,7 @@ export default async function handler(req, res) {
     const errStr = error.message + ' ' + (error?.cause?.message || '');
     if (errStr.includes('API_KEY_INVALID')) return res.status(503).json({ error: 'Chave Gemini inválida.' });
     if (error?.status === 503 || errStr.includes('high demand')) return res.status(503).json({ error: 'O Gemini está temporariamente sobrecarregado.' });
-    if (error?.status === 429 || errStr.includes('quota')) return res.status(503).json({ error: 'A cota diária do Gemini foi atingida.' });
+    if (isQuotaOrBillingError(error)) return res.status(503).json({ error: 'Limite de uso da IA atingido ou acesso indisponível. Nenhum modelo alternativo foi acionado.' });
     return res.status(500).json({ error: 'Erro ao gerar resposta. Tente novamente em instantes.' });
   } finally {
     res.off?.('close', disconnect);
