@@ -109,7 +109,7 @@ async function until(predicate) {
 async function send(text) {
   const input = $('#chat-input');
   await act(async () => {
-    Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set.call(input, text);
+    Object.getOwnPropertyDescriptor(Object.getPrototypeOf(input), 'value').set.call(input, text);
     input.dispatchEvent(new window.Event('input', { bubbles: true }));
   });
   assert.equal(input.value, text);
@@ -419,6 +419,36 @@ try {
   assert.ok([...Array(window.localStorage.length)].some((_, index) => window.localStorage.key(index).startsWith('astra-arcade-session-v1:')));
   await click($('.astra-full .brand-lockup'));
   assert.equal($('.arcade'), null);
+
+  // Verify PGN before recreating the welcome screen used by shortcut tests.
+  window.history.replaceState(null, '', '/chat');
+  await act(async () => window.dispatchEvent(new window.PopStateEvent('popstate')));
+  await act(async () => i18n.changeLanguage('pt'));
+  await until(() => $('.astra-full'));
+  const requestsBeforeReplay = requests.length;
+  await send('[Event "Local replay"]\n\n1. e4 e5 2. Nf3 Nc6 *');
+  await until(() => $('section[aria-label="Análise de partida"] button[aria-pressed]'));
+  const replay = $('section[aria-label="Análise de partida"]');
+  await click(findButton(replay, '2. Nf3'));
+  assert.equal(findButton(replay, '2. Nf3').getAttribute('aria-pressed'), 'true');
+  assert.equal(requests.length, requestsBeforeReplay, 'pasted PGN stays in the browser');
+  assert.match(replay.textContent, /sem API de IA/);
+  assert.equal(findButton(replay, 'Explique este lance'), undefined);
+  await click(replay.querySelector('summary'));
+  const pgnInput = replay.querySelector('textarea');
+  await act(async () => {
+    Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, 'value').set.call(pgnInput, '1. f3 e5 2. g4 Qh4#');
+    pgnInput.dispatchEvent(new window.Event('input', { bubbles: true }));
+  });
+  await click(findButton(replay, 'Carregar partida'));
+  await click(findButton(replay, '2... Qh4#'));
+  assert.match(replay.textContent, /Qh4# é xeque-mate: o rei adversário está em xeque e não há defesa legal/);
+  assert.doesNotMatch(replay.textContent, /FEN|\*\*|API_KEY/);
+  await act(async () => i18n.changeLanguage('en'));
+  assert.match(replay.textContent, /Qh4# is checkmate/);
+  assert.match(replay.textContent, /no AI API/);
+  assert.equal(requests.length, requestsBeforeReplay, 'import, move explanations and language changes never request AI');
+  await act(async () => i18n.changeLanguage('pt'));
 
   await act(async () => activeRoot.unmount());
   anthemEvents.length = 0;

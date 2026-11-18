@@ -15,6 +15,7 @@ import StreamingReply from '../components/StreamingReply';
 import { createStreamBuffer } from '../services/streamBuffer';
 import { warmModelCatalog } from '../services/chatStream';
 import sendMessage from '../services/api';
+import { isChessReplayRequest, parseChessReplay } from '../services/chessReplay';
 import useLiveContext from '../hooks/useLiveContext';
 import { sourcesForText } from '../services/liveContext';
 import { useAstra } from '../context/AstraContext';
@@ -162,6 +163,26 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
       return;
     }
     if (!query || sendingRef.current) return;
+    if (isChessReplayRequest(query)) {
+      followOutput.current = true;
+      setInput('');
+      const source = query.replace(/^\/pgn\s*/i, '');
+      let game;
+      let invalid = false;
+      try {
+        if (source) game = parseChessReplay(source);
+      } catch {
+        invalid = /^(?:\s*\[|```|\d+\.|\/pgn\s)/i.test(query);
+      }
+      const translationKey = game ? 'chat.chessReplay.sent' : 'chat.chessReplay.title';
+      appendMessage({ id: nextId(), sender: 'user', text: t(translationKey), translationKey, lang: i18n.language });
+      appendMessage({
+        id: nextId(), sender: 'ai', lang: i18n.language,
+        text: '[CHESS_REPLAY]',
+        chessReplay: { game, invalid },
+      });
+      return;
+    }
     const selectedActions = resourceActions ?? (isDesignSystemRequest(query) ? [DESIGN_SYSTEM_ACTION] : undefined);
     sendingRef.current = true;
     const requestLanguage = i18n.language;
@@ -356,7 +377,7 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
                   {messages.filter(message => !showGaloHero || message.id !== 'welcome').map(message => (
                     <div id={messageAnchor(message.id)} tabIndex={-1} className="chat-msg-in outline-none" key={message.id}>
                       <MessageBubble message={message.id === 'welcome' ? { ...message, text: t(welcomeKey), translationKey: welcomeKey } : message} liveContext={live.context} refreshing={live.refreshing} onRefresh={live.refresh} onSelectSection={onSelectSection}
-                        onViewFull={openFull ? viewFullMessage : undefined} compact={modal}>
+                        onViewFull={openFull ? viewFullMessage : undefined} compact={modal} active={visible && !showArcade}>
                         {message.id === 'welcome' && modal && galoShortcuts}
                         {message.reviewId && <LaboratoryReview reviewId={message.reviewId} onOpenLab={() => onSelectSection?.('laboratorio')}
                           onViewFull={modal && openFull ? () => viewFullMessage(message.id) : undefined} />}
@@ -409,9 +430,16 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
                   <div className="hidden pl-4 text-accent sm:block" aria-hidden="true">
                     <Sparkles size={20} />
                   </div>
-                  <input
+                  <textarea
                     ref={inputRef}
                     id="chat-input"
+                    rows={1}
+                    onKeyDown={event => {
+                      if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
+                        event.preventDefault();
+                        if (!loading) event.currentTarget.form.requestSubmit();
+                      }
+                    }}
                     aria-label={showArcade ? (en ? 'Ask Astra about the game' : 'Pergunte à Astra sobre o jogo') : t('chat.placeholder')}
                     value={input}
                     onChange={(event) => setInput(event.target.value)}
@@ -419,7 +447,7 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
                       : t('chat.placeholder') || 'Digite uma pergunta sobre o Gustavo...'}
                     disabled={!modal && loading}
                     autoComplete="off"
-                    className="min-h-12 min-w-0 flex-1 bg-transparent py-3 pl-4 pr-2 text-[15px] font-medium text-ink outline-none placeholder:text-muted disabled:opacity-60 sm:pl-2"
+                    className="min-h-12 min-w-0 flex-1 resize-none bg-transparent py-3 pl-4 pr-2 text-[15px] font-medium text-ink outline-none placeholder:text-muted disabled:opacity-60 sm:pl-2"
                   />
                   {loading && <button type="button" onClick={() => activeRequest.current?.controller.abort()}
                     className="icon-button shrink-0" aria-label={en ? 'Stop response' : 'Parar resposta'}><Square size={16} aria-hidden="true" /></button>}

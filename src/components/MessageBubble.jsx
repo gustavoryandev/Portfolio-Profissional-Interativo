@@ -26,6 +26,7 @@ import { DESIGN_SYSTEM_CARD } from '../data/designSystem';
 
 const ResumeCard = lazy(() => import('./ResumeCard'));
 const DesignSystemCard = lazy(() => import('./DesignSystemCard'));
+const ChessReplay = lazy(() => import('./ChessReplay'));
 
 // Tags fixas que viram cards. Esta é a única lista: a regex abaixo é derivada dela.
 const cards = {
@@ -45,6 +46,7 @@ const cards = {
   '[GITHUB_LANGUAGES_CARD]': GithubLanguagesCard,
   '[CHESS_CARD]': ChessCard,
   '[CHESS_GAME]': ChessGame,
+  '[CHESS_REPLAY]': ChessReplay,
 };
 
 // [GALO_CARD], [GALO_CARD:5] ou [GALO_CARD:ALL]; sem número mostra 3 jogos
@@ -217,7 +219,7 @@ function Avatar({ isUser, children }) {
   );
 }
 
-function MessageBubble({ message, liveContext = {}, refreshing = [], onRefresh, onSelectSection, onViewFull, compact = false, children }) {
+function MessageBubble({ message, liveContext = {}, refreshing = [], onRefresh, onSelectSection, onViewFull, compact = false, active = true, children }) {
   const { i18n } = useTranslation();
   const uiLanguage = i18n.language.startsWith('en') ? 'en' : 'pt';
   const ui = UI;
@@ -225,7 +227,7 @@ function MessageBubble({ message, liveContext = {}, refreshing = [], onRefresh, 
   const isError = message?.tone === 'error';
   const original = message?.text || '';
   const sourceLanguage = message?.lang?.startsWith('en') ? 'en' : 'pt';
-  const needsTranslation = !isUser && !message.translationKey && original !== DESIGN_SYSTEM_CARD && sourceLanguage !== uiLanguage;
+  const needsTranslation = !isUser && !message.translationKey && !message.chessReplay && original !== DESIGN_SYSTEM_CARD && sourceLanguage !== uiLanguage;
   const [translations, setTranslations] = useState({});
   const [translationFailed, setTranslationFailed] = useState(false);
   useEffect(() => {
@@ -237,8 +239,8 @@ function MessageBubble({ message, liveContext = {}, refreshing = [], onRefresh, 
     }).catch(() => { if (active) setTranslationFailed(true); });
     return () => { active = false; };
   }, [original, uiLanguage, needsTranslation, translations]);
-  const text = isUser ? original : message.translationKey ? i18n.t(message.translationKey, { defaultValue: original })
-    : sourceLanguage === uiLanguage ? original : translations[uiLanguage] || original;
+  const text = message.translationKey ? i18n.t(message.translationKey, { defaultValue: original })
+    : isUser || sourceLanguage === uiLanguage ? original : translations[uiLanguage] || original;
   const translating = needsTranslation && !translations[uiLanguage];
 
   const segments = useMemo(() => (isUser ? [] : splitMessage(text)), [isUser, text]);
@@ -282,6 +284,7 @@ function MessageBubble({ message, liveContext = {}, refreshing = [], onRefresh, 
         )}
         {hasFullOnlyCard && <p className="text-sm text-muted">{i18n.t('chat.surface.fullOnlyCard')}</p>}
         {compact && hasShareableCards && <FullAstraCardLink onOpen={onViewFull ? () => onViewFull(message.id) : undefined} />}
+        {message.chessReplay?.invalid && <p role="alert" className="text-sm text-ink">{i18n.t('chat.chessReplay.invalid')}</p>}
 
         {segments.map((segment, index) => {
           if (segment.type === 'text') {
@@ -301,6 +304,7 @@ function MessageBubble({ message, liveContext = {}, refreshing = [], onRefresh, 
           if (!card) return <span key={index}>{segment.tag}</span>;
 
           const { Component, limit } = card;
+          if (Component === ChessReplay && !message.chessReplay) return null;
           const source = CARD_SOURCES[segment.tag.slice(1, -1).split(':')[0]];
           const target = compact ? compactCardMode(segment.tag) : 'inline';
           if (target !== 'inline') {
@@ -315,7 +319,9 @@ function MessageBubble({ message, liveContext = {}, refreshing = [], onRefresh, 
               <Suspense fallback={<p role="status">{i18n.t('resume.loading')}</p>}>
                 {(!source || data?.status === 'ok') && (Component === ProjectsCard
                   ? <ProjectsCard preview onViewAll={() => onSelectSection?.('projects')} />
-                  : <Component context={context} lang={uiLanguage} limit={limit} />)}
+                  : Component === ChessReplay
+                    ? <ChessReplay initialReplay={message.chessReplay.game} active={active} />
+                    : <Component context={context} lang={uiLanguage} limit={limit} />)}
               </Suspense>
             </section>
           );

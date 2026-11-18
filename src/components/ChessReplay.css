@@ -1,0 +1,80 @@
+.chess-replay {
+  container-type: inline-size;
+}
+
+.chess-replay-layout {
+  display: grid;
+  gap: 12px;
+  align-items: start;
+  max-width: 780px;
+  margin-inline: auto;
+}
+
+.chess-replay-board {
+  width: 100%;
+  max-width: min(300px, max(210px, 43dvh));
+  margin-inline: auto;
+}
+
+.chess-replay-analysis {
+  min-width: 0;
+}
+
+.chess-replay-moves {
+  max-height: 86px;
+}
+
+.chess-replay-moves .chip {
+  min-height: 36px;
+}
+
+@container (min-width: 560px) {
+  .chess-replay-layout {
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    gap: 16px;
+  }
+
+  .chess-replay-board {
+    max-width: min(400px, max(250px, 54dvh));
+    margin-inline-end: 0;
+  }
+
+  .chess-replay-moves {
+    max-height: 128px;
+  }
+}
+
+.chess-replay-badge {
+  position: absolute;
+  z-index: 2;
+  pointer-events: none;
+  display: grid;
+  place-items: center;
+  width: clamp(16px, 5.2%, 24px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--move-badge-color);
+  color: white;
+  font-size: clamp(10px, 3.5cqi, 15px);
+  font-weight: 800;
+  line-height: 1;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 35%);
+  transform: translate(-75%, -15%);
+}
+
+.chess-replay-badge[data-grade="brilliant"] { --move-badge-color: #008477; }
+.chess-replay-badge[data-grade="best"] { --move-badge-color: #397128; }
+.chess-replay-badge[data-grade="excellent"] { --move-badge-color: #447a2b; }
+.chess-replay-badge[data-grade="good"] { --move-badge-color: #587b38; }
+.chess-replay-badge[data-grade="inaccuracy"] { --move-badge-color: #826000; }
+.chess-replay-badge[data-grade="mistake"] { --move-badge-color: #a74713; }
+.chess-replay-badge[data-grade="blunder"] { --move-badge-color: #bd292d; }
+.chess-replay-badge[data-grade="book"] { --move-badge-color: #8a5a37; }
+
+.chess-replay-badge[data-grade="great"] { --move-badge-color: #23779a; }
+.chess-replay-badge[data-grade="missed"] { --move-badge-color: #b44162; }
+.chess-replay progress { accent-color: var(--accent, #4e938c); height: 5px; }
+.chess-replay-analysis details p { margin-top: 6px; line-height: 1.5; }
+.chess-replay-analysis select { max-width: 55%; }
+.chess-replay-variation { overflow-x: auto; padding-bottom: 4px; }
+.chess-replay-variation .chip { flex: 0 0 auto; }

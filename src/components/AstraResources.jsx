@@ -41,6 +41,7 @@ const integrations = [
   ['github', Github],
   ['wakatime', Clock],
   ['chessGame', Swords],
+  ['chessReplay', BarChart3],
   ['chessRating', Trophy],
   ['spotify', Headphones],
   ['canvas', GraduationCap],
@@ -103,7 +104,7 @@ export default function AstraResources({ open, compact, disabled, triggerRef, on
   };
 
   const handlePick = (prompt, actions, arcadeShortcut) => {
-    if (drawerRef.current || actions || arcadeShortcut) onClose();
+    if (drawerRef.current || actions || arcadeShortcut || prompt === '/pgn') onClose();
     else closeRef.current.focus({ preventScroll: true });
     onPick(prompt, actions, arcadeShortcut);
   };
