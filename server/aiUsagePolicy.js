@@ -4,7 +4,7 @@
 export const FREE_TIER_MODELS = Object.freeze([
   'gemini-3.8-flash', 'gemini-3.6-flash', 'gemini-3.5-flash-lite',
 ]);
-export const MAX_MODEL_ATTEMPTS = 2;
+export const MAX_MODEL_ATTEMPTS = 3;
 export const isApprovedModel = name => FREE_TIER_MODELS.includes(name);
 
 export function isQuotaOrBillingError(error) {

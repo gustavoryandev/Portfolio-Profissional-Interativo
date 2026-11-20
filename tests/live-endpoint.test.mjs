@@ -262,6 +262,56 @@ test('the chat retries incomplete Gemini output in JSON and replaces it in the s
   }
 });
 
+test('both chats allow queued Gemini replies after a local chess review', async t => {
+  const originalFetch = globalThis.fetch;
+  process.env.GEMINI_API_KEY = 'queued-chat-test';
+  mockAdapter = async config => ({ status: 200, config, data: { models: [
+    { name: 'models/gemini-3.8-flash', supportedGenerationMethods: ['generateContent'] },
+  ] } });
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  t.mock.method(AbortSignal, 'timeout', milliseconds => {
+    const controller = new AbortController();
+    setTimeout(() => controller.abort(), milliseconds);
+    return controller.signal;
+  });
+  try {
+    for (const surface of ['full', 'compact']) {
+      let release, requestSignal, started;
+      const requested = new Promise(resolve => { started = resolve; });
+      globalThis.fetch = async (_url, options) => {
+        requestSignal = options.signal;
+        started();
+        await new Promise(resolve => { release = resolve; });
+        requestSignal.throwIfAborted();
+        return new Response('data: ' + JSON.stringify({ candidates: [{
+          content: { role: 'model', parts: [{ text: 'Olá! Como posso ajudar?' }] }, finishReason: 'STOP',
+        }] }) + '\n\n', { headers: { 'Content-Type': 'text/event-stream' } });
+      };
+      const events = [];
+      const res = { ...response(), flushHeaders() { this.headersSent = true; },
+        write(line) { events.push(JSON.parse(line)); return true; }, end() {} };
+      const pending = handler({ method: 'POST', body: {
+        userMessage: 'oi', lang: 'pt', surface, stream: true, streamRetry: true,
+        chatHistory: [{ sender: 'user', text: 'Analisar partida' }, { sender: 'ai', text: '[CHESS_REPLAY]' }],
+      } }, res);
+      await requested;
+      t.mock.timers.tick(7000);
+      const prematurelyAborted = requestSignal.aborted;
+      release();
+      // On regression, stop a fallback instead of leaving the test waiting for it.
+      globalThis.fetch = async () => { throw new Error('Unexpected fallback for a queued reply'); };
+      await pending;
+      assert.equal(prematurelyAborted, false, 'a queued response must survive the former 4.5s first-token deadline');
+      assert.deepEqual(events.map(event => event.type), ['meta', 'delta', 'context', 'done']);
+      assert.equal(events[1].text, 'Olá! Como posso ajudar?');
+    }
+  } finally {
+    globalThis.fetch = originalFetch;
+    process.env.GEMINI_API_KEY = '';
+    mockAdapter = undefined;
+  }
+});
+
 test('explicit game and proficiency requests bypass generation with one appropriate card', async () => {
   for (const [userMessage, tag] of [
     ['Quero jogar xadrez com você', '[CHESS_GAME]'],
@@ -361,6 +411,68 @@ test('both Astra surfaces share the same tool contract and request editor data o
       }
     }
     assert.equal(requests, 4);
+  } finally {
+    globalThis.fetch = originalFetch;
+    process.env.GEMINI_API_KEY = '';
+    mockAdapter = undefined;
+  }
+});
+
+test('model discovery keeps the preferred models first and Flash-Lite last', async () => {
+  process.env.GEMINI_API_KEY = 'model-priority-test';
+  mockAdapter = async config => ({ status: 200, config, data: { models: [
+    'gemini-3.5-flash-lite', 'gemini-3.6-flash', 'gemini-3.8-flash',
+  ].map(name => ({ name: `models/${name}`, supportedGenerationMethods: ['generateContent'] })) } });
+  try {
+    const res = response();
+    await handler({ method: 'POST', body: { action: 'models' } }, res);
+    assert.deepEqual(res.body.models, ['gemini-3.8-flash', 'gemini-3.6-flash', 'gemini-3.5-flash-lite']);
+  } finally {
+    process.env.GEMINI_API_KEY = '';
+    mockAdapter = undefined;
+  }
+});
+
+test('silent preferred models switch after eight seconds and Flash-Lite is the last resort', async t => {
+  const originalFetch = globalThis.fetch;
+  process.env.GEMINI_API_KEY = 'last-resort-test';
+  mockAdapter = async config => ({ status: 200, config, data: { models: [
+    'gemini-3.5-flash-lite', 'gemini-3.6-flash', 'gemini-3.8-flash',
+  ].map(name => ({ name: `models/${name}`, supportedGenerationMethods: ['generateContent'] })) } });
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  const calls = [];
+  let firstStarted, secondStarted;
+  const first = new Promise(resolve => { firstStarted = resolve; });
+  const second = new Promise(resolve => { secondStarted = resolve; });
+  globalThis.fetch = async (url, options) => {
+    const name = String(url).match(/models\/([^:]+)/)[1];
+    calls.push(name);
+    if (calls.length <= 2) {
+      (calls.length === 1 ? firstStarted : secondStarted)();
+      await new Promise((_, reject) => options.signal.addEventListener('abort',
+        () => reject(new DOMException('Request aborted', 'AbortError')), { once: true }));
+    }
+    return new Response('data: ' + JSON.stringify({ candidates: [{
+      content: { role: 'model', parts: [{ text: 'Resposta alternativa.' }] }, finishReason: 'STOP',
+    }] }) + '\n\n', { headers: { 'Content-Type': 'text/event-stream' } });
+  };
+  try {
+    const events = [];
+    const res = { ...response(), flushHeaders() { this.headersSent = true; },
+      write(line) { events.push(JSON.parse(line)); return true; }, end() {} };
+    const pending = handler({ method: 'POST', body: {
+      userMessage: 'Quem é Gustavo?', surface: 'full', stream: true, streamRetry: true,
+    } }, res);
+    await first;
+    t.mock.timers.tick(7999);
+    assert.equal(calls.length, 1);
+    t.mock.timers.tick(1);
+    await second;
+    t.mock.timers.tick(8000);
+    await pending;
+    assert.deepEqual(calls, ['gemini-3.8-flash', 'gemini-3.6-flash', 'gemini-3.5-flash-lite']);
+    assert.deepEqual(events.map(event => event.type), ['meta', 'delta', 'context', 'done']);
+    assert.equal(events[1].text, 'Resposta alternativa.');
   } finally {
     globalThis.fetch = originalFetch;
     process.env.GEMINI_API_KEY = '';

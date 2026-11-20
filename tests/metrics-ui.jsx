@@ -108,6 +108,25 @@ for (const Component of [WakaTimeCard, CanvasCard, SpotifyCard, ChessCard, Exper
   await render(false, <Component context={{}} />);
   assert.ok(document.querySelector('.portfolio-card'));
 }
+// Fractional percentages remain accessible and repeated cards have unique headings.
+const detailContext = { github: { status: 'ok', profile: { login: 'fixture' },
+  languages: { items: [{ name: 'JavaScript', percent: 99.9, value: 999 }, { name: 'CSS', percent: 0.1, value: 1 }] },
+  repositories: Array.from({ length: 5 }, (_, index) => ({ name: `project-${index}`, language: 'JavaScript',
+    pushedAt: index === 0 ? 'invalid' : '2026-11-20T01:00:00Z', archived: index === 1 })),
+} };
+for (const lang of ['pt', 'en']) {
+  await render(false, <><GithubLanguagesCard context={detailContext} lang={lang} /><GithubLanguagesCard context={detailContext} lang={lang} />
+    <RepositoriesCard context={detailContext} lang={lang} /></>);
+  const headings = [...document.querySelectorAll('section[aria-labelledby]')].map(section => section.getAttribute('aria-labelledby'));
+  assert.equal(new Set(headings).size, 3);
+  assert.equal(document.querySelector('[aria-label="CSS"]').getAttribute('aria-valuenow'), '0.1');
+  assert.equal(document.querySelectorAll('.github-repo').length, 4);
+  assert.equal(document.querySelectorAll('.github-repo time').length, 3);
+  assert.match(document.querySelector('.github-repo time').textContent, /19/); // Brasília date, not UTC.
+  assert.equal(document.querySelector('.github-detail-footer a').href, 'https://github.com/fixture?tab=repositories');
+  assert.equal(document.querySelector('.github-repo').href, 'https://github.com/fixture/project-0');
+  assert.ok(!document.body.textContent.includes('Invalid Date'));
+}
 const game = { id: 'test', date: '2035-01-01T20:00:00Z', state: 'pre', league: 'Brazilian Serie A',
   home: { name: 'Atlético', logo: '/icons/git.svg' }, away: { name: 'Visitante', logo: '/icons/react.svg' } };
 await render(true, <GaloCard context={{ galo: { games: [game] } }} />);

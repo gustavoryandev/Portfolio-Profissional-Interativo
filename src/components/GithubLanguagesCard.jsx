@@ -1,7 +1,8 @@
-import { CardShell } from './ui/CardShell';
+import { CardShell, CardHeader } from './ui/CardShell';
 import LanguageIcon from './LanguageIcon';
-// src/components/GithubLanguages.jsx
-import { useMemo } from 'react';
+import { useId, useMemo } from 'react';
+import { Code2 } from 'lucide-react';
+import './GithubDetails.css';
 
 const FONT_MONO = "'JetBrains Mono', 'Fira Code', ui-monospace, monospace";
 const FALLBACK_COLOR = '#8b949e';
@@ -11,7 +12,7 @@ const HEX = /^#[0-9a-f]{6}$/i;
 
 const copy = {
   pt: {
-    title: 'Linguagens',
+    title: 'Linguagens mais usadas',
     count: (n) => `${n} linguagens em repositórios públicos`,
     countOne: '1 linguagem em repositórios públicos',
     others: (n) => `+ ${n} outras`,
@@ -21,7 +22,7 @@ const copy = {
     empty: 'Ainda não há linguagens nos repositórios públicos.',
   },
   en: {
-    title: 'Languages',
+    title: 'Most used languages',
     count: (n) => `${n} languages across public repositories`,
     countOne: '1 language across public repositories',
     others: (n) => `+ ${n} more`,
@@ -30,13 +31,6 @@ const copy = {
     unavailable: 'Language data is unavailable at the moment.',
     empty: 'No languages in public repositories yet.',
   },
-};
-
-// Tokens do design system Alvinegro + Azul
-const ui = {
-  panel: '', card: 'border-line bg-panel-soft', track: 'bg-line', text: 'text-ink', sub: 'text-muted',
-  accentRule: 'bg-accent', tile: 'border-line bg-panel', hover: 'hover:border-accent hover:shadow-md',
-  badge: 'border-brand-400/40 bg-brand-400/10 text-accent', dashed: 'border-line text-muted',
 };
 
 // Lê só o que existe; ignora itens inválidos e ordena do maior para o menor
@@ -99,12 +93,13 @@ export default function GithubLanguages({ context, lang = 'pt' }) {
   const items = useMemo(() => normalize(github?.languages?.items), [github?.languages?.items]);
   const groups = useMemo(() => groupRest(items, MAX_ITEMS, t.others), [items, t]);
 
-  const headingId = 'gh-languages-title';
+  const headingId = useId();
 
   if (github?.status !== 'ok' || github.languages == null) {
     return (
-      <CardShell as="section" className="my-3" >
-        <div className={`rounded-xl border border-dashed py-12 text-center text-sm font-medium ${ui.dashed}`}>
+      <CardShell as="section" className="my-3 github-detail" aria-labelledby={headingId}>
+        <CardHeader icon={Code2} titleId={headingId} title={t.title} />
+        <div className="github-detail-empty">
           {t.unavailable}
         </div>
       </CardShell>
@@ -113,9 +108,9 @@ export default function GithubLanguages({ context, lang = 'pt' }) {
 
   if (items.length === 0) {
     return (
-      <CardShell as="section" className="my-3" >
-        <h3 className={`mb-4 text-[0.85rem] font-semibold uppercase tracking-[0.05em] ${ui.sub}`}>{t.title}</h3>
-        <div className={`rounded-xl border border-dashed py-10 text-center text-sm font-medium ${ui.dashed}`}>
+      <CardShell as="section" className="my-3 github-detail" aria-labelledby={headingId}>
+        <CardHeader icon={Code2} titleId={headingId} title={t.title} />
+        <div className="github-detail-empty">
           {t.empty}
         </div>
       </CardShell>
@@ -125,78 +120,58 @@ export default function GithubLanguages({ context, lang = 'pt' }) {
   const barSummary = groups.map((g) => `${g.name} ${fmtPercent.format(g.percent)}%`).join(', ');
 
   return (
-    <CardShell as="section" className="my-3" aria-labelledby={headingId}>
-      <header className="mb-6 flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h3
-            id={headingId}
-            className={`flex items-center gap-3 text-[0.85rem] font-semibold uppercase tracking-[0.05em] ${ui.sub}`}
-          >
-            <span aria-hidden="true" className={`h-4 w-[3px] rounded-full ${ui.accentRule}`} />
-            {t.title}
-          </h3>
-          <p className={`mt-2 text-sm ${ui.sub}`}>
-            {items.length === 1 ? t.countOne : t.count(fmtCount.format(items.length))}
-          </p>
-        </div>
-        <span className={`rounded-full border px-3 py-1 text-xs font-bold uppercase tracking-wider ${ui.badge}`}>
-          {groups[0].name} · {fmtPercent.format(groups[0].percent)}%
-        </span>
-      </header>
+    <CardShell as="section" className="my-3 github-detail" aria-labelledby={headingId}>
+      <CardHeader icon={Code2} titleId={headingId} title={t.title}
+        subtitle={items.length === 1 ? t.countOne : t.count(fmtCount.format(items.length))} />
 
       {/* Barra agregada: segmentos proporcionais, com descrição para leitores de tela */}
       <div
         role="img"
         aria-label={`${t.barLabel}: ${barSummary}`}
-        className={`mb-6 flex h-3.5 w-full gap-[2px] overflow-hidden rounded-full p-[2px] ${ui.track}`}
+        className="github-language-distribution"
       >
         {groups.map((g) => (
           <span
             key={g.name}
             aria-hidden="true"
-            className="h-full rounded-full transition-[width] duration-700 ease-out"
-            style={{ width: `${g.percent}%`, backgroundColor: g.color }}
+            style={{ flexGrow: g.percent, backgroundColor: g.color }}
           />
         ))}
       </div>
 
-      <ul className="m-0 grid list-none grid-cols-1 gap-3 p-0 sm:grid-cols-2">
+      <ul className="github-language-list">
         {groups.map((g) => (
           <li
             key={g.name}
-            className={`rounded-xl border border-l-[3px] p-4 transition-all duration-200 ${ui.card} ${ui.hover}`}
-            style={{ borderLeftColor: g.color }}
+            className="github-language-row"
           >
-            <div className="flex items-center gap-3">
-              <span aria-hidden="true" className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border ${ui.tile}`}>
-                <LanguageIcon name={g.name} size={22} color={g.color} />
+              <span aria-hidden="true" className="github-language-icon">
+                <LanguageIcon name={g.name} size={20} color={g.color} />
               </span>
-              <div className="min-w-0 flex-1">
-                <p className={`truncate text-[0.95rem] font-bold ${ui.text}`}>{g.name}</p>
+              <div className="github-language-name">
+                <strong>{g.name}</strong>
                 {g.bytes !== null && (
-                  <p className={`mt-0.5 text-xs tabular-nums ${ui.sub}`} style={{ fontFamily: FONT_MONO }}>
+                  <span className="github-language-bytes" style={{ fontFamily: FONT_MONO }}>
                     {fmtBytes(g.bytes)}
-                  </p>
+                  </span>
                 )}
               </div>
               <span
-                className={`shrink-0 text-[1.1rem] font-semibold tabular-nums ${ui.text}`}
+                className="github-language-percent"
                 style={{ fontFamily: FONT_MONO }}
               >
                 {fmtPercent.format(g.percent)}%
               </span>
-            </div>
-
             <div
               role="progressbar"
               aria-label={g.name}
               aria-valuemin={0}
               aria-valuemax={100}
-              aria-valuenow={Math.round(g.percent)}
-              className={`mt-3 h-2 w-full overflow-hidden rounded-full ${ui.track}`}
+              aria-valuenow={g.percent}
+              aria-valuetext={`${fmtPercent.format(g.percent)}%`}
+              className="github-language-track"
             >
               <div
-                className="h-full rounded-full transition-[width] duration-700 ease-out"
                 style={{ width: `${g.percent}%`, backgroundColor: g.color }}
               />
             </div>
@@ -204,7 +179,7 @@ export default function GithubLanguages({ context, lang = 'pt' }) {
         ))}
       </ul>
 
-      <p className={`mt-6 text-center text-xs font-medium ${ui.sub}`}>{t.note}</p>
+      <p className="github-detail-note">{t.note}</p>
     </CardShell>
   );
 }

@@ -23,9 +23,11 @@ const fallbackLanguage = 'I can only communicate in Portuguese or English. Pleas
 
 const fallbackModels = FREE_TIER_MODELS;
 
-const GEMINI_TIMEOUT_MS = 12000;
-const FIRST_DELTA_TIMEOUT_MS = 4500;
-const CHAT_GENERATION_TIMEOUT_MS = 24000;
+// Try the preferred models first, switching promptly if no output arrives.
+// Once output starts, allow it to finish within the shared generation deadline.
+const GEMINI_TIMEOUT_MS = 24000;
+const FIRST_DELTA_TIMEOUT_MS = 8000;
+const CHAT_GENERATION_TIMEOUT_MS = 40000;
 // Tempo máximo que o prompt espera pelos dados ao vivo (cache frio). Depois disso usa o que já está em cache.
 const LIVE_PROMPT_WAIT_MS = 1200;
 // Tempo máximo que a resposta espera por dados ao vivo já em andamento; depois usa o snapshot do cache.
@@ -42,12 +44,8 @@ function generationConfig(model, maxOutputTokens) {
 }
 
 function modelPriority(name) {
-  const normalized = name.toLowerCase();
-  const familyScore = normalized.includes('flash') ? 0 : 100;
-  const version = normalized.match(/gemini-(\d+)(?:\.(\d+))?/);
-  const versionScore = version ? Number(version[1]) * 10 + Number(version[2] || 0) : 0;
-  const previewPenalty = normalized.includes('preview') ? 10 : 0;
-  return familyScore - versionScore + previewPenalty;
+  // Preserve the preferred quality order; Flash-Lite is the last resort.
+  return fallbackModels.indexOf(name);
 }
 
 async function discoverModels(apiKey) {
@@ -1057,11 +1055,6 @@ function planHistory(messages, prior, budget) {
   return { summary, anchor, start, toSummarize: messages.slice(covered, start) };
 }
 
-const summaryModelOrder = (models) => [
-  ...models.filter((name) => /lite/i.test(name)),
-  ...models.filter((name) => !/lite/i.test(name))
-];
-
 function transcriptOf(messages) {
   const lines = messages.map((m) => `${m.role === 'user' ? 'Visitante' : 'Astra'}: ${clipHead(m.text, HISTORY_POLICY.summaryMessageChars)}`);
   return clipTail(lines.join('\n'), HISTORY_POLICY.summaryInputChars);
@@ -1077,7 +1070,7 @@ async function updateSummary(genAI, models, previous, rolled, parentSignal) {
   const prompt = `${SUMMARY_INSTRUCTION}\n\nRESUMO ANTERIOR:\n${previous || '(nenhum)'}\n\nMENSAGENS NOVAS:\n${transcriptOf(rolled)}`;
   const signal = AbortSignal.any([parentSignal, AbortSignal.timeout(HISTORY_POLICY.summaryTimeoutMs)]);
   try {
-    const { value } = await runWithFallback(summaryModelOrder(models), (name, attemptSignal) => genAI
+    const { value } = await runWithFallback(models, (name, attemptSignal) => genAI
       .getGenerativeModel(
         { model: name, generationConfig: generationConfig(name, 2048) }
       )
