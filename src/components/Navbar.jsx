@@ -1,3 +1,4 @@
+import RickThemeMusic from './RickThemeMusic';
 import { useContext } from 'react';
 import { useAstra } from '../context/AstraContext';
 import { ThemeContext } from '../context/ThemeContext';
@@ -52,6 +53,7 @@ export function HeaderActions() {
   return (
     <div className="header-actions">
       <div className="language-switch" aria-label={en ? 'Language' : 'Idioma'}>{['pt', 'en'].map(lang => <button key={lang} aria-pressed={i18n.language.startsWith(lang)} onClick={() => i18n.changeLanguage(lang)}>{lang.toUpperCase()}</button>)}</div>
+      <RickThemeMusic />
       <ThemeSelector />
       <a className="cv-link" href={cv} download aria-label={t('navbar.baixarCv')}><Download size={16} /><span>{t('navbar.baixarCv')}</span></a>
     </div>

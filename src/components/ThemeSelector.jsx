@@ -26,7 +26,7 @@ export default function ThemeSelector() {
       options: group.options.map(option => ({
         id: option.id,
         label: t(`navbar.appearance.${option.id}`, { defaultValue: option.name }),
-        description: isGaloTheme(option.id) ? t('navbar.anthem.notice') : undefined,
+        description: isGaloTheme(option.id) ? t('navbar.anthem.notice') : option.id === 'rick-morty' ? t('rick.music.notice') : undefined,
         preview: <span className="theme-swatch" aria-hidden="true">
           {isGaloTheme(option.id) && <GaloCrest />}
         </span>,

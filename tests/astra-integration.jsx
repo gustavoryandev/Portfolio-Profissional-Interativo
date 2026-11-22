@@ -22,18 +22,19 @@ window.HTMLElement.prototype.hidePopover = () => {};
 window.HTMLDialogElement.prototype.showModal = window.HTMLDialogElement.prototype.show = function () { this.open = true; };
 window.HTMLDialogElement.prototype.close = function () { this.open = false; };
 const anthemEvents = [];
+const musicEvents = [];
 window.Audio = class {
   paused = true;
   constructor(src) { this.src = src; }
   play() {
     this.paused = false;
-    anthemEvents.push(['play', this.src]);
+    (this.src.includes('itunes.apple.com') ? musicEvents : anthemEvents).push(['play', this.src]);
     this.onplay?.();
     return Promise.resolve();
   }
   pause() {
     this.paused = true;
-    anthemEvents.push(['pause']);
+    (this.src.includes('itunes.apple.com') ? musicEvents : anthemEvents).push(['pause']);
     this.onpause?.();
   }
 };
@@ -410,6 +411,14 @@ try {
     assert.equal(document.documentElement.dataset.theme, theme.id);
     assert.equal(document.querySelectorAll('.arcade-card').length, 5);
     if (theme.id === 'rick-morty') {
+      assert.equal(musicEvents.length, 1, 'selecting Rick starts the music');
+      const musicButton = $('.astra-full .rick-theme-music');
+      assert.equal(musicButton.getAttribute('aria-pressed'), 'true');
+      await click(musicButton);
+      assert.equal(musicButton.getAttribute('aria-pressed'), 'false');
+      await click(musicButton);
+      assert.equal(musicButton.getAttribute('aria-pressed'), 'true');
+      const musicBeforePortal = musicEvents.length;
       const arcade = $('.arcade');
       const log = $('.astra-full [role="log"]');
       const portal = $('.astra-full .dimension-portal');
@@ -478,8 +487,10 @@ try {
       await click($('.meeseeks-box'));
       assert.equal($('.meeseeks-visitor'), null);
       assert.equal($('.dimension-intro'), null, 'reduced motion suppresses the intro scenes');
+      assert.equal(musicEvents.length, musicBeforePortal, 'crossing does not interrupt or restart the track');
     }
   }
+  assert.deepEqual(musicEvents.at(-1), ['pause'], 'leaving Rick stops its music');
   assert.deepEqual(anthemEvents, [
     ['play', '/hino-do-galo.mp3'],
     ['pause'],

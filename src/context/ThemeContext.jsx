@@ -1,3 +1,4 @@
+import useRickThemeMusic from '../hooks/useRickThemeMusic';
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { isGaloTheme, isDimensionalTheme, legacyThemeIds, themePalettes, themes } from '../data/themes.js';
 import { DimensionalIntro } from '../components/RickDimensionExperience';
@@ -10,6 +11,7 @@ export { ThemeContext } from './ThemeState';
 const galoAnthemUrl = '/hino-do-galo.mp3';
 
 export function ThemeProvider({ children }) {
+  const { musicStatus, playMusic, stopMusic, toggleMusic } = useRickThemeMusic();
   const [theme, setSelectedTheme] = useState(() => {
     let initial = document.documentElement.dataset.theme;
     if (!initial) {
@@ -93,6 +95,7 @@ export function ThemeProvider({ children }) {
     setEggMessage('');
     const wasGalo = isGaloTheme(selectedTheme.current);
     const isGalo = isGaloTheme(nextTheme);
+    const wasRick = selectedTheme.current === 'rick-morty';
     selectedTheme.current = nextTheme;
     setSelectedTheme(nextTheme);
     if (nextTheme === 'rick-morty') {
@@ -100,13 +103,16 @@ export function ThemeProvider({ children }) {
       setDimension('lab');
     }
 
+    if (nextTheme === 'rick-morty' && !wasRick) void playMusic();
+    else if (nextTheme !== 'rick-morty' && wasRick) stopMusic();
+
     if (isGalo && !wasGalo) {
       playAnthem();
     } else if (!isGalo && wasGalo && anthem.current) {
       anthem.current.pause();
       anthem.current.currentTime = 0;
     }
-  }, [playAnthem]);
+  }, [playAnthem, playMusic, stopMusic]);
 
   const crossDimension = useCallback(event => {
     if (!isDimensionalTheme(selectedTheme.current) || crossingTimer.current) return;
@@ -155,7 +161,7 @@ export function ThemeProvider({ children }) {
   }, [theme, dimension, darkMode, palette, crossing]);
 
   return (
-    <ThemeContext.Provider value={{ theme, darkMode, setTheme, anthemPlaying, toggleAnthem, crossDimension, crossing, dimension, eggMessage, setEggMessage, shipDeparted, markShipDeparted, introScene }}>
+    <ThemeContext.Provider value={{ musicStatus, toggleMusic, theme, darkMode, setTheme, anthemPlaying, toggleAnthem, crossDimension, crossing, dimension, eggMessage, setEggMessage, shipDeparted, markShipDeparted, introScene }}>
       {children}
       <DimensionalIntro scene={introScene} onDismiss={dismissIntro} />
       {crossing && <div className="dimension-transit" style={{ '--portal-x': portalOrigin.x, '--portal-y': portalOrigin.y }} aria-hidden="true"><span /></div>}

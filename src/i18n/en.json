@@ -733,6 +733,13 @@
       "openFull": "Open {{name}}",
       "language": "Change the portfolio and assistant language",
       "askProject": "Open Projects and ask the assistant about any project. You can edit your question before sending."
+    },
+    "music": {
+      "play": "Play Rick and Morty Theme preview",
+      "pause": "Pause Rick and Morty Theme preview",
+      "retry": "Try playing the music again",
+      "error": "The music could not be loaded. Press to try again.",
+      "notice": "Theme music · Official Ryan Elder preview"
     }
   }
 }

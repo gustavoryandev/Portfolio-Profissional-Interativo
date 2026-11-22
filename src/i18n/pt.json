@@ -733,6 +733,13 @@
       "openFull": "Abrir {{name}}",
       "language": "Troque o idioma do portfólio e da assistente",
       "askProject": "Abra Projetos e pergunte à assistente sobre qualquer projeto. Você pode editar a pergunta antes de enviar."
+    },
+    "music": {
+      "play": "Tocar prévia de Rick and Morty Theme",
+      "pause": "Pausar prévia de Rick and Morty Theme",
+      "retry": "Tentar tocar a música novamente",
+      "error": "Não foi possível carregar a música. Toque para tentar novamente.",
+      "notice": "Música tema · Prévia oficial de Ryan Elder"
     }
   }
 }

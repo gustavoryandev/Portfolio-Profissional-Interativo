@@ -27,3 +27,7 @@ Os endereços de origem também estão em `public/rick-assets/sources.json`. Os 
 Arquivo: `public/rick-garage-night.png`. Gerado com imagegen a partir da referência fornecida, antes da decisão de manter esta imagem e usar imagens da internet nos personagens.
 
 Prompt: original wide nighttime garage environment closely inspired by the attached reference: wooden beams, three green fluorescent lights, large teal pipe, shelving with gadgets and jars, messy workbench, purple crystals, wiring, CRT monitor and Meeseeks box; open garage door showing starry night; no characters or spaceship; dark left and center for readable portfolio text; flat hand-drawn adult sci-fi cartoon, 3:2 landscape.
+
+## Música
+
+“Rick and Morty Theme”, Rick and Morty & Ryan Elder: [faixa oficial](https://music.apple.com/us/song/1570547237). A interface reproduz a prévia oficial diretamente do CDN da Apple, em volume inicial de 22%, uma vez ao selecionar o tema. O controle de som no cabeçalho permite pausar e retomar. A trilha continua durante a travessia e para ao sair do tema. Restaurar uma sessão salva não reproduz som sem interação. Bloqueio de autoplay mantém o botão disponível; erro de rede permite tentar novamente.
