@@ -1,3 +1,4 @@
+import { useAssistantPersona } from '../context/AssistantAppearanceContext';
 import { useLayoutEffect, useRef } from 'react';
 import {
   BarChart3, Clock, Code2, Compass, FileCode2, Folder, Gamepad2, Github, GraduationCap, Headphones, Info, Layers,
@@ -50,6 +51,8 @@ const integrations = [
 
 export default function AstraResources({ open, compact, disabled, triggerRef, onClose, onPick }) {
   const { t, i18n } = useTranslation();
+  const persona = useAssistantPersona();
+  const fullPersona = useAssistantPersona('full');
   const en = i18n.language.startsWith('en');
   const panelRef = useRef(null);
   const closeRef = useRef(null);
@@ -128,7 +131,7 @@ export default function AstraResources({ open, compact, disabled, triggerRef, on
       onClick={event => { if (drawerRef.current && clickedDialogBackdrop(event)) onClose(); }}
       onKeyDown={handleKey}>
       <header className="astra-resources-header">
-        <h3 id="astra-resources-title">{t('chat.resources.title')}</h3>
+        <h3 id="astra-resources-title">{persona ? t('rick.assistant.resources', { name: persona.name }) : t('chat.resources.title')}</h3>
         <button ref={closeRef} type="button" className="icon-button astra-resources-close"
           aria-label={t('chat.resources.close')} onClick={onClose}>
           <X size={17} aria-hidden="true" />
@@ -137,17 +140,24 @@ export default function AstraResources({ open, compact, disabled, triggerRef, on
       <div className="astra-resources-body custom-scrollbar">
         <p className="astra-resources-note">{t('chat.resources.note')}</p>
         {groups.map(([group, items]) => <section className="astra-resources-group" key={group} aria-labelledby={`astra-resources-${group}`}>
-          <h4 id={`astra-resources-${group}`}>{t(`chat.resources.groups.${group}`)}</h4>
-          {compact && group === 'versions' && <p className="astra-resources-note">{t('chat.resources.cardHandoff')}</p>}
+          <h4 id={`astra-resources-${group}`}>{persona && group === 'versions' ? t('rick.assistant.versions') : persona && group === 'arcade' ? `${persona.name} Arcade` : t(`chat.resources.groups.${group}`)}</h4>
+          {compact && group === 'versions' && <p className="astra-resources-note">{persona ? t('rick.assistant.handoff', { name: fullPersona.name }) : t('chat.resources.cardHandoff')}</p>}
           {group === 'arcade' && <p className="astra-resources-note">{t(compact ? 'chat.resources.arcadeCompact' : 'chat.resources.arcadeFull')}</p>}
           <ul className="astra-resources-list">
             {items.map(([key, Icon, action, arcadeShortcut]) => {
               const game = games[arcadeShortcut?.game];
-              const { title, description, prompt } = game ? {
+              let { title, description, prompt } = game ? {
                 title: game.name,
                 description: game.description[Number(en)],
                 prompt: t('chat.resources.arcadeGuide', { game: game.name }),
               } : t(`chat.resources.items.${key}`, { returnObjects: true });
+              if (persona) {
+                if (key === 'openFullVersion') title = t('rick.assistant.openFull', { name: fullPersona.name });
+                if (key === 'identifyVersion') description = t('rick.assistant.identify');
+                if (key === 'askProject') description = t('rick.assistant.askProject');
+                if (key === 'language') description = t('rick.assistant.language');
+                if (key === 'arcadeBrowse') description = t('rick.assistant.handoff', { name: fullPersona.name });
+              }
               return (
                 <li key={key}>
                   <button type="button" className="astra-resource" disabled={disabled}

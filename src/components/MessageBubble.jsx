@@ -3,6 +3,7 @@ import { lazy, memo, Suspense, useEffect, useMemo, useState } from 'react';
 import { AlertTriangle, Check, Copy, Sparkles, User } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import AstraAvatar from './AstraAvatar';
+import { useAssistantPersona } from '../context/AssistantAppearanceContext';
 import SpotifyCard from './SpotifyCard';
 import GithubCard from './GithubCard';
 import StatsCard from './StatsCard';
@@ -220,6 +221,7 @@ function Avatar({ isUser, children }) {
 }
 
 function MessageBubble({ message, liveContext = {}, refreshing = [], onRefresh, onSelectSection, onViewFull, compact = false, active = true, children }) {
+  const persona = useAssistantPersona();
   const { i18n } = useTranslation();
   const uiLanguage = i18n.language.startsWith('en') ? 'en' : 'pt';
   const ui = UI;
@@ -275,7 +277,7 @@ function MessageBubble({ message, liveContext = {}, refreshing = [], onRefresh, 
       <div className={hasCards ? 'message-content message-with-cards' : 'message-content'}>
         {!isError && (
           <div className="astra-label">
-            <span>Astra</span>
+            <span>{persona?.name ?? 'Astra'}</span>
             {message.model && <span className="dim-tag">{message.model}</span>}
           </div>
         )}

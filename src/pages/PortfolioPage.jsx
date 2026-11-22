@@ -14,13 +14,23 @@ import { SocialLinks } from '../components/ProfilePanel';
 import ScrollReveal from '../components/ui/ScrollReveal';
 import GaloCrest from '../components/GaloCrest';
 import AstraAvatar from '../components/AstraAvatar';
+import { useAssistantPersona } from '../context/AssistantAppearanceContext';
+import { PortalArt } from '../components/DimensionPortal';
+import DimensionalScene from '../components/DimensionalScene';
+import DimensionAstraSignal from '../components/DimensionAstraSignal';
+import { GarageWorkbench, CitadelReception } from '../components/RickDimensionExperience';
 import perfil from '../data/perfil.json';
-import { isGaloTheme } from '../data/themes.js';
+import { isGaloTheme, isDimensionalTheme } from '../data/themes.js';
 
 export default function PortfolioPage({ activeSection, projectFocus, onSectionLink }) {
   const { openAstra, openFull } = useAstra();
-  const galo = isGaloTheme(useContext(ThemeContext)?.theme);
-  const { i18n } = useTranslation();
+  const { theme, dimension, shipDeparted, markShipDeparted } = useContext(ThemeContext) ?? {};
+  const galo = isGaloTheme(theme);
+  const persona = useAssistantPersona();
+  const fullPersona = useAssistantPersona('full');
+  const dimensional = isDimensionalTheme(theme);
+  const secret = dimension === 'corrupted';
+  const { t, i18n } = useTranslation();
   const en = i18n.language.startsWith('en');
   const pageRef = useRef(null);
   const headerRef = useRef(null);
@@ -70,24 +80,34 @@ export default function PortfolioPage({ activeSection, projectFocus, onSectionLi
   }, []);
 
   return <div ref={pageRef} className="portfolio-app scroll-portfolio">
+    {dimensional && <DimensionalScene secret={secret} />}
     <a className="skip-link" href="#main-content">{en ? 'Skip to content' : 'Pular para o conteúdo'}</a>
     <Navbar ref={headerRef} portfolio activeSection={visibleSection} onSectionLink={onSectionLink} />
     <MobileNav en={en} active={visibleSection} onSectionLink={onSectionLink} />
     <main id="main-content" tabIndex={-1} className="scroll-content">
       <section id="inicio" className="portfolio-hero" aria-labelledby="hero-title">
+        {dimensional && <div className="rick-ship" data-departed={shipDeparted} data-docked={secret} onAnimationEnd={event => { if (event.animationName === 'garage-flyby') markShipDeparted(); }} aria-hidden="true"><img src="/rick-assets/spaceship.png" alt="" width="640" height="426" /><span /></div>}
         {galo && <GaloCrest className="hero-galo-watermark" />}
         <ScrollReveal>
+          {dimensional && <div className="dimension-label"><span>{t(secret ? 'rick.citadelCode' : 'rick.garageCode')}</span><b>{t(secret ? 'rick.citadelName' : 'rick.garageName')}</b></div>}
           <p className="section-eyebrow">{en ? 'SOFTWARE ENGINEERING · PUC MINAS' : 'ENGENHARIA DE SOFTWARE · PUC MINAS'}</p>
           <h1 id="hero-title">Gustavo<br /><span className="neon-title">Ryan.</span></h1>
-          <p className="hero-lead">{en ? 'Turning ideas into digital experiences.' : 'Transformando ideias em experiências digitais.'}</p>
+          <p className="hero-lead">{dimensional ? (secret ? (en ? 'Infinite versions. An original way to build.' : 'Infinitas versões. Um jeito próprio de construir.') : (en ? 'Good ideas cross galaxies.' : 'Boas ideias atravessam galáxias.')) : (en ? 'Turning ideas into digital experiences.' : 'Transformando ideias em experiências digitais.')}</p>
+          {dimensional && <div className="dimension-instrument-panel">
+            <div className="dimension-readout"><span>{en ? 'PORTAL CONTROL' : 'CONTROLE DO PORTAL'}</span><strong>{secret ? (en ? 'Citadel access granted' : 'Acesso liberado à Cidadela') : (en ? 'Portal stabilized' : 'Portal estabilizado')}</strong></div>
+            <div className="dimension-instruments" aria-hidden="true"><i /><span>⏚</span><b>137.0 Hz</b><em /></div>
+            <DimensionAstraSignal />
+            <GarageWorkbench />
+          </div>}
           <p className="hero-description">{en ? 'Java, Spring Boot and React. Explore my projects, skills and the journey behind the code.' : 'Java, Spring Boot e React. Explore meus projetos, habilidades e a trajetória por trás do código.'}</p>
           <div className="hero-actions">
-            {galo && <a className="neon-cta" href="/chat" onClick={openFull}><Sparkles size={18} aria-hidden="true" />{en ? 'Talk to Astra' : 'Conversar com Astra'}<ArrowUpRight size={18} aria-hidden="true" /></a>}
+            {galo && <a className="neon-cta" href="/chat" onClick={openFull}><Sparkles size={18} aria-hidden="true" />{fullPersona ? (en ? `Talk to ${fullPersona.name}` : `Conversar com ${fullPersona.name}`) : (en ? 'Talk to Astra' : 'Conversar com Astra')}<ArrowUpRight size={18} aria-hidden="true" /></a>}
             <a className={galo ? 'scroll-secondary' : 'neon-cta'} href="#projetos" onClick={onSectionLink}>{en ? 'Explore projects' : 'Explorar projetos'}<ArrowDown size={17} aria-hidden="true" /></a>
           </div>
           <SocialLinks />
         </ScrollReveal>
         <ScrollReveal delay={.08} className="hero-profile glass-panel">
+          {dimensional && <><PortalArt className="hero-dimensional-ring" /><div className="dimension-scan-label">{t(secret ? 'rick.citizen' : 'rick.researcher')}<span>{t(secret ? 'rick.dockOnline' : 'rick.stable')}</span></div></>}
           <div className="portrait-orbit" aria-hidden="true" />
           <img className="hero-photo" src="/perfil-foto.jpeg" alt={en ? 'Gustavo Ryan' : 'Foto de Gustavo Ryan'} width="572" height="777" fetchPriority="high" />
           <div className="hero-profile-caption">
@@ -127,10 +147,10 @@ export default function PortfolioPage({ activeSection, projectFocus, onSectionLi
         <ScrollReveal><p className="section-eyebrow">04 / {en ? 'TOOLKIT' : 'TECNOLOGIAS'}</p><h2 id="skills-title">{en ? 'What I build with.' : 'Com o que eu construo.'}</h2></ScrollReveal>
         <div className="portfolio-skill-visuals"><SkillsGlobe skills={perfil.skills} en={en} /></div><div className="scroll-skills">{perfil.skills.map((skill, index) => <ScrollReveal key={skill.nome} delay={(index % 4) * .025}><div className="glass-panel scroll-skill"><LanguageIcon name={skill.nome} size={28} /><h3>{skill.nome}</h3></div></ScrollReveal>)}</div>
       </section>
-      {['experience', 'education', 'contact'].map(section => <div key={section} id={section === 'contact' ? 'contato' : section} className="scroll-section"><ScrollReveal><PortfolioSection active={section} en={en} /></ScrollReveal></div>)}
-      <ScrollReveal><section className="glass-panel astra-scroll-cta" aria-labelledby="astra-cta-title"><AstraAvatar width="64" height="64" /><div><h2 id="astra-cta-title">{en ? 'Curious about my work?' : 'Quer conhecer melhor meu trabalho?'}</h2><p>{en ? 'Astra can guide you through my projects and live integrations.' : 'A Astra te guia pelos projetos e pelas integrações ao vivo.'}</p></div><a href="/chat" onClick={openFull} className="neon-cta">{en ? 'Talk to Astra' : 'Conversar com Astra'}<ArrowUpRight size={18} aria-hidden="true" /></a></section></ScrollReveal>
+      {['experience', 'education', 'contact'].map(section => <div key={section} id={section === 'contact' ? 'contato' : section} className="scroll-section"><ScrollReveal>{section === 'contact' && <CitadelReception />}<PortfolioSection active={section} en={en} /></ScrollReveal></div>)}
+      <ScrollReveal><section className="glass-panel astra-scroll-cta" aria-labelledby="astra-cta-title"><AstraAvatar surface="full" width="64" height="64" /><div><h2 id="astra-cta-title">{en ? 'Curious about my work?' : 'Quer conhecer melhor meu trabalho?'}</h2><p>{t('rick.assistant.guide', { name: fullPersona?.name ?? 'Astra' })}</p></div><a href="/chat" onClick={openFull} className="neon-cta">{fullPersona ? (en ? `Talk to ${fullPersona.name}` : `Conversar com ${fullPersona.name}`) : (en ? 'Talk to Astra' : 'Conversar com Astra')}<ArrowUpRight size={18} aria-hidden="true" /></a></section></ScrollReveal>
     </main>
-    <aside className="astra-fab-shortcut" aria-label="Astra"><button type="button" className="astra-fab" onClick={openAstra} aria-haspopup="dialog"><AstraAvatar />{en ? 'Ask Astra' : 'Perguntar pra Astra'}</button></aside>
+    <aside className="astra-fab-shortcut" aria-label={persona?.name ?? 'Astra'}><button type="button" className="astra-fab" onClick={openAstra} aria-haspopup="dialog"><AstraAvatar />{persona ? (en ? `Ask ${persona.name}` : `Perguntar ao ${persona.name}`) : (en ? 'Ask Astra' : 'Perguntar pra Astra')}</button></aside>
     <footer className="scroll-footer"><span>© {new Date().getFullYear()} Gustavo Ryan</span><a href="#inicio">{en ? 'Back to top ↑' : 'Voltar ao topo ↑'}</a></footer>
   </div>;
 }

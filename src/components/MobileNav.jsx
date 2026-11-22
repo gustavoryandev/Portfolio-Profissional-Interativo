@@ -1,3 +1,4 @@
+import { useAssistantPersona } from '../context/AssistantAppearanceContext';
 import { useAstra } from '../context/AstraContext';
 import { useEffect, useRef } from 'react';
 import { Home, Code2, Sparkles, Menu, X } from 'lucide-react';
@@ -5,6 +6,7 @@ import { HeaderActions, portfolioLinks } from './Navbar';
 import { sections } from './Sidebar';
 
 export default function MobileNav({ en, active, onSelect, onSectionLink }) {
+  const persona = useAssistantPersona('full');
   const { openFull } = useAstra();
   const dialog = useRef(null);
   useEffect(() => {
@@ -18,10 +20,10 @@ export default function MobileNav({ en, active, onSelect, onSectionLink }) {
   return <>
     <nav className="mobile-nav fixed inset-x-0 bottom-0 z-40 grid grid-cols-3 gap-3 border-t border-line bg-panel px-4 pt-2 pb-[max(8px,env(safe-area-inset-bottom))]" aria-label={en ? 'Main navigation' : 'Navegação principal'}>
       {chat ? <>
-        <button className={target} onClick={() => onSelect('home')} aria-current={active === 'home' ? 'page' : undefined}><Sparkles size={20} aria-hidden="true" />Astra</button>
+        <button className={target} onClick={() => onSelect('home')} aria-current={active === 'home' ? 'page' : undefined}><Sparkles size={20} aria-hidden="true" />{persona?.name ?? 'Astra'}</button>
         <button className={target} onClick={() => onSelect('projects')} aria-current={active === 'projects' ? 'page' : undefined}><Code2 size={20} aria-hidden="true" />{en ? 'Projects' : 'Projetos'}</button>
       </> : <>
-        <a className={target} href="/chat" onClick={openFull}><Sparkles size={20} aria-hidden="true" />Astra</a>
+        <a className={target} href="/chat" onClick={openFull}><Sparkles size={20} aria-hidden="true" />{persona?.name ?? 'Astra'}</a>
         <a className={target} href="#projetos" onClick={onSectionLink} aria-current={active === 'projetos' ? 'location' : undefined}><Code2 size={20} aria-hidden="true" />{en ? 'Projects' : 'Projetos'}</a>
       </>}
       <button className={target} onClick={() => dialog.current.showModal()}><Menu size={20} aria-hidden="true" />Menu</button>

@@ -476,7 +476,21 @@
         "session": "{{duration}} session since {{start}}",
         "projectToday": "{{duration}} on this project today",
         "noActivity": "No editor activity today.",
-        "underMinute": "under 1 min"
+        "underMinute": "under 1 min",
+        "category": {
+          "Coding": "Coding",
+          "AI Coding": "AI Coding",
+          "Building": "Building",
+          "Writing Docs": "Writing Docs",
+          "Writing Tests": "Writing Tests",
+          "Running Tests": "Running Tests",
+          "Debugging": "Debugging",
+          "Browsing": "Browsing",
+          "Code Reviewing": "Code Reviewing",
+          "Designing": "Designing",
+          "Researching": "Researching",
+          "Learning": "Learning"
+        }
       }
     },
     "github": {
@@ -636,5 +650,89 @@
     "voluntario_puc_role": "Academic Event Volunteer",
     "voluntario_puc_desc": "Logistical support, accreditation, and attendee service at the We Make Software event at PUC Minas.",
     "voluntario_puc_skills": "Teamwork, Communication, Organization"
+  },
+  "rick": {
+    "portal": {
+      "return": "Return to Rick’s garage",
+      "cross": "Cross the portal",
+      "back": "RETURN",
+      "enter": "ENTER",
+      "secret": "You are in the secret dimension.",
+      "original": "Original dimension."
+    },
+    "garageCode": "C-137 / GARAGE",
+    "citadelCode": "CITADEL / DOCK 06",
+    "garageName": "RICK’S GARAGE",
+    "citadelName": "THE CITADEL OF RICKS",
+    "garageLead": "Good ideas cross galaxies.",
+    "citadelLead": "Infinite versions. An original way to build.",
+    "control": "PORTAL CONTROL",
+    "access": "Citadel access granted",
+    "stabilized": "Portal stabilized",
+    "citizen": "GUSTAVO / CITIZEN 06",
+    "researcher": "GUSTAVO / GARAGE RESEARCH",
+    "dockOnline": "DOCK 06 ONLINE",
+    "stable": "PORTAL STABLE",
+    "archive": "CITADEL / ARCHIVE",
+    "research": "GARAGE / RESEARCH",
+    "intern": "INTERN",
+    "terminal": "CITADEL SERVICE TERMINAL",
+    "monitor": "{{name}} / WORKBENCH MONITOR",
+    "openChat": "Open conversation",
+    "box": "Press the Meeseeks box",
+    "exit": "Done, I found the exit.",
+    "hint": "Done, I found the exit. Look for the portal beside the name in the header.",
+    "upThere": "The portal is up there.",
+    "pickleRun": "Make Pickle Rick run to the other side",
+    "ratSuit": "RAT SUIT / P-137",
+    "experiment": "EXPERIMENT / P-137",
+    "pickleFound": "Pickle Rick found! Rat suit activated.",
+    "reception": "Citadel reception",
+    "turnSign": "Turn Morty’s reception sign",
+    "direct": "Talk directly to Gustavo",
+    "receptionSign": "CITADEL / RECEPTION",
+    "mortyIntern": "Morty — Intern",
+    "application": "He’s also waiting to hear back from his job application.",
+    "dockCamera": "Citadel docking camera",
+    "garageOpening": "Rick’s garage opening",
+    "dockCam": "CAM 06 / DOCKING BAY",
+    "garageOnline": "C-137 / GARAGE ONLINE",
+    "welcomeGustavo": "Welcome, Gustavo no. 6",
+    "destination": "The same ship. Another destination.",
+    "skip": "Skip scene",
+    "citadelSignal": "I found six Gustavos in the system. You’re the Java one, right?",
+    "garageSignal": "Rick stepped out. If anything beeps, call me.",
+    "meeseeks": {
+      "name": "Mr. Meeseeks",
+      "intro": "I’m Mr. Meeseeks. Look at me!",
+      "welcome": "I’m Mr. Meeseeks. Look at me! Need a hand with Gustavo’s projects, code or résumé?"
+    },
+    "squanchy": {
+      "name": "Squanchy",
+      "intro": "Ready to squanch?",
+      "welcome": "Ready to squanch? Pull up a chair in the garage. I’ll show you Gustavo’s projects, code and journey."
+    },
+    "poopybutthole": {
+      "name": "Mr. Poopybutthole",
+      "intro": "Ooo-wee! Welcome to the Citadel.",
+      "welcome": "Ooo-wee! I found six Gustavos in the system. You’re the Java one, right? Let’s explore his work."
+    },
+    "assistant": {
+      "guide": "{{name}} can guide you through my projects and live integrations.",
+      "resources": "{{name}} resources",
+      "working": "{{name}} is working on your request…",
+      "continue": "Continue with {{name}}",
+      "opening": "Opening {{name}}…",
+      "game": "Ask {{name}} about the game",
+      "full": "Full version",
+      "compact": "Compact chat",
+      "note": "Explore the resources and ask {{name}} for help.",
+      "handoff": "Some resources open in the full version, with {{name}}.",
+      "versions": "Assistant versions",
+      "identify": "See which assistant and interface you are using",
+      "openFull": "Open {{name}}",
+      "language": "Change the portfolio and assistant language",
+      "askProject": "Open Projects and ask the assistant about any project. You can edit your question before sending."
+    }
   }
 }

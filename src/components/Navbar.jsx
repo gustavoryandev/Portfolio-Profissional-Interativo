@@ -5,14 +5,17 @@ import { useTranslation } from 'react-i18next';
 import { Download, Sparkles } from 'lucide-react';
 import ThemeSelector from './ThemeSelector';
 import GaloCrest from './GaloCrest';
+import { useAssistantPersona } from '../context/AssistantAppearanceContext';
+import DimensionPortal from './DimensionPortal';
 import PortfolioLogo from './PortfolioLogo';
-import { isGaloTheme } from '../data/themes.js';
+import { isGaloTheme, isDimensionalTheme } from '../data/themes.js';
 import { PORTFOLIO_SECTIONS as portfolioLinks } from '../services/portfolioActions';
 export { portfolioLinks };
 
 export default function Navbar({ ref, portfolio = false, activeSection, onSectionLink }) {
   const { openFull, returnPortfolio } = useAstra();
   const { theme, anthemPlaying, toggleAnthem } = useContext(ThemeContext) ?? {};
+  const fullPersona = useAssistantPersona('full');
   const galo = isGaloTheme(theme);
   const { i18n, t } = useTranslation();
   const en = i18n.language.startsWith('en');
@@ -27,6 +30,7 @@ export default function Navbar({ ref, portfolio = false, activeSection, onSectio
       {portfolio && galo && <button type="button" className="galo-brand-badge" onClick={toggleAnthem} aria-label={anthemLabel} title={anthemLabel}>
         <GaloCrest />
       </button>}
+      {isDimensionalTheme(theme) && <DimensionPortal />}
     </div>
     {portfolio && <nav className="scroll-nav" aria-label={en ? 'Portfolio sections' : 'Seções do portfólio'}>
       {portfolioLinks.map(([id, pt, english]) => (
@@ -34,7 +38,7 @@ export default function Navbar({ ref, portfolio = false, activeSection, onSectio
           {en ? english : pt}
         </a>
       ))}
-      <a href="/chat" onClick={openFull} className="nav-astra">Astra <Sparkles size={14} aria-hidden="true" /></a>
+      <a href="/chat" onClick={openFull} className="nav-astra">{fullPersona?.name ?? 'Astra'} <Sparkles size={14} aria-hidden="true" /></a>
     </nav>}
     {portfolio && sectionLabel && <span className="mobile-current-section">{sectionLabel}</span>}
     <HeaderActions />

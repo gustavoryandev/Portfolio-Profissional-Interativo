@@ -9,6 +9,8 @@ import './mobile.css';
 import './header.css';
 import './astra.css';
 import './themes.css';
+import './dimensions.css';
+import './rick-experience.css';
 import './glassFx.js';
 import './i18n';
 import { ThemeProvider } from './context/ThemeContext.jsx';

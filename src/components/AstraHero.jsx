@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import AstraAvatar from './AstraAvatar';
+import { useAssistantPersona } from '../context/AssistantAppearanceContext';
 
 // Posições fixas (sem Math.random): render estável e sem hydration mismatch.
 const SPARKS = [
@@ -17,10 +18,11 @@ const SPARKS = [
 
 export default function AstraHero({ en, compact, prompts, onPick, disabled, greeting, shortcuts }) {
   const { t } = useTranslation();
+  const persona = useAssistantPersona('full');
   return (
     <div className="astra-hero-wrap" data-compact={compact} aria-hidden={compact || undefined} inert={compact}>
       <div className="astra-hero-clip">
-        <section className="astra-hero" aria-label={en ? 'Meet Astra' : 'Conheça a Astra'}>
+        <section className="astra-hero" aria-label={persona ? (en ? `Meet ${persona.name}` : `Conheça ${persona.name}`) : (en ? 'Meet Astra' : 'Conheça a Astra')}>
           {SPARKS.map((spark, i) => (
             <span key={i} className="astra-spark" aria-hidden="true"
               style={{ '--x': spark.x, '--y': spark.y, '--dx': spark.dx, '--dy': spark.dy, '--d': spark.d }} />
@@ -33,7 +35,7 @@ export default function AstraHero({ en, compact, prompts, onPick, disabled, gree
             <p className="astra-greet">{en ? 'Hello, I’m' : 'Olá, eu sou'}</p>
           </div>
 
-          <p className="astra-wordmark" aria-hidden="true">Astra</p>
+          <p className="astra-wordmark" data-persona={persona?.id} aria-hidden="true">{persona?.name ?? 'Astra'}</p>
           <div className="dim-line">
             <span className="dim-tag">{en ? 'Interactive AI résumé' : 'Currículo IA interativo'}</span>
           </div>
@@ -42,7 +44,7 @@ export default function AstraHero({ en, compact, prompts, onPick, disabled, gree
             {en ? 'Gustavo’s AI assistant' : 'Assistente IA do Gustavo'}
             <span className="bp-handles" aria-hidden="true"><i /><i /><i /><i /></span>
           </span>
-          <p className="hud astra-sub">{greeting ?? `// ${t('chat.subtitulo')}`}</p>
+          <p className="hud astra-sub">{persona?.intro ?? greeting ?? `// ${t('chat.subtitulo')}`}</p>
           {shortcuts}
 
           {prompts.length > 0 && (

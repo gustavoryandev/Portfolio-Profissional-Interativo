@@ -1,6 +1,7 @@
 export const themes = [
   { id: 'light', light: true },
   { id: 'dark' },
+  { id: 'rick-morty', name: 'Rick and Morty' },
   { id: 'galo', name: 'Galo CAM Dark' },
   { id: 'galo-light', name: 'Galo CAM Light', light: true },
   { id: 'aurora', name: 'Aurora' },
@@ -15,8 +16,11 @@ export const themes = [
   { id: 'floresta-mineral', name: 'Floresta mineral' },
 ];
 
+export const themePalettes = themes;
+
 // Keep these aliases in sync with the first-paint script in index.html.
 export const legacyThemeIds = {
+  'rick-morty-secret': 'rick-morty',
   'obsidian-gold': 'midnight-pink',
   'grafite-coral': 'midnight-pink',
   'champagne-gold': 'ardosia-cobalto',
@@ -25,3 +29,5 @@ export const legacyThemeIds = {
 };
 
 export const isGaloTheme = theme => theme === 'galo' || theme === 'galo-light';
+
+export const isDimensionalTheme = theme => theme === 'rick-morty';

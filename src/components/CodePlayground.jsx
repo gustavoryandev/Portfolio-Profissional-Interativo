@@ -7,9 +7,13 @@ import { LAB_CODE_LIMIT, LAB_MODES as MODES } from '../services/portfolioActions
 import { useAstra, useLaboratory } from '../context/AstraContext';
 import LaboratoryReview from './LaboratoryReview';
 import ScrollReveal from './ui/ScrollReveal';
+import { useAssistantPersona } from '../context/AssistantAppearanceContext';
+import { LabPickle } from './RickDimensionExperience';
 
 export default function CodePlayground() {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const { labHandoff: handoff } = useAstra();
+  const persona = useAssistantPersona(handoff?.modal ? 'compact' : 'full');
   const en = i18n.language.startsWith('en');
   const { openAstra, openFull, labHandoff } = useAstra();
   const [lab, { example, language, code, output, status, busy }] = useLaboratory();
@@ -24,12 +28,13 @@ export default function CodePlayground() {
   };
 
   return <ScrollReveal as="section" id="laboratorio" className="scroll-section code-lab" aria-labelledby="code-lab-title">
+    <LabPickle />
     <p className="section-eyebrow">03 / {en ? 'CODE LAB' : 'LABORATÓRIO'}</p>
     <h2 id="code-lab-title">{en ? 'Make the code yours.' : 'Experimente. Altere. Execute.'}</h2>
     <p className="code-lab-intro">{en ? 'Explore Bro Fit and Shopping Cart in Java, Python and JavaScript.' : 'Explore o Bro Fit e o Carrinho de Compras em Java, Python e JavaScript.'}</p>
     {labHandoff && <div className="lab-handoff glass-panel">
-      <p role="status">{labHandoff.reply ?? (en ? 'Astra is working on your request…' : 'Astra está preparando sua resposta…')}</p>
-      <button type="button" className="chip chip--accent" onClick={labHandoff.modal ? openAstra : openFull}>{en ? 'Continue with Astra' : 'Continuar com a Astra'}</button>
+      <p role="status">{labHandoff.reply ?? (t('rick.assistant.working', { name: persona?.name ?? 'Astra' }))}</p>
+      <button type="button" className="chip chip--accent" onClick={labHandoff.modal ? openAstra : openFull}>{t('rick.assistant.continue', { name: persona?.name ?? 'Astra' })}</button>
     </div>}
     <LaboratoryReview />
     <div className="glass-panel code-lab-panel">

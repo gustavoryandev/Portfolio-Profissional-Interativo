@@ -7,6 +7,7 @@ import { AstraContext } from './context/AstraContext';
 import useMobileViewport from './hooks/useMobileViewport';
 import useMobileLayout from './hooks/useMobileLayout';
 import { ThemeContext } from './context/ThemeContext';
+import { useAssistantPersona } from './context/AssistantAppearanceContext';
 import { createLaboratory } from './services/laboratory';
 import { createAstraActionEngine } from './services/astraActionEngine';
 import { clickedDialogBackdrop } from './services/dialogInteraction';
@@ -26,7 +27,7 @@ const readRoute = () => {
 };
 
 export default function App() {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const en = i18n.language.startsWith('en');
   const [route, setRoute] = useState(readRoute);
   const { path } = route;
@@ -43,6 +44,9 @@ export default function App() {
   const trigger = useRef(null);
   const scroll = useRef(0);
   const full = path === '/chat';
+  const persona = useAssistantPersona(full ? 'full' : 'compact');
+  const fullPersona = useAssistantPersona('full');
+  const assistantName = persona?.name ?? 'Astra';
   const mobile = useMobileLayout();
   const showIntro = full && !introSeen && !mobile;
   const finishIntro = useCallback(() => setIntroSeen(true), []);
@@ -150,13 +154,13 @@ export default function App() {
   return <AstraContext.Provider value={{ lab, actions, labHandoff, setLabHandoff, actionUi,
     openAstra, openFull, returnPortfolio: event => { event.preventDefault(); close(); navigate('/'); } }}>
     <div hidden={full}>{portfolioVisited.current && <PortfolioIntro en={en}><PortfolioPage activeSection={route.section || 'inicio'} projectFocus={route.project ? route : null} onSectionLink={followSectionLink} /></PortfolioIntro>}</div>
-    <dialog inert={showIntro} style={showIntro ? { visibility: 'hidden' } : undefined} ref={dialog} role={full ? 'main' : undefined} className={`astra-shell ${full ? 'astra-shell-full' : 'astra-shell-modal'}`} aria-label={en ? 'Astra conversation' : 'Conversa com a Astra'} onCancel={() => setOpened(false)} onKeyDown={trapFocus}
+    <dialog inert={showIntro} style={showIntro ? { visibility: 'hidden' } : undefined} ref={dialog} role={full ? 'main' : undefined} className={`astra-shell ${full ? 'astra-shell-full' : 'astra-shell-modal'}`} aria-label={persona ? (en ? `Conversation with ${assistantName}` : `Conversa com ${assistantName}`) : (en ? 'Astra conversation' : 'Conversa com a Astra')} onCancel={() => setOpened(false)} onKeyDown={trapFocus}
       onClick={event => { if (!full && opened && clickedDialogBackdrop(event)) close(); }}>
       <div className="astra-toolbar" hidden={full}>
-        {full ? <a href="/" onClick={event => { event.preventDefault(); close(); navigate('/'); }}>{en ? '← Portfolio' : '← Portfólio'}</a> : <a href="/chat" onClick={openFull}>{en ? 'Open full Astra ↗' : 'Abrir Astra completa ↗'}</a>}
-        {!full && <button autoFocus onClick={close} aria-label={en ? 'Close Astra' : 'Fechar Astra'}>✕</button>}
+        {full ? <a href="/" onClick={event => { event.preventDefault(); close(); navigate('/'); }}>{en ? '← Portfolio' : '← Portfólio'}</a> : <a href="/chat" onClick={openFull}>{fullPersona ? (en ? `Open ${fullPersona.name} ↗` : `Abrir ${fullPersona.name} ↗`) : (en ? 'Open full Astra ↗' : 'Abrir Astra completa ↗')}</a>}
+        {!full && <button autoFocus onClick={close} aria-label={en ? `Close ${assistantName}` : `Fechar ${assistantName}`}>✕</button>}
       </div>
-      {started && <Suspense fallback={<p className="astra-loading" role="status">{en ? 'Opening Astra…' : 'Abrindo Astra…'}</p>}><ChatPage onReady={setChatReady} modal={!full} visible={full ? !showIntro : opened} onSelectSection={selectSection} draft={chatDraft}
+      {started && <Suspense fallback={<p className="astra-loading" role="status">{t('rick.assistant.opening', { name: assistantName })}</p>}><ChatPage onReady={setChatReady} modal={!full} visible={full ? !showIntro : opened} onSelectSection={selectSection} draft={chatDraft}
         arcade={full ? route.arcade : null} arcadeChallenge={route.challenge} onOpenArcade={openArcade} onCloseArcade={() => navigate('/chat')} /></Suspense>}
     </dialog>
     {showIntro && <AstraEntrance en={en} onFinish={finishIntro} />}

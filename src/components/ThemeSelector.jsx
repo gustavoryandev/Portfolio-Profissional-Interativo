@@ -8,7 +8,7 @@ import OptionMenu from './OptionMenu';
 
 const groups = [
   { label: 'original', options: themes.slice(0, 2) },
-  { label: 'custom', options: themes.slice(2), expandable: true },
+  { label: 'custom', options: themes.slice(2).filter(option => !option.hidden), expandable: true },
 ];
 
 export default function ThemeSelector() {
@@ -17,7 +17,7 @@ export default function ThemeSelector() {
 
   return <OptionMenu
     label={t('navbar.appearance.title')}
-    caption={t('navbar.appearance.count', { count: themes.length })}
+    caption={t('navbar.appearance.count', { count: themes.filter(option => !option.hidden).length })}
     triggerClassName="icon-button"
     triggerContent={<Palette size={19} aria-hidden="true" />}
     groups={groups.map(group => ({

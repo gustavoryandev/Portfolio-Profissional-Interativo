@@ -10,8 +10,11 @@
       // Set the saved palette before the first paint, including on a direct visit to /chat.
       let savedTheme;
       try { savedTheme = localStorage.getItem('theme'); } catch {}
+      let savedDimension = 'lab';
+      try { savedDimension = savedTheme === 'rick-morty-secret' ? 'corrupted' : localStorage.getItem('rick-morty-dimension'); } catch {}
       // Keep these aliases in sync with src/data/themes.js.
       const legacyThemeIds = {
+        'rick-morty-secret': 'rick-morty',
         'obsidian-gold': 'midnight-pink',
         'grafite-coral': 'midnight-pink',
         'champagne-gold': 'ardosia-cobalto',
@@ -20,10 +23,11 @@
       };
       if (Object.hasOwn(legacyThemeIds, savedTheme)) savedTheme = legacyThemeIds[savedTheme];
       const lightThemes = ['light', 'galo-light', 'papel-violeta', 'quartzo-framboesa', 'ardosia-cobalto', 'petroleo-gelo'];
-      const darkThemes = ['dark', 'galo', 'aurora', 'midnight-violet', 'midnight-pink', 'cobalto-intenso', 'petroleo-eletrico', 'floresta-mineral'];
+      const darkThemes = ['rick-morty', 'dark', 'galo', 'aurora', 'midnight-violet', 'midnight-pink', 'cobalto-intenso', 'petroleo-eletrico', 'floresta-mineral'];
       const theme = lightThemes.includes(savedTheme) || darkThemes.includes(savedTheme) ? savedTheme : 'dark';
       const root = document.documentElement;
       root.dataset.theme = theme;
+      if (theme === 'rick-morty') root.dataset.dimension = savedDimension === 'corrupted' ? 'corrupted' : 'lab';
       root.classList.toggle('dark', darkThemes.includes(theme));
       root.toggleAttribute('data-custom-theme', theme !== 'light' && theme !== 'dark');
     </script>

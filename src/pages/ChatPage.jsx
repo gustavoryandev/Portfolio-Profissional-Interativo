@@ -5,7 +5,9 @@ import { useTranslation } from 'react-i18next';
 import Navbar from '../components/Navbar';
 import useMobileViewport from '../hooks/useMobileViewport';
 import AstraHero from '../components/AstraHero';
-import AstraAvatar from '../components/AstraAvatar';
+import AstraAvatar, { AstraSurfaceProvider } from '../components/AstraAvatar';
+import DimensionAstraSignal from '../components/DimensionAstraSignal';
+import { useAssistantPersona } from '../context/AssistantAppearanceContext';
 import { ThemeContext } from '../context/ThemeContext';
 import { isGaloTheme } from '../data/themes';
 import { DESIGN_SYSTEM_ACTION, isDesignSystemRequest } from '../data/designSystem';
@@ -42,13 +44,14 @@ const MOTION_CSS = `
 
 // Mesmo avatar, rótulo e forma do bubble da Astra: sem salto de layout quando a resposta chega
 function TypingIndicator({ label }) {
+  const persona = useAssistantPersona();
   return (
     <div className="my-2 flex w-full justify-start gap-3" role="status" aria-label={label}>
       <div aria-hidden="true" className="avatar-astra mt-2 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border">
         <AstraAvatar />
       </div>
       <div className="message-content">
-        <div className="astra-label" aria-hidden="true"><span>Astra</span></div>
+        <div className="astra-label" aria-hidden="true"><span>{persona?.name ?? 'Astra'}</span></div>
         <div className="chat-bubble chat-bubble--astra flex items-center gap-1.5">
           {[0, 0.15, 0.3].map((delay) => (
             <span key={delay} aria-hidden="true" className="h-2 w-2 animate-bounce rounded-full bg-muted"
@@ -63,6 +66,8 @@ function TypingIndicator({ label }) {
 export default function ChatPage({ modal = false, visible = true, onReady, onSelectSection, draft,
   arcade, arcadeChallenge, onOpenArcade, onCloseArcade }) {
   const { t, i18n } = useTranslation();
+  const persona = useAssistantPersona(modal ? 'compact' : 'full');
+  const assistantName = persona?.name ?? 'Astra';
   const viewportRef = useMobileViewport();
   const { actions, actionUi, openFull, setLabHandoff } = useAstra();
   const galo = isGaloTheme(useContext(ThemeContext)?.theme);
@@ -313,7 +318,7 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
   );
 
   return (
-    <div
+    <AstraSurfaceProvider surface={modal ? 'compact' : 'full'}><div
       className={`portfolio-app astra-conversation ${modal ? "astra-compact" : "astra-full"}`}
       ref={viewportRef}
       data-chat-empty={!compact}
@@ -332,16 +337,16 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
             <FullArcade ref={arcadeSession} en={en} initialGame={isGame(arcade) ? arcade : null}
               challenge={arcadeChallenge} onClose={onCloseArcade} />
           </Suspense>}
-          <section className="center-panel glass-panel" aria-label={en ? 'Conversation with Astra' : 'Conversa com Astra'}>
+          <section className="center-panel glass-panel" aria-label={en ? `Conversation with ${assistantName}` : `Conversa com ${assistantName}`}>
             <div className="chat-view">
               <div className="chat-heading">
                 <div>
                   <span className="astra-mini" aria-hidden="true"><AstraAvatar /></span>
-                  <h2>{en ? 'Talk to Astra' : 'Converse com a Astra'}</h2>
+                  <h2>{persona ? (en ? `Talk to ${assistantName}` : `Converse com ${assistantName}`) : (en ? 'Talk to Astra' : 'Converse com a Astra')}</h2>
                 </div>
                 <span className="astra-heading-actions">
                   <span className="astra-heading-description">{en ? 'AI assistant' : 'Assistente de IA'}</span>
-                  <button type="button" className="icon-button astra-arcade-trigger" aria-label="Astra Arcade" title="Astra Arcade"
+                  <button type="button" className="icon-button astra-arcade-trigger" aria-label={persona ? `${assistantName} Arcade` : 'Astra Arcade'} title={persona ? `${assistantName} Arcade` : 'Astra Arcade'}
                     aria-expanded={modal ? undefined : showArcade} onClick={() => {
                       setResourcesOpen(false);
                       if (modal) void handleSend(en ? 'Astra Arcade games' : 'Jogos do Astra Arcade');
@@ -349,7 +354,7 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
                       else onOpenArcade();
                     }}><Gamepad2 size={18} aria-hidden="true" /></button>
                   <button ref={resourcesTrigger} type="button" className="icon-button astra-resources-trigger"
-                      aria-label={t('chat.resources.title')} title={t('chat.resources.title')}
+                      aria-label={persona ? (en ? `${assistantName} resources` : `Recursos de ${assistantName}`) : t('chat.resources.title')} title={persona ? (en ? `${assistantName} resources` : `Recursos de ${assistantName}`) : t('chat.resources.title')}
                       aria-controls={ASTRA_RESOURCES_ID} aria-expanded={resourcesOpen}
                       onClick={() => setResourcesOpen(open => !open)}>
                       <CircleHelp size={17} aria-hidden="true" />
@@ -357,6 +362,7 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
                 </span>
               </div>
 
+              <DimensionAstraSignal />
               <div
                 ref={messagesContainerRef}
                 onScroll={event => {
@@ -376,7 +382,7 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
 
                   {messages.filter(message => !showGaloHero || message.id !== 'welcome').map(message => (
                     <div id={messageAnchor(message.id)} tabIndex={-1} className="chat-msg-in outline-none" key={message.id}>
-                      <MessageBubble message={message.id === 'welcome' ? { ...message, text: t(welcomeKey), translationKey: welcomeKey } : message} liveContext={live.context} refreshing={live.refreshing} onRefresh={live.refresh} onSelectSection={onSelectSection}
+                      <MessageBubble message={message.id === 'welcome' ? { ...message, text: persona?.welcome ?? t(welcomeKey), translationKey: persona ? undefined : welcomeKey } : message} liveContext={live.context} refreshing={live.refreshing} onRefresh={live.refresh} onSelectSection={onSelectSection}
                         onViewFull={openFull ? viewFullMessage : undefined} compact={modal} active={visible && !showArcade}>
                         {message.id === 'welcome' && modal && galoShortcuts}
                         {message.reviewId && <LaboratoryReview reviewId={message.reviewId} onOpenLab={() => onSelectSection?.('laboratorio')}
@@ -390,7 +396,7 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
                           if (showArcade && arcadeSession.current) {
                             void arcadeSession.current.dispatch(isGame(game) ? { type: 'game.start', game, challenge } : { type: 'arcade.open' });
                           } else onOpenArcade(game, challenge);
-                        }}>{modal ? (en ? 'Open in Full Astra ↗' : 'Abrir na Astra Completa ↗') : (en ? 'Open Astra Arcade' : 'Abrir Astra Arcade')}</a>}
+                        }}>{persona ? (en ? `Open ${assistantName} Arcade` : `Abrir Arcade de ${assistantName}`) : modal ? (en ? 'Open in Full Astra ↗' : 'Abrir na Astra Completa ↗') : (en ? 'Open Astra Arcade' : 'Abrir Astra Arcade')}</a>}
                       </MessageBubble>
                     </div>
                   ))}
@@ -440,10 +446,10 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
                         if (!loading) event.currentTarget.form.requestSubmit();
                       }
                     }}
-                    aria-label={showArcade ? (en ? 'Ask Astra about the game' : 'Pergunte à Astra sobre o jogo') : t('chat.placeholder')}
+                    aria-label={showArcade ? (t('rick.assistant.game', { name: assistantName })) : t('chat.placeholder')}
                     value={input}
                     onChange={(event) => setInput(event.target.value)}
-                    placeholder={showArcade ? (en ? 'Ask Astra about the game…' : 'Pergunte à Astra sobre o jogo…')
+                    placeholder={showArcade ? (`${t('rick.assistant.game', { name: assistantName })}…`)
                       : t('chat.placeholder') || 'Digite uma pergunta sobre o Gustavo...'}
                     disabled={!modal && loading}
                     autoComplete="off"
@@ -468,6 +474,6 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
             onClose={() => setResourcesOpen(false)} onPick={(prompt, plan, arcadeShortcut) => handleSend(prompt, !plan, plan, arcadeShortcut)} />
         </div>
       </div>
-    </div>
+    </div></AstraSurfaceProvider>
   );
 }

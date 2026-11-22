@@ -4,12 +4,12 @@ import { build } from 'esbuild';
 import { fileURLToPath } from 'node:url';
 import { readFile, unlink } from 'node:fs/promises';
 import { JSDOM } from 'jsdom';
-import { legacyThemeIds, themes } from '../src/data/themes.js';
+import { legacyThemeIds, themes, themePalettes } from '../src/data/themes.js';
 
 test('The first paint honors current and legacy saved themes', async () => {
   const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
   const cases = [
-    ...themes.map(theme => [theme.id, theme]),
+    ...themePalettes.map(theme => [theme.id, theme]),
     ...Object.entries(legacyThemeIds).map(([oldId, newId]) => [oldId, themes.find(theme => theme.id === newId)]),
     ['unknown-theme', themes.find(theme => theme.id === 'dark')],
   ];
@@ -44,5 +44,25 @@ test('Full and Compact Astra use the same live Laboratory and review', async () 
     await import(output.href);
   } finally {
     await Promise.all([output, stylesheet].map(file => unlink(file).catch(() => {})));
+  }
+});
+
+
+test('First paint restores dimensions separately and migrates the former secret palette', async () => {
+  const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
+  for (const [theme, savedDimension, expected] of [
+    ['rick-morty', 'lab', 'lab'], ['rick-morty', 'corrupted', 'corrupted'],
+    ['rick-morty-secret', null, 'corrupted'], ['rick-morty', 'invalid', 'lab'],
+    ['dark', 'corrupted', undefined],
+  ]) {
+    const dom = new JSDOM(html, { url: 'https://portfolio.test', runScripts: 'dangerously',
+      beforeParse({ localStorage }) {
+        localStorage.setItem('theme', theme);
+        if (savedDimension) localStorage.setItem('rick-morty-dimension', savedDimension);
+      },
+    });
+    assert.equal(dom.window.document.documentElement.dataset.dimension, expected);
+    assert.equal(dom.window.document.documentElement.dataset.theme, theme === 'rick-morty-secret' ? 'rick-morty' : theme);
+    dom.window.close();
   }
 });
