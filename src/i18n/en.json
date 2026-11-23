@@ -637,6 +637,8 @@
     "documentation": "Official {{name}} documentation (new tab)",
     "previewAlt": "Screenshot of {{title}}",
     "previewUnavailable": "Preview unavailable",
+    "enlargePreview": "Enlarge image of {{title}}",
+    "closePreview": "Close enlarged image",
     "technologies": "Technologies and concepts",
     "openProject": "View project: {{title}} (new tab)",
     "viewProject": "View project",

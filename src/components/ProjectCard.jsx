@@ -1,21 +1,32 @@
 import './ProjectCard.css';
 import { useAssistantPersona } from '../context/AssistantAppearanceContext';
-import { useContext, useId, useState } from 'react';
-import { ArrowUpRight, ImageOff, Sparkles } from 'lucide-react';
+import { useContext, useId, useRef, useState } from 'react';
+import { ArrowUpRight, Expand, ImageOff, Sparkles } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import TechnologyLink from './TechnologyLink';
 import { projectContent } from '../data/projectContent';
 import { ThemeContext } from '../context/ThemeContext';
 import { ProjectMorty } from './RickDimensionExperience';
+import ProjectImageModal from './ProjectImageModal';
 
 function ProjectPreview({ image, title }) {
   const { t } = useTranslation();
   const [failed, setFailed] = useState(false);
+  const [opened, setOpened] = useState(false);
+  const trigger = useRef(null);
+  const alt = image?.altKey ? t(image.altKey) : t('projetos.previewAlt', { title });
   return <div className="project-preview aspect-video overflow-hidden border-b border-[var(--line)]" data-has-image={Boolean(image?.src && !failed)}>
     {image?.src && !failed ? (
-      <img src={image.src} alt={image.altKey ? t(image.altKey) : t('projetos.previewAlt', { title })}
+      <>
+      <button ref={trigger} type="button" className="project-preview-trigger" aria-haspopup="dialog"
+        aria-label={t('projetos.enlargePreview', { title })} onClick={() => setOpened(true)}>
+      <img src={image.src} alt={alt}
         loading="lazy" decoding="async" width="960" height="540"
         className="h-full w-full object-cover" style={{ objectPosition: image.position ?? 'center' }} onError={() => setFailed(true)} />
+      <span className="project-preview-expand" aria-hidden="true"><Expand size={18} /></span>
+      </button>
+      {opened && <ProjectImageModal image={image} title={title} alt={alt} trigger={trigger} onClose={() => setOpened(false)} />}
+      </>
     ) : (
       <div className="flex h-full flex-col items-center justify-center gap-3 p-5 text-center text-[var(--muted)]">
         <span className="rounded-2xl border border-[var(--line)] bg-[var(--panel)] p-4">

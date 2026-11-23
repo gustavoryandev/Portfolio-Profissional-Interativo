@@ -637,6 +637,8 @@
     "documentation": "Documentação oficial de {{name}} (nova aba)",
     "previewAlt": "Screenshot do projeto {{title}}",
     "previewUnavailable": "Prévia indisponível",
+    "enlargePreview": "Ampliar imagem de {{title}}",
+    "closePreview": "Fechar imagem ampliada",
     "technologies": "Tecnologias e conceitos",
     "openProject": "Ver projeto: {{title}} (nova aba)",
     "viewProject": "Ver projeto",
