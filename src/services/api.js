@@ -3,7 +3,7 @@ import { requestChatStream } from './chatStream.js';
 
 const sendMessage = async (userMessage, lang, chatHistory = [], chatContext = null, predefinedSuggestion = false, options) => {
   if (options?.onEvent) return requestChatStream({
-    userMessage, lang, chatHistory, chatContext, predefinedSuggestion, surface: options.surface, labSnapshot: options.labSnapshot,
+    userMessage, lang, chatHistory, chatContext, predefinedSuggestion, surface: options.surface, labSnapshot: options.labSnapshot, appearance: options.appearance,
   }, options);
   try {
     const response = await axios.post("/api/chat", {
@@ -12,6 +12,9 @@ const sendMessage = async (userMessage, lang, chatHistory = [], chatContext = nu
       chatHistory,
       chatContext,
       predefinedSuggestion,
+      surface: options?.surface,
+      appearance: options?.appearance,
+      labSnapshot: options?.labSnapshot,
     });
     return response.data;
   } catch (error) {

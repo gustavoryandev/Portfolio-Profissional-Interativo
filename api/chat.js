@@ -1,3 +1,4 @@
+import { resolveAssistantPersona, assistantPersonaInstruction, characterResourceReply } from '../server/assistantPersona.js';
 import { conversationResource } from '../src/services/conversationResource.js';
 import axios from 'axios';
 import { GoogleGenerativeAI } from '@google/generative-ai';
@@ -1367,6 +1368,8 @@ export default async function handler(req, res) {
     if (typeof userMessage !== 'string' || !userMessage.trim()) return res.status(400).json({ error: 'Mensagem inválida.' });
     const suggestionLanguage = String(body.lang).startsWith('en') ? 'en' : 'pt';
     const surface = ['compact', 'full'].includes(body.surface) ? body.surface : null;
+    const persona = resolveAssistantPersona(body.appearance, surface);
+    const resourceReply = payload => res.status(200).json(characterResourceReply(payload, persona, suggestionLanguage));
     const labSnapshot = surface ? sanitizeLabSnapshot(body.labSnapshot) : null;
     if (body.labSnapshot != null && !labSnapshot) return res.status(400).json({ error: 'Invalid Laboratory snapshot.' });
     if (labSnapshot && !stream) res.setHeader('Cache-Control', 'no-store');
@@ -1376,8 +1379,8 @@ export default async function handler(req, res) {
       res.setHeader('Cache-Control', 'no-store');
       const { galo } = await fetchLiveContext(['galo'], { retryFailed: true });
       const result = formatGaloResult(galo?.lastMatch, suggestionLanguage);
-      if (result) return res.status(200).json({ response: result });
-      return res.status(200).json({ response: suggestions.galoWelcome.matchUnavailable,
+      if (result) return resourceReply({ response: result });
+      return resourceReply({ response: suggestions.galoWelcome.matchUnavailable,
         translationKey: 'chat.galoWelcome.matchUnavailable' });
     }
     const suggestionIndex = suggestions?.sugestoes.indexOf(message) ?? -1;
@@ -1393,10 +1396,18 @@ export default async function handler(req, res) {
       && /(?:quer ver|would you like to see).*(?:metricas detalhadas|detailed .*metrics)/.test(normalizeQuery(lastAi)));
     const normalizedQuery = normalizeQuery(message);
     const surfaceIntent = surface && !labSnapshot ? astraSurfaceIntent(normalizedQuery) : null;
-    if (surfaceIntent === 'open') return res.status(200).json({ actions: [{ type: 'astra.openFull' }] });
+    if (surfaceIntent === 'open') return resourceReply({ actions: [{ type: 'astra.openFull' }] });
+    if (persona && !labSnapshot && /^(?:quem (?:e|é) voc[eê]|qual (?:e|é) (?:o )?seu nome|who are you|what(?:'s| is) your name)[?!., ]*$/i.test(message)) {
+      const translationKey = `rick.${persona.id}.identity`;
+      return res.status(200).json({ response: readJson(`${suggestionLanguage}.json`).rick[persona.id].identity, translationKey });
+    }
     if (surfaceIntent === 'identify') {
+      if (persona) {
+        const translationKey = `rick.${persona.id}.surface.${surface}`;
+        return res.status(200).json({ response: readJson(`${suggestionLanguage}.json`).rick[persona.id].surface[surface], translationKey });
+      }
       const translationKey = `chat.surface.${surface}`;
-      return res.status(200).json({ response: readJson(`${suggestionLanguage}.json`).chat.surface[surface], translationKey });
+      return resourceReply({ response: readJson(`${suggestionLanguage}.json`).chat.surface[surface], translationKey });
     }
     // The existing direct resource routes remain available. Compound lab requests need the action planner.
     const planFirst = labSnapshot || surfaceIntent === 'compound' || (surface && /\b(?:laboratorio|lab(?:oratory)?|bro fit|editor|playground)\b/.test(normalizedQuery));
@@ -1406,16 +1417,16 @@ export default async function handler(req, res) {
     if (resource) {
       const en = String(body.lang).startsWith('en');
       if (resource === 'offerPlay') {
-        return res.status(200).json({ response: readJson(`${suggestionLanguage}.json`).chat.chessGame.offer, translationKey: 'chat.chessGame.offer' });
+        return resourceReply({ response: readJson(`${suggestionLanguage}.json`).chat.chessGame.offer, translationKey: 'chat.chessGame.offer' });
       }
-      if (resource === 'play') return res.status(200).json({ response: (en ? 'Let’s play!' : 'Vamos jogar!') + '\n[CHESS_GAME]' });
-      if (resource === 'skills') return res.status(200).json({ response: (en ? 'Here are Gustavo’s declared skill levels.' : 'Estes são os níveis de proficiência declarados pelo Gustavo.') + '\n[SKILLS_CARD]' });
+      if (resource === 'play') return resourceReply({ response: (en ? 'Let’s play!' : 'Vamos jogar!') + '\n[CHESS_GAME]' });
+      if (resource === 'skills') return resourceReply({ response: (en ? 'Here are Gustavo’s declared skill levels.' : 'Estes são os níveis de proficiência declarados pelo Gustavo.') + '\n[SKILLS_CARD]' });
       const readChess = prepareLiveContext(['chess']);
-      return res.status(200).json({ response: (en ? 'Here are Gustavo’s Chess.com ratings and statistics.' : 'Aqui estão os ratings e as estatísticas do Gustavo no Chess.com.') + '\n[CHESS_CARD]', liveContext: forClient(await readChess(METRICS_WAIT_MS)) });
+      return resourceReply({ response: (en ? 'Here are Gustavo’s Chess.com ratings and statistics.' : 'Aqui estão os ratings e as estatísticas do Gustavo no Chess.com.') + '\n[CHESS_CARD]', liveContext: forClient(await readChess(METRICS_WAIT_MS)) });
     }
     const affirmative = /^(?:sim|yes|yeah|sure|ok|claro|quero|pode)(?:\s+(?:please|por favor|sim))?[\s,!?.]*$/.test(normalizedQuery);
     if (!planFirst && pendingMetrics && /^(?:nao|no|nope)(?:[\s,!?.]+(?:obrigad[oa]|thanks))?[\s,!?.]*$/.test(normalizedQuery)) {
-      return res.status(200).json({ response: String(body.lang).startsWith('en') ? 'Okay, we will keep just the summary.' : 'Tudo bem, vamos manter apenas o resumo.', translationKey: 'chat.metricsDeclined' });
+      return resourceReply({ response: String(body.lang).startsWith('en') ? 'Okay, we will keep just the summary.' : 'Tudo bem, vamos manter apenas o resumo.', translationKey: 'chat.metricsDeclined' });
     }
     const githubQuery = /\bgithub\b/.test(normalizedQuery);
     const wakatimeQuery = WAKATIME_INTENT.test(normalizedQuery);
@@ -1451,7 +1462,7 @@ export default async function handler(req, res) {
       const response = [intro, ...cardLines.filter(Boolean), offer].filter(Boolean).join('\n');
       const readLive = prepareLiveContext([useGh && 'github', useWk && 'wakatime'].filter(Boolean));
       const liveContext = forClient(await readLive(METRICS_WAIT_MS));
-      return res.status(200).json({ response, liveContext });
+      return resourceReply({ response, liveContext });
     }
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) return res.status(500).json({ error: 'GEMINI_API_KEY não configurada.' });
@@ -1488,7 +1499,8 @@ export default async function handler(req, res) {
     const systemInstruction = buildSystemInstruction(perfil, summary, geminiContext, githubBlock) + suggestionInstruction
       + `\nRespond in ${suggestionLanguage === 'en' ? 'English' : 'Portuguese'}. ${style}`
       + (surface ? ' If asked which version the user is using, answer from the current interface above, even if the conversation history mentions the other version.' : '')
-      + (actionTools?.instructions ?? '');
+      + (actionTools?.instructions ?? '')
+      + assistantPersonaInstruction(persona, suggestionLanguage);
 
     const write = (payload) => writeEvent(res, payload, controller.signal);
     const signal = AbortSignal.any([controller.signal, AbortSignal.timeout(CHAT_GENERATION_TIMEOUT_MS)]);

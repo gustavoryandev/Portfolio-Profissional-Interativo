@@ -705,17 +705,32 @@
     "meeseeks": {
       "name": "Sr. Meeseeks",
       "intro": "Eu sou o Sr. Meeseeks. Olha pra mim!",
-      "welcome": "Eu sou o Sr. Meeseeks. Olha pra mim! Quer uma ajuda com os projetos, o código ou o currículo do Gustavo?"
+      "welcome": "Eu sou o Sr. Meeseeks. Olha pra mim! Quer uma ajuda com os projetos, o código ou o currículo do Gustavo?",
+      "identity": "Eu sou o Sr. Meeseeks! Uma tarefa por vez: projetos, código ou currículo? Sou a assistente do portfólio do Gustavo nesse personagem.",
+      "surface": {
+        "compact": "Você está na conversa compacta com Sr. Meeseeks, dentro do portfólio.",
+        "full": "Você está na versão completa com Sr. Meeseeks, na página dedicada à conversa."
+      }
     },
     "squanchy": {
       "name": "Squanchy",
       "intro": "Vamos Squanchar?",
-      "welcome": "Vamos Squanchar? Puxa uma cadeira na garagem. Eu te mostro os projetos, o código e a trajetória do Gustavo."
+      "welcome": "Vamos Squanchar? Puxa uma cadeira na garagem. Eu te mostro os projetos, o código e a trajetória do Gustavo.",
+      "identity": "Squanchy, pronto pra squanchar esse portfólio com você. Sou a assistente do Gustavo no clima da garagem — os projetos e os dados continuam sendo os dele.",
+      "surface": {
+        "compact": "Você está na conversa compacta com Squanchy, dentro do portfólio.",
+        "full": "Você está na versão completa com Squanchy, na página dedicada à conversa."
+      }
     },
     "poopybutthole": {
       "name": "Sr. Bunda Cagada",
       "intro": "Ooo-wee! Bem-vindo à Cidadela.",
-      "welcome": "Ooo-wee! Achei seis Gustavos no sistema. Você é o do Java, certo? Vamos explorar o trabalho dele."
+      "welcome": "Ooo-wee! Achei seis Gustavos no sistema. Você é o do Java, certo? Vamos explorar o trabalho dele.",
+      "identity": "Ooo-wee! Sr. Bunda Cagada por aqui. Você atravessou para a Cidadela, mas a conversa continua. Sou a assistente do portfólio do Gustavo nesse personagem.",
+      "surface": {
+        "compact": "Você está na conversa compacta com Sr. Bunda Cagada, dentro do portfólio.",
+        "full": "Você está na versão completa com Sr. Bunda Cagada, na página dedicada à conversa."
+      }
     },
     "assistant": {
       "guide": "{{name}} te guia pelos projetos e pelas integrações ao vivo.",

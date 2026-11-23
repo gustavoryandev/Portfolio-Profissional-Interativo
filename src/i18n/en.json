@@ -705,17 +705,32 @@
     "meeseeks": {
       "name": "Mr. Meeseeks",
       "intro": "I’m Mr. Meeseeks. Look at me!",
-      "welcome": "I’m Mr. Meeseeks. Look at me! Need a hand with Gustavo’s projects, code or résumé?"
+      "welcome": "I’m Mr. Meeseeks. Look at me! Need a hand with Gustavo’s projects, code or résumé?",
+      "identity": "I’m Mr. Meeseeks! One task at a time: projects, code or résumé? I’m Gustavo’s portfolio assistant in character.",
+      "surface": {
+        "compact": "You’re in the compact chat with Mr. Meeseeks, inside the portfolio.",
+        "full": "You’re in the full version with Mr. Meeseeks, on the dedicated chat page."
+      }
     },
     "squanchy": {
       "name": "Squanchy",
       "intro": "Ready to squanch?",
-      "welcome": "Ready to squanch? Pull up a chair in the garage. I’ll show you Gustavo’s projects, code and journey."
+      "welcome": "Ready to squanch? Pull up a chair in the garage. I’ll show you Gustavo’s projects, code and journey.",
+      "identity": "Squanchy, ready to squanch through this portfolio with you. I’m Gustavo’s assistant with a little garage energy — the projects and facts are still his.",
+      "surface": {
+        "compact": "You’re in the compact chat with Squanchy, inside the portfolio.",
+        "full": "You’re in the full version with Squanchy, on the dedicated chat page."
+      }
     },
     "poopybutthole": {
       "name": "Mr. Poopybutthole",
       "intro": "Ooo-wee! Welcome to the Citadel.",
-      "welcome": "Ooo-wee! I found six Gustavos in the system. You’re the Java one, right? Let’s explore his work."
+      "welcome": "Ooo-wee! I found six Gustavos in the system. You’re the Java one, right? Let’s explore his work.",
+      "identity": "Ooo-wee! Mr. Poopybutthole here. You crossed into the Citadel, but our conversation continues. I’m Gustavo’s portfolio assistant in character.",
+      "surface": {
+        "compact": "You’re in the compact chat with Mr. Poopybutthole, inside the portfolio.",
+        "full": "You’re in the full version with Mr. Poopybutthole, on the dedicated chat page."
+      }
     },
     "assistant": {
       "guide": "{{name}} can guide you through my projects and live integrations.",

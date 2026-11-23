@@ -446,6 +446,10 @@ try {
       assert.equal(pickleStage.dataset.side, 'right');
       assert.equal(pickleStage.dataset.found, 'true');
       assert.match(pickleStage.querySelector('img').getAttribute('src'), /pickle-rat/);
+      await send('Thanks');
+      await until(() => !$('#chat-input').disabled);
+      assert.deepEqual(requests.at(-1).appearance, { theme: 'rick-morty', dimension: 'lab' });
+      assert.equal(requests.at(-1).surface, 'full');
       const requestsBeforeEggs = requests.length;
       assert.equal($('[data-preview="rick-morty-secret"]'), null, 'secret dimension stays outside the selector');
       await click(portal);

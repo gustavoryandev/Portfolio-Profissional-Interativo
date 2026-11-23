@@ -70,7 +70,8 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
   const assistantName = persona?.name ?? 'Astra';
   const viewportRef = useMobileViewport();
   const { actions, actionUi, openFull, setLabHandoff } = useAstra();
-  const galo = isGaloTheme(useContext(ThemeContext)?.theme);
+  const { theme, dimension } = useContext(ThemeContext) ?? {};
+  const galo = isGaloTheme(theme);
   const welcomeKey = galo ? 'chat.galoWelcome.greeting' : modal ? 'chat.quickWelcome' : 'chat.boasVindas';
 
   const [messages, setMessages] = useState(() => [{ id: 'welcome', sender: 'ai', text: t('chat.boasVindas'), translationKey: 'chat.boasVindas' }]);
@@ -221,11 +222,12 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
     try {
       // O campo "id" é só da interface: não vai para o backend
       const history = messagesRef.current.map(({ id, sender, text, translationKey }) => id === 'welcome'
-        ? { sender, text: t(welcomeKey), translationKey: welcomeKey }
+        ? { sender, text: persona?.welcome ?? t(welcomeKey), ...(persona ? {} : { translationKey: welcomeKey }) }
         : { sender, text, translationKey });
       const options = {
         signal: controller.signal,
         surface: modal ? 'compact' : 'full',
+        appearance: theme === 'rick-morty' ? { theme, dimension } : undefined,
         onEvent: event => {
           if (mounted.current && !controller.signal.aborted) buffer.push(event);
         },
