@@ -383,7 +383,7 @@
   opacity: var(--galo-watermark-opacity);
   pointer-events: none;
 }
-:root[data-theme="galo-light"] .hero-galo-watermark { filter: grayscale(1) brightness(.55); opacity: .28; }
+:root[data-theme="galo-light"] .hero-galo-watermark { filter: grayscale(1); }
 :root[data-theme|="galo"] .portfolio-hero .section-eyebrow { font-weight: 800; }
 :root[data-theme="galo-light"] .portfolio-hero .section-eyebrow { color: var(--ink); }
 :root[data-theme|="galo"] .portfolio-hero .section-eyebrow::after {
