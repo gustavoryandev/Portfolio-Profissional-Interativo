@@ -166,7 +166,7 @@
 .projects-track-controls button:hover:not([aria-disabled="true"]) { background: var(--panel-soft); border-color: var(--control-border); }
 .projects-scroll-progress { height: 3px; background: var(--line); border-radius: 3px; margin-inline-end: 8px; }
 .projects-scroll-progress > span { display: block; height: 100%; border-radius: inherit; background: var(--accent); transform: scaleX(0); transform-origin: left; }
-.projects-scroll-section .project-preview { height: 128px; aspect-ratio: auto; flex-shrink: 0; }
+.projects-scroll-section .project-preview { height: auto; aspect-ratio: 16 / 9; flex-shrink: 0; }
 .projects-scroll-section .project-tile > .flex { padding: 16px; gap: 12px; }
 .project-labels { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
 .project-featured { padding: 4px 8px; border-radius: 999px; color: var(--action-text); background: var(--action-bg); font-size: 12px; font-weight: 600; }
@@ -179,7 +179,7 @@
   .scroll-portfolio .projects-scroll-section .projects-card { padding: 16px; }
   .projects-scroll-section .project-controls :is(.project-filter, input) { min-height: 38px; }
   .projects-scroll-section .project-controls input { padding-block: 8px; }
-  .projects-scroll-section .project-preview { height: 100px; }
+  .projects-scroll-section .project-preview { height: clamp(150px, 12vw, 190px); aspect-ratio: auto; }
   .projects-scroll-section .project-tile > .flex { padding: 14px; gap: 10px; }
   .projects-scroll-section .project-tile p { margin-top: 8px; }
 }

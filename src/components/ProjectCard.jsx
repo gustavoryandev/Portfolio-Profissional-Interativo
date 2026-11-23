@@ -1,3 +1,4 @@
+import './ProjectCard.css';
 import { useAssistantPersona } from '../context/AssistantAppearanceContext';
 import { useContext, useId, useState } from 'react';
 import { ArrowUpRight, ImageOff, Sparkles } from 'lucide-react';
@@ -10,11 +11,11 @@ import { ProjectMorty } from './RickDimensionExperience';
 function ProjectPreview({ image, title }) {
   const { t } = useTranslation();
   const [failed, setFailed] = useState(false);
-  return <div className="project-preview aspect-video overflow-hidden border-b border-[var(--line)]">
+  return <div className="project-preview aspect-video overflow-hidden border-b border-[var(--line)]" data-has-image={Boolean(image?.src && !failed)}>
     {image?.src && !failed ? (
       <img src={image.src} alt={image.altKey ? t(image.altKey) : t('projetos.previewAlt', { title })}
         loading="lazy" decoding="async" width="960" height="540"
-        className="h-full w-full object-contain" onError={() => setFailed(true)} />
+        className="h-full w-full object-cover" style={{ objectPosition: image.position ?? 'center' }} onError={() => setFailed(true)} />
     ) : (
       <div className="flex h-full flex-col items-center justify-center gap-3 p-5 text-center text-[var(--muted)]">
         <span className="rounded-2xl border border-[var(--line)] bg-[var(--panel)] p-4">
@@ -42,12 +43,12 @@ export default function ProjectCard({ project, onAskAstra, compact, featured }) 
     <article className="project-tile glass-panel flex min-w-0 flex-col overflow-hidden" aria-labelledby={titleId} data-dimension-label={theme === 'rick-morty' ? t(dimension === 'corrupted' ? 'rick.archive' : 'rick.research') : undefined}>
       {theme === 'rick-morty' && <ProjectMorty expanded={detailsOpen || showAll} />}
       <ProjectPreview key={project.image?.src || 'empty'} image={project.image} title={title} />
-      <div className="flex flex-1 flex-col gap-5 p-5 sm:p-6">
+      <div className="project-card-body flex flex-1 flex-col gap-5 p-5 sm:p-6">
         {(project.tipo || featured) && <div className="project-labels">
           {project.tipo && <span className="w-fit rounded-full border border-[var(--line)] bg-[var(--panel-soft)] px-2.5 py-1 text-xs font-medium text-[var(--accent)]">{t(`projetos.kind.${project.tipo}`)}</span>}
           {featured && <span className="project-featured">{t('projetos.featured')}</span>}
         </div>}
-        <div><h4 id={titleId}>{title}</h4>{description && <p className="mt-3">{description}</p>}</div>
+        <div className="project-card-copy"><h4 id={titleId}>{title}</h4>{description && <p className="mt-3">{description}</p>}</div>
         <div>
           {canExpand && <button type="button" className="project-tech-toggle" aria-expanded={showAll} aria-controls={techId}
             aria-label={t('projetos.toggleTechLabel', { action: t(showAll ? 'projetos.showLess' : 'projetos.showAll'), title })}
@@ -60,7 +61,7 @@ export default function ProjectCard({ project, onAskAstra, compact, featured }) 
           <summary>{i18n.language.startsWith('en') ? 'Project details' : 'Detalhes do projeto'}</summary>
           <dl><dt>{i18n.language.startsWith('en') ? 'Technologies' : 'Tecnologias'}</dt><dd>{tech.join(' · ')}</dd><dt>{i18n.language.startsWith('en') ? 'Source' : 'Código-fonte'}</dt><dd>{project.githubUrl ? <a href={project.githubUrl} target="_blank" rel="noopener noreferrer">GitHub</a> : (i18n.language.startsWith('en') ? 'Available in the project links' : 'Disponível nos links do projeto')}</dd></dl>
         </details>}
-        <div className="mt-auto border-t border-[var(--line)] pt-5">
+        <div className="project-card-actions mt-auto border-t border-[var(--line)] pt-5">
           {project.githubUrl && <a href={project.githubUrl} target="_blank" rel="noopener noreferrer"
             className="project-action" aria-label={t('projetos.openProject', { title })}>
             {t('projetos.viewProject')}<ArrowUpRight size={17} aria-hidden="true" />

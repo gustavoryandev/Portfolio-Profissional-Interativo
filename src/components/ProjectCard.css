@@ -1,0 +1,18 @@
+.project-tile { position: relative; border-radius: 15px; }
+.project-preview { position: relative; isolation: isolate; flex-shrink: 0; }
+.project-preview > img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform 300ms ease; }
+.project-preview[data-has-image="true"]::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(180deg, transparent 65%, #00000024); box-shadow: inset 0 1px #ffffff12; }
+.project-preview[data-has-image="false"] { background-image: radial-gradient(ellipse at top right, color-mix(in srgb, var(--accent) 12%, transparent), transparent 70%); }
+.project-card-copy h4 { text-wrap: balance; }
+.project-card-copy p { text-wrap: pretty; }
+.project-card-body { min-width: 0; }
+.project-card-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; padding-top: 16px; }
+.project-card-actions .project-action { flex-grow: 1; min-height: 44px; border-radius: 9px; }
+.project-card-actions .project-ask-astra { justify-content: center; margin-top: 0; padding: 8px; border: 1px solid var(--line); border-radius: 9px; text-align: center; transition: border-color 180ms ease, background-color 180ms ease; }
+.project-card-actions .project-ask-astra:hover { border-color: var(--accent); background: var(--panel-soft); text-decoration: none; }
+.projects-scroll-section .project-card-actions { gap: 8px; padding-top: 14px; }
+.projects-scroll-section .project-card-actions .project-ask-astra { flex-basis: 100%; width: 100%; }
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .project-tile:hover .project-preview > img { transform: scale(1.035); }
+}
+@media (prefers-reduced-motion: reduce) { .project-preview > img, .project-card-actions .project-ask-astra { transition: none; } }
