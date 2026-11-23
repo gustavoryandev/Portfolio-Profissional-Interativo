@@ -466,7 +466,7 @@
 @media (min-width: 1800px) {
   :root[data-theme|="galo"] .hero-galo-watermark {
     display: block;
-    top: calc(50% - 180px);
+    top: 16px;
     right: calc((100% - 100vw) / 2 + 24px);
     width: clamp(180px, 13vw, 270px);
   }
