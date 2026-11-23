@@ -7,6 +7,9 @@
 :root[data-theme="rick-morty"] .dimension-instrument-panel::before,
 :root[data-theme="rick-morty"] .dimension-instrument-panel::after { border-color: #d1ddbd66; }
 :root[data-theme="rick-morty"] .hero-profile { background: #151e23e8; }
+@media (min-width: 900px) {
+  :root[data-theme="rick-morty"] .hero-profile { align-self: start; margin-top: 48px; }
+}
 .garage-workbench { position: relative; display: flex; align-items: center; gap: 14px; min-height: 68px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); }
 .workbench-monitor { text-align: left; padding: 10px 12px; flex: 1; border: 1px solid #728572; border-radius: 5px; background: #080f0c; color: #b6e581; cursor: pointer; }
 .workbench-monitor span { display: block; font: 10px/1.5 ui-monospace, monospace; letter-spacing: .04em; }
