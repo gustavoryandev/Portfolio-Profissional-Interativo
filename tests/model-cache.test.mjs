@@ -49,3 +49,12 @@ test('cold discovery deadline uses fallback without duplicating slow discovery',
   await new Promise(resolve => setTimeout(resolve, 0));
   assert.deepEqual(await get('key'), ['discovered', 'fallback']);
 });
+
+test('generation can use approved defaults immediately while the catalog is cold', async () => {
+  let finish;
+  const get = createModelCache({ fallback: ['fallback'], discover: () => new Promise(resolve => { finish = resolve; }) });
+  assert.deepEqual(await get('key', { waitForDiscovery: false }), ['fallback']);
+  const catalog = get('key');
+  finish(['available']);
+  assert.deepEqual(await catalog, ['available', 'fallback']);
+});

@@ -1,5 +1,7 @@
 // NDJSON tolerates arbitrary network chunk boundaries, including split UTF-8.
-export async function requestChatStream(payload, { signal, onEvent = () => {} } = {}) {
+export async function requestChatStream(payload, { signal: callerSignal, onEvent = () => {} } = {}) {
+  const timeout = AbortSignal.timeout(36_000);
+  const signal = callerSignal ? AbortSignal.any([callerSignal, timeout]) : timeout;
   const response = await fetch('/api/chat', {
     method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/x-ndjson, application/json' },
     body: JSON.stringify({ ...payload, stream: true, streamRetry: true }), signal,
@@ -9,7 +11,16 @@ export async function requestChatStream(payload, { signal, onEvent = () => {} } 
     throw new Error(error.error || `Chat request failed (${response.status})`);
   }
   // Deterministic replies and validation branches can still return ordinary JSON.
-  if (response.headers.get('content-type')?.includes('application/json')) return response.json();
+  if (response.headers.get('content-type')?.includes('application/json')) {
+    const result = await response.json();
+    const hasText = typeof result?.response === 'string' && result.response.trim();
+    const hasTranslation = typeof result?.translationKey === 'string' && result.translationKey.trim();
+    const hasActions = Array.isArray(result?.actions) && result.actions.length;
+    if (!hasText && !hasTranslation && !hasActions) {
+      throw new Error('Empty chat response');
+    }
+    return result;
+  }
   if (!response.body || !response.headers.get('content-type')?.includes('application/x-ndjson')) throw new Error('Invalid chat stream');
   const reader = response.body.getReader();
   const decoder = new TextDecoder();
@@ -21,9 +32,16 @@ export async function requestChatStream(payload, { signal, onEvent = () => {} } 
     if (!line.trim() || done) return;
     const event = JSON.parse(line);
     if (event.type === 'error') throw new Error(event.error || 'Chat stream failed');
-    if (event.type === 'meta') Object.assign(result, { model: event.model, chatContext: event.chatContext, liveContext: event.liveContext });
+    if (event.type === 'meta') {
+      Object.assign(result, { model: event.model, chatContext: event.chatContext, liveContext: event.liveContext });
+      if (event.degraded === true) result.degraded = true;
+    }
     if (event.type === 'context') result.liveContext = event.liveContext;
-    if (event.type === 'reset') { text = ''; delete result.actions; }
+    if (event.type === 'reset') {
+      text = '';
+      delete result.actions;
+      delete result.degraded;
+    }
     if (event.type === 'actions') result.actions = event.actions;
     if (event.type === 'delta') {
       if (typeof event.text !== 'string') throw new Error('Invalid chat delta');

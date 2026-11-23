@@ -229,7 +229,7 @@ function MessageBubble({ message, liveContext = {}, refreshing = [], onRefresh, 
   const isError = message?.tone === 'error';
   const original = message?.text || '';
   const sourceLanguage = message?.lang?.startsWith('en') ? 'en' : 'pt';
-  const needsTranslation = !isUser && !message.translationKey && !message.chessReplay && original !== DESIGN_SYSTEM_CARD && sourceLanguage !== uiLanguage;
+  const needsTranslation = !isUser && !message.degraded && !message.translationKey && !message.chessReplay && original !== DESIGN_SYSTEM_CARD && sourceLanguage !== uiLanguage;
   const [translations, setTranslations] = useState({});
   const [translationFailed, setTranslationFailed] = useState(false);
   useEffect(() => {

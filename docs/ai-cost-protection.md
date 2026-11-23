@@ -7,9 +7,9 @@ O usuário confirmou que o projeto da chave Gemini está no **Free Tier, sem fat
 - IA livre do chat mantida, incluindo ferramentas da Astra, tradução e resumo de histórico.
 - Lista explícita de modelos de texto com faixa gratuita documentada: Gemini 3.8 Flash, 3.6 Flash e 3.5 Flash-Lite. A descoberta de modelos não pode introduzir modelos não aprovados, Pro, previews, aliases mutáveis ou modelos novos automaticamente.
 - A lista é filtrada novamente antes de executar qualquer geração.
-- Máximo de três tentativas por operação de geração (o resumo de histórico é uma operação separada).
-- O chat prioriza Gemini 3.8 Flash e 3.6 Flash; Flash-Lite fica como última alternativa. Essa ordem também é preservada após descobrir o catálogo. Em streaming, troca de modelo após 8 segundos sem texto nem chamada de ferramenta, quando houver alternativa. Cada tentativa tem limite de 24 segundos e a geração inteira compartilha um limite de 40 segundos. Esses limites são tetos, não tempos de espera obrigatórios: o texto é enviado assim que chega. A função de hospedagem tem limite de 60 segundos para acomodar também o carregamento de contexto.
-- Erros de cota, HTTP 429, pagamento ou faturamento encerram a operação imediatamente, sem tentar outro modelo. Erro desse tipo no resumo também impede iniciar a geração seguinte na mesma requisição.
+- Cada geração tem até três tentativas sequenciais. O histórico de conversas longas é resumido localmente.
+- Perguntas curtas sem dependência de dados ao vivo, pedidos detalhados ou ações começam no Gemini 3.5 Flash-Lite, assim como a tradução. Nas demais solicitações, a ordem é Gemini 3.8 Flash, 3.6 Flash e 3.5 Flash-Lite. Em streaming, o chat troca de modelo após 8 segundos sem texto ou chamada de ferramenta, se houver alternativa. Cada tentativa dura até 18 segundos dentro de um limite compartilhado de 30 segundos de geração. O limite da função de hospedagem é de 60 segundos e também cobre o carregamento de contexto.
+- Erros de cota, HTTP 429, pagamento ou faturamento encerram a geração imediatamente. A interface ainda recebe uma resposta de contingência.
 - Nenhum upgrade de conta, compra de créditos ou ativação de faturamento é feito pelo código.
 - A revisão de xadrez usa somente Stockfish/WASM, base local e explicações determinísticas. Foi removida a chamada de explicação a /api/chat. Os arquivos do motor são servidos pela própria hospedagem; não há serviço de análise pago.
 

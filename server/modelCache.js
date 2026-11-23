@@ -7,7 +7,7 @@ export function withDeadline(promise, milliseconds, fallback = null) {
 
 export function createModelCache({ discover, fallback, now = Date.now, ttl = 3600000, retryTtl = 60000, wait = 1200 }) {
   const entries = new Map();
-  return async function getModels(key) {
+  return async function getModels(key, { waitForDiscovery = true } = {}) {
     let entry = entries.get(key);
     if (!entry) {
       entry = { list: null, expires: 0, pending: null };
@@ -24,6 +24,6 @@ export function createModelCache({ discover, fallback, now = Date.now, ttl = 360
     }
     // A stale catalog stays usable while exactly one discovery refreshes it.
     if (entry.list) return entry.list;
-    return withDeadline(entry.pending, wait, [...fallback]);
+    return waitForDiscovery ? withDeadline(entry.pending, wait, [...fallback]) : [...fallback];
   };
 }

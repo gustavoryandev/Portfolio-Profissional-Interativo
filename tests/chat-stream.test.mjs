@@ -42,6 +42,10 @@ test('partial stream failures are reported without retrying generation', async (
     }
     globalThis.fetch = async () => Response.json({ response: 'Immediate reply', translationKey: 'key' });
     assert.equal((await requestChatStream({})).response, 'Immediate reply');
+    globalThis.fetch = async () => Response.json({ translationKey: 'chat.surface.full' });
+    assert.equal((await requestChatStream({})).translationKey, 'chat.surface.full');
+    globalThis.fetch = async () => Response.json({ response: '  ' });
+    await assert.rejects(requestChatStream({}), /Empty chat response/);
     globalThis.fetch = async () => Response.json({ error: 'unavailable' }, { status: 503 });
     await assert.rejects(requestChatStream({}), /unavailable/);
   } finally { globalThis.fetch = original; }

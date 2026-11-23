@@ -221,7 +221,7 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
     const updateHandoff = reply => setLabHandoff?.(current => current?.turn === turn ? { ...current, reply } : current);
     try {
       // O campo "id" é só da interface: não vai para o backend
-      const history = messagesRef.current.map(({ id, sender, text, translationKey }) => id === 'welcome'
+      const history = messagesRef.current.filter(message => !message.degraded).map(({ id, sender, text, translationKey }) => id === 'welcome'
         ? { sender, text: persona?.welcome ?? t(welcomeKey), ...(persona ? {} : { translationKey: welcomeKey }) }
         : { sender, text, translationKey });
       const options = {
@@ -259,6 +259,7 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
         notices.push(...proposal.notices);
       }
       controller.signal.throwIfAborted();
+      if (data.degraded) setInput(current => current || query);
       const replyLanguage = data.response || data.error ? requestLanguage : i18n.language;
       const reply = [data.response || data.error, actionReply(notices, replyLanguage.startsWith('en'))].filter(Boolean).join('\n\n');
       const response = [reply, ...cards].filter(Boolean).join('\n');
@@ -275,6 +276,7 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
         context: data.liveContext,
         lang: replyLanguage,
         model: data.model,
+        degraded: data.degraded,
         reviewId,
       });
       live.absorb(data.liveContext);
@@ -285,6 +287,7 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
     } catch {
       if (!mounted.current) return;
       const cancelled = controller.signal.aborted;
+      if (!cancelled) setInput(current => current || query);
       const notice = cancelled
         ? (requestLanguage.startsWith('en') ? 'Response stopped.' : 'Resposta interrompida.')
         : t('chat.erro', { lng: requestLanguage });
@@ -293,6 +296,7 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
         id,
         sender: 'ai',
         tone: cancelled ? undefined : 'error',
+        degraded: true,
         lang: requestLanguage,
         text: cancelled ? [buffer.getText(), notice].filter(Boolean).join('\n\n') : notice,
       });

@@ -15,7 +15,7 @@ const sendMessage = async (userMessage, lang, chatHistory = [], chatContext = nu
       surface: options?.surface,
       appearance: options?.appearance,
       labSnapshot: options?.labSnapshot,
-    });
+    }, { signal: options?.signal, timeout: 36000 });
     return response.data;
   } catch (error) {
     console.error("Erro na requisição para /api/chat:", error);
