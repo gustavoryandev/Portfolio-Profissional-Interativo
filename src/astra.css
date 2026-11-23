@@ -162,8 +162,12 @@
   .astra-heading-description { display: none; }
   .astra-heading-actions { flex-shrink: 0; }
 }
-@media (max-width: 767px) and (max-height: 500px) {
+@media (max-height: 600px) {
   .astra-conversation .chat-composer > .custom-scrollbar { display: none; }
+  .astra-conversation .astra-starters { display: none; }
+  .astra-conversation .astra-hero-wrap { display: none; }
+  .astra-conversation .chat-heading { padding-block: 4px; }
+  .astra-conversation .chat-heading > span { display: none; }
   .astra-full .chat-heading { padding-block: 4px; }
   .astra-conversation .chat-composer { padding: 4px 8px; }
 }
