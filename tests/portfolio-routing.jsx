@@ -32,6 +32,10 @@ for (const lang of ['pt', 'en']) {
   const ids = [...doc.querySelectorAll('[id]')].map(node => node.id);
   assert.equal(new Set(ids).size, ids.length, 'section and form IDs must be unique');
   assert.equal(doc.querySelectorAll('.project-tile').length, perfil.projetos.length);
+  assert.equal(doc.querySelectorAll('.hobby-list li').length, 6);
+  assert.equal(doc.querySelectorAll('.watched-series li').length, perfil.interesses.series.assistidas.length);
+  assert.equal(doc.querySelector('.favorite-series strong').textContent, 'Breaking Bad');
+  assert.match(doc.querySelector('.hobby-list').textContent, lang === 'pt' ? /família e amigos/ : /family and friends/);
   page.window.close();
 }
 

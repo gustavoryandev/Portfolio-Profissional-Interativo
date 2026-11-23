@@ -1,0 +1,29 @@
+.personal-interests { margin-top: 32px; padding-top: 28px; border-top: 1px solid var(--line); }
+.personal-interests header { margin-bottom: 22px; }
+.personal-interests header .section-eyebrow { margin-bottom: 8px; font-size: 10px; letter-spacing: .16em; }
+.personal-interests h3 { margin: 0 0 8px; color: var(--ink); font-size: clamp(21px, 2.3vw, 28px); font-weight: 650; letter-spacing: -.025em; }
+.personal-interests header > p:last-child { max-width: 62ch; color: var(--muted); font-size: 14px; line-height: 1.7; }
+.interests-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(24px, 4vw, 54px); align-items: start; }
+.personal-interests h4 { margin-bottom: 14px; color: var(--ink); font-size: 14px; font-weight: 600; }
+.hobby-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; list-style: none; margin: 0; padding: 0; }
+.hobby-list li { display: flex; align-items: center; gap: 10px; color: var(--ink); font-size: 13px; line-height: 1.5; }
+.hobby-list li > span { display: grid; place-items: center; width: 36px; height: 36px; flex-shrink: 0; border: 1px solid var(--line); border-radius: 10px; color: var(--accent); background: var(--panel-soft); }
+.favorite-series { position: relative; display: flex; gap: 14px; align-items: center; overflow: hidden; padding: 20px; border: 1px solid var(--line); border-radius: 14px; background: linear-gradient(125deg, color-mix(in srgb, var(--accent) 12%, var(--panel)), var(--panel)); }
+.favorite-series-icon { color: var(--primary); }
+.favorite-series p { margin: 0 0 5px; color: var(--muted); font: 11px/1.5 ui-monospace, monospace; }
+.favorite-series strong { position: relative; z-index: 1; color: var(--ink); font-size: 24px; letter-spacing: -.03em; }
+.favorite-series-mark { margin-left: auto; color: var(--accent); opacity: .2; font: 700 28px/.9 ui-monospace, monospace; transform: rotate(-8deg); }
+.favorite-series-mark b { margin-left: 12px; }
+.watched-series { margin-top: 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel-soft); }
+.watched-series summary { display: flex; align-items: center; gap: 10px; min-height: 66px; padding: 14px 16px; color: var(--ink); font-size: 13px; font-weight: 550; cursor: pointer; list-style: none; }
+.watched-series summary::-webkit-details-marker { display: none; }
+.watched-series summary > svg { color: var(--accent); flex-shrink: 0; }
+.watched-series summary::after { content: '+'; margin-left: auto; color: var(--accent); font-size: 21px; }
+.watched-series[open] summary::after { content: '−'; }
+.watched-series summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 10px; }
+.watched-series small { display: block; margin-top: 4px; color: var(--muted); font-size: 11px; font-weight: 400; }
+.watched-series ul { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 18px; margin: 0; padding: 16px; border-top: 1px solid var(--line); list-style: none; }
+.watched-series li { display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 12px; line-height: 1.6; overflow-wrap: anywhere; }
+.watched-series li svg { flex-shrink: 0; color: var(--primary); }
+@media (max-width: 700px) { .interests-layout { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 380px) { .hobby-list, .watched-series ul { grid-template-columns: minmax(0, 1fr); } }

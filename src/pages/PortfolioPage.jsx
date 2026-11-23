@@ -1,3 +1,4 @@
+import PersonalInterests from '../components/PersonalInterests';
 import { useContext, useLayoutEffect, useRef, useState } from 'react';
 import SkillsGlobe from '../components/SkillsGlobe';
 import { useAstra } from '../context/AstraContext';
@@ -139,6 +140,7 @@ export default function PortfolioPage({ activeSection, projectFocus, onSectionLi
               {perfil.bio[en ? 'en' : 'pt'].split('\n\n').map(paragraph => <p key={paragraph}>{paragraph}</p>)}
             </div>
           </div>
+          <PersonalInterests />
         </ScrollReveal>
       </section>
       <ProjectsScrollSection projectFocus={projectFocus} />

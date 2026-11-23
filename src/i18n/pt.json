@@ -756,5 +756,14 @@
       "error": "Não foi possível carregar a música. Toque para tentar novamente.",
       "notice": "Música tema · Prévia oficial de Ryan Elder"
     }
+  },
+  "interests": {
+    "eyebrow": "FORA DO CÓDIGO",
+    "title": "Um pouco mais sobre mim",
+    "hobbies": "O que gosto de fazer",
+    "favorite": "Minha série favorita",
+    "watched": "Séries que assisti e gostei",
+    "showAll": "Ver as {{count}} séries",
+    "summary": "Entre família, amigos, esportes e uma boa partida, sempre cabe mais um episódio."
   }
 }

@@ -756,5 +756,14 @@
       "error": "The music could not be loaded. Press to try again.",
       "notice": "Theme music · Official Ryan Elder preview"
     }
+  },
+  "interests": {
+    "eyebrow": "BEYOND THE CODE",
+    "title": "A little more about me",
+    "hobbies": "What I enjoy doing",
+    "favorite": "My favorite series",
+    "watched": "Series I’ve watched and enjoyed",
+    "showAll": "View all {{count}} series",
+    "summary": "Between family, friends, sports and a good game, there’s always room for one more episode."
   }
 }

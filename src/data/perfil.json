@@ -17,6 +17,117 @@
 "pt": "Fora do ambiente acadêmico e tecnológico, dedico-me ao futebol, esporte que pratico desde os 7 anos de idade. Minha longa trajetória no futsal, com destaque para a vivência esportiva no Colégio Santo Antônio, foi fundamental para o desenvolvimento de competências comportamentais e cognitivas indispensáveis. Essa experiência me proporcionou não apenas disciplina, resiliência e forte espírito de trabalho em equipe, mas também lapidou meu raciocínio lógico, foco em resultados e a capacidade de tomada de rápida decisão sob pressão.",
 "en": "Outside of the academic and technological environment, I am dedicated to soccer, a sport I have practiced since I was 7 years old. My long trajectory in futsal, highlighted by my sports experience at Colégio Santo Antônio, was fundamental to developing indispensable behavioral and cognitive skills. This experience provided me not only with discipline, resilience, and a strong spirit of teamwork but also honed my logical reasoning, focus on results, and the ability to make quick decisions under pressure."
 },
+"interesses": {
+  "hobbies": [
+    {
+      "id": "family-friends",
+      "pt": "Passar tempo com família e amigos",
+      "en": "Spending time with family and friends"
+    },
+    {
+      "id": "tv",
+      "pt": "Ver séries de TV",
+      "en": "Watching TV series"
+    },
+    {
+      "id": "sports",
+      "pt": "Praticar esportes",
+      "en": "Playing sports"
+    },
+    {
+      "id": "valorant",
+      "pt": "Jogar Valorant",
+      "en": "Playing Valorant"
+    },
+    {
+      "id": "chess",
+      "pt": "Jogar xadrez",
+      "en": "Playing chess"
+    },
+    {
+      "id": "clash-royale",
+      "pt": "Jogar Clash Royale",
+      "en": "Playing Clash Royale"
+    }
+  ],
+  "series": {
+    "favorita": "Breaking Bad",
+    "assistidas": [
+      {
+        "pt": "La Casa de Papel",
+        "en": "Money Heist"
+      },
+      {
+        "pt": "BoJack Horseman",
+        "en": "BoJack Horseman"
+      },
+      {
+        "pt": "Rick and Morty",
+        "en": "Rick and Morty"
+      },
+      {
+        "pt": "Todo Mundo Odeia o Chris",
+        "en": "Everybody Hates Chris"
+      },
+      {
+        "pt": "Eu, a Patroa e as Crianças",
+        "en": "My Wife and Kids"
+      },
+      {
+        "pt": "Breaking Bad",
+        "en": "Breaking Bad"
+      },
+      {
+        "pt": "Peaky Blinders",
+        "en": "Peaky Blinders"
+      },
+      {
+        "pt": "Dr. House",
+        "en": "House"
+      },
+      {
+        "pt": "O Mentalista",
+        "en": "The Mentalist"
+      },
+      {
+        "pt": "A Lista Negra",
+        "en": "The Blacklist"
+      },
+      {
+        "pt": "Lupin",
+        "en": "Lupin"
+      },
+      {
+        "pt": "Suits",
+        "en": "Suits"
+      },
+      {
+        "pt": "Cobra Kai",
+        "en": "Cobra Kai"
+      },
+      {
+        "pt": "Narcos",
+        "en": "Narcos"
+      },
+      {
+        "pt": "O Gambito da Rainha",
+        "en": "The Queen’s Gambit"
+      },
+      {
+        "pt": "Berlim e as Joias de Paris",
+        "en": "Berlin and the Jewels of Paris"
+      },
+      {
+        "pt": "Berlim e a Dama com Arminho",
+        "en": "Berlin and the Lady with an Ermine"
+      },
+      {
+        "pt": "Como Vender Drogas Online (Rápido)",
+        "en": "How to Sell Drugs Online (Fast)"
+      }
+    ]
+  }
+},
 "skills": [
 { "nome": "Java", "proficienciaPercentual": 60, "categoria": "Backend" },
 { "nome": "Spring Boot", "proficienciaPercentual": 30, "categoria": "Backend" },
