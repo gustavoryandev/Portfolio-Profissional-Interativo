@@ -1,0 +1,18 @@
+/* Preserve room for the introduction and portrait at intermediate sizes. */
+@media (768px <= width < 1120px) {
+  .portfolio-hero { gap: 28px; padding-block: 40px; grid-template-columns: 1.2fr .8fr; }
+  .portfolio-hero h1 { font-size: clamp(64px, 8vw, 84px); }
+}
+@media (768px <= width < 900px) {
+  .portfolio-hero { grid-template-columns: 1fr; min-height: auto; }
+  .hero-profile { width: min(100%, 380px); justify-self: center; }
+}
+@media (min-width: 1120px) and (max-height: 820px) {
+  .portfolio-hero { padding-block: 28px; min-height: calc(100svh - 100px); gap: 48px; }
+  .portfolio-hero h1 { font-size: clamp(72px, 7vw, 96px); }
+  .hero-lead { margin-top: 18px; }
+  .hero-description { margin-top: 12px; }
+  .hero-actions { gap: 16px; margin-block: 18px; }
+  .hero-profile { width: min(100%, 340px); justify-self: end; padding: 12px; }
+  .hero-profile-caption { padding-top: 12px; }
+}

@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App.jsx';
 import './scroll.css';
+import './hero-responsive.css';
 import './index.css';
 import './glass-neon.css';
 import './intro.css';
