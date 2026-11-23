@@ -6,6 +6,10 @@
 .project-card-copy h4 { text-wrap: balance; }
 .project-card-copy p { text-wrap: pretty; }
 .project-card-body { min-width: 0; }
+.project-card-details { display: grid; align-content: start; gap: 12px; }
+.project-card-copy p[data-summary="true"] { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.project-description-toggle { min-height: 44px; color: var(--accent); font-size: 14px; text-decoration: underline; text-underline-offset: 3px; text-align: start; }
+.project-card-details :is(a, button, summary):focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 .project-card-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; padding-top: 16px; }
 .project-card-actions .project-action { flex-grow: 1; min-height: 44px; border-radius: 9px; }
 .project-card-actions .project-ask-astra { justify-content: center; margin-top: 0; padding: 8px; border: 1px solid var(--line); border-radius: 9px; text-align: center; transition: border-color 180ms ease, background-color 180ms ease; }

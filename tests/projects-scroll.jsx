@@ -11,7 +11,8 @@ Object.assign(globalThis, {
   requestAnimationFrame: callback => setTimeout(callback, 0),
   cancelAnimationFrame: clearTimeout,
 });
-globalThis.ResizeObserver = class { observe() {} disconnect() {} };
+const observers = [];
+globalThis.ResizeObserver = class { constructor(callback) { observers.push(callback); } observe() {} disconnect() {} };
 const desktop = { matches: true, addEventListener() {}, removeEventListener() {} };
 const reduced = { ...desktop, matches: false };
 window.matchMedia = query => query.includes('pointer: fine') ? desktop : reduced;
@@ -19,7 +20,8 @@ Object.defineProperty(window, 'innerHeight', { writable: true, value: 900 });
 const start = 904;
 let scrollY = 0;
 Object.defineProperty(window, 'scrollY', { get: () => scrollY });
-window.scrollTo = ({ top }) => { scrollY = top; };
+let pageWrites = 0;
+window.scrollTo = ({ top }) => { pageWrites++; scrollY = top; };
 const children = el => [...el.querySelectorAll('[data-project-slide]')];
 Object.defineProperties(window.HTMLElement.prototype, {
   clientWidth: { get() { return 1000; } },
@@ -61,6 +63,16 @@ assert.equal(track.scrollLeft, run);
 assert.ok(section.getBoundingClientRect().top + parseFloat(section.style.height) < 96 + 590, 'the stage can leave the viewport when the run is over');
 await scroll(start + run / 2);
 assert.equal(track.scrollLeft, run / 2, 'reverse document scroll moves the rail backward');
+for (let pass = 0; pass < 4; pass++) {
+  await scroll(start + run + 20);
+  const writes = pageWrites;
+  observers.forEach(callback => callback());
+  await renderFrame();
+  assert.equal(pageWrites, writes, 'passive measurement at the exit must never move the page');
+  assert.equal(track.scrollLeft, run);
+  await scroll(start + run - 20);
+  assert.equal(track.scrollLeft, run - 20);
+}
 const key = name => track.dispatchEvent(new window.KeyboardEvent('keydown', { key: name, bubbles: true, cancelable: true }));
 key('End');
 assert.equal(window.scrollY, start + run);
@@ -83,15 +95,22 @@ assert.ok(window.scrollY > start);
 const oldLeft = track.scrollLeft;
 window.innerHeight = 560;
 window.dispatchEvent(new window.Event('resize'));
-assert.equal(section.dataset.pinned, 'false');
+await renderFrame();
+assert.equal(section.dataset.pinned, 'true', 'short desktop screens retain the mandatory horizontal pin');
 assert.equal(track.scrollLeft, oldLeft);
+desktop.matches = false;
+window.dispatchEvent(new window.Event('resize'));
+await renderFrame();
+assert.equal(section.dataset.pinned, 'false');
 const oldY = window.scrollY;
 key('End');
 assert.equal(window.scrollY, oldY, 'keyboard controls in native mode only scroll the rail');
 assert.equal(track.scrollLeft, run);
 window.innerHeight = 900;
+desktop.matches = true;
 reduced.matches = true;
 window.dispatchEvent(new window.Event('resize'));
+await renderFrame();
 assert.equal(section.dataset.pinned, 'false');
 
 await act(async () => root.render(<ProjectsScrollSection projectFocus={{ project: 'oficina-java' }} />));
@@ -105,5 +124,10 @@ assert.equal(first.querySelectorAll('ul li').length, 3);
 await act(async () => techButton.click());
 assert.equal(techButton.getAttribute('aria-expanded'), 'true');
 assert.ok(first.querySelectorAll('ul li').length > 3);
+const descriptionButton = first.querySelector('.project-description-toggle');
+assert.equal(descriptionButton.getAttribute('aria-expanded'), 'false');
+await act(async () => descriptionButton.click());
+assert.equal(descriptionButton.getAttribute('aria-expanded'), 'true');
+assert.equal(document.getElementById(descriptionButton.getAttribute('aria-controls').split(' ')[0]).dataset.summary, undefined);
 await act(async () => root.unmount());
 dom.window.close();

@@ -203,6 +203,50 @@
 .project-ask-astra { display: flex; align-items: center; gap: 8px; min-height: 44px; margin-top: 4px; color: var(--accent); font-size: 13px; font-weight: 600; text-align: left; }
 .project-ask-astra:hover { text-decoration: underline; }
 .project-ask-astra svg { flex-shrink: 0; }
+@media (max-width: 767px) {
+  .scroll-portfolio .projects-scroll-section .projects-card { padding: 8px; }
+  .projects-scroll-section .project-tile > .project-card-body { padding: 12px; gap: 10px; }
+  .projects-scroll-section .project-card-details { gap: 8px; }
+  .projects-scroll-section .project-tile[data-details-open="false"] :is(.project-card-technologies, .dimension-project-details) { display: none; }
+  .projects-scroll-section .project-card-copy p { margin-top: 6px; line-height: 1.5; }
+}
+/* Keep the pin's geometry independent of overflow and expanded card content. */
+@media (min-width: 1120px) and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .projects-pin {
+    height: min(800px, calc(100dvh - var(--projects-pin-top, 96px) - 16px));
+    display: flex;
+    flex-direction: column;
+  }
+  .projects-pin > .scroll-reveal { flex: none; }
+  .scroll-portfolio .projects-pin .projects-card {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    margin-block: 0;
+    padding: 12px;
+  }
+  .projects-pin .project-controls, .projects-pin .projects-track-controls { flex: none; }
+  /* Leave the floating assistant a separate area beside the rail controls. */
+  .projects-pin .projects-track-controls { padding-inline-end: 190px; }
+  .projects-pin .projects-track { flex: 1; min-height: 0; }
+  .projects-pin .project-tile { height: 100%; min-height: 0; }
+  .projects-pin .project-preview { height: clamp(80px, 16dvh, 174px); }
+  .projects-pin .project-card-body { min-height: 0; overflow: hidden; }
+  .projects-pin .project-card-details { min-height: 0; overflow-y: auto; scrollbar-width: thin; padding: 2px 4px 4px; }
+  .projects-pin .project-card-actions { flex: none; }
+  @media (max-height: 820px) {
+    .projects-pin .project-preview { height: 96px; }
+    .projects-pin .project-card-actions { flex-wrap: nowrap; gap: 6px; }
+    .projects-pin .project-card-actions :is(.project-action, .project-ask-astra) { flex: 1 1 0; width: auto; padding: 8px; font-size: 13px; }
+  }
+  .projects-scroll-section[data-overflow="false"] .projects-pin { height: auto; }
+  .projects-scroll-section[data-overflow="false"] .projects-track { flex: none; }
+  .projects-scroll-section[data-overflow="false"] .project-tile { height: auto; }
+}
+@media (768px <= width < 1120px) {
+  .projects-track > [data-project-slide] { flex-basis: calc((100% - var(--project-gap)) / 2); }
+}
 @media (max-width: 1100px) {
   .scroll-skills { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }

@@ -14,12 +14,13 @@ function connectTrack(section) {
   const previous = section.querySelector('[data-project-step="-1"]');
   const next = section.querySelector('[data-project-step="1"]');
   const header = section.closest('.scroll-portfolio')?.querySelector('.site-header');
-  const desktop = window.matchMedia('(min-width: 768px) and (hover: hover) and (pointer: fine)');
+  const desktop = window.matchMedia('(min-width: 1120px) and (hover: hover) and (pointer: fine)');
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
   let distance = 0;
   let top = 0;
   let pinned = false;
   let frame = 0;
+  let measureFrame = 0;
 
   const bounds = () => section.getBoundingClientRect();
   const position = () => clamp(top - bounds().top, distance);
@@ -51,29 +52,23 @@ function connectTrack(section) {
 
   function measure(reset = false) {
     if (!track.clientWidth) return;
-    const wasPinned = pinned;
     const sectionTop = bounds().top;
-    const progress = pinned ? position() : track.scrollLeft;
     const inRun = pinned && sectionTop <= top + EPSILON && sectionTop >= top - distance - EPSILON;
     top = (header?.offsetHeight ?? 0) + 16;
+    section.style.setProperty('--projects-pin-top', `${top}px`);
     distance = Math.max(0, track.scrollWidth - track.clientWidth);
     section.dataset.overflow = String(distance > EPSILON);
-    // Measure the actual stage, including the controls and any expanded technologies.
+    // The desktop stage has a viewport budget in CSS, independently of pinned state.
+    // Never toggle pinning based on its measured height: doing so makes controls,
+    // text wrapping and ResizeObserver feed back into each other at the boundary.
     const height = stage.getBoundingClientRect().height;
-    pinned = desktop.matches && !reduced.matches && distance > EPSILON && top + height + 12 <= window.innerHeight;
+    pinned = desktop.matches && !reduced.matches && distance > EPSILON;
     section.dataset.pinned = String(pinned);
-    section.style.setProperty('--projects-pin-top', `${top}px`);
     section.style.height = pinned ? `${height + distance}px` : '';
 
-    if (reset) {
-      goTo(0, inRun);
-    } else if (inRun && !pinned) {
-      // Keep the stage on screen when resizing out of the pinned mode.
-      window.scrollTo({ top: window.scrollY + bounds().top - top, behavior: 'instant' });
-      track.scrollLeft = clamp(progress, distance);
-    } else if (!wasPinned && pinned && progress > EPSILON && sectionTop <= top && sectionTop + height > top) {
-      goTo(progress);
-    }
+    // Only explicit navigation/filtering may move the document. Passive measuring
+    // must not write scrollY, particularly after reaching either end of the rail.
+    if (reset) goTo(0, inRun);
     update();
   }
 
@@ -111,7 +106,12 @@ function connectTrack(section) {
     if (slide) reveal(slide);
   };
 
-  const resize = () => measure();
+  const resize = () => {
+    if (!measureFrame) measureFrame = requestAnimationFrame(() => {
+      measureFrame = 0;
+      measure();
+    });
+  };
   const observer = new ResizeObserver(resize);
   observer.observe(stage);
   observer.observe(track);
@@ -139,6 +139,7 @@ function connectTrack(section) {
     },
     disconnect() {
       cancelAnimationFrame(frame);
+      cancelAnimationFrame(measureFrame);
       observer.disconnect();
       window.removeEventListener('scroll', onPageScroll);
       window.removeEventListener('resize', resize);
