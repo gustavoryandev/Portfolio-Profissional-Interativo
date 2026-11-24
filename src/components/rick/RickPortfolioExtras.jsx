@@ -42,3 +42,33 @@ export function CitadelCredential() {
     </div>
   </Fold>;
 }
+
+const demonstrationIds = ['portfolio', 'geosolar'];
+const demonstrations = demonstrationIds.map(id => perfil.projetos.find(project => project.id === id && project.image?.src)).filter(Boolean);
+
+export function InterdimensionalTV({ onSectionLink }) {
+  const { t, i18n } = useTranslation();
+  const selectId = useId();
+  const [open, setOpen] = useState(false);
+  const [channel, setChannel] = useState(demonstrations[0]?.id);
+  const selected = demonstrations.find(project => project.id === channel) ?? demonstrations[0];
+  if (!selected) return null;
+  const title = projectContent(selected, 'titulo', i18n.language, t);
+  return <Fold icon={Tv} label={t('rick.extras.tv.title')} className="rick-tv" onToggle={event => setOpen(event.currentTarget.open)}>
+    <div className="rick-tv-controls">
+      <label htmlFor={selectId}>{t('rick.extras.tv.channel')}</label>
+      <select id={selectId} value={channel} onChange={event => setChannel(event.currentTarget.value)}>
+        {demonstrations.map(project => <option value={project.id} key={project.id}>{projectContent(project, 'titulo', i18n.language, t)}</option>)}
+      </select>
+    </div>
+    {open && <figure key={channel} className="rick-tv-screen" data-rick-motion>
+      <img src={selected.image.src} alt={selected.image.altKey ? t(selected.image.altKey) : t('projetos.previewAlt', { title })} decoding="async" />
+      <figcaption>{t('rick.extras.tv.capture', { title })}</figcaption>
+    </figure>}
+    <div className="rick-extra-links">
+      <a href={`/?project=${selected.id}#projetos`} onClick={onSectionLink}>{t('rick.extras.tv.project')}</a>
+      {selected.demoUrl && <a href={selected.demoUrl}>{t('projetos.viewDemo')}</a>}
+      {selected.githubUrl && <a href={selected.githubUrl} target="_blank" rel="noopener noreferrer">{t('projetos.viewProject')}</a>}
+    </div>
+  </Fold>;
+}

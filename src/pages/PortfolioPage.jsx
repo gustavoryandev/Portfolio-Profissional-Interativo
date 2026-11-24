@@ -1,4 +1,4 @@
-import { RickObjects, CitadelCredential } from '../components/rick/RickPortfolioExtras';
+import { RickObjects, CitadelCredential, InterdimensionalTV } from '../components/rick/RickPortfolioExtras';
 import PersonalInterests from '../components/PersonalInterests';
 import { useContext, useLayoutEffect, useRef, useState } from 'react';
 import SkillsGlobe from '../components/SkillsGlobe';
@@ -157,6 +157,7 @@ export default function PortfolioPage({ activeSection, projectFocus, onSectionLi
         </ScrollReveal>
       </section>
       <ProjectsScrollSection projectFocus={projectFocus} />
+      {dimensional && <InterdimensionalTV onSectionLink={onSectionLink} />}
       <CodePlayground />
       <section id="habilidades" className="scroll-section" aria-labelledby="skills-title">
         <ScrollReveal><p className="section-eyebrow">04 / {en ? 'TOOLKIT' : 'TECNOLOGIAS'}</p><h2 id="skills-title">{en ? 'What I build with.' : 'Com o que eu construo.'}</h2></ScrollReveal>
