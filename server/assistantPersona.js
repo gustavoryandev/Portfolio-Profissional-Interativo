@@ -29,6 +29,32 @@ export function resolveAssistantPersona(appearance, surface) {
   return id ? { id, ...profiles[id] } : null;
 }
 
+const characterNames = {
+  poopybutthole: /\b(?:(?:senhor|sr|mr|mister) )?(?:bunda cagada|cagada|poopybutthole)\b/g,
+  squanchy: /\bsquanchy\b/g,
+  meeseeks: /\b(?:(?:senhor|sr|mr|mister) )?meeseeks\b/g,
+};
+
+const introductions = [
+  /^(?:quem (?:e|eh) (?:voce|vc|(?:o )?@)|qual (?:e |eh )?(?:o )?seu nome)$/,
+  /^(?:(?:voce|vc) )?(?:pode )?(?:se (?:apresenta|apresente|apresentar)|apresente se)$/,
+  /^(?:me |pode me )?(?:fale|fala|falar|conte|conta|contar)(?: um pouco)? (?:sobre|de) (?:voce|vc|si|(?:o )?@)$/,
+  /^(?:who are you|who is @|what(?:'s| is) your name)$/,
+  /^(?:can you |could you )?(?:introduce yourself|tell (?:me|us)(?: a (?:bit|little))? about (?:yourself|you|@))$/,
+];
+
+export function isCharacterIntroduction(query, persona) {
+  // Mark only the current character. A name by itself, or a different subject,
+  // must not turn an ordinary question into a portfolio introduction.
+  const text = query.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[.,!?;:—–-]+/g, ' ').replace(/[’']/g, "'").replace(/\s+/g, ' ').trim()
+    .replace(characterNames[persona.id], '@')
+    .replace(/^(?:(?:oi|ola|hey|hi|please|por favor) )+/, '')
+    .replace(/ (?:por favor|please)$/, '').replace(/^@ /, '');
+  const withoutVocative = text.replace(/ @$/, '');
+  return introductions.some(intent => intent.test(text) || intent.test(withoutVocative));
+}
+
 export function assistantPersonaInstruction(persona, lang) {
   if (!persona) return '';
   const name = persona[lang === 'en' ? 'en' : 'pt'];

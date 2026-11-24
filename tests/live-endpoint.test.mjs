@@ -22,6 +22,23 @@ function response() {
     setHeader(name, value) { this.headers[name] = value; }, json(body) { this.body = body; return this; } };
 }
 
+test('identity replies survive a provider outage while model-dependent requests stay degraded', async () => {
+  const body = { appearance: { theme: 'rick-morty', dimension: 'corrupted' }, surface: 'full', stream: true, streamRetry: true };
+  for (const [lang, userMessage] of [['pt', 'me fale sobre vc senhor cagada'], ['en', 'Tell me about yourself, Mr. Poopybutthole']]) {
+    const res = response();
+    await handler({ method: 'POST', body: { ...body, lang, userMessage } }, res);
+    assert.equal(res.code, 200);
+    assert.equal(res.body.translationKey, 'rick.poopybutthole.identity');
+    assert.ok(res.body.response);
+    assert.equal(res.body.model, undefined);
+    assert.equal(res.body.degraded, undefined);
+  }
+  const res = response();
+  await handler({ method: 'POST', body: { ...body, lang: 'pt', userMessage: 'Senhor cagada, explique como implementar uma fila.' } }, res);
+  assert.equal(res.body.degraded, true);
+  assert.equal(res.body.translationKey, undefined);
+});
+
 test('refreshContext validates its allowlist before any integration call', async () => {
   for (const sources of [[], ['__proto__'], ['https://invalid'], ['github', 'invalid']]) {
     const res = response();

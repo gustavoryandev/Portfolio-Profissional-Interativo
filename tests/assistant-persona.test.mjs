@@ -1,6 +1,18 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { resolveAssistantPersona, assistantPersonaInstruction, characterResourceReply } from '../server/assistantPersona.js';
+import { resolveAssistantPersona, assistantPersonaInstruction, characterResourceReply, isCharacterIntroduction } from '../server/assistantPersona.js';
+
+test('only direct identity questions select the local character introduction', () => {
+  const persona = resolveAssistantPersona({ theme: 'rick-morty', dimension: 'corrupted' }, 'full');
+  for (const phrase of ['me fale sobre vc senhor cagada', 'Me fale sobre você.', 'Se apresenta!', 'Quem é o Sr. Bunda Cagada?',
+    'Hey, Mr. Poopybutthole, tell me about yourself!', 'Introduce yourself, please.', 'What’s your name?']) {
+    assert.ok(isCharacterIntroduction(phrase, persona), phrase);
+  }
+  for (const phrase of ['Sr. Bunda Cagada, explique o ROTA', 'se apresenta e abre o currículo', 'Tell me about Gustavo',
+    'Quem é o Sr. Meeseeks?', 'Tell me about yourself and explain your code']) {
+    assert.equal(isCharacterIntroduction(phrase, persona), false, phrase);
+  }
+});
 
 test('character selection follows theme, interface and dimension; client instructions are ignored', () => {
   for (const dimension of ['lab', 'corrupted']) {
