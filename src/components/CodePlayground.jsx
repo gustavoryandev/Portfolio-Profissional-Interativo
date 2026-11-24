@@ -28,10 +28,14 @@ export default function CodePlayground() {
   };
 
   return <ScrollReveal as="section" id="laboratorio" className="scroll-section code-lab" aria-labelledby="code-lab-title">
-    <LabPickle />
-    <p className="section-eyebrow">03 / {en ? 'CODE LAB' : 'LABORATÓRIO'}</p>
-    <h2 id="code-lab-title">{en ? 'Make the code yours.' : 'Experimente. Altere. Execute.'}</h2>
-    <p className="code-lab-intro">{en ? 'Explore Bro Fit and Shopping Cart in Java, Python and JavaScript.' : 'Explore o Bro Fit e o Carrinho de Compras em Java, Python e JavaScript.'}</p>
+    <div className="code-lab-heading">
+      <div>
+        <p className="section-eyebrow">03 / {en ? 'CODE LAB' : 'LABORATÓRIO'}</p>
+        <h2 id="code-lab-title">{en ? 'Make the code yours.' : 'Experimente. Altere. Execute.'}</h2>
+        <p className="code-lab-intro">{en ? 'Explore Bro Fit and Shopping Cart in Java, Python and JavaScript.' : 'Explore o Bro Fit e o Carrinho de Compras em Java, Python e JavaScript.'}</p>
+      </div>
+      <LabPickle />
+    </div>
     {labHandoff && <div className="lab-handoff glass-panel">
       <p role="status">{labHandoff.reply ?? (t('rick.assistant.working', { name: persona?.name ?? 'Astra' }))}</p>
       <button type="button" className="chip chip--accent" onClick={labHandoff.modal ? openAstra : openFull}>{t('rick.assistant.continue', { name: persona?.name ?? 'Astra' })}</button>

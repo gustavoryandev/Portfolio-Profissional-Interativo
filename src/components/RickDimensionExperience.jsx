@@ -62,44 +62,7 @@ export function GarageWorkbench({ onSectionLink }) {
   </div>;
 }
 
-export function LabPickle() {
-  const { theme, dimension } = useContext(ThemeContext) ?? {};
-  const { t } = useTranslation();
-  const ref = useRef(null);
-  const [spotted, setSpotted] = useState(false);
-  const [otherSide, setOtherSide] = useState(false);
-  const [found, setFound] = useState(false);
-  const [escaping, setEscaping] = useState(false);
-  useEffect(() => {
-    if (dimension !== 'lab' && escaping) { setFound(true); setEscaping(false); }
-  }, [dimension, escaping]);
-  useEffect(() => {
-    if (!ref.current) return;
-    if (typeof IntersectionObserver === 'undefined') { setSpotted(true); return; }
-    const observer = new IntersectionObserver(entries => {
-      if (entries.some(entry => entry.isIntersecting)) { setSpotted(true); observer.disconnect(); }
-    }, { threshold: .1 });
-    observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, [theme]);
-  if (theme !== 'rick-morty') return null;
-  return <div ref={ref} className="lab-pickle-stage" data-spotted={spotted} data-found={found} data-escaping={escaping} data-side={otherSide ? 'right' : 'left'} hidden={dimension !== 'lab'}>
-    <span className="lost-screw" aria-hidden="true">⚙</span>
-    <button type="button" className="pickle-button" aria-disabled={escaping} aria-pressed={found} onClick={() => {
-      if (escaping) return;
-      setOtherSide(value => !value);
-      if (!found) {
-        if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) setFound(true);
-        else setEscaping(true);
-      }
-    }} onAnimationEnd={event => {
-      if (event.animationName === 'pickle-escape') { setFound(true); setEscaping(false); }
-    }} aria-label={t('rick.pickleRun')}>
-      <CharacterArt who={found ? 'pickle-rat' : 'pickle'} />
-    </button><span className="pickle-experiment" aria-hidden="true">{t(found ? 'rick.ratSuit' : 'rick.experiment')}</span>
-    <span className="sr-only" role="status">{found ? (t('rick.pickleFound')) : ''}</span>
-  </div>;
-}
+export { default as LabPickle } from './rick/LabPickle';
 
 export function ProjectMorty({ expanded }) {
   return <div className="project-morty" data-expanded={expanded} aria-hidden="true"><CharacterArt /><i /><b /></div>;
