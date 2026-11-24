@@ -11,10 +11,16 @@ import { ThemeContext } from '../context/ThemeState';
 import { useAstra } from '../context/AstraContext';
 import { useAssistantPersona } from '../context/AssistantAppearanceContext';
 
-export function CharacterArt({ who = 'morty', badge = false }) {
+export function CharacterArt({ who = 'morty', badge = false, gaze = false }) {
   const { t } = useTranslation();
+  const [eyesReady, setEyesReady] = useState(false);
   return <span className="series-character" data-who={who} aria-hidden="true">
-    <img src={`/rick-assets/${who}.png`} alt="" draggable="false" decoding="async" />
+    {gaze ? <svg className="morty-drawing" viewBox="0 0 444 883" preserveAspectRatio="xMidYMax meet">
+      <image href="/rick-assets/morty.webp" width="444" height="883" onLoad={() => setEyesReady(true)} onError={() => setEyesReady(false)} />
+      {eyesReady && <g><g fill="#fff"><circle cx="254" cy="132" r="9" /><circle cx="346" cy="120" r="9" /></g>
+      <g className="morty-gaze" fill="#161717"><path d="m249 130 3 -3 3 2 3 -1 1 4 -2 2 1 3 -4 -2 -3 1 1 -3Z M341 118 l3 -2 3 1 3 -1 1 4 -2 2 1 3 -4 -2 -4 1 1 -3Z" /></g>
+      </g>}
+    </svg> : <img src={`/rick-assets/${who}.webp`} alt="" draggable="false" decoding="async" />}
     {badge && <span className="series-character-badge">MORTY<br />{t('rick.intern')}</span>}
   </span>;
 }
@@ -64,31 +70,47 @@ export function GarageWorkbench({ onSectionLink }) {
 
 export { default as LabPickle } from './rick/LabPickle';
 
-export function ProjectMorty({ expanded }) {
-  return <div className="project-morty" data-expanded={expanded} aria-hidden="true"><CharacterArt /><i /><b /></div>;
+export function ProjectMorty({ expanded, label }) {
+  const stage = useRef(null);
+  const active = useCharacterActivity(stage);
+  return <div ref={stage} className="project-morty-stage" data-active={active}>
+    <span>{label}</span>
+    <div className="project-morty" data-rick-motion data-expanded={expanded} aria-hidden="true">
+      {(active || expanded) && <CharacterArt gaze />}<i /><b />
+    </div>
+  </div>;
 }
 
 export function CitadelReception() {
   const persona = useAssistantPersona();
-  const { theme, dimension, setEggMessage } = useContext(ThemeContext) ?? {};
+  const { theme, dimension, setEggMessage, recordDiscovery } = useContext(ThemeContext) ?? {};
   const { t } = useTranslation();
   const [flipped, setFlipped] = useState(false);
+  const reception = useRef(null);
+  const active = useCharacterActivity(reception, theme === 'rick-morty' && dimension === 'corrupted');
   if (theme !== 'rick-morty' || dimension !== 'corrupted') return null;
-  return <aside className="citadel-reception" aria-label={t('rick.reception')}>
+  return <aside ref={reception} className="citadel-reception" data-active={active} data-rick-motion aria-label={t('rick.reception')}>
     <button type="button" aria-pressed={flipped} className="reception-morty" aria-label={t('rick.turnSign')} onClick={() => {
       setFlipped(value => !value);
-      setEggMessage('rick.application');
-    }}><CharacterArt badge /><span className="paper-stack" aria-hidden="true">▱▱▱</span><span className="reception-sign">{flipped ? (t('rick.direct')) : (t('rick.receptionSign'))}</span></button>
-    <span className="morty-badge">{t('rick.mortyIntern')}</span>
-    {flipped && <p role="status"><strong>{persona?.name}:</strong> {t('rick.application')}</p>}
+      if (!flipped) recordDiscovery?.('reception');
+      setEggMessage(flipped ? '' : 'rick.application');
+    }}><CharacterArt badge gaze /><span className="paper-stack" aria-hidden="true">▱▱▱</span><span className="reception-sign">{flipped ? t('rick.direct') : t('rick.receptionSign')}</span><span className="morty-badge">{t('rick.mortyIntern')}</span></button>
+    {flipped && <div><p role="status"><strong>{persona?.name}:</strong> {t('rick.application')}</p>
+      <button type="button" className="reception-contact" onClick={event => {
+        const contact = event.currentTarget.closest('#contato');
+        const target = contact?.querySelector('input[name="name"]:enabled') ?? contact?.querySelector('a[href^="mailto:"]');
+        target?.focus();
+      }}>{t('rick.contactDesk')}</button></div>}
   </aside>;
 }
 
-export function CitadelWindows() {
-  return <div className="citadel-windows" aria-hidden="true">
+export function CitadelWindows({ dock = false }) {
+  const windows = useRef(null);
+  const active = useCharacterActivity(windows);
+  return <div ref={windows} className={dock ? 'citadel-windows citadel-windows--dock' : 'citadel-windows'} data-active={active} data-rick-motion aria-hidden="true">
     <div className="citadel-window-scene scene-cargo"><CharacterArt badge /><span className="cargo-box">▰</span></div>
     <div className="citadel-window-scene scene-debate"><CharacterArt who="rick" /><CharacterArt who="rick" /></div>
-    <div className="citadel-window-scene scene-dock"><CharacterArt who="rick" /><img src="/rick-assets/spaceship.png" alt="" /></div>
+    <div className="citadel-window-scene scene-dock"><CharacterArt who="rick" /><img src={shipArt} alt="" loading="lazy" decoding="async" /></div>
   </div>;
 }
 

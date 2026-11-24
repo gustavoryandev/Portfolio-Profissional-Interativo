@@ -9,7 +9,7 @@ import { ThemeContext } from '../context/ThemeContext';
 import { ProjectMorty } from './RickDimensionExperience';
 import ProjectImageModal from './ProjectImageModal';
 
-function ProjectPreview({ image, title }) {
+function ProjectPreview({ image, title, scene }) {
   const { t } = useTranslation();
   const [failed, setFailed] = useState(false);
   const [opened, setOpened] = useState(false);
@@ -35,6 +35,7 @@ function ProjectPreview({ image, title }) {
         <span className="text-xs font-medium">{t('projetos.previewUnavailable')}</span>
       </div>
     )}
+    {scene}
   </div>;
 }
 
@@ -54,8 +55,7 @@ export default function ProjectCard({ project, onAskAstra, compact, featured }) 
   const description = projectContent(project, 'descricao', i18n.language, t);
   return (
     <article className="project-tile glass-panel flex min-w-0 flex-col overflow-hidden" aria-labelledby={titleId} data-details-open={descriptionOpen} data-dimension-label={theme === 'rick-morty' ? t(dimension === 'corrupted' ? 'rick.archive' : 'rick.research') : undefined}>
-      {theme === 'rick-morty' && <ProjectMorty expanded={detailsOpen || showAll} />}
-      <ProjectPreview key={project.image?.src || 'empty'} image={project.image} title={title} />
+      <ProjectPreview key={project.image?.src || 'empty'} image={project.image} title={title} scene={theme === 'rick-morty' ? <ProjectMorty expanded={detailsOpen || descriptionOpen || showAll} label={t(dimension === 'corrupted' ? 'rick.archive' : 'rick.research')} /> : null} />
       <div className="project-card-body flex flex-1 flex-col gap-5 p-5 sm:p-6">
         <div className="project-card-details">
         {(project.tipo || featured) && <div className="project-labels">
