@@ -1,3 +1,4 @@
+import { resumeUrl } from '../data/resume';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Download, Maximize2, Minimize2, ZoomIn, ZoomOut } from 'lucide-react';
@@ -54,8 +55,7 @@ function ResumePage({ pdf, number, width, zoom, label, onError }) {
 
 export default function ResumeCard({ lang = 'pt' }) {
   const { t } = useTranslation();
-  const url = lang.startsWith('en')
-    ? '/Gustavo Ryan Resume (English).pdf' : '/Currículo Gustavo Ryan.pdf';
+  const url = resumeUrl(lang);
   const [documentState, setDocumentState] = useState(null);
   const [error, setError] = useState(false);
   const [attempt, setAttempt] = useState(0);

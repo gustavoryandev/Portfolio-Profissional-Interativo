@@ -16,15 +16,14 @@ ASSETS = {
     'portal': ('https://image.pngaaa.com/709/209709-middle.png', 'https://www.pngaaa.com/detail/209709'),
     'citadel': ('https://ik.imagekit.io/1rbgez32no/hocmarketing-org/10/20/og--the-ultimate-guide-to-rick-and-mortys-citadel-of-ricks-unravel-its-mysterious-secrets', 'https://en.hocmarketing.org/the-ultimate-guide-to-rick-and-mortys-citadel-of-ricks-unravel-66754'),
     'citadel-plaza': ('https://images8.alphacoders.com/633/thumb-1920-633250.jpg', 'https://wall.alphacoders.com/big.php?i=633250'),
-    'squanchy': ('https://mystickermania.com/cdn/stickers/rick-and-morty/rick-and-morty-squanchy-512x512.png', 'https://mystickermania.com/t/Rick%20and%20Morty/?page=3'),
-    'poopybutthole': ('https://image.pngaaa.com/497/4732497-middle.png', 'https://www.pngaaa.com/detail/4732497'),
     'avatar-meeseeks': ('https://image.pngaaa.com/604/4870604-middle.png', 'https://www.pngaaa.com/detail/4870604'),
     'avatar-squanchy': ('https://mystickermania.com/cdn/stickers/rick-and-morty/rick-and-morty-squanchy-512x512.png', 'https://mystickermania.com/t/Rick%20and%20Morty/?page=3'),
     'avatar-poopybutthole': ('https://image.pngaaa.com/497/4732497-middle.png', 'https://www.pngaaa.com/detail/4732497'),
     'pickle-rat': ('https://www.pngmart.com/files/23/Pickle-Rick-PNG-Isolated-Pic.png', 'https://www.pngmart.com/image/754649'),
 }
-DEST = Path(__file__).resolve().parent.parent / 'public' / 'rick-assets'
-DEST.mkdir(exist_ok=True)
+# Reference downloads stay outside the public build. The app ships prepared WebPs.
+DEST = Path(__file__).resolve().parent.parent / '.cache' / 'rick-reference'
+DEST.mkdir(parents=True, exist_ok=True)
 
 def download(item):
     name, (url, source) = item

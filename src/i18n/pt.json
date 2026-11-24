@@ -666,7 +666,7 @@
       "secret": "Você está na dimensão secreta.",
       "original": "Dimensão original."
     },
-    "garageCode": "C-137 / GARAGEM",
+    "garageCode": "Dimensão C-131 / GARAGEM",
     "citadelCode": "CIDADELA / DOCA 06",
     "garageName": "A GARAGEM DO RICK",
     "citadelName": "A CIDADELA DOS RICKS",
@@ -680,12 +680,77 @@
     "dockOnline": "DOCA 06 ATIVA",
     "stable": "PORTAL ESTÁVEL",
     "archive": "CIDADELA / ARQUIVO",
+    "dossier": {
+      "archive": "Dossiê de pesquisa",
+      "report": "Relatório técnico",
+      "illustration": "Ilustração técnica",
+      "problem": "Problema",
+      "contribution": "Minha contribuição",
+      "decision": "Decisões técnicas",
+      "status": "Estado documentado",
+      "result": "Resultado",
+      "evidence": "Ver commit"
+    },
+    "bench": {
+      "checkConsole": "A execução falhou. Veja o diagnóstico abaixo.",
+      "executorError": "O executor falhou sem enviar um diagnóstico. Tente executar novamente.",
+      "wandbox": "Aguardando compilação e execução no Wandbox…"
+    },
+    "extras": {
+      "title": "Extras dimensionais",
+      "inspect": "Inspecionar instrumentos",
+      "objects": {
+        "migration": "Módulo de migração",
+        "migrationInfo": "No ROTA, o Flyway aplica as migrações SQL versionadas do banco PostgreSQL.",
+        "runner": "Cartucho de execução",
+        "runnerInfo": "No Laboratório, JavaScript e Python executam em workers no navegador. O código Java é enviado ao Wandbox.",
+        "lab": "Abrir Laboratório"
+      },
+      "credential": "Credencial da Cidadela",
+      "credentialFocus": "Foco em back-end · Java e Spring Boot",
+      "tv": {
+        "title": "TV interdimensional",
+        "channel": "Projeto",
+        "capture": "Captura da demonstração · {{title}}",
+        "project": "Ver ficha do projeto"
+      },
+      "discovery": {
+        "title": "Registro de descobertas",
+        "enable": "Registrar minhas descobertas",
+        "local": "O registro é opcional e fica neste navegador.",
+        "empty": "Nenhuma descoberta registrada.",
+        "reset": "Limpar descobertas",
+        "citadel": "Travessia à Cidadela",
+        "meeseeks": "Caixa do Sr. Meeseeks",
+        "pickle": "Traje de Pickle Rick",
+        "reception": "Placa de Morty na recepção"
+      },
+      "replay": {
+        "title": "Rever as introduções",
+        "garage": "Abertura da Garagem",
+        "citadel": "Chegada à Cidadela",
+        "still": "{{scene}} · quadro estático"
+      },
+      "credits": {
+        "title": "Créditos e decisões técnicas",
+        "garage": "O cenário da Garagem foi criado com ImageGen.",
+        "art": "Os recortes dos personagens e as imagens da Cidadela foram adaptados de referências externas.",
+        "sources": "Consultar as fontes das artes",
+        "implementation": "O tema usa imagens WebP locais e animações curtas em CSS e SVG. O portal preserva a posição de leitura e respeita a preferência por movimento reduzido."
+      },
+      "diary": "Diário de pesquisa",
+      "transmission": "Canal de transmissão"
+    },
     "research": "GARAGEM / PESQUISA",
     "intern": "ESTAGIÁRIO",
     "terminal": "TERMINAL DE ATENDIMENTO",
     "monitor": "{{name}} / MONITOR DA BANCADA",
     "openChat": "Abrir conversa",
     "box": "Apertar a caixa do Sr. Meeseeks",
+    "javaProjects": "Mostrar projetos Java",
+    "openResume": "Abrir currículo",
+    "explainRota": "Explicar o projeto ROTA",
+    "contactDesk": "Falar com o Gustavo",
     "exit": "Pronto, achei a saída.",
     "hint": "Pronto, achei a saída. Procure o portal ao lado do nome no cabeçalho.",
     "upThere": "O portal fica lá em cima.",
@@ -702,7 +767,7 @@
     "dockCamera": "Câmera da doca da Cidadela",
     "garageOpening": "Abertura da Garagem do Rick",
     "dockCam": "CÂM 06 / DOCA",
-    "garageOnline": "C-137 / GARAGEM ATIVA",
+    "garageOnline": "DIMENSÃO C-131 / GARAGEM ATIVA",
     "welcomeGustavo": "Bem-vindo, Gustavo nº 6",
     "destination": "A mesma nave. Outro destino.",
     "skip": "Pular cena",
@@ -759,7 +824,19 @@
       "play": "Tocar prévia de Rick and Morty Theme",
       "pause": "Pausar prévia de Rick and Morty Theme",
       "retry": "Tentar tocar a música novamente",
-      "error": "Não foi possível carregar a música. Toque para tentar novamente.",
+      "replay": "Repetir a prévia da música",
+      "settings": "Som e movimento",
+      "volume": "Volume da música",
+      "pauseEffects": "Pausar efeitos visuais contínuos",
+      "state": {
+        "idle": "Prévia disponível.",
+        "loading": "Carregando a prévia…",
+        "playing": "Prévia em reprodução.",
+        "paused": "Prévia pausada.",
+        "hidden": "Prévia suspensa enquanto a aba está oculta.",
+        "ended": "Prévia encerrada. Use o botão de som para repetir.",
+        "error": "Não foi possível carregar a prévia. Use o botão de som para tentar novamente."
+      },
       "notice": "Música tema · Prévia oficial de Ryan Elder"
     }
   },

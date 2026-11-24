@@ -15,7 +15,7 @@ export function useAssistantPersona(surface) {
   const { t } = useTranslation();
   const id = assistantPersonaId({ theme, dimension, surface: surface ?? inheritedSurface });
   if (!id) return null;
-  return { id, image: `/rick-assets/avatar-${id}.png?v=portrait-2`,
+  return { id, image: `/rick-assets/avatar-${id}.webp`,
     name: t(`rick.${id}.name`), intro: t(`rick.${id}.intro`), welcome: t(`rick.${id}.welcome`) };
 
 }

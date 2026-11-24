@@ -666,7 +666,7 @@
       "secret": "You are in the secret dimension.",
       "original": "Original dimension."
     },
-    "garageCode": "C-137 / GARAGE",
+    "garageCode": "DIMENSION C-131 / GARAGE",
     "citadelCode": "CITADEL / DOCK 06",
     "garageName": "RICK’S GARAGE",
     "citadelName": "THE CITADEL OF RICKS",
@@ -680,12 +680,77 @@
     "dockOnline": "DOCK 06 ONLINE",
     "stable": "PORTAL STABLE",
     "archive": "CITADEL / ARCHIVE",
+    "dossier": {
+      "archive": "Research dossier",
+      "report": "Technical report",
+      "illustration": "Technical illustration",
+      "problem": "Problem",
+      "contribution": "My contribution",
+      "decision": "Technical decisions",
+      "status": "Documented state",
+      "result": "Outcome",
+      "evidence": "View commit"
+    },
+    "bench": {
+      "checkConsole": "Execution failed. See the diagnostics below.",
+      "executorError": "The runner failed without returning diagnostics. Try running the code again.",
+      "wandbox": "Waiting for Wandbox to compile and run the code…"
+    },
+    "extras": {
+      "title": "Dimensional extras",
+      "inspect": "Inspect instruments",
+      "objects": {
+        "migration": "Migration module",
+        "migrationInfo": "ROTA uses Flyway to apply versioned SQL migrations to its PostgreSQL database.",
+        "runner": "Execution cartridge",
+        "runnerInfo": "In the Laboratory, JavaScript and Python run in browser workers. Java code is sent to Wandbox.",
+        "lab": "Open Laboratory"
+      },
+      "credential": "Citadel credential",
+      "credentialFocus": "Back-end focus · Java and Spring Boot",
+      "tv": {
+        "title": "Interdimensional TV",
+        "channel": "Project",
+        "capture": "Demo screenshot · {{title}}",
+        "project": "View project details"
+      },
+      "discovery": {
+        "title": "Discovery journal",
+        "enable": "Record my discoveries",
+        "local": "The journal is optional and stored in this browser.",
+        "empty": "No discoveries recorded.",
+        "reset": "Clear discoveries",
+        "citadel": "Crossing to the Citadel",
+        "meeseeks": "Mr. Meeseeks Box",
+        "pickle": "Pickle Rick’s suit",
+        "reception": "Morty’s reception sign"
+      },
+      "replay": {
+        "title": "Replay introductions",
+        "garage": "Garage opening",
+        "citadel": "Citadel arrival",
+        "still": "{{scene}} · still frame"
+      },
+      "credits": {
+        "title": "Credits and technical decisions",
+        "garage": "The Garage backdrop was created with ImageGen.",
+        "art": "Character cutouts and Citadel images were adapted from external references.",
+        "sources": "See the artwork sources",
+        "implementation": "The theme uses local WebP images and short CSS and SVG animations. The portal preserves reading position and respects the reduced motion preference."
+      },
+      "diary": "Research journal",
+      "transmission": "Transmission channel"
+    },
     "research": "GARAGE / RESEARCH",
     "intern": "INTERN",
     "terminal": "CITADEL SERVICE TERMINAL",
     "monitor": "{{name}} / WORKBENCH MONITOR",
     "openChat": "Open conversation",
     "box": "Press the Meeseeks box",
+    "javaProjects": "Show Java projects",
+    "openResume": "Open résumé",
+    "explainRota": "Explain the ROTA project",
+    "contactDesk": "Contact Gustavo",
     "exit": "Done, I found the exit.",
     "hint": "Done, I found the exit. Look for the portal beside the name in the header.",
     "upThere": "The portal is up there.",
@@ -702,7 +767,7 @@
     "dockCamera": "Citadel docking camera",
     "garageOpening": "Rick’s garage opening",
     "dockCam": "CAM 06 / DOCKING BAY",
-    "garageOnline": "C-137 / GARAGE ONLINE",
+    "garageOnline": "DIMENSION C-131 / GARAGE ONLINE",
     "welcomeGustavo": "Welcome, Gustavo no. 6",
     "destination": "The same ship. Another destination.",
     "skip": "Skip scene",
@@ -759,7 +824,19 @@
       "play": "Play Rick and Morty Theme preview",
       "pause": "Pause Rick and Morty Theme preview",
       "retry": "Try playing the music again",
-      "error": "The music could not be loaded. Press to try again.",
+      "replay": "Replay the music preview",
+      "settings": "Sound and motion",
+      "volume": "Music volume",
+      "pauseEffects": "Pause continuous visual effects",
+      "state": {
+        "idle": "Preview available.",
+        "loading": "Loading the preview…",
+        "playing": "Preview playing.",
+        "paused": "Preview paused.",
+        "hidden": "Preview suspended while the tab is hidden.",
+        "ended": "Preview finished. Use the sound button to replay it.",
+        "error": "The preview could not be loaded. Use the sound button to try again."
+      },
       "notice": "Theme music · Official Ryan Elder preview"
     }
   },
