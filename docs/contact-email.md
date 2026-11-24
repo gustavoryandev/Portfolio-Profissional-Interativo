@@ -1,34 +1,29 @@
-# Contato com EmailJS no navegador
+# Contato com reCAPTCHA v3
 
-O chat (card [CONTACT_FORM]) e a seção estática Contato usam o mesmo ContactSection e o serviço src/services/contact.js. O envio é feito pelo SDK @emailjs/browser diretamente ao EmailJS. Não usa /api/contact, Redis, chave privada ou Gemini.
+O formulário gera um token novo com a ação contact para cada e-mail. A API /api/contact valida o token no Google antes de enviar pelo EmailJS. Funciona no Vite local e nas funções da Vercel.
 
-## Configuração existente
+## Configuração
 
-O .env.local não precisa ser alterado. O Vite lê as quatro variáveis já existentes:
+1. No Google, registre uma chave com base em pontuação (v3). Use uma etiqueta como Portfolio Gustavo. Cadastre gustavoryan.vercel.app (ou seu domínio real) e localhost, sem protocolo nem caminho.
+2. Preencha .env.local e as variáveis da Vercel:
+   - VITE_RECAPTCHA_SITE_KEY: chave do site, pública.
+   - RECAPTCHA_SECRET_KEY: chave secreta, somente no servidor.
+   - RECAPTCHA_ALLOWED_HOSTNAMES: domínios permitidos separados por vírgulas. Precisa corresponder aos domínios do Google.
+   - RECAPTCHA_MIN_SCORE: 0.5 inicialmente; ajuste conforme o tráfego.
+   - EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID_FOR_ME, EMAILJS_TEMPLATE_ID_FOR_SENDER e EMAILJS_PUBLIC_KEY: mesmos valores da configuração anterior, agora no servidor.
+   - EMAILJS_PRIVATE_KEY: chave privada do EmailJS (Account / API Keys).
+3. No EmailJS, habilite chamadas de aplicações fora do navegador nas configurações de segurança. Para impedir chamadas diretas que contornem a API, exija autorização com chave privada e desabilite os envios diretos pelo navegador. Verifique a disponibilidade dessa configuração no seu plano antes de publicar.
+4. Desative Enable reCAPTCHA V2 verification nos dois templates: o v3 é validado pelo servidor do projeto. Mantenha For Me com destinatário fixo e For Sender com o destinatário do visitante. Não adicione outro auto-reply.
+5. Reinicie npm run dev. Na Vercel, faça novo deploy depois de configurar as variáveis.
 
-- VITE_EMAILJS_SERVICE_ID
-- VITE_EMAILJS_TEMPLATE_ID_FOR_ME
-- VITE_EMAILJS_TEMPLATE_ID_FOR_SENDER
-- VITE_EMAILJS_PUBLIC_KEY
+Não coloque segredos em variáveis VITE_*. As antigas VITE_EMAILJS_* não são mais usadas pelo formulário. Se já foram publicadas, os identificadores antigos continuam disponíveis em versões anteriores; a restrição no painel do EmailJS é necessária para impedir envios diretos.
 
-A chave pública e os identificadores de templates são destinados à integração no navegador. Nunca coloque chaves privadas, senhas ou tokens de outras integrações nessas variáveis. Para produção, disponibilize os mesmos valores públicos no ambiente de build da hospedagem.
+## Validação e limites
 
-## Templates existentes
+O servidor exige success, ação contact, pontuação mínima, hostname permitido e token com até dois minutos. Sem configuração ou com falha do CAPTCHA, nenhum e-mail é enviado. Os destinatários são definidos no servidor.
 
-Nenhum template é criado ou alterado pelo código. For Me recebe name, email e message, conforme as capturas fornecidas. O assunto é incluído no início de message para aparecer no corpo existente. For Sender recebe name e email; o usuário confirmou que To Email usa {{email}}. Também são enviados subject, reference, to_email e reply_to para compatibilidade. O destinatário principal continua configurado no template; to_email usa o e-mail já existente em perfil.json.
+Os limites de cinco tentativas por hora, intervalo de um minuto, fila entre formulários e prevenção de duplicatas continuam no navegador; são auxiliares e podem ser contornados. Não há limitador distribuído no servidor. Tokens não são armazenados. Falhas de entrega incerta impedem reenvio automático; falha apenas na confirmação permite tentar somente ela.
 
-O código chama explicitamente For Me e depois For Sender. Se houver uma automação de auto-reply vinculada no dashboard, ela não deve também disparar For Sender, para evitar confirmação duplicada. Nenhuma configuração do dashboard é alterada automaticamente.
+Os testes usam mocks e não enviam e-mails. Após configurar os painéis, teste os dois e-mails, script Google bloqueado e rejeição de chamadas diretas sem chave privada ao EmailJS.
 
-## Estados e duplicatas
-
-Validação de nome, e-mail, assunto e mensagem, honeypot e limite local de cinco tentativas por hora. O botão fica bloqueado durante o envio. As chamadas são sequenciais e espaçadas em pelo menos 1,1 segundo. Sucesso só aparece após ambos os templates serem aceitos pelo EmailJS.
-
-O estado de cada e-mail fica salvo por 24 horas no navegador, usando um hash do conteúdo, referência e estados, sem armazenar o texto da mensagem ou credenciais. Se apenas a confirmação for rejeitada, tentar novamente envia somente ela. Uma resposta perdida ou timeout é tratado como entrega incerta e impede reenvio automático. Fechar a aba durante o envio também exige verificar a entrega antes de reenviar.
-
-Web Locks coordena abas quando disponível; há uma fila em memória como fallback. Essas proteções não são garantias contra abuso externo, outros dispositivos, armazenamento apagado ou desabilitado. A confirmação de aceitação pela API não garante chegada à caixa de entrada.
-
-## Execução
-
-O contato funciona com npm run dev ou vercel dev. As demais integrações de backend continuam usando vercel dev. Reinicie o servidor de desenvolvimento após atualizar o código, se estiver usando uma sessão antiga.
-
-A migração final para o navegador foi realizada sem executar testes, build ou envios reais, por solicitação do usuário.
+Referências: https://developers.google.com/recaptcha/docs/v3 e https://www.emailjs.com/docs/rest-api/send/

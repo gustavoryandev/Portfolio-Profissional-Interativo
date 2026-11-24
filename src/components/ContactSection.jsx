@@ -1,11 +1,13 @@
-import React, { useId, useRef, useState } from 'react';
+import React, { useEffect, useId, useRef, useState } from 'react';
 import { CheckCircle, LoaderCircle, Mail, Send } from 'lucide-react';
 import { submitContact } from '../services/contact.js';
+import { createContactCaptcha } from '../services/contactCaptcha.js';
 
 const copy = {
   en: {
     title: 'Send me an email', name: 'Your name', email: 'Your email', subject: 'Subject', message: 'Message',
-    send: 'Send message', sending: 'Sending…', retry: 'Try again',
+    send: 'Send message', sending: 'Verifying and sending…', retry: 'Try again',
+    captcha_failed: 'Verification was not completed. Please allow Google reCAPTCHA and try again in one minute. If you already received a confirmation, do not resend.',
     sent: 'Your message was sent and a confirmation email is on its way. Please check your inbox and spam folder.',
     note: 'You will receive an email confirming receipt of your message.',
     validation_error: 'Check the fields: name (2–100 characters), subject (3–160), message (10–5,000), and a valid email address.',
@@ -21,7 +23,8 @@ const copy = {
   },
   pt: {
     title: 'Envie um e-mail', name: 'Seu nome', email: 'Seu e-mail', subject: 'Assunto', message: 'Mensagem',
-    send: 'Enviar mensagem', sending: 'Enviando…', retry: 'Tentar novamente',
+    send: 'Enviar mensagem', sending: 'Verificando e enviando…', retry: 'Tentar novamente',
+    captcha_failed: 'A verificação não foi concluída. Permita o Google reCAPTCHA e tente novamente em um minuto. Se já recebeu a confirmação, não reenvie.',
     sent: 'Sua mensagem foi enviada e um e-mail de confirmação está a caminho. Confira sua caixa de entrada e spam.',
     note: 'Você receberá um e-mail confirmando o recebimento da mensagem.',
     validation_error: 'Confira os campos: nome (2–100 caracteres), assunto (3–160), mensagem (10–5.000) e um e-mail válido.',
@@ -48,7 +51,14 @@ export default function ContactSection({ lang = 'pt', variant = 'chat' }) {
   const busy = useRef(false);
   const submission = useRef(null);
   const statusRef = useRef(null);
-  const locked = status === 'loading' || status === 'sent' || ['delivery_unknown', 'confirmation_failed'].includes(result?.code);
+  const captchaRef = useRef(null);
+  const captcha = useRef(null);
+  useEffect(() => {
+    const controller = createContactCaptcha(captchaRef.current, import.meta.env.VITE_RECAPTCHA_SITE_KEY?.trim(), language);
+    captcha.current = controller;
+    return () => { controller.dispose(); captcha.current = null; };
+  }, [language]);
+  const locked = status === 'loading' || status === 'sent' || result?.notificationSent || ['delivery_unknown', 'confirmation_failed'].includes(result?.code);
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -57,12 +67,14 @@ export default function ContactSection({ lang = 'pt', variant = 'chat' }) {
     if (values.name.length < 2 || values.subject.length < 3 || values.message.length < 10) {
       setResult({ code: 'validation_error' }); setStatus('error'); return;
     }
-    const payload = result?.code === 'confirmation_failed' && submission.current
+    const payload = result?.notificationSent && submission.current
       ? submission.current.payload : JSON.stringify({ ...values, lang: language });
     if (!submission.current || submission.current.payload !== payload) submission.current = { payload, id: crypto.randomUUID() };
     busy.current = true; setStatus('loading'); setResult(null);
     try {
-      const response = await submitContact({ ...JSON.parse(submission.current.payload), submissionId: submission.current.id });
+      const response = await submitContact({ ...JSON.parse(submission.current.payload), submissionId: submission.current.id }, {
+        getCaptchaToken: () => captcha.current.getToken(),
+      });
       setResult(response); setStatus(response.code === 'sent' ? 'sent' : 'error');
     } catch { setResult({ code: 'network_error' }); setStatus('error'); }
     finally { busy.current = false; requestAnimationFrame(() => statusRef.current?.focus()); }
@@ -89,6 +101,7 @@ export default function ContactSection({ lang = 'pt', variant = 'chat' }) {
         <input id={`${id}-website`} name="website" tabIndex={-1} autoComplete="off" value={fields.website}
           onChange={event => setFields(previous => ({ ...previous, website: event.target.value }))} /></div>
     </fieldset>
+    <div ref={captchaRef} className="mt-4 max-w-full overflow-x-auto" />
     <div ref={statusRef} tabIndex={-1} role={status === 'error' ? 'alert' : 'status'} aria-live="polite" className="mt-4 break-words text-sm outline-none">
       {status === 'sent' && <CheckCircle className="mb-2 text-brand-400" aria-hidden="true" />}
       {status === 'loading' ? t.sending : status === 'sent' ? t.sent : status === 'error' ? t[result?.code] || t.error : ''}

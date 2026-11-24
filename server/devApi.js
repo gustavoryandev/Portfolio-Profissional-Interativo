@@ -7,7 +7,8 @@ export function localApiPlugin({ loadHandler = () => import('../api/chat.js') } 
     apply: 'serve',
     configureServer(server) {
       server.middlewares.use(async (req, res, next) => {
-        if (req.url?.split('?')[0] !== '/api/chat') return next();
+        const route = req.url?.split('?')[0];
+        if (!['/api/chat', '/api/contact'].includes(route)) return next();
         res.status = code => { res.statusCode = code; return res; };
         res.json = body => {
           res.setHeader('Content-Type', 'application/json; charset=utf-8');
@@ -32,7 +33,7 @@ export function localApiPlugin({ loadHandler = () => import('../api/chat.js') } 
             res.status(400).json({ error: 'JSON inválido.' });
             return;
           }
-          const { default: handler } = await loadHandler();
+          const { default: handler } = await (route === '/api/contact' ? import('../api/contact.js') : loadHandler());
           await handler(req, res);
         } catch (error) {
           server.config.logger.error(`[local-chat-api] ${error.message}`);
