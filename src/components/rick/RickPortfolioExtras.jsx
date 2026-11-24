@@ -94,10 +94,32 @@ function DiscoveryJournal() {
   </Fold>;
 }
 
+function ReplayIntroductions() {
+  const { t } = useTranslation();
+  const { replayIntro, crossing, introScene } = useContext(ThemeContext) ?? {};
+  const reduced = useReducedSceneMotion();
+  const [still, setStill] = useState(null);
+  return <Fold icon={Clapperboard} label={t('rick.extras.replay.title')}>
+    <div className="rick-extra-links">
+      {['garage', 'citadel'].map(scene => <button type="button" key={scene} className="rick-extra-control"
+        aria-disabled={crossing || Boolean(introScene)} aria-pressed={reduced ? still === scene : undefined} onClick={event => {
+          if (crossing || introScene) return;
+          if (reduced) setStill(previous => previous === scene ? null : scene);
+          else replayIntro?.(scene, event.currentTarget);
+        }}>{t(`rick.extras.replay.${scene}`)}</button>)}
+    </div>
+    {reduced && still && <figure className="rick-replay-preview">
+      <SceneBackdrop scene={still === 'garage' ? 'garage' : 'dock'} className="rick-replay-still" />
+      <figcaption>{t('rick.extras.replay.still', { scene: t(`rick.extras.replay.${still}`) })}</figcaption>
+    </figure>}
+  </Fold>;
+}
+
 export function RickExtraArchive() {
   const { t } = useTranslation();
   return <Fold icon={CircuitBoard} label={t('rick.extras.title')} className="rick-extra-archive">
     <DiscoveryJournal />
+    <ReplayIntroductions />
     <Fold label={t('rick.extras.credits.title')}>
       <ul className="rick-credits">
         <li>{t('rick.extras.credits.garage')}</li>
