@@ -18,14 +18,16 @@ import AstraAvatar from '../components/AstraAvatar';
 import { useAssistantPersona } from '../context/AssistantAppearanceContext';
 import { PortalArt } from '../components/DimensionPortal';
 import DimensionalScene from '../components/DimensionalScene';
+import { PortfolioShip } from '../components/rick/DimensionShip';
+import useCharacterActivity from '../components/rick/useCharacterActivity';
 import DimensionAstraSignal from '../components/DimensionAstraSignal';
-import { GarageWorkbench, CitadelReception } from '../components/RickDimensionExperience';
+import { CitadelWindows, GarageWorkbench, CitadelReception } from '../components/RickDimensionExperience';
 import perfil from '../data/perfil.json';
 import { isGaloTheme, isDimensionalTheme } from '../data/themes.js';
 
 export default function PortfolioPage({ activeSection, projectFocus, onSectionLink }) {
   const { openAstra, openFull } = useAstra();
-  const { theme, dimension, shipDeparted, markShipDeparted } = useContext(ThemeContext) ?? {};
+  const { theme, dimension, shipDeparted, markShipDeparted, introScene, crossing, effectsPaused } = useContext(ThemeContext) ?? {};
   const galo = isGaloTheme(theme);
   const persona = useAssistantPersona();
   const fullPersona = useAssistantPersona('full');
@@ -34,6 +36,8 @@ export default function PortfolioPage({ activeSection, projectFocus, onSectionLi
   const { t, i18n } = useTranslation();
   const en = i18n.language.startsWith('en');
   const pageRef = useRef(null);
+  const heroRef = useRef(null);
+  const heroActive = useCharacterActivity(heroRef, dimensional);
   const headerRef = useRef(null);
   const [visibleSection, setVisibleSection] = useState(() => (
     portfolioLinks.some(([id]) => id === activeSection) ? activeSection : 'inicio'
@@ -80,37 +84,43 @@ export default function PortfolioPage({ activeSection, projectFocus, onSectionLi
     };
   }, []);
 
+  const portrait = <img className="hero-photo" src="/perfil-foto.jpeg" alt={en ? 'Gustavo Ryan' : 'Foto de Gustavo Ryan'} width="572" height="777" fetchPriority="high" />;
   return <div ref={pageRef} className="portfolio-app scroll-portfolio">
     {dimensional && <DimensionalScene secret={secret} />}
     <a className="skip-link" href="#main-content">{en ? 'Skip to content' : 'Pular para o conteúdo'}</a>
     <Navbar ref={headerRef} portfolio activeSection={visibleSection} onSectionLink={onSectionLink} />
     <MobileNav en={en} active={visibleSection} onSectionLink={onSectionLink} />
     <main id="main-content" tabIndex={-1} className="scroll-content">
-      <section id="inicio" className="portfolio-hero" aria-labelledby="hero-title">
-        {dimensional && <div className="rick-ship" data-departed={shipDeparted} data-docked={secret} onAnimationEnd={event => { if (event.animationName === 'garage-flyby') markShipDeparted(); }} aria-hidden="true"><img src="/rick-assets/spaceship.png" alt="" width="640" height="426" /><span /></div>}
+      <section ref={heroRef} id="inicio" className="portfolio-hero" aria-labelledby="hero-title">
         {galo && <GaloCrest className="hero-galo-watermark" />}
-        <ScrollReveal>
+        <ScrollReveal className={dimensional ? 'rick-presentation' : ''}>
           {dimensional && <div className="dimension-label"><span>{t(secret ? 'rick.citadelCode' : 'rick.garageCode')}</span><b>{t(secret ? 'rick.citadelName' : 'rick.garageName')}</b></div>}
           <p className="section-eyebrow">{en ? 'SOFTWARE ENGINEERING · PUC MINAS' : 'ENGENHARIA DE SOFTWARE · PUC MINAS'}</p>
           <h1 id="hero-title">Gustavo<br /><span className="neon-title">Ryan.</span></h1>
           <p className="hero-lead">{dimensional ? (secret ? (en ? 'Infinite versions. An original way to build.' : 'Infinitas versões. Um jeito próprio de construir.') : (en ? 'Good ideas cross galaxies.' : 'Boas ideias atravessam galáxias.')) : (en ? 'Turning ideas into digital experiences.' : 'Transformando ideias em experiências digitais.')}</p>
-          {dimensional && <div className="dimension-instrument-panel">
-            <div className="dimension-readout"><span>{en ? 'PORTAL CONTROL' : 'CONTROLE DO PORTAL'}</span><strong>{secret ? (en ? 'Citadel access granted' : 'Acesso liberado à Cidadela') : (en ? 'Portal stabilized' : 'Portal estabilizado')}</strong></div>
-            <div className="dimension-instruments" aria-hidden="true"><i /><span>⏚</span><b>137.0 Hz</b><em /></div>
-            <DimensionAstraSignal />
-            <GarageWorkbench onSectionLink={onSectionLink} />
-          </div>}
           <p className="hero-description">{en ? 'Java, Spring Boot and React. Explore my projects, skills and the journey behind the code.' : 'Java, Spring Boot e React. Explore meus projetos, habilidades e a trajetória por trás do código.'}</p>
           <div className="hero-actions">
             {galo && <a className="neon-cta" href="/chat" onClick={openFull}><Sparkles size={18} aria-hidden="true" />{fullPersona ? (en ? `Talk to ${fullPersona.name}` : `Conversar com ${fullPersona.name}`) : (en ? 'Talk to Astra' : 'Conversar com Astra')}<ArrowUpRight size={18} aria-hidden="true" /></a>}
             <a className={galo ? 'scroll-secondary' : 'neon-cta'} href="#projetos" onClick={onSectionLink}>{en ? 'Explore projects' : 'Explorar projetos'}<ArrowDown size={17} aria-hidden="true" /></a>
           </div>
           <SocialLinks />
+          {dimensional && <div className="dimension-instrument-panel">
+            <div className="dimension-console-heading">
+              <div className="dimension-readout"><span>{t('rick.control')}</span><strong>{t(secret ? 'rick.access' : 'rick.stabilized')}</strong></div>
+              <div className="dimension-instruments" aria-hidden="true"><i /><span>⏚</span><b>137.0 Hz</b><em /></div>
+            </div>
+            <DimensionAstraSignal />
+            <GarageWorkbench onSectionLink={onSectionLink} />
+          </div>}
         </ScrollReveal>
+        {dimensional && <div className="rick-ship-stage" aria-hidden="true">
+          {secret && <CitadelWindows dock />}
+          {!crossing && !introScene && (secret || !shipDeparted) && <PortfolioShip docked={secret} onDepart={markShipDeparted} visible={heroActive} />}
+        </div>}
         <ScrollReveal delay={.08} className="hero-profile glass-panel">
-          {dimensional && <><PortalArt className="hero-dimensional-ring" /><div className="dimension-scan-label">{t(secret ? 'rick.citizen' : 'rick.researcher')}<span>{t(secret ? 'rick.dockOnline' : 'rick.stable')}</span></div></>}
+          {dimensional && <div className="dimension-scan-label">{t(secret ? 'rick.citizen' : 'rick.researcher')}<span>{t(secret ? 'rick.dockOnline' : 'rick.stable')}</span></div>}
           <div className="portrait-orbit" aria-hidden="true" />
-          <img className="hero-photo" src="/perfil-foto.jpeg" alt={en ? 'Gustavo Ryan' : 'Foto de Gustavo Ryan'} width="572" height="777" fetchPriority="high" />
+          {dimensional && <PortalArt className="hero-dimensional-ring" />}{portrait}
           <div className="hero-profile-caption">
             <span>{en ? 'DEVELOPER' : 'DESENVOLVEDOR'} <b>/</b> {en ? 'STUDENT' : 'ESTUDANTE'}</span>
             <strong>{galo && <MapPin size={16} aria-hidden="true" />}{perfil.localizacao}</strong>
