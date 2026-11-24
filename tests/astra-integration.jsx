@@ -39,6 +39,10 @@ window.Audio = class {
   }
 };
 globalThis.IntersectionObserver = class { observe() {} unobserve() {} disconnect() {} };
+globalThis.Image = class {
+  set src(value) { queueMicrotask(() => this.onload?.()); }
+  async decode() {}
+};
 globalThis.ResizeObserver = class {
   constructor(callback) { this.callback = callback; }
   observe(element) {
@@ -433,6 +437,8 @@ try {
       assert.equal(projectCard.querySelector('.project-morty').dataset.expanded, 'true');
       await click($('.meeseeks-box'));
       assert.ok($('.meeseeks-visitor'));
+      assert.equal($('.meeseeks-actions a').getAttribute('href'), '/?tech=Java#projetos');
+      assert.equal($('.meeseeks-actions button').getAttribute('aria-haspopup'), 'dialog');
       await act(async () => i18n.changeLanguage('pt'));
       assert.match($('.dimension-astra-signal').textContent, /Procure o portal/);
       assert.match($('.meeseeks-visitor').textContent, /Pronto, achei a saída/);
@@ -443,9 +449,10 @@ try {
       assert.equal(projectCard.dataset.dimensionLabel, 'GARAGE / RESEARCH');
       const pickleStage = $('.lab-pickle-stage');
       await click(pickleStage.querySelector('button'));
-      assert.equal(pickleStage.dataset.side, 'right');
       assert.equal(pickleStage.dataset.found, 'true');
-      assert.match(pickleStage.querySelector('img').getAttribute('src'), /pickle-rat/);
+      assert.equal(pickleStage.querySelector('[data-action]').dataset.action, 'still');
+      assert.equal(pickleStage.querySelector('button').getAttribute('aria-pressed'), 'true');
+      assert.ok(pickleStage.querySelectorAll('svg circle').length >= 4, 'assembled suit includes the limb joints');
       await send('Thanks');
       await until(() => !$('#chat-input').disabled);
       assert.deepEqual(requests.at(-1).appearance, { theme: 'rick-morty', dimension: 'lab' });
@@ -485,6 +492,7 @@ try {
       assert.equal(window.localStorage.getItem('rick-morty-dimension'), 'lab');
       assert.equal($('.arcade'), arcade);
       assert.ok(details.open);
+      assert.equal($('.lab-pickle-stage').dataset.found, 'true', 'the discovered suit survives the return trip');
       await click(details.querySelector('summary'));
       await until(() => !details.open);
       assert.equal(projectCard.querySelector('.project-morty').dataset.expanded, 'false');

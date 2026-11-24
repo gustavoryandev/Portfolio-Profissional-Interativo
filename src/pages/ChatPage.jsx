@@ -76,6 +76,7 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
 
   const [messages, setMessages] = useState(() => [{ id: 'welcome', sender: 'ai', text: t('chat.boasVindas'), translationKey: 'chat.boasVindas' }]);
   const [input, setInput] = useState('');
+  const [composerFocused, setComposerFocused] = useState(false);
   const en = i18n.language.startsWith('en');
   const [loading, setLoading] = useState(false);
   const [streaming, setStreaming] = useState(null);
@@ -204,7 +205,7 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
         const response = await answerArcade(intent, { en, compact: modal || !visible, session, openArcade: onOpenArcade });
         if (mounted.current) appendMessage({ id: nextId(), sender: 'ai', lang: requestLanguage, ...response });
       } catch {
-        if (mounted.current) appendMessage({ id: nextId(), sender: 'ai', lang: requestLanguage, text: t('chat.erro') });
+        if (mounted.current) appendMessage({ id: nextId(), sender: 'ai', tone: 'error', lang: requestLanguage, text: t('chat.erro') });
       } finally {
         sendingRef.current = false;
         if (mounted.current) setLoading(false);
@@ -277,6 +278,7 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
         lang: replyLanguage,
         model: data.model,
         degraded: data.degraded,
+        tone: data.degraded || data.error ? 'error' : undefined,
         reviewId,
       });
       live.absorb(data.liveContext);
@@ -368,7 +370,7 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
                 </span>
               </div>
 
-              <DimensionAstraSignal />
+              <DimensionAstraSignal performance={{ visible, focused: composerFocused, typing: Boolean(input.trim()), loading, streaming, last: messages.at(-1) }} />
               <div
                 ref={messagesContainerRef}
                 onScroll={event => {
@@ -444,6 +446,8 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
                   </div>
                   <textarea
                     ref={inputRef}
+                    onFocus={() => setComposerFocused(true)}
+                    onBlur={() => setComposerFocused(false)}
                     id="chat-input"
                     rows={1}
                     onKeyDown={event => {
