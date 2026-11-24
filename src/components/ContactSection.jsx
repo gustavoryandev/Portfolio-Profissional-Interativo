@@ -1,11 +1,12 @@
 import React, { useEffect, useId, useRef, useState } from 'react';
-import { CheckCircle, LoaderCircle, Mail, Send } from 'lucide-react';
+import { CheckCircle, LoaderCircle, Mail, Radio, Send } from 'lucide-react';
 import { submitContact } from '../services/contact.js';
 import { createContactCaptcha } from '../services/contactCaptcha.js';
 
 const copy = {
   en: {
     title: 'Send me an email', name: 'Your name', email: 'Your email', subject: 'Subject', message: 'Message',
+    transmission: 'Send a transmission by email',
     send: 'Send message', sending: 'Verifying and sending…', retry: 'Try again',
     captcha_failed: 'Verification was not completed. Please allow Google reCAPTCHA and try again in one minute. If you already received a confirmation, do not resend.',
     sent: 'Your message was sent and a confirmation email is on its way. Please check your inbox and spam folder.',
@@ -23,6 +24,7 @@ const copy = {
   },
   pt: {
     title: 'Envie um e-mail', name: 'Seu nome', email: 'Seu e-mail', subject: 'Assunto', message: 'Mensagem',
+    transmission: 'Enviar uma transmissão por e-mail',
     send: 'Enviar mensagem', sending: 'Verificando e enviando…', retry: 'Tentar novamente',
     captcha_failed: 'A verificação não foi concluída. Permita o Google reCAPTCHA e tente novamente em um minuto. Se já recebeu a confirmação, não reenvie.',
     sent: 'Sua mensagem foi enviada e um e-mail de confirmação está a caminho. Confira sua caixa de entrada e spam.',
@@ -41,7 +43,7 @@ const copy = {
 };
 const empty = { name: '', email: '', subject: '', message: '', website: '' };
 
-export default function ContactSection({ lang = 'pt', variant = 'chat' }) {
+export default function ContactSection({ lang = 'pt', variant = 'chat', transmission = false }) {
   const language = lang.startsWith('en') ? 'en' : 'pt';
   const t = copy[language];
   const id = useId();
@@ -80,10 +82,12 @@ export default function ContactSection({ lang = 'pt', variant = 'chat' }) {
     finally { busy.current = false; requestAnimationFrame(() => statusRef.current?.focus()); }
   }
 
+  const Icon = transmission ? Radio : Mail;
   return <form onSubmit={handleSubmit} aria-labelledby={`${id}-title`} aria-busy={status === 'loading'}
+    data-rick-transmission={transmission ? status : undefined}
     className={`portfolio-card contact-card card-surface mt-2 w-full min-w-0 p-5 sm:p-6 ${variant === 'chat' ? 'max-w-md' : ''}`}>
-    <div className="mb-4 flex items-center gap-3"><Mail size={24} className="shrink-0 text-brand-400" aria-hidden="true" />
-      <h3 id={`${id}-title`} className="card-heading">{t.title}</h3></div>
+    <div className="mb-4 flex items-center gap-3"><Icon size={24} className="shrink-0 text-brand-400" aria-hidden="true" />
+      <h3 id={`${id}-title`} className="card-heading">{transmission ? t.transmission : t.title}</h3></div>
     <p className="mb-4 text-base text-[var(--muted)]">{t.note}</p>
     <fieldset disabled={locked} className="min-w-0 space-y-4">
       {['name', 'email', 'subject', 'message'].map(key => {

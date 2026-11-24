@@ -17,7 +17,8 @@ export default function PortfolioSection({ active, en, dimensional = false }) {
   const { t } = useTranslation();
   const section = sections.find(([id]) => id === active);
   const diary = dimensional && ['experience', 'education'].includes(active);
-  const eyebrow = diary ? t('rick.extras.diary')
+  const transmission = dimensional && active === 'contact';
+  const eyebrow = diary ? t('rick.extras.diary') : transmission ? t('rick.extras.transmission')
     : en ? 'GET TO KNOW MY JOURNEY' : 'CONHEÇA MINHA TRAJETÓRIA';
   return <section className="portfolio-section" aria-labelledby={headingId}>
     <p className="section-eyebrow">{eyebrow}</p>
@@ -28,6 +29,6 @@ export default function PortfolioSection({ active, en, dimensional = false }) {
     {active === 'experience' && <ExperienceCard diary={diary} />}
     {active === 'education' && <EducationSection en={en} diary={diary} />}
     {active === 'skills' && <><SkillsGlobe skills={perfil.skills} en={en} /><div className="skills-grid">{perfil.skills.map(skill => <div className="detail-card" key={skill.nome}><div className="flex items-center gap-3"><LanguageIcon name={skill.nome} size={24} /><h3>{skill.nome}</h3></div><p>{en ? ({ 'Banco de dados': 'Database', Ferramentas: 'Tools', 'Formato de dados': 'Data format' }[skill.categoria] || skill.categoria) : skill.categoria}</p></div>)}</div></>}
-    {active === 'contact' && <div className="space-y-5"><div className="detail-card"><h3>{en ? 'Let’s talk' : 'Vamos conversar'}</h3><p>{en ? 'Get in touch by email or through my social profiles.' : 'Entre em contato por e-mail ou pelas minhas redes profissionais.'}</p><a className="text-link break-all" href={'mailto:' + perfil.email}>{perfil.email}</a><SocialLinks /></div><ContactSection lang={en ? 'en' : 'pt'} variant="page" /></div>}
+    {active === 'contact' && <div className="space-y-5"><div className="detail-card"><h3>{en ? 'Let’s talk' : 'Vamos conversar'}</h3><p>{en ? 'Get in touch by email or through my social profiles.' : 'Entre em contato por e-mail ou pelas minhas redes profissionais.'}</p><a className="text-link break-all" href={'mailto:' + perfil.email}>{perfil.email}</a><SocialLinks /></div><ContactSection lang={en ? 'en' : 'pt'} variant="page" transmission={transmission} /></div>}
   </section>;
 }
