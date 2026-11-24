@@ -6,6 +6,7 @@ import { STATIC_MOTION_QUERY } from '../motionPreferences';
 function shouldPlay() {
   if (!window.matchMedia || window.matchMedia(STATIC_MOTION_QUERY).matches) return false;
   if (new URLSearchParams(window.location.search).get('intro') === '1') return true;
+  if (document.documentElement.dataset.theme === 'rick-morty') return false;
   return !window.location.hash;
 }
 

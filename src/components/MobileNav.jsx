@@ -1,6 +1,7 @@
 import { useAssistantPersona } from '../context/AssistantAppearanceContext';
 import { useAstra } from '../context/AstraContext';
-import { useEffect, useRef } from 'react';
+import { useContext, useEffect, useRef } from 'react';
+import { ThemeContext } from '../context/ThemeState';
 import { Home, Code2, Sparkles, Menu, X } from 'lucide-react';
 import { HeaderActions, portfolioLinks } from './Navbar';
 import { sections } from './Sidebar';
@@ -9,6 +10,10 @@ export default function MobileNav({ en, active, onSelect, onSectionLink }) {
   const persona = useAssistantPersona('full');
   const { openFull } = useAstra();
   const dialog = useRef(null);
+  const { theme } = useContext(ThemeContext) ?? {};
+  useEffect(() => {
+    if (theme === 'rick-morty' && dialog.current?.open) dialog.current.close();
+  }, [theme]);
   useEffect(() => {
     const desktop = window.matchMedia('(min-width: 768px)');
     const close = () => { if (desktop.matches) dialog.current?.close(); };

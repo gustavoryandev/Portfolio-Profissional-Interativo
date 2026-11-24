@@ -1,15 +1,20 @@
-import { projectContent } from '../data/projectContent';
-import perfil from '../data/perfil.json';
-import { resumeUrl } from '../data/resume';
-import useCharacterActivity from './rick/useCharacterActivity';
-import { meeseeksBox, shipArt, useSceneAssets } from './rick/sceneAssets';
-import MeeseeksRig from './rick/MeeseeksRig';
-import CharacterPerformance from './rick/CharacterPerformance';
 import { useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ThemeContext } from '../context/ThemeState';
 import { useAstra } from '../context/AstraContext';
 import { useAssistantPersona } from '../context/AssistantAppearanceContext';
+import { REDUCED_MOTION_QUERY, RICK_INTRO_DURATION } from '../motionPreferences';
+import RickThemeMusic from './RickThemeMusic';
+import CharacterPerformance from './rick/CharacterPerformance';
+import MeeseeksRig from './rick/MeeseeksRig';
+import { DimensionShip } from './rick/DimensionShip';
+import { meeseeksBox, shipArt, useSceneAssets } from './rick/sceneAssets';
+import SceneBackdrop from './rick/SceneBackdrop';
+import useCharacterActivity from './rick/useCharacterActivity';
+import { resumeUrl } from '../data/resume';
+import perfil from '../data/perfil.json';
+import { projectContent } from '../data/projectContent';
+export { default as LabPickle } from './rick/LabPickle';
 
 export function CharacterArt({ who = 'morty', badge = false, gaze = false }) {
   const { t } = useTranslation();
@@ -68,8 +73,6 @@ export function GarageWorkbench({ onSectionLink }) {
   </div>;
 }
 
-export { default as LabPickle } from './rick/LabPickle';
-
 export function ProjectMorty({ expanded, label }) {
   const stage = useRef(null);
   const active = useCharacterActivity(stage);
@@ -115,24 +118,59 @@ export function CitadelWindows({ dock = false }) {
 }
 
 export function DimensionalIntro({ scene, onDismiss }) {
-  const persona = useAssistantPersona('full');
   const { t } = useTranslation();
   const skip = useRef(null);
+  const duration = RICK_INTRO_DURATION[scene];
+  const assets = useSceneAssets(scene);
+  useLayoutEffect(() => { skip.current?.focus({ preventScroll: true }); }, []);
   useEffect(() => {
     if (!scene) return;
+    const motion = window.matchMedia?.(REDUCED_MOTION_QUERY);
+    if (motion?.matches || document.hidden || assets === 'fallback') { onDismiss(); return; }
+    const onPreference = () => { if (motion?.matches) onDismiss(); };
     const onKey = event => { if (event.key === 'Escape') onDismiss(); };
+    const onVisibility = () => { if (document.hidden) onDismiss(); };
+    const timer = assets === 'ready' ? window.setTimeout(onDismiss, duration) : null;
+    motion?.addEventListener('change', onPreference);
     window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [scene, onDismiss]);
-  if (!scene) return null;
+    window.addEventListener('resize', onDismiss);
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => {
+      window.clearTimeout(timer);
+      motion?.removeEventListener('change', onPreference);
+      window.removeEventListener('keydown', onKey);
+      window.removeEventListener('resize', onDismiss);
+      document.removeEventListener('visibilitychange', onVisibility);
+    };
+  }, [scene, duration, onDismiss, assets]);
   const dock = scene === 'citadel';
-  return <section className={`dimension-intro ${dock ? 'intro-dock' : 'intro-garage'}`} aria-label={dock ? (t('rick.dockCamera')) : (t('rick.garageOpening'))}>
-    <div className="intro-illustration" aria-hidden="true">
+  function keepControlsInScene(event) {
+    if (event.key !== 'Tab') return;
+    const buttons = event.currentTarget.querySelectorAll('button:not(:disabled)');
+    const first = buttons[0], last = buttons[buttons.length - 1];
+    if (event.shiftKey ? document.activeElement === first : document.activeElement === last) {
+      event.preventDefault();
+      (event.shiftKey ? last : first)?.focus();
+    }
+  }
+  return <section className={`dimension-intro ${dock ? 'intro-dock' : 'intro-garage'}`} role="dialog" aria-modal="true" onKeyDown={keepControlsInScene}
+    data-assets={assets} data-rick-motion style={{ '--scene-duration': `${duration}ms` }} aria-label={dock ? t('rick.dockCamera') : t('rick.garageOpening')}>
+    {assets === 'ready' && <><div className="intro-illustration" aria-hidden="true">
+      <SceneBackdrop scene={dock ? 'dock' : 'garage'} className="intro-backdrop" />
       <div className="intro-garage-door" />
-      <img className="intro-spaceship" src="/rick-assets/spaceship.png" alt="" />
-      {dock ? <div className="intro-reception"><CharacterArt badge /><span>Morty — {t('rick.intern')}</span></div> : <div className="intro-pickle"><CharacterArt who="pickle" /><span>⚙</span></div>}
+      {!dock && <div className="garage-lighting"><i /><i /></div>}
+      <div className="intro-airspace"><DimensionShip className="intro-spaceship" /></div>
+      <div className="intro-ground">
+        {dock ? <div className="intro-reception"><CharacterArt badge /><span>Morty — {t('rick.intern')}</span></div> : <div className="intro-pickle"><CharacterArt who="pickle" /><span>⚙</span></div>}
+      </div>
     </div>
-    <div className="intro-caption"><small>{t(dock ? 'rick.dockCam' : 'rick.garageOnline')}</small><strong>{dock ? (t('rick.welcomeGustavo')) : 'Gustavo Ryan'}</strong><p>{dock ? (t('rick.destination')) : persona?.intro}</p></div>
-    <button ref={skip} type="button" onClick={onDismiss}>{t('rick.skip')} <span aria-hidden="true">Esc</span></button>
+    <div className="intro-caption">
+      <div className="intro-monitor-screen"><small>{t(dock ? 'rick.dockCam' : 'rick.garageOnline')}</small><strong>{dock ? (t('rick.welcomeGustavo')) : 'Gustavo Ryan'}</strong><p>{t(dock ? 'rick.destination' : 'rick.squanchy.intro')}</p></div>
+    </div>
+    </>}
+    <div className="intro-controls">
+      <RickThemeMusic />
+      <button ref={skip} type="button" onClick={onDismiss}>{t('rick.skip')} <span aria-hidden="true">Esc</span></button>
+    </div>
   </section>;
 }
