@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { Play, RotateCcw, Square, Terminal } from 'lucide-react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import './CodePlayground.css';
 
 import { languages } from '../data/playgroundLanguages';
@@ -8,7 +9,26 @@ import { useAstra, useLaboratory } from '../context/AstraContext';
 import LaboratoryReview from './LaboratoryReview';
 import ScrollReveal from './ui/ScrollReveal';
 import { useAssistantPersona } from '../context/AssistantAppearanceContext';
-import { LabPickle } from './RickDimensionExperience';
+import { CharacterArt, LabPickle } from './RickDimensionExperience';
+import { ThemeContext } from '../context/ThemeState';
+import useCharacterActivity from './rick/useCharacterActivity';
+
+function BenchStatus({ label, status, busy, example, language }) {
+  const ref = useRef(null);
+  const active = useCharacterActivity(ref);
+  const previous = useRef({ busy, example, language });
+  const [reaction, setReaction] = useState(null);
+  useEffect(() => {
+    const last = previous.current;
+    previous.current = { busy, example, language };
+    const finished = last.busy && !busy && last.example === example && last.language === language;
+    setReaction(active && finished && (status === 'done' || status === 'error') ? status : null);
+  }, [status, busy, example, language, active]);
+  return <div ref={ref} className="code-lab-readout" data-rick-motion data-active={active}>
+    <p role="status"><span className="code-lab-indicator" aria-hidden="true" />{label}</p>
+    <span className="code-lab-spotter" data-reaction={reaction ?? undefined} aria-hidden="true"><CharacterArt /></span>
+  </div>;
+}
 
 export default function CodePlayground() {
   const { t, i18n } = useTranslation();
@@ -16,6 +36,8 @@ export default function CodePlayground() {
   const persona = useAssistantPersona(handoff?.modal ? 'compact' : 'full');
   const en = i18n.language.startsWith('en');
   const { openAstra, openFull, labHandoff } = useAstra();
+  const { theme } = useContext(ThemeContext) ?? {};
+  const dimensional = theme === 'rick-morty';
   const [lab, { example, language, code, output, status, busy }] = useLaboratory();
   const selected = MODES.find(item => item.id === example);
 
@@ -26,6 +48,9 @@ export default function CodePlayground() {
     idle: 'Pronto para experimentar.', loading: 'Preparando a execução… Pode levar alguns instantes.', running: 'Executando…',
     done: 'Execução concluída.', stopped: 'Execução interrompida.', timeout: 'Tempo limite atingido. Tente um exemplo menor.', error: 'Não foi possível concluir. Confira o código e a conexão com a internet.',
   };
+  const benchLabel = status === 'error'
+    ? t(output ? 'rick.bench.checkConsole' : 'rick.bench.executorError')
+    : status === 'loading' && language === 'java' ? t('rick.bench.wandbox') : labels[status];
 
   return <ScrollReveal as="section" id="laboratorio" className="scroll-section code-lab" aria-labelledby="code-lab-title">
     <div className="code-lab-heading">
@@ -41,7 +66,7 @@ export default function CodePlayground() {
       <button type="button" className="chip chip--accent" onClick={labHandoff.modal ? openAstra : openFull}>{t('rick.assistant.continue', { name: persona?.name ?? 'Astra' })}</button>
     </div>}
     <LaboratoryReview />
-    <div className="glass-panel code-lab-panel">
+    <div className="glass-panel code-lab-panel" data-rick-lab-state={dimensional ? status : undefined}>
       <div className="code-lab-toolbar">
         <span className="code-lab-language"><Terminal size={18} aria-hidden="true" />{languages[language].label}</span>
         <div className="code-lab-languages" role="group" aria-label={en ? 'Programming language' : 'Linguagem de programação'}>{['java', 'python', 'javascript'].map(value => <button key={value} type="button" disabled={busy} aria-pressed={language === value} onClick={() => lab.select({ language: value })}>{languages[value].label}</button>)}</div>
@@ -57,7 +82,11 @@ export default function CodePlayground() {
         ? (en ? 'Your space to experiment. Each language keeps its draft while this page is open.' : 'Seu espaço para experimentar. Cada linguagem mantém seu rascunho enquanto esta página estiver aberta.')
         : <>{en ? 'Project demo · ' : 'Demonstração do projeto · '}<a href={selected.source} target="_blank" rel="noreferrer">{en ? 'View original Java project ↗' : 'Ver projeto original em Java ↗'}</a></>}</p><div className="code-lab-columns">
         <div className="code-lab-editor"><label htmlFor="playground-code">{languages[language].file}</label><textarea id="playground-code" value={code} onChange={event => lab.setCode(event.target.value)} disabled={busy} spellCheck={false} autoCapitalize="off" autoCorrect="off" maxLength={LAB_CODE_LIMIT} aria-label={en ? 'Editable code' : 'Código editável'} /></div>
-        <div className="code-lab-output"><h3>{en ? 'Console output' : 'Saída do console'}</h3><p role="status">{labels[status]}</p><pre tabIndex={0} aria-label={en ? 'Execution result' : 'Resultado da execução'}>{output || (status === 'done' ? (en ? 'No console output.' : 'Nenhuma saída no console.') : '› _')}</pre></div>
+        <div className="code-lab-output">
+          <h3>{en ? 'Console output' : 'Saída do console'}</h3>
+          {dimensional ? <BenchStatus label={benchLabel} status={status} busy={busy} example={example} language={language} /> : <p role="status">{labels[status]}</p>}
+          <pre tabIndex={0} aria-label={en ? 'Execution result' : 'Resultado da execução'}>{output || (status === 'done' ? (en ? 'No console output.' : 'Nenhuma saída no console.') : '› _')}</pre>
+        </div>
       </div>
       <div className="code-lab-footer"><p>{language === 'java' ? (en ? 'Your code is sent to Wandbox (OpenJDK 21). Stopping ends the wait, not the remote execution.' : 'Seu código é enviado ao Wandbox (OpenJDK 21). Parar encerra a espera, não a execução remota.') : (en ? 'Runs in your browser. Python requires internet on first load. Up to 10 seconds per run.' : 'Executa no navegador. Python requer internet no primeiro carregamento. Até 10 segundos por execução.')}</p>{busy ? <button type="button" className="neon-cta" onClick={lab.stop}><Square size={16} />{en ? 'Stop' : 'Parar'}</button> : <button type="button" className="neon-cta" disabled={!code.trim()} onClick={lab.run}><Play size={16} />{en ? 'Run code' : 'Executar código'}</button>}</div>
     </div>
