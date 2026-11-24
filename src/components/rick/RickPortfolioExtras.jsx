@@ -29,3 +29,16 @@ export function RickObjects({ onSectionLink }) {
     </Fold>
   </Fold>;
 }
+
+export function CitadelCredential() {
+  const { t, i18n } = useTranslation();
+  return <Fold icon={IdCard} label={t('rick.extras.credential')} className="citadel-credential">
+    <strong className="citadel-credential-name">{perfil.nome}</strong>
+    <p>{t('rick.extras.credentialFocus')}</p>
+    <div className="rick-extra-links">
+      <a href={`https://github.com/${perfil.github}`} target="_blank" rel="noopener noreferrer">GitHub</a>
+      <a href={perfil.linkedin} target="_blank" rel="noopener noreferrer">LinkedIn</a>
+      <a href={resumeUrl(i18n.language)} download>{t('navbar.baixarCv')}</a>
+    </div>
+  </Fold>;
+}

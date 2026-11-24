@@ -1,4 +1,4 @@
-import { RickObjects } from '../components/rick/RickPortfolioExtras';
+import { RickObjects, CitadelCredential } from '../components/rick/RickPortfolioExtras';
 import PersonalInterests from '../components/PersonalInterests';
 import { useContext, useLayoutEffect, useRef, useState } from 'react';
 import SkillsGlobe from '../components/SkillsGlobe';
@@ -126,6 +126,7 @@ export default function PortfolioPage({ activeSection, projectFocus, onSectionLi
             <span>{en ? 'DEVELOPER' : 'DESENVOLVEDOR'} <b>/</b> {en ? 'STUDENT' : 'ESTUDANTE'}</span>
             <strong>{galo && <MapPin size={16} aria-hidden="true" />}{perfil.localizacao}</strong>
           </div>
+          {dimensional && secret && <CitadelCredential />}
         </ScrollReveal>
       </section>
       {dimensional && <RickObjects onSectionLink={onSectionLink} />}
