@@ -19,7 +19,7 @@ export default function ProjectsCard({ reveal = false, showcase = false, preview
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('all');
   useLayoutEffect(() => {
-    if (projectFocus) { setQuery(''); setCategory('all'); }
+    if (projectFocus) { setQuery(projectFocus.technology ? `tech:${projectFocus.technology}` : ''); setCategory('all'); }
   }, [projectFocus]);
   useLayoutEffect(() => {
     onResultsChange?.();
@@ -28,7 +28,11 @@ export default function ProjectsCard({ reveal = false, showcase = false, preview
   const catalog = preview ? FEATURED_IDS.map(id => perfil.projetos.find(project => project.id === id)).filter(Boolean) : perfil.projetos;
   const projects = catalog.filter(project => {
     const text = [projectContent(project, 'titulo', i18n.language, t), projectContent(project, 'descricao', i18n.language, t), ...(project.techs || [])].join(' ');
-    return (category === 'all' || project.categoria === category) && normalize(text).includes(normalize(query.trim()));
+    const search = normalize(query.trim());
+    const matches = search.startsWith('tech:')
+      ? project.techs?.some(name => normalize(name) === search.slice(5).trim())
+      : normalize(text).includes(search);
+    return (category === 'all' || project.categoria === category) && matches;
   });
   const showFeatured = showcase && category === 'all' && !query.trim();
   const featured = showFeatured ? SHOWCASE_IDS.map(id => projects.find(project => project.id === id)).filter(Boolean) : [];

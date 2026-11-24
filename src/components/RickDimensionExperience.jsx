@@ -1,4 +1,11 @@
-import { useContext, useEffect, useRef, useState } from 'react';
+import { projectContent } from '../data/projectContent';
+import perfil from '../data/perfil.json';
+import { resumeUrl } from '../data/resume';
+import useCharacterActivity from './rick/useCharacterActivity';
+import { meeseeksBox, shipArt, useSceneAssets } from './rick/sceneAssets';
+import MeeseeksRig from './rick/MeeseeksRig';
+import CharacterPerformance from './rick/CharacterPerformance';
+import { useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ThemeContext } from '../context/ThemeState';
 import { useAstra } from '../context/AstraContext';
@@ -12,22 +19,45 @@ export function CharacterArt({ who = 'morty', badge = false }) {
   </span>;
 }
 
-export function GarageWorkbench() {
+const rota = perfil.projetos.find(project => project.id === 'car-rental');
+export function GarageWorkbench({ onSectionLink }) {
   const persona = useAssistantPersona();
-  const { dimension, setEggMessage } = useContext(ThemeContext);
+  const { dimension, setEggMessage, recordDiscovery } = useContext(ThemeContext);
   const { openAstra } = useAstra();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [meeseeks, setMeeseeks] = useState(false);
-  return <div className="garage-workbench">
+  const bench = useRef(null);
+  const active = useCharacterActivity(bench, dimension === 'lab');
+  const assets = useSceneAssets(dimension === 'lab' ? 'workbench' : null, active || meeseeks);
+  return <div ref={bench} className="garage-workbench" data-rick-motion data-active={active}>
     <button type="button" className="workbench-monitor" onClick={openAstra} aria-haspopup="dialog">
       <span>{dimension === 'corrupted' ? t('rick.terminal') : t('rick.monitor', { name: persona?.name })}</span>
       <strong>{t('rick.openChat')}</strong>
     </button>
     <button type="button" className="meeseeks-box" aria-label={t('rick.box')} aria-pressed={meeseeks} onClick={() => {
       setMeeseeks(value => !value);
+      if (!meeseeks) recordDiscovery?.('meeseeks');
       setEggMessage(meeseeks ? '' : 'rick.hint');
-    }}><img src="/rick-assets/meeseeks-box.png" alt="" draggable="false" /></button>
-    {meeseeks && <div className="meeseeks-visitor"><CharacterArt who="meeseeks" /><p role="status">{t('rick.exit')}<small>{t('rick.upThere')}</small></p></div>}
+    }}>{assets === 'ready' ? <><img src={meeseeksBox} alt="" draggable="false" />
+      <svg viewBox="0 0 368 401" aria-hidden="true"><path fill="#406366" d="M114 56 Q184 18 256 58 V110 Q233 142 154 131 Q111 126 111 99Z" />
+        <ellipse cx="184" cy="99" rx="67" ry="29" fill="#24383b" />
+        <g className="box-plunger"><path fill="#51a5c3" d="M125 71 Q181 43 242 71 V94 C241 131 128 132 125 95Z" />
+          <ellipse cx="183" cy="72" rx="58" ry="25" fill="#69caf0" stroke="#a9e1ed" strokeWidth="3" /></g>
+      </svg></> : <span className="meeseeks-box-glyph" aria-hidden="true">◆</span>}</button>
+    {dimension === 'lab' && <CharacterPerformance active={active} visible={meeseeks && assets !== 'loading'}>
+      {(pose, reduced) => <div className="meeseeks-visitor" data-rick-motion data-pose={pose}>
+        {pose === 'entrance' && !reduced && <span className="summon-ring" aria-hidden="true" />}
+        <MeeseeksRig key={reduced ? 'still' : 'playing'} state={pose} reduced={reduced} />
+        <div className="meeseeks-presentation" data-presented={meeseeks && (pose === 'reaction' || pose === 'idle')}>
+          <p>{t('rick.exit')}<small>{t('rick.upThere')}</small></p>
+          <div className="meeseeks-actions">
+            <a href="/?tech=Java#projetos" onClick={onSectionLink}>{t('rick.javaProjects')}</a>
+            <a href={resumeUrl(i18n.language)} target="_blank" rel="noopener noreferrer">{t('rick.openResume')}</a>
+            <button type="button" aria-haspopup="dialog" onClick={event => openAstra(event, t('projetos.astraPrompt', { title: projectContent(rota, 'titulo', i18n.language, t) }))}>{t('rick.explainRota')}</button>
+          </div>
+        </div>
+      </div>}
+    </CharacterPerformance>}
     <span className="workbench-screw" aria-hidden="true">⚙</span>
   </div>;
 }

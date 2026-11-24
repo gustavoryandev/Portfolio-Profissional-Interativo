@@ -23,6 +23,7 @@ const readRoute = () => {
   const arcade = params.get('arcade');
   return { path: pathname.replace(/\/+$/, '') || '/', section: hash.slice(1),
     arcade: arcade === '1' || isGame(arcade) ? arcade : null, challenge: params.get('challenge') === '1',
+    technology: hash === '#projetos' ? params.get('tech') : null,
     project: hash === '#projetos' && projectIds.has(project) ? project : null };
 };
 
@@ -64,7 +65,8 @@ export default function App() {
   const followSectionLink = event => {
     if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     const target = new URL(event.currentTarget.href);
-    target.searchParams.delete('project');
+    // A fragment-only link inherits the current query string from the browser.
+    if (event.currentTarget.getAttribute('href')?.startsWith('#')) target.searchParams.delete('project');
     event.preventDefault();
     navigate(target.pathname + target.search + target.hash, true);
   };
@@ -153,7 +155,7 @@ export default function App() {
   if (!['/', '/chat'].includes(path)) return <main className="route-loading"><h1>404</h1><a href="/">{en ? 'Back to portfolio' : 'Voltar ao portfólio'}</a></main>;
   return <AstraContext.Provider value={{ lab, actions, labHandoff, setLabHandoff, actionUi,
     openAstra, openFull, returnPortfolio: event => { event.preventDefault(); close(); navigate('/'); } }}>
-    <div hidden={full}>{portfolioVisited.current && <PortfolioIntro en={en}><PortfolioPage activeSection={route.section || 'inicio'} projectFocus={route.project ? route : null} onSectionLink={followSectionLink} /></PortfolioIntro>}</div>
+    <div hidden={full}>{portfolioVisited.current && <PortfolioIntro en={en}><PortfolioPage activeSection={route.section || 'inicio'} projectFocus={route.project || route.technology ? route : null} onSectionLink={followSectionLink} /></PortfolioIntro>}</div>
     <dialog inert={showIntro} style={showIntro ? { visibility: 'hidden' } : undefined} ref={dialog} role={full ? 'main' : undefined} className={`astra-shell ${full ? 'astra-shell-full' : 'astra-shell-modal'}`} aria-label={persona ? (en ? `Conversation with ${assistantName}` : `Conversa com ${assistantName}`) : (en ? 'Astra conversation' : 'Conversa com a Astra')} onCancel={() => setOpened(false)} onKeyDown={trapFocus}
       onClick={event => { if (!full && opened && clickedDialogBackdrop(event)) close(); }}>
       <div className="astra-toolbar" hidden={full}>

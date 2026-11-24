@@ -167,7 +167,7 @@ export default function ProjectsScrollSection({ projectFocus }) {
   }, []);
 
   useLayoutEffect(() => {
-    if (!projectFocus) return;
+    if (!projectFocus?.project) return;
     const frame = requestAnimationFrame(() => controller.current?.focus(projectFocus.project));
     return () => cancelAnimationFrame(frame);
   }, [projectFocus]);

@@ -98,7 +98,7 @@ export default function PortfolioPage({ activeSection, projectFocus, onSectionLi
             <div className="dimension-readout"><span>{en ? 'PORTAL CONTROL' : 'CONTROLE DO PORTAL'}</span><strong>{secret ? (en ? 'Citadel access granted' : 'Acesso liberado à Cidadela') : (en ? 'Portal stabilized' : 'Portal estabilizado')}</strong></div>
             <div className="dimension-instruments" aria-hidden="true"><i /><span>⏚</span><b>137.0 Hz</b><em /></div>
             <DimensionAstraSignal />
-            <GarageWorkbench />
+            <GarageWorkbench onSectionLink={onSectionLink} />
           </div>}
           <p className="hero-description">{en ? 'Java, Spring Boot and React. Explore my projects, skills and the journey behind the code.' : 'Java, Spring Boot e React. Explore meus projetos, habilidades e a trajetória por trás do código.'}</p>
           <div className="hero-actions">
