@@ -16,6 +16,8 @@
   inset: 12.5% 13.5% 13.5% 12.5%;
   overflow: hidden;
   border-radius: 50%;
+  /* Clip composited photo layers too: rounded overflow alone can leak on iOS. */
+  clip-path: ellipse(50% 50% at 50% 50%);
   isolation: isolate;
 }
 .dimensional-portal-content > :is(img,picture), .dimensional-portal-content > picture > img {
