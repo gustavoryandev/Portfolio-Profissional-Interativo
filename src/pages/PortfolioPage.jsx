@@ -1,4 +1,3 @@
-import { RickObjects, CitadelCredential, InterdimensionalTV, RickExtraArchive } from '../components/rick/RickPortfolioExtras';
 import PersonalInterests from '../components/PersonalInterests';
 import { useContext, useLayoutEffect, useRef, useState } from 'react';
 import SkillsGlobe from '../components/SkillsGlobe';
@@ -21,6 +20,7 @@ import PortraitPortal from '../components/rick/PortraitPortal';
 import DimensionalScene from '../components/DimensionalScene';
 import { PortfolioShip } from '../components/rick/DimensionShip';
 import useCharacterActivity from '../components/rick/useCharacterActivity';
+import { CitadelCredential, InterdimensionalTV, RickExtraArchive, RickObjects } from '../components/rick/RickPortfolioExtras';
 import DimensionAstraSignal from '../components/DimensionAstraSignal';
 import { CitadelWindows, GarageWorkbench, CitadelReception } from '../components/RickDimensionExperience';
 import perfil from '../data/perfil.json';
