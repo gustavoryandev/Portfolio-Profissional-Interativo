@@ -21,6 +21,7 @@ function connectTrack(section) {
   let pinned = false;
   let frame = 0;
   let measureFrame = 0;
+  let expectedLeft = 0;
 
   const bounds = () => section.getBoundingClientRect();
   const position = () => clamp(top - bounds().top, distance);
@@ -29,7 +30,7 @@ function connectTrack(section) {
   const goTo = (left, movePage = pinned) => {
     const target = clamp(left, distance);
     if (movePage) window.scrollTo({ top: window.scrollY + bounds().top - top + target, behavior: 'instant' });
-    track.scrollLeft = target;
+    track.scrollLeft = expectedLeft = target;
     showProgress();
   };
   function showProgress() {
@@ -41,14 +42,18 @@ function connectTrack(section) {
   const update = () => {
     frame = 0;
     if (pinned) {
-      const left = position();
-      if (Math.abs(track.scrollLeft - left) >= 1) track.scrollLeft = left;
+      expectedLeft = position();
+      if (Math.abs(track.scrollLeft - expectedLeft) >= 1) track.scrollLeft = expectedLeft;
     }
     showProgress();
   };
   const schedule = () => { if (!frame) frame = requestAnimationFrame(update); };
   const onPageScroll = () => { if (pinned) schedule(); };
-  const onTrackScroll = () => { if (!pinned) schedule(); };
+  // Focus and scrollIntoView can move an overflow-hidden track. While pinned,
+  // reconcile those writes to the page position without moving the page itself.
+  const onTrackScroll = () => {
+    if (!pinned || Math.abs(track.scrollLeft - expectedLeft) >= 1) schedule();
+  };
 
   function measure(reset = false) {
     if (!track.clientWidth) return;
@@ -75,6 +80,8 @@ function connectTrack(section) {
   function step(direction) {
     if (distance <= EPSILON) return;
     const current = pinned ? position() : track.scrollLeft;
+    const remaining = direction > 0 ? distance - current : current;
+    if (remaining < EPSILON) return;
     const stops = slides().map(slidePosition);
     const target = direction > 0 ? stops.find(left => left > current + EPSILON)
       : stops.findLast(left => left < current - EPSILON);
