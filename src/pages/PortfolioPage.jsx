@@ -1,3 +1,4 @@
+import { RickObjects } from '../components/rick/RickPortfolioExtras';
 import PersonalInterests from '../components/PersonalInterests';
 import { useContext, useLayoutEffect, useRef, useState } from 'react';
 import SkillsGlobe from '../components/SkillsGlobe';
@@ -127,6 +128,7 @@ export default function PortfolioPage({ activeSection, projectFocus, onSectionLi
           </div>
         </ScrollReveal>
       </section>
+      {dimensional && <RickObjects onSectionLink={onSectionLink} />}
       <section id="sobre" className="scroll-section" aria-labelledby="about-title">
         <ScrollReveal>
           <p className="section-eyebrow">01 / {en ? 'THE JOURNEY' : 'A TRAJETÓRIA'}</p>
