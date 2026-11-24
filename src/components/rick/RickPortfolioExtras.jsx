@@ -72,3 +72,39 @@ export function InterdimensionalTV({ onSectionLink }) {
     </div>
   </Fold>;
 }
+
+function DiscoveryJournal() {
+  const { t } = useTranslation();
+  const { progress, enableExploration, resetExploration } = useContext(ThemeContext) ?? {};
+  if (!progress) return null;
+  const { enabled, found } = progress;
+  return <Fold icon={BookOpen} label={t('rick.extras.discovery.title')}>
+    <label className="rick-discovery-option">
+      <input type="checkbox" checked={enabled} onChange={event => enableExploration(event.currentTarget.checked)} />
+      {t('rick.extras.discovery.enable')}
+    </label>
+    <p>{t('rick.extras.discovery.local')}</p>
+    {found.length > 0 ? <ul className="rick-discoveries">
+      {discoveries.filter(id => found.includes(id)).map(id => <li key={id}>{t(`rick.extras.discovery.${id}`)}</li>)}
+    </ul> : <p>{t('rick.extras.discovery.empty')}</p>}
+    <button type="button" className="rick-extra-control" disabled={!found.length} onClick={event => {
+      event.currentTarget.closest('details')?.querySelector('summary')?.focus({ preventScroll: true });
+      resetExploration();
+    }}>{t('rick.extras.discovery.reset')}</button>
+  </Fold>;
+}
+
+export function RickExtraArchive() {
+  const { t } = useTranslation();
+  return <Fold icon={CircuitBoard} label={t('rick.extras.title')} className="rick-extra-archive">
+    <DiscoveryJournal />
+    <Fold label={t('rick.extras.credits.title')}>
+      <ul className="rick-credits">
+        <li>{t('rick.extras.credits.garage')}</li>
+        <li>{t('rick.extras.credits.art')} <a href="/rick-assets/sources.json" target="_blank" rel="noopener noreferrer">{t('rick.extras.credits.sources')}</a></li>
+        <li><a href={RICK_THEME_TRACK.source} target="_blank" rel="noopener noreferrer">{RICK_THEME_TRACK.title}</a> · {RICK_THEME_TRACK.artist}</li>
+      </ul>
+      <p>{t('rick.extras.credits.implementation')}</p>
+    </Fold>
+  </Fold>;
+}

@@ -1,4 +1,4 @@
-import { RickObjects, CitadelCredential, InterdimensionalTV } from '../components/rick/RickPortfolioExtras';
+import { RickObjects, CitadelCredential, InterdimensionalTV, RickExtraArchive } from '../components/rick/RickPortfolioExtras';
 import PersonalInterests from '../components/PersonalInterests';
 import { useContext, useLayoutEffect, useRef, useState } from 'react';
 import SkillsGlobe from '../components/SkillsGlobe';
@@ -167,6 +167,6 @@ export default function PortfolioPage({ activeSection, projectFocus, onSectionLi
       <ScrollReveal><section className="glass-panel astra-scroll-cta" aria-labelledby="astra-cta-title"><AstraAvatar surface="full" width="64" height="64" /><div><h2 id="astra-cta-title">{en ? 'Curious about my work?' : 'Quer conhecer melhor meu trabalho?'}</h2><p>{t('rick.assistant.guide', { name: fullPersona?.name ?? 'Astra' })}</p></div><a href="/chat" onClick={openFull} className="neon-cta">{fullPersona ? (en ? `Talk to ${fullPersona.name}` : `Conversar com ${fullPersona.name}`) : (en ? 'Talk to Astra' : 'Conversar com Astra')}<ArrowUpRight size={18} aria-hidden="true" /></a></section></ScrollReveal>
     </main>
     <aside className="astra-fab-shortcut" aria-label={persona?.name ?? 'Astra'}><button type="button" className="astra-fab" onClick={openAstra} aria-haspopup="dialog"><AstraAvatar />{persona ? (en ? `Ask ${persona.name}` : `Perguntar ao ${persona.name}`) : (en ? 'Ask Astra' : 'Perguntar pra Astra')}</button></aside>
-    <footer className="scroll-footer"><span>© {new Date().getFullYear()} Gustavo Ryan</span><a href="#inicio">{en ? 'Back to top ↑' : 'Voltar ao topo ↑'}</a></footer>
+    <footer className="scroll-footer"><span>© {new Date().getFullYear()} Gustavo Ryan</span><a href="#inicio">{en ? 'Back to top ↑' : 'Voltar ao topo ↑'}</a>{dimensional && <RickExtraArchive />}</footer>
   </div>;
 }
