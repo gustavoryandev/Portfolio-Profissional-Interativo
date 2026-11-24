@@ -3,17 +3,17 @@ import { useTranslation } from 'react-i18next';
 import perfil from '../data/perfil.json';
 import { CardShell, CardHeader } from './ui/CardShell';
 
-export default function ExperienceCard() {
+export default function ExperienceCard({ diary = false }) {
   const { t } = useTranslation();
 
   return (
-    <CardShell size="md">
+    <CardShell size="md" className={diary ? 'rick-diary' : undefined}>
       <CardHeader icon={BriefcaseBusiness} title={t('cards.experiencia.titulo')} />
       <ol className="relative ml-2 m-0 list-none border-l border-brand-500/40 p-0">
         {perfil.experiencias.map((experience) => (
           <li key={experience.id} className="relative pb-5 pl-6 last:pb-0">
             <span aria-hidden="true" className="absolute -left-[5px] top-1.5 h-2.5 w-2.5 rounded-full border-2 border-accent bg-panel" />
-            <div className="flex items-start justify-between gap-3">
+            <div className={`flex items-start justify-between gap-3${diary ? ' rick-diary-entry' : ''}`}>
               <div className="min-w-0">
                 <h4 className="text-sm font-bold text-ink">{experience.empresa}</h4>
                 <p className="mt-1 text-xs tracking-wide text-muted">{t(experience.cargoI18n)}</p>

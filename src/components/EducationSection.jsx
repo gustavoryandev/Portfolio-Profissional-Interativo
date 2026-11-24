@@ -3,14 +3,14 @@ import { CalendarDays, GraduationCap, Trophy } from 'lucide-react';
 import perfil from '../data/perfil.json';
 import LanguageIcon from './LanguageIcon';
 
-export default function EducationSection({ en = false }) {
+export default function EducationSection({ en = false, diary = false }) {
   const headingId = useId();
   const lang = en ? 'en' : 'pt';
   return <div className="space-y-5">
     {perfil.formacao.map(education => {
       const technical = education.origemHabilidades === 'skills';
       const Icon = technical ? GraduationCap : Trophy;
-      return <article key={education.id} aria-labelledby={`${headingId}-${education.id}`} className="overflow-hidden rounded-xl border border-[var(--line)] bg-[var(--panel)]">
+      return <article key={education.id} aria-labelledby={`${headingId}-${education.id}`} className={`overflow-hidden rounded-xl border border-[var(--line)] bg-[var(--panel)]${diary ? ' rick-diary' : ''}`}>
         <div className="palette-gradient h-1 bg-gradient-to-r from-blue-600 to-sky-400" />
         <div className="p-5 sm:p-6">
           <header className="flex flex-col gap-4 sm:flex-row sm:items-start">

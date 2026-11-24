@@ -1,6 +1,7 @@
 import PersonalInterests from './PersonalInterests';
 import LanguageIcon from './LanguageIcon';
 import { useId } from 'react';
+import { useTranslation } from 'react-i18next';
 import ContactSection from './ContactSection';
 import { Download } from 'lucide-react';
 import perfil from '../data/perfil.json';
@@ -11,17 +12,21 @@ import { sections } from './Sidebar';
 import SkillsGlobe from './SkillsGlobe';
 import SkillsProficiencyCard from './SkillsProficiencyCard';
 import EducationSection from './EducationSection';
-export default function PortfolioSection({ active, en }) {
+export default function PortfolioSection({ active, en, dimensional = false }) {
   const headingId = useId();
+  const { t } = useTranslation();
   const section = sections.find(([id]) => id === active);
+  const diary = dimensional && ['experience', 'education'].includes(active);
+  const eyebrow = diary ? t('rick.extras.diary')
+    : en ? 'GET TO KNOW MY JOURNEY' : 'CONHEÇA MINHA TRAJETÓRIA';
   return <section className="portfolio-section" aria-labelledby={headingId}>
-    <p className="section-eyebrow">{en ? 'GET TO KNOW MY JOURNEY' : 'CONHEÇA MINHA TRAJETÓRIA'}</p>
+    <p className="section-eyebrow">{eyebrow}</p>
     <h2 id={headingId}>{section?.[en ? 3 : 2]}</h2>
     {active === 'about' && <div className="detail-card about-profile-card"><div className="about-profile-heading mb-5 flex w-full flex-col items-center gap-4 text-center"><div className="about-profile-portrait relative isolate h-24 w-24 shrink-0 overflow-hidden rounded-full border border-[var(--accent)] bg-[var(--panel-soft)] sm:h-28 sm:w-28"><img width="572" height="777" className="absolute max-w-none object-cover" src="/perfil-foto.jpeg" alt={en ? `Photo of ${perfil.nome}` : `Foto de ${perfil.nome}`} /></div><h3>{perfil.nome}</h3></div><div className="space-y-3">{perfil.bio[en ? 'en' : 'pt'].split('\n\n').map(paragraph => <p key={paragraph}>{paragraph}</p>)}</div><a className="cv-link" href={en ? '/Gustavo Ryan Resume (English).pdf' : '/Currículo Gustavo Ryan.pdf'} download><Download size={16} />{en ? 'Download résumé' : 'Baixar currículo'}</a><PersonalInterests /></div>}
     {active === 'projects' && <ProjectsCard />}
     {active === 'proficiency' && <SkillsProficiencyCard lang={en ? 'en' : 'pt'} />}
-    {active === 'experience' && <ExperienceCard />}
-    {active === 'education' && <EducationSection en={en} />}
+    {active === 'experience' && <ExperienceCard diary={diary} />}
+    {active === 'education' && <EducationSection en={en} diary={diary} />}
     {active === 'skills' && <><SkillsGlobe skills={perfil.skills} en={en} /><div className="skills-grid">{perfil.skills.map(skill => <div className="detail-card" key={skill.nome}><div className="flex items-center gap-3"><LanguageIcon name={skill.nome} size={24} /><h3>{skill.nome}</h3></div><p>{en ? ({ 'Banco de dados': 'Database', Ferramentas: 'Tools', 'Formato de dados': 'Data format' }[skill.categoria] || skill.categoria) : skill.categoria}</p></div>)}</div></>}
     {active === 'contact' && <div className="space-y-5"><div className="detail-card"><h3>{en ? 'Let’s talk' : 'Vamos conversar'}</h3><p>{en ? 'Get in touch by email or through my social profiles.' : 'Entre em contato por e-mail ou pelas minhas redes profissionais.'}</p><a className="text-link break-all" href={'mailto:' + perfil.email}>{perfil.email}</a><SocialLinks /></div><ContactSection lang={en ? 'en' : 'pt'} variant="page" /></div>}
   </section>;
