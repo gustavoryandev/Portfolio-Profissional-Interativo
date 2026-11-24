@@ -1,297 +1,293 @@
-/* Original dimensional lab, with a hidden cosmic counterpart. */
-:root[data-theme|="rick-morty"], .menu-option[data-preview="rick-morty"] {
-  --palette-bg: #0B0E14; --palette-surface: #161B22;
-  --palette-primary: #97CE4C; --palette-accent: #A6D8F0; --palette-hover: #B2DF28;
-  --palette-on-primary: #0B0E14; --palette-text: #F0F6FC; --palette-muted: #8B949E;
+/* Shared palette, portal and motion contract for both Rick and Morty dimensions. */
+:root[data-theme="rick-morty"], .menu-option[data-preview="rick-morty"] {
+  --palette-bg: #0b0e14; --palette-surface: #161b22;
+  --palette-primary: #97ce4c; --palette-accent: #a6d8f0; --palette-hover: #b2df28;
+  --palette-on-primary: #0b0e14; --palette-text: #f0f6fc; --palette-muted: #a3aebb;
   --palette-border: #303942; --palette-tint: 22 27 34;
   --palette-primary-rgb: 151 206 76; --palette-accent-rgb: 166 216 240;
-  --wave-one: #97CE4C; --wave-two: #A6D8F0; --wave-glow: #B2DF28;
-  --portal-edge: #b6fa48; --portal-mid: #58e9b2; --portal-core: #1d5031;
+  --wave-one: #97ce4c; --wave-two: #a6d8f0; --wave-glow: #b2df28;
+}
+:root[data-theme="rick-morty"] {
+  --primary-hover: var(--palette-hover);
+  --focus-ring: var(--palette-primary);
+  --neon-strength: .16;
+  --glass-alpha: .96;
+  --rick-surface: #151e23;
+  --rick-console: #121e1c;
+  --rick-frame: #59615b;
+  --rick-portrait-border: #97ce4c66;
+  --rick-portrait-radius: 24px 8px;
+  --rick-photo-radius: 46% 46% 44% 44%;
+  --rick-photo-border: var(--primary);
+  --rick-title-shadow: #25341a;
+  --rick-portal-filter: drop-shadow(0 0 5px #86ed2380);
+
+  --rick-layer-scenery: 0;
+  --rick-layer-actors: 1;
+  --rick-layer-controls: 40;
+  --rick-layer-intro: 9000;
+  --rick-layer-transit: 9999;
+  --rick-motion-quick: 160ms;
+  --rick-motion-beat: 280ms;
+  --rick-motion-reveal: 420ms;
+  --rick-motion-ease: cubic-bezier(.22, .68, .28, 1);
+  --rick-motion-exit: cubic-bezier(.55, .05, .8, .45);
 }
 :root[data-theme="rick-morty"][data-dimension="corrupted"] {
-  --palette-bg: #110d20; --palette-surface: #201730;
-  --palette-primary: #ffc779; --palette-accent: #c4a2ff; --palette-hover: #ffe0b3;
-  --palette-on-primary: #23152d; --palette-text: #faf0ff; --palette-muted: #c2b3d1;
-  --palette-border: #554167; --palette-tint: 32 23 48;
-  --palette-primary-rgb: 255 199 121; --palette-accent-rgb: 196 162 255;
+  --palette-bg: #091723; --palette-surface: #142a39;
+  --palette-primary: #e7b45d; --palette-accent: #a2d5ed; --palette-hover: #ffd28a;
+  --palette-on-primary: #15202b; --palette-text: #edf4f7; --palette-muted: #a5bac6;
+  --palette-border: #496370; --palette-tint: 20 42 57;
+  --palette-primary-rgb: 231 180 93; --palette-accent-rgb: 162 213 237;
   --wave-one: #bc8aff; --wave-two: #ffc779; --wave-glow: #8c5ac9;
-  --portal-edge: #ffc779; --portal-mid: #bc8aff; --portal-core: #412565;
+  --rick-surface: #142a39;
+  --rick-console: #102331;
+  --rick-frame: #557181;
+  --rick-portrait-border: #8ab3c5;
+  --rick-portrait-radius: 9px;
+  --rick-photo-radius: 12px;
+  --rick-photo-border: var(--accent);
+  --rick-title-shadow: #65502b;
+  --rick-portal-filter: hue-rotate(25deg) drop-shadow(0 0 5px #a2d5ed55);
 }
-:root[data-theme|="rick-morty"] body {
-  background: radial-gradient(ellipse at 90% 20%, #23472566, transparent 48%),
-    linear-gradient(#a9e76008 1px, transparent 1px), linear-gradient(90deg, #a9e76008 1px, transparent 1px), var(--page);
-  background-size: auto, 64px 64px, 64px 64px, auto;
-  background-attachment: fixed;
-}
+:root[data-theme="rick-morty"] body { background: var(--page); }
 :root[data-theme="rick-morty"][data-dimension="corrupted"] body {
-  background: radial-gradient(ellipse at 80% 20%, #945ad94a, transparent 45%),
-    radial-gradient(circle, #efc88e66 1px, transparent 1.5px) 0 0 / 73px 89px,
-    radial-gradient(circle, #c9b0ff40 1px, transparent 1.5px) 31px 27px / 121px 137px, var(--page);
+  background: radial-gradient(ellipse at 85% 20%, #28537255, transparent 55%), var(--page);
 }
-:root[data-theme|="rick-morty"] .theme-waves { display: none; }
-:root[data-theme|="rick-morty"] .site-header { border-bottom: 1px solid var(--line); }
-.dimension-portal {
-  position: relative; flex-shrink: 0; display: grid; place-items: center;
-  width: 66px; height: 64px; margin-left: 8px; padding: 3px 8px 12px;
-  border-left: 1px solid var(--line); cursor: pointer; border-radius: 8px;
-  color: var(--primary); touch-action: manipulation;
+:root[data-theme="rick-morty"] .theme-waves { display: none; }
+:root[data-theme="rick-morty"]:is([data-rick-effects-paused], [data-rick-tab-hidden]) .astra-spark {
+  animation: none;
+  opacity: .5;
 }
-.dimension-portal:focus-visible { outline: 3px solid var(--primary); outline-offset: 3px; }
-.dimension-portal:hover { background: rgb(var(--palette-primary-rgb) / .09); }
-.portal-hint { position: absolute; bottom: 0; font: 700 10px/1.5 ui-monospace, monospace; letter-spacing: .1em; }
-.portal-art {
-  position: relative; display: block; width: 42px; height: 46px; border-radius: 48%;
-  background: radial-gradient(ellipse, var(--portal-core) 12%, var(--portal-mid) 45%, var(--portal-edge) 65%, transparent 70%);
-  box-shadow: 0 0 17px color-mix(in srgb, var(--portal-edge) 35%, transparent);
+:root[data-theme="rick-morty"] .astra-hero-wrap[data-compact="true"] .astra-spark,
+:root[data-theme="rick-morty"]:is([data-rick-effects-paused], [data-rick-tab-hidden]) .hud-dot { animation: none; }
+:root[data-theme="rick-morty"] :is(.portfolio-app .site-header, .option-menu, .glass-panel, .astra-fab, .mobile-nav, .mobile-menu) {
+  background: var(--panel);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
 }
-.portal-art > span, .portal-art > i, .portal-art > b {
-  position: absolute; inset: 9%; border: 2px solid var(--portal-edge); border-radius: 43% 57% 39% 61%;
-  animation: portal-orbit 13s linear infinite;
+:root[data-theme="rick-morty"] .portfolio-app .site-header {
+  border-bottom: 1px solid var(--line);
 }
-.portal-art > i { inset: 23%; border-color: var(--portal-mid); animation-direction: reverse; animation-duration: 9s; }
-.portal-art > b { inset: 35%; border-width: 3px; animation-duration: 6s; }
-.dimension-portal:hover .portal-art { filter: brightness(1.25); }
-.dimension-label { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 26px; align-items: center; font: 12px/1.5 ui-monospace, monospace; letter-spacing: .06em; }
-.dimension-label span { padding: 6px 10px; background: var(--primary); color: var(--on-primary); font-weight: 800; }
-.dimension-label b { color: var(--muted); font-weight: 400; }
-:root[data-theme|="rick-morty"] .portfolio-hero { position: relative; gap: clamp(24px, 5vw, 70px); }
-:root[data-theme|="rick-morty"] .portfolio-hero h1 { font-family: 'Trebuchet MS', sans-serif; font-weight: 900; letter-spacing: -.065em; }
-:root[data-theme|="rick-morty"] .neon-title { color: var(--primary); text-shadow: 3px 3px 0 var(--portal-core); }
-:root[data-theme|="rick-morty"] .hero-lead { font-weight: 600; }
-:root[data-theme|="rick-morty"] .hero-profile { padding: 28px; border: 1px solid var(--line); border-radius: 24px 6px; background: var(--panel); box-shadow: 12px 12px 0 rgb(var(--palette-primary-rgb) / .06); }
-.dimension-scan-label { position: relative; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; margin-bottom: 18px; color: var(--accent); font: 11px/1.5 ui-monospace, monospace; }
-.dimension-scan-label span { color: var(--primary); }
-:root[data-theme|="rick-morty"] .hero-photo { border-radius: 45% 45% 42% 42%; border: 2px solid var(--primary); filter: saturate(.7); }
-:root[data-theme|="rick-morty"] .hero-profile .portrait-orbit { display: none; }
-.hero-dimensional-ring { position: absolute; width: 112%; height: 95%; left: -6%; top: 5%; opacity: .28; box-shadow: none; }
-.hero-dimensional-ring > * { animation-duration: 40s; }
-:root[data-theme|="rick-morty"] .hero-profile-caption { background: var(--panel); border-top: 1px solid var(--line); margin-top: 18px; }
-:root[data-theme="rick-morty"][data-dimension="corrupted"] .portfolio-hero h1 { font-family: Georgia, serif; font-style: italic; font-weight: 500; }
-:root[data-theme="rick-morty"][data-dimension="corrupted"] .hero-profile { border-radius: 6px 24px; box-shadow: -12px 12px 0 #c4a2ff10; }
-:root[data-theme="rick-morty"][data-dimension="corrupted"] .hero-photo { border-radius: 12px; filter: saturate(.35) sepia(.15); }
-:root[data-theme|="rick-morty"] :is(.astra-wordmark, .astra-greet) { color: var(--primary); }
-:root[data-theme|="rick-morty"] .astra-hero { border: 1px solid var(--line); background: linear-gradient(130deg, var(--panel), transparent); }
-:root[data-theme="rick-morty"][data-dimension="corrupted"] .astra-wordmark { font-family: Georgia, serif; font-style: italic; letter-spacing: -.04em; }
-:root[data-theme="rick-morty"][data-dimension="corrupted"] .astra-hero { background: radial-gradient(ellipse at top, #7541b74a, var(--panel)); }
-.dimension-transit { position: fixed; inset: 0; z-index: 9999; pointer-events: none; display: grid; place-items: center; overflow: hidden; animation: dimension-fade .75s ease both; background: rgb(var(--palette-primary-rgb) / .12); }
-.dimension-transit span { width: 40vmax; height: 40vmax; border: 8vmax solid var(--portal-mid); border-radius: 48%; box-shadow: 0 0 0 3vmax var(--portal-edge), inset 0 0 80px var(--portal-edge), 0 0 100px var(--portal-edge); animation: dimension-cross .75s ease-in both; }
-@keyframes portal-orbit { to { transform: rotate(360deg); } }
-@keyframes dimension-cross { from { transform: scale(.05) rotate(-70deg); opacity: 0; } 35% { opacity: .85; } to { transform: scale(4) rotate(50deg); opacity: 0; } }
-@keyframes dimension-fade { from, to { opacity: 0; } 30% { opacity: 1; } }
-@media (max-width: 767px) {
-  .dimension-portal { width: 48px; height: 54px; padding-inline: 3px; margin-left: 0; }
-  .dimension-portal .portal-art { width: 33px; height: 36px; }
-  .hero-dimensional-ring > * { animation: none; }
-  :root[data-theme|="rick-morty"] .hero-profile { padding: 20px; }
-  :root[data-theme|="rick-morty"] body { background-attachment: scroll; }
-  .dimension-label { gap: 8px; font-size: 11px; }
-  .dimension-transit span { box-shadow: 0 0 0 3vmax var(--portal-edge); }
+:root[data-theme="rick-morty"] .scroll-portfolio :is(.site-header, .mobile-nav) { z-index: var(--rick-layer-controls); }
+.rick-media-controls { display: inline-flex; flex: none; align-items: center; gap: 4px; }
+.rick-media-controls.rick-mobile-media { display: none; }
+.site-header .rick-media-settings { width: 32px; }
+.rick-settings-popover {
+  position: fixed;
+  inset: auto;
+  right: clamp(12px, var(--rick-settings-right, 12px), max(12px, calc(100vw - 316px)));
+  width: min(304px, calc(100vw - 24px));
+  margin: 0;
+  padding: 14px 16px;
+  overflow: auto;
+  border: 1px solid var(--rick-frame);
+  border-radius: 12px;
+  background: var(--panel);
+  color: var(--ink);
+  box-shadow: 0 8px 28px #0008;
+  font-size: 14px;
+  line-height: 1.5;
 }
-@media (prefers-reduced-motion: reduce) {
-  .portal-art > *, .dimension-transit, .dimension-transit span { animation: none !important; }
-  .dimension-transit { display: none; }
-}
-
-/* Painted organic vortex, shared by the header, lab and crossing. */
-.portal-art { background: none; box-shadow: none; border-radius: 50%; }
-.portal-art > img { position: absolute; width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 0 5px #86ed2380); animation: portal-breathe 5s ease-in-out infinite; }
-.dimension-portal .portal-art { width: 39px; height: 50px; }
-.dimension-portal { height: 70px; }
-.hero-dimensional-ring { height: 100%; width: 120%; left: -10%; top: 0; opacity: .35; }
-.hero-dimensional-ring > img { animation-duration: 12s; filter: none; }
-.dimension-transit span { border: 0; box-shadow: none; width: 60vmax; height: 90vmax; background: url('/dimensional-portal.svg') center / contain no-repeat; }
-.dimension-transit { background: #52b60812; }
-@keyframes portal-breathe { 0%, 100% { transform: rotate(-3deg) scale(.96); } 50% { transform: rotate(3deg) scale(1.04); } }
-@media (max-width: 767px) {
-  .dimension-portal { height: 58px; }
-  .dimension-portal .portal-art { width: 32px; height: 40px; }
-  .hero-dimensional-ring > img { animation: none; }
-  .dimension-transit span { box-shadow: none; }
-}
-
-/* Cartoon science-fiction scenery stays behind the readable content. */
-:root[data-theme|="rick-morty"] {
-  --portal-edge: #b6fa48; --portal-mid: #58e9b2; --portal-core: #1d5031;
-}
-:root[data-theme="rick-morty"][data-dimension="corrupted"] {
-  --palette-bg: #130c22; --palette-surface: #241936;
-  --palette-primary: #c2f451; --palette-accent: #cfacff; --palette-hover: #ddff8f;
-  --palette-on-primary: #192309; --palette-primary-rgb: 194 244 81;
-  --wave-one: #ac6bff; --wave-two: #c2f451;
-}
-:root[data-theme|="rick-morty"] body {
-  background: radial-gradient(ellipse at 76% 12%, #44821945, transparent 48%),
-    radial-gradient(ellipse at 10% 80%, #12634b22, transparent 50%), #07150f;
-}
-:root[data-theme="rick-morty"][data-dimension="corrupted"] body {
-  background: radial-gradient(ellipse at 80% 18%, #7138ae70, transparent 52%),
-    radial-gradient(ellipse at 0% 65%, #a0296925, transparent 48%),
-    radial-gradient(circle, #ded2b480 1px, transparent 1.5px) 0 0 / 83px 103px,
-    radial-gradient(circle, #b7a2ff70 1px, transparent 1.5px) 31px 27px / 137px 151px, #130c22;
-}
-.portfolio-app > .dimensional-scene { display: block; position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
-.alien-planet { position: absolute; width: clamp(160px, 24vw, 380px); aspect-ratio: 1; right: -7%; top: 16%; border: 2px solid #96bb3b38; border-radius: 50%; background: radial-gradient(circle at 28% 28%, #506a2f, #193527 70%); opacity: .45; box-shadow: inset -30px -16px 0 #051a2250; }
-.alien-planet::after { content: ''; position: absolute; inset: 44% -35%; border: 12px solid #a6d34730; border-top: 3px solid #a6d34750; border-radius: 50%; transform: rotate(-28deg); }
-.alien-planet i, .alien-planet b { position: absolute; width: 20%; aspect-ratio: 1; border-radius: 50%; background: #0c251840; box-shadow: inset 3px 4px 0 #06181a40; left: 20%; top: 26%; }
-.alien-planet b { width: 13%; top: 64%; left: 58%; }
-.alien-horizon { position: absolute; width: 100%; height: min(55vh, 540px); bottom: 0; opacity: .5; }
-.alien-ridge-far { fill: #184432; stroke: #4e714036; stroke-width: 2; }
-.alien-ridge-near { fill: #0d251e; }
-.alien-plants { stroke: #729d4250; stroke-width: 8; }
-:root[data-theme="rick-morty"][data-dimension="corrupted"] .alien-planet { background: radial-gradient(circle at 30% 25%, #d19a8e, #784379 55%, #332241); border-color: #ecc7b04a; opacity: .7; }
-:root[data-theme="rick-morty"][data-dimension="corrupted"] .alien-planet::after { border-color: #f2b87f38; border-top-color: #ffcb9b70; }
-:root[data-theme="rick-morty"][data-dimension="corrupted"] .alien-ridge-far { fill: #42224d; stroke: #bb76b52a; }
-:root[data-theme="rick-morty"][data-dimension="corrupted"] .alien-ridge-near { fill: #24152f; }
-:root[data-theme="rick-morty"][data-dimension="corrupted"] .alien-plants { stroke: #c77daf55; }
-:root[data-theme|="rick-morty"] .portfolio-hero { min-height: 820px; padding-block: 80px 64px; }
-:root[data-theme|="rick-morty"] .portfolio-hero > :not(.rick-ship) { position: relative; z-index: 1; }
-:root[data-theme|="rick-morty"] .portfolio-hero h1 { font-family: 'Trebuchet MS', sans-serif; font-weight: 900; letter-spacing: -.075em; transform: skew(-4deg) rotate(-2deg); transform-origin: left center; color: #e5f5cd; text-shadow: 3px 4px 0 #243d19; }
-:root[data-theme|="rick-morty"] .portfolio-hero .neon-title { color: #b3ee37; text-shadow: 3px 4px 0 #30681c, 0 0 35px #91e33e35; }
-:root[data-theme="rick-morty"][data-dimension="corrupted"] .portfolio-hero h1 { color: #ddcaf9; font-style: normal; text-shadow: 3px 4px 0 #633b79; }
-:root[data-theme="rick-morty"][data-dimension="corrupted"] .portfolio-hero .neon-title { color: #d3fa70; text-shadow: 3px 4px 0 #60672c, 0 0 35px #c2f45125; }
-.rick-ship { position: absolute; right: -50px; top: 12px; width: clamp(260px, 28vw, 420px); z-index: 2; pointer-events: none; animation: ship-hover 8s ease-in-out infinite; }
-.rick-ship img { position: relative; z-index: 1; display: block; width: 100%; height: auto; filter: drop-shadow(0 12px 18px #0007); }
-.rick-ship > span { position: absolute; width: 40%; height: 70%; bottom: -12%; left: 30%; background: linear-gradient(#9fef4930, transparent); clip-path: polygon(35% 0, 65% 0, 100% 100%, 0 100%); }
-:root[data-theme|="rick-morty"] .hero-profile { margin-top: 100px; padding: 24px; width: min(100%, 380px); justify-self: end; background: linear-gradient(145deg, #173122dd, #0c1c16d9); border: 1px solid #8ab65866; border-radius: 30px 9px 30px 9px; box-shadow: 10px 10px 0 #7ba32b0d, inset 0 1px 0 #c1ed7a20; overflow: visible; }
-:root[data-theme|="rick-morty"] .hero-profile .hero-photo { aspect-ratio: 4 / 5; object-fit: cover; border-radius: 46% 46% 44% 44%; border: 3px solid #a7e13f; filter: saturate(.8); }
-:root[data-theme|="rick-morty"] .hero-profile-caption { border-color: #74934350; background: transparent; }
-:root[data-theme|="rick-morty"] .hero-dimensional-ring { width: 123%; height: calc(100% - 95px); left: -11.5%; top: 40px; z-index: -1; opacity: .8; }
-:root[data-theme|="rick-morty"] .dimension-scan-label { font-size: 10px; letter-spacing: .04em; gap: 4px; }
-:root[data-theme="rick-morty"][data-dimension="corrupted"] .hero-profile { background: linear-gradient(145deg, #39244ee0, #1d142cdd); border-color: #b08bda70; box-shadow: 10px 10px 0 #bc87e60c, inset 0 1px 0 #d9baff20; border-radius: 9px 30px 9px 30px; }
-:root[data-theme="rick-morty"][data-dimension="corrupted"] .hero-profile .hero-photo { border-color: #d7b0f1; filter: saturate(.6); }
-:root[data-theme="rick-morty"][data-dimension="corrupted"] .hero-dimensional-ring { filter: hue-rotate(175deg) saturate(.8); }
-:root[data-theme="rick-morty"][data-dimension="corrupted"] .dimension-label span { background: #b58de8; color: #170d23; }
-:root[data-theme|="rick-morty"] .neon-cta { border-radius: 9px 15px 9px 15px; box-shadow: 0 4px 0 #4c7723, 0 0 24px #a6e74218; }
-:root[data-theme|="rick-morty"] .astra-fab { border-color: var(--primary); background: var(--panel); box-shadow: 0 0 20px rgb(var(--palette-primary-rgb) / .12); }
-@keyframes ship-hover { 0%, 100% { transform: translateY(0) rotate(-5deg); } 50% { transform: translateY(-15px) rotate(-2deg); } }
-@media (min-width: 1024px) {
-  .rick-ship {
-    top: 8px;
-    right: -24px;
-    width: clamp(180px, 16vw, 240px);
-    z-index: 0;
-    opacity: .88;
-  }
-}
-@media (max-width: 1023px) {
-  .rick-ship { right: -15px; top: 36px; width: 280px; }
-}
-@media (max-width: 767px) {
-  :root[data-theme|="rick-morty"] .portfolio-hero { min-height: auto; padding-block: 40px; gap: 100px; }
-  :root[data-theme|="rick-morty"] .hero-profile { margin-top: 30px; align-self: center; width: min(90%, 350px); }
-  .rick-ship { top: auto; bottom: 480px; right: -10px; width: 220px; animation-duration: 10s; }
-  .rick-ship img { filter: none; }
-  .alien-horizon { opacity: .3; }
-  .alien-planet { width: 180px; right: -80px; }
-  :root[data-theme|="rick-morty"] .hero-dimensional-ring > img { filter: none; }
-}
-@media (prefers-reduced-motion: reduce) {
-  .rick-ship, .portal-art > img { animation: none !important; }
-}
-
-/* Spatial Dark palette trial: exact theme scope preserves the secret world. */
-:root[data-theme="rick-morty"]:not([data-dimension="corrupted"]) {
-  --primary-hover: #B2DF28;
-  --action-bg: #97CE4C; --action-hover: #B2DF28; --action-text: #0B0E14;
-  --focus-ring: #97CE4C;
-  --neon-strength: .16; --glass-alpha: .96;
-}
-:root[data-theme="rick-morty"]:not([data-dimension="corrupted"]) body { background: #0B0E14; }
-:root[data-theme="rick-morty"]:not([data-dimension="corrupted"]) :is(.site-header, .option-menu, .glass-panel, dialog, .astra-fab) {
-  background: #161B22;
-}
-:root[data-theme="rick-morty"]:not([data-dimension="corrupted"]) .portfolio-hero h1 {
-  color: #F0F6FC; text-shadow: 2px 3px 0 #161B22;
-}
-:root[data-theme="rick-morty"]:not([data-dimension="corrupted"]) .portfolio-hero .neon-title {
-  color: #97CE4C; text-shadow: 2px 3px 0 #25341a, 0 0 28px #B2DF281a;
-}
-:root[data-theme="rick-morty"]:not([data-dimension="corrupted"]) .hero-profile {
-  background: #161B22; border-color: #97CE4C66;
-  box-shadow: 8px 8px 0 #97CE4C08, inset 0 1px 0 #A6D8F014;
-}
-:root[data-theme="rick-morty"]:not([data-dimension="corrupted"]) .hero-profile .hero-photo { border-color: #97CE4C; }
-:root[data-theme="rick-morty"]:not([data-dimension="corrupted"]) .hero-profile-caption { border-color: #303942; }
-:root[data-theme="rick-morty"]:not([data-dimension="corrupted"]) .neon-cta {
-  box-shadow: 0 3px 0 #54772a, 0 0 20px #97CE4C14;
-}
-:root[data-theme="rick-morty"]:not([data-dimension="corrupted"]) .neon-cta:is(:hover, :focus-visible) {
-  background: #B2DF28; box-shadow: 0 3px 0 #54772a, 0 0 25px #B2DF2840;
+.rick-volume-label, .rick-effects-option { display: flex; align-items: center; gap: 10px; }
+.rick-volume-label { justify-content: space-between; font-weight: 650; }
+.rick-settings-popover p { margin: 2px 0 12px; color: var(--muted); font-size: 13px; }
+.rick-settings-popover input { accent-color: var(--primary); }
+.rick-settings-popover input:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 3px; }
+.rick-settings-popover .rick-music-volume { display: block; width: 100%; min-height: 44px; }
+.rick-effects-option { min-height: 44px; padding-top: 6px; border-top: 1px solid var(--line); cursor: pointer; }
+.rick-effects-option input { flex: none; width: 20px; height: 20px; min-width: 20px; min-height: 20px; }
+@media (width < 768px) {
+  .site-header .rick-media-controls.rick-mobile-media { display: inline-flex; margin-inline-start: auto; }
+  .site-header .rick-media-controls .icon-button { min-width: 44px; min-height: 44px; }
 }
 :root[data-theme="rick-morty"]:not([data-dimension="corrupted"]) .scroll-nav a[aria-current="location"] {
-  color: #97CE4C; border-color: #97CE4C;
-  background: #97CE4C14; box-shadow: inset 0 0 0 1px #97CE4C55;
+  color: var(--primary);
+  background: #97ce4c14;
+  box-shadow: inset 0 0 0 1px #97ce4c55;
 }
-:root[data-theme="rick-morty"]:not([data-dimension="corrupted"]) .dimensional-scene { opacity: .4; }
-:root[data-theme="rick-morty"]:not([data-dimension="corrupted"]) .alien-planet {
-  background: radial-gradient(circle at 28% 28%, #334451, #161B22 70%);
-  border-color: #A6D8F038;
+:root[data-theme="rick-morty"] .neon-cta {
+  border-radius: 9px 15px;
+  box-shadow: 0 3px 0 color-mix(in srgb, var(--primary) 55%, var(--page)), 0 0 20px rgb(var(--palette-primary-rgb) / .08);
 }
-:root[data-theme="rick-morty"]:not([data-dimension="corrupted"]) .alien-ridge-far { fill: #1e2c39; stroke: #A6D8F020; }
-:root[data-theme="rick-morty"]:not([data-dimension="corrupted"]) .alien-ridge-near { fill: #111923; }
-:root[data-theme="rick-morty"]:not([data-dimension="corrupted"]) .alien-plants { stroke: #A6D8F035; }
+:root[data-theme="rick-morty"] .astra-fab {
+  border-color: var(--primary);
+  box-shadow: 0 0 20px rgb(var(--palette-primary-rgb) / .12);
+}
+:root[data-theme="rick-morty"] :is(.astra-wordmark, .astra-greet) { color: var(--primary); }
+:root[data-theme="rick-morty"] .astra-hero {
+  border: 1px solid var(--line);
+  background: linear-gradient(130deg, var(--panel), var(--rick-console));
+}
+:root[data-theme="rick-morty"][data-dimension="corrupted"] .astra-wordmark {
+  font-family: 'Trebuchet MS', sans-serif;
+  letter-spacing: -.04em;
+}
+:root[data-theme="rick-morty"][data-dimension="corrupted"] .astra-hero {
+  background: linear-gradient(135deg, #25475a, var(--panel));
+  border-color: var(--rick-frame);
+}
 
-
-/* One theme, two dimensions: only paint and transforms change during crossing. */
-:root[data-crossing] { overflow-anchor: none; }
-.dimension-starfield { position: absolute; inset: 0; background: radial-gradient(circle, #b7a2ff70 1px, transparent 1.5px) 21px 38px / 113px 137px; opacity: .12; }
-:root[data-theme="rick-morty"]:not([data-dimension="corrupted"]) .alien-horizon { display: none; }
-:root[data-theme="rick-morty"]:not([data-dimension="corrupted"]) .portfolio-hero h1 { transform: none; }
-:root[data-theme="rick-morty"][data-dimension="corrupted"] {
-  --palette-bg: #100d1d; --palette-surface: #21192f;
-  --palette-primary: #c5a0ff; --palette-accent: #e7b0f3; --palette-hover: #dec6ff;
-  --palette-on-primary: #160e26; --palette-text: #f4efff; --palette-muted: #bcb0ce;
-  --palette-border: #665079; --palette-tint: 33 25 47;
-  --palette-primary-rgb: 197 160 255; --palette-accent-rgb: 231 176 243;
-  --primary-hover: #dec6ff; --focus-ring: #d2b1ff;
-  --action-bg: #c5a0ff; --action-hover: #dec6ff; --action-text: #160e26;
+.dimension-portal {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 56px;
+  height: 48px;
+  padding: 0 5px 10px;
+  border-radius: 8px;
+  color: var(--primary);
+  cursor: pointer;
+  touch-action: manipulation;
 }
-:root[data-theme="rick-morty"][data-dimension="corrupted"] body { background: radial-gradient(ellipse at 80% 15%, #59337a55, transparent 55%), #100d1d; }
-:root[data-theme="rick-morty"][data-dimension="corrupted"] .dimension-starfield { opacity: .8; }
-:root[data-theme="rick-morty"][data-dimension="corrupted"] .alien-horizon { opacity: .18; }
-:root[data-theme="rick-morty"][data-dimension="corrupted"] .portfolio-hero h1 { font-family: 'Trebuchet MS', sans-serif; font-style: normal; font-weight: 900; letter-spacing: -.065em; color: var(--ink); transform: translateX(2px) skew(-2deg); text-shadow: -2px 2px #8c51ac55, 2px -1px #6d99b533; }
-:root[data-theme="rick-morty"][data-dimension="corrupted"] .portfolio-hero .neon-title { color: var(--primary); text-shadow: -3px 2px #8c51ac55; }
-:root[data-theme="rick-morty"][data-dimension="corrupted"] .dimension-label span { background: var(--primary); color: var(--on-primary); }
-:root[data-theme="rick-morty"] .hero-lead { min-height: 2.9em; }
-.dimension-instrument-panel { margin-top: 20px; padding: 16px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); max-width: 460px; position: relative; }
-.dimension-instrument-panel::before, .dimension-instrument-panel::after { content: ''; position: absolute; width: 5px; height: 5px; border: 1px solid var(--muted); border-radius: 50%; top: 6px; }
-.dimension-instrument-panel::before { left: 6px; }.dimension-instrument-panel::after { right: 6px; }
-.dimension-readout { display: grid; gap: 5px; min-height: 47px; }
-.dimension-readout > span { font: 10px/1.5 ui-monospace, monospace; letter-spacing: .12em; color: var(--muted); }
-.dimension-readout strong { font: 600 15px/1.5 ui-monospace, monospace; color: var(--primary); }
-.dimension-instruments { display: flex; gap: 15px; align-items: center; color: var(--accent); padding-block: 12px; font: 11px ui-monospace, monospace; }
-.dimension-instruments i { width: 27px; height: 27px; border: 2px solid var(--primary); border-right-color: transparent; border-radius: 50%; transform: rotate(-35deg); }
-.dimension-instruments em { height: 12px; flex: 1; background: repeating-linear-gradient(90deg, var(--primary) 0 3px, transparent 3px 7px); opacity: .4; }
-.dimension-astra-signal { display: flex; align-items: center; gap: 10px; min-height: 65px; padding: 10px 0 0; border-top: 1px solid var(--line); color: var(--ink); }
+.dimension-portal:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: 3px; }
+.site-header .dimension-portal[data-quiet-focus]:focus { outline: none; }
+.dimension-portal:active .portal-art { transform: scale(.94); }
+@media (hover: hover) {
+  .dimension-portal:hover { background: rgb(var(--palette-primary-rgb) / .09); }
+  .dimension-portal:hover .portal-art { filter: brightness(1.25); }
+}
+.dimension-portal[aria-busy="true"] .portal-art {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: 50%;
+}
+.portal-hint { position: absolute; bottom: 0; font: 700 9px/1.4 ui-monospace, monospace; letter-spacing: .08em; }
+.portal-art { position: relative; display: block; width: 34px; height: 38px; pointer-events: none; }
+.portal-art > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: var(--rick-portal-filter);
+}
+@media (width >= 768px) and (prefers-reduced-motion: no-preference) {
+  :root:not([data-rick-effects-paused], [data-rick-tab-hidden]) .dimension-portal .portal-art > img { animation: portal-breathe 5s ease-in-out infinite; }
+}
+@media (width < 768px) and (prefers-reduced-motion: no-preference) {
+  .dimension-portal[data-crossing="true"] .portal-art { animation: portal-tap var(--rick-motion-beat) var(--rick-motion-ease); }
+}
+@keyframes portal-breathe {
+  0%, 100% { transform: rotate(-3deg) scale(.96); }
+  50% { transform: rotate(3deg) scale(1.04); }
+}
+@keyframes portal-tap { 50% { transform: scale(1.12); } }
+
+.dimension-label,
+.dimension-scan-label {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font: 11px/1.45 ui-monospace, monospace;
+  letter-spacing: .04em;
+}
+.dimension-label { margin-bottom: clamp(10px, 2dvh, 18px); }
+.dimension-label span { padding: 4px 8px; background: var(--primary); color: var(--on-primary); font-weight: 800; }
+.dimension-label b { color: var(--muted); font-weight: 400; }
+.dimension-scan-label {
+  position: relative;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  color: var(--accent);
+  font-size: 10px;
+}
+.dimension-scan-label span { color: var(--primary); }
+
+.dimension-instrument-panel {
+  position: relative;
+  max-width: 500px;
+  margin-top: 12px;
+  padding: 12px 14px;
+  border: 4px solid var(--rick-frame);
+  border-radius: 12px 12px 8px 8px;
+  background: var(--rick-console);
+  box-shadow: 4px 5px #0005;
+}
+.dimension-instrument-panel::before, .dimension-instrument-panel::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  width: 5px;
+  height: 5px;
+  border: 1px solid #d1ddbd66;
+  border-radius: 50%;
+}
+.dimension-instrument-panel::before { left: 4px; }
+.dimension-instrument-panel::after { right: 4px; }
+.dimension-console-heading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(70px, .56fr);
+  align-items: center;
+  gap: 6px 14px;
+  padding-bottom: 9px;
+}
+.dimension-readout { display: grid; gap: 3px; }
+.dimension-readout > span { color: var(--muted); font: 10px/1.4 ui-monospace, monospace; letter-spacing: .09em; }
+.dimension-readout strong { color: var(--primary); font: 600 14px/1.35 ui-monospace, monospace; }
+.dimension-instruments { display: flex; gap: 8px; align-items: center; color: var(--accent); font: 10px ui-monospace, monospace; white-space: nowrap; }
+.dimension-instruments i { width: 16px; height: 16px; flex: none; border: 2px solid var(--primary); border-right-color: transparent; border-radius: 50%; transform: rotate(-35deg); }
+.dimension-instruments em { min-width: 12px; height: 9px; flex: 1; background: repeating-linear-gradient(90deg, var(--primary) 0 2px, transparent 2px 5px); opacity: .45; }
+.dimension-astra-signal { display: flex; align-items: center; gap: 10px; min-height: 57px; padding-top: 8px; border-top: 1px solid var(--line); color: var(--ink); }
 .dimension-astra-signal img { width: 36px; height: 36px; flex-shrink: 0; border-radius: 50%; }
-.dimension-astra-signal p { display: grid; gap: 3px; margin: 0; font-size: 13px; line-height: 1.45; }
+.dimension-astra-signal p { display: grid; gap: 3px; margin: 0; font-size: 13px; line-height: 1.4; }
 .dimension-astra-signal strong { font: 600 11px ui-monospace, monospace; color: var(--accent); }
 .chat-view > .dimension-astra-signal { padding: 12px 20px; flex-shrink: 0; background: var(--panel); }
-:root[data-dimension="corrupted"] .dimension-instrument-panel { transform: rotate(-.35deg); border-style: dashed; box-shadow: 3px -2px #bf72ef25, -3px 2px #8bd5de15; }
-:root[data-dimension="corrupted"] .dimension-instruments i { transform: rotate(35deg); border-style: dashed; }
-:root[data-dimension="corrupted"] .dimension-instruments em { transform: skew(-12deg) translateY(2px); }
-:root[data-theme="rick-morty"] .project-tile { border-radius: 8px; border-top: 3px solid var(--primary); background: var(--panel); }
-:root[data-theme="rick-morty"] .project-tile::after { content: attr(data-dimension-label); position: absolute; top: 10px; right: 10px; padding: 4px 7px; background: var(--panel); color: var(--primary); border: 1px solid var(--line); border-radius: 3px; font: 10px ui-monospace, monospace; pointer-events: none; }
-:root[data-dimension="corrupted"] .project-tile { border-color: #a776d0; border-style: dashed; box-shadow: 2px 0 #d9a5ed55, -2px 2px #6b84c044; }
-:root[data-dimension="corrupted"] .project-tile::after { content: attr(data-dimension-label); border-style: dashed; }
-:root[data-dimension="corrupted"] .hero-profile { border-color: var(--primary); background: var(--panel); }
-:root[data-dimension="corrupted"] .hero-profile .hero-photo { border-color: var(--primary); }
-:root[data-dimension="corrupted"] .hero-dimensional-ring { filter: hue-rotate(190deg) saturate(.7); }
-:root[data-dimension="corrupted"] .astra-wordmark { font-family: 'Trebuchet MS', sans-serif; font-style: normal; }
-.portal-art > img { animation: portal-spin 28s linear infinite; }
-:root[data-dimension="corrupted"] .portal-art > img { filter: hue-rotate(190deg) saturate(.8) drop-shadow(0 0 5px #ba80ff66); animation: portal-spin 20s linear infinite reverse; border-radius: 43% 57% 47% 53%; }
-@keyframes portal-spin { from { transform: rotate(0); } to { transform: rotate(360deg); } }
-.dimension-transit { display: block; background: none; animation: none; }
-.dimension-transit span { position: absolute; left: var(--portal-x); top: var(--portal-y); width: 220vmax; height: 220vmax; margin: -110vmax; border-radius: 50%; background: radial-gradient(circle, transparent 52%, rgb(var(--palette-primary-rgb) / .24) 62%, rgb(var(--palette-primary-rgb) / .6) 64%, transparent 68%); box-shadow: none; animation: dimension-wave .7s ease-out both; }
-@keyframes dimension-wave { from { transform: scale(0); opacity: 1; } to { transform: scale(1); opacity: 0; } }
-@media (max-width: 767px) {
-  .dimension-transit { display: none; }
-  .dimension-portal[data-crossing="true"] .portal-art { animation: portal-tap .3s ease-out; }
-  .dimension-instrument-panel { padding: 14px; }
-  .hero-dimensional-ring > img { animation: none; }
+@media (width < 480px) {
+  .dimension-console-heading { grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
+  .dimension-instruments :is(span, em) { display: none; }
 }
-@keyframes portal-tap { 50% { transform: scale(1.15); } }
-@media (prefers-reduced-motion: reduce) {
-  .portal-art > img, .dimension-portal[data-crossing="true"] .portal-art { animation: none !important; }
-  .dimension-transit { display: none; }
+
+/* The iris covers the scene before the destination changes. */
+:root[data-theme="rick-morty"][data-crossing] { overflow-anchor: none; }
+.dimension-transit {
+  --transit-rim: #a5ed5d;
+  --transit-band: #427e46;
+  --transit-depth: #0c211d;
+  position: fixed;
+  inset: 0;
+  z-index: var(--rick-layer-transit);
+  overflow: hidden;
+  pointer-events: none;
 }
+.dimension-transit[data-phase="reveal"] { will-change: opacity; }
+.dimension-transit[data-destination="lab"] {
+  --transit-rim: #c5eafa;
+  --transit-band: #42687b;
+  --transit-depth: #101e2b;
+}
+.transit-iris {
+  position: absolute;
+  left: var(--portal-x);
+  top: var(--portal-y);
+  translate: -50% -50%;
+  width: var(--iris-size);
+  max-width: none;
+  height: var(--iris-size);
+  transform: scale(0);
+}
+.dimension-transit:is([data-phase="charge"], [data-phase="open"]) .transit-iris { will-change: transform; }
+.dimension-transit:is([data-phase="covered"], [data-phase="reveal"]) .transit-iris { display: none; }
+.transit-cover {
+  position: absolute;
+  inset: 0;
+  display: none;
+  background: radial-gradient(ellipse at var(--portal-x) var(--portal-y), var(--transit-depth) 20%,
+    color-mix(in srgb, var(--transit-depth) 85%, var(--transit-band)));
+}
+.dimension-transit:is([data-phase="covered"], [data-phase="reveal"]) .transit-cover { display: block; }
+.portal-current, .portal-core {
+  transform-origin: 50px 50px;
+  transform-box: view-box;
+}
+.dimension-transit[data-phase="open"] .portal-current {
+  animation: portal-current-turn .65s ease-out both;
+}
+.dimension-transit[data-destination="lab"] { --current-turn: -73deg; }
+.dimension-transit[data-phase="open"] .portal-core {
+  animation: portal-core-drift .54s ease-out both;
+}
+@keyframes portal-core-drift { to { transform: translate(1px, -.5px) rotate(-32deg) scale(.82); } }
+@keyframes portal-current-turn { to { transform: rotate(var(--current-turn, 73deg)); } }

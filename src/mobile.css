@@ -14,8 +14,11 @@
   html {
     scroll-behavior: auto;
   }
-  #root, #root *, #root *::before, #root *::after, #root dialog::backdrop {
+  /* Only explicitly marked dimensional artwork runs on mobile. */
+  #root, #root *:where(:not([data-rick-motion], [data-rick-motion] *)), #root *::before, #root *::after, #root dialog::backdrop {
     animation: none !important;
+  }
+  #root, #root *:where(:not([data-rick-motion], [data-rick-motion] *)), #root *::before, #root *::after, #root dialog::backdrop {
     transition: none !important;
     scroll-behavior: auto !important;
   }

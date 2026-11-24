@@ -144,7 +144,7 @@
   scroll-padding-inline: 5px;
 }
 .projects-track::-webkit-scrollbar { display: none; }
-.projects-scroll-section[data-pinned="true"] .projects-track { overflow-x: hidden; scroll-snap-type: none; }
+.projects-scroll-section[data-pinned="true"] .projects-track { overflow: hidden; scroll-snap-type: none; }
 .projects-track > [data-project-slide] {
   flex: 0 0 clamp(280px, calc((100% - 2 * var(--project-gap)) / 3), 380px);
   max-width: 100%;
@@ -207,7 +207,7 @@
   .scroll-portfolio .projects-scroll-section .projects-card { padding: 8px; }
   .projects-scroll-section .project-tile > .project-card-body { padding: 12px; gap: 10px; }
   .projects-scroll-section .project-card-details { gap: 8px; }
-  .projects-scroll-section .project-tile[data-details-open="false"] :is(.project-card-technologies, .dimension-project-details) { display: none; }
+  .projects-scroll-section .project-tile[data-details-open="false"] .project-card-technologies { display: none; }
   .projects-scroll-section .project-card-copy p { margin-top: 6px; line-height: 1.5; }
 }
 /* Keep the pin's geometry independent of overflow and expanded card content. */

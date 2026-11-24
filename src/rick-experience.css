@@ -1,211 +1,556 @@
-/* Garage and Citadel: scenery is decorative; every egg uses a native control. */
-:root[data-theme="rick-morty"] .dimensional-scene { opacity: 1; }
-.garage-wall-art { position: absolute; inset: 0; background: linear-gradient(90deg, #0b1014e8 0%, #0b1014c4 40%, #0b10143d 75%), linear-gradient(0deg, #0b1014cc, transparent 60%), url('/rick-garage-night.png') center / cover; }
-:root[data-theme="rick-morty"]:not([data-dimension="corrupted"]) :is(.alien-planet, .alien-horizon, .dimension-starfield) { display: none; }
-:root[data-theme="rick-morty"] .portfolio-hero { min-height: 960px; }
-:root[data-theme="rick-morty"] .dimension-instrument-panel { background: #121e1c; border: 5px solid #59615b; border-radius: 16px 16px 8px 8px; box-shadow: 5px 6px 0 #0005, inset 0 0 24px #85c55b12; }
-:root[data-theme="rick-morty"] .dimension-instrument-panel::before,
-:root[data-theme="rick-morty"] .dimension-instrument-panel::after { border-color: #d1ddbd66; }
-:root[data-theme="rick-morty"] .hero-profile { background: #151e23e8; }
-@media (min-width: 900px) {
-  :root[data-theme="rick-morty"] .hero-profile { align-self: start; margin-top: 48px; }
+/* Each scene is painted beneath the portfolio. Fixed cameos stay in the wide gutters. */
+:root[data-theme="rick-morty"] .dimensional-scene {
+  display: block;
+  position: fixed;
+  inset: 0;
+  z-index: var(--rick-layer-scenery);
+  overflow: hidden;
+  pointer-events: none;
 }
-.garage-workbench { position: relative; display: flex; align-items: center; gap: 14px; min-height: 68px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); }
-.workbench-monitor { text-align: left; padding: 10px 12px; flex: 1; border: 1px solid #728572; border-radius: 5px; background: #080f0c; color: #b6e581; cursor: pointer; }
-.workbench-monitor span { display: block; font: 10px/1.5 ui-monospace, monospace; letter-spacing: .04em; }
-.workbench-monitor strong { display: block; margin-top: 4px; font-size: 14px; }
-.workbench-monitor:hover { background: #19331c; }
-.meeseeks-box { position: relative; width: 54px; height: 50px; flex-shrink: 0; border: 3px solid #573c23; border-radius: 5px; background: #d78934; box-shadow: inset -8px -5px #0002, 3px 3px #0005; transform: rotate(4deg); cursor: pointer; }
-.meeseeks-box > i { position: absolute; width: 26px; height: 12px; top: -10px; left: 10px; border: 2px solid #274f5c; border-radius: 50%; background: #65c4ed; box-shadow: 0 3px #244450; }
-.meeseeks-box > span { display: block; font-size: 22px; color: #68481f; }
-.meeseeks-box[aria-pressed="true"] > i { background: #b6e7fa; top: -7px; }
-.meeseeks-visitor { position: absolute; z-index: 8; bottom: 50px; right: -10px; width: 110px; pointer-events: none; }
-.meeseeks-visitor .series-character { width: 100%; height: 145px; }
-.meeseeks-visitor p { position: absolute; bottom: 115px; right: 65px; width: 190px; padding: 12px; border: 1px solid #8bd6f2; border-radius: 10px 10px 0 10px; background: #132b36; color: #e8f7ff; font-size: 14px; box-shadow: 0 6px 18px #0005; }
-.meeseeks-visitor small { display: block; margin-top: 5px; color: #b2d9e8; font-size: 12px; }
-.workbench-screw { position: absolute; bottom: -21px; right: 85px; color: #9ba896; font-size: 19px; }
-.workbench-monitor:focus-visible, .meeseeks-box:focus-visible, .pickle-button:focus-visible, .reception-morty:focus-visible, .dimension-project-details summary:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: 4px; }
-
-/* One flight per tab visit. The same asset is stationary at the destination. */
-:root[data-theme="rick-morty"] .rick-ship { animation: garage-flyby 2.1s ease-in-out both; opacity: .85; top: 25px; right: -24px; width: clamp(170px, 16vw, 235px); z-index: 0; }
-:root[data-theme="rick-morty"] .rick-ship[data-departed="true"]:not([data-docked="true"]) { visibility: hidden; animation: none; }
-:root[data-theme="rick-morty"] .rick-ship[data-docked="true"] { visibility: visible; animation: none; opacity: .9; transform: rotate(-2deg); }
-.rick-ship > span { display: none; }
-@keyframes garage-flyby { from { transform: translateX(-45vw) translateY(0) scale(.65); opacity: 0; } 20% { opacity: .9; } 80% { opacity: .9; } to { transform: translateX(28vw) translateY(-30px) scale(.45); opacity: 0; } }
-
-/* The Lab is explored before Pickle Rick reveals himself. */
-.code-lab { position: relative; }
-.lab-pickle-stage { position: relative; height: 0; z-index: 4; }
-.lab-pickle-stage[hidden] { display: none; }
-.pickle-button { position: absolute; top: 83px; left: calc(100% - 115px); width: 58px; height: 78px; opacity: 0; transform: translateY(27px); transition: left .5s ease-in-out, transform .35s ease, opacity .2s ease; cursor: pointer; }
-.lab-pickle-stage[data-spotted="true"] .pickle-button { opacity: 1; transform: translateY(0) rotate(8deg); }
-.lab-pickle-stage[data-side="right"] .pickle-button { left: 15px; transform: translateY(0) rotate(-12deg); }
-.pickle-button .series-character { width: 100%; height: 100%; }
-.pickle-experiment { position: absolute; top: 135px; right: 8px; padding: 6px 8px; border: 1px solid var(--line); border-radius: 4px; background: var(--panel); font: 9px ui-monospace, monospace; color: var(--muted); pointer-events: none; }
-.lost-screw { position: absolute; right: 127px; top: 140px; color: #aebbad; font-size: 17px; }
-
-/* A card's native details state survives the change of dimension. */
-.project-morty { position: absolute; z-index: 3; right: 14px; top: 62px; width: 75px; height: 112px; overflow: hidden; pointer-events: none; }
-.project-morty .series-character { width: 75px; height: 110px; transform: translateY(115px); transition: transform .3s ease; }
-.project-morty[data-expanded="true"] .series-character { transform: translateY(0); }
-.project-morty > i, .project-morty > b { position: absolute; bottom: 0; width: 15px; height: 8px; border-radius: 6px; background: #f1c7a3; border: 2px solid #263331; opacity: 0; }
-.project-morty > i { left: 4px; }.project-morty > b { right: 4px; }
-.project-morty[data-expanded="true"] > :is(i,b) { opacity: 1; }
-.dimension-project-details { border-top: 1px solid var(--line); padding-top: 12px; font-size: 14px; }
-.dimension-project-details summary { width: fit-content; color: var(--accent); cursor: pointer; padding: 4px 0; }
-.dimension-project-details dl { display: grid; gap: 7px; margin-top: 12px; }
-.dimension-project-details dt { color: var(--muted); font: 11px ui-monospace, monospace; }
-.dimension-project-details dd { margin-bottom: 8px; line-height: 1.6; }
-:root[data-theme="rick-morty"] .project-tile::after { content: attr(data-dimension-label); }
-
-/* Suspended city, cold blue infrastructure and amber wayfinding. */
-:root[data-theme="rick-morty"][data-dimension="corrupted"] {
-  --palette-bg: #091723; --palette-surface: #142a39; --palette-primary: #e7b45d;
-  --palette-accent: #a2d5ed; --palette-hover: #ffd28a; --palette-on-primary: #15202b;
-  --palette-text: #edf4f7; --palette-muted: #a5bac6; --palette-border: #496370;
-  --palette-tint: 20 42 57; --palette-primary-rgb: 231 180 93; --palette-accent-rgb: 162 213 237;
-  --primary-hover: #ffd28a; --focus-ring: #e7b45d;
-  --action-bg: #e7b45d; --action-hover: #ffd28a; --action-text: #15202b;
+.garage-wall-art, .citadel-city-art, .intro-backdrop {
+  display: block;
+  position: absolute;
+  inset: 0;
 }
-:root[data-theme="rick-morty"][data-dimension="corrupted"] body { background: radial-gradient(ellipse at 85% 20%, #28537255, transparent 55%), #091723; }
-:root[data-theme="rick-morty"][data-dimension="corrupted"] :is(.alien-planet, .alien-horizon) { display: none; }
-:root[data-theme="rick-morty"][data-dimension="corrupted"] .dimension-starfield { opacity: .5; }
-.citadel-city-art { position: absolute; top: 15%; right: -7%; width: min(65vw, 930px); opacity: .32; }
-.citadel-skyline { position: absolute; width: 100%; height: min(42vh, 400px); bottom: 0; opacity: .5; }
-.citadel-building { fill: #18364a; stroke: #5f8eac55; stroke-width: 2; }
-.citadel-window { stroke: #e7b45d80; stroke-width: 3; }
-.citadel-spire { fill: #28516a; stroke: #92c6dd55; stroke-width: 2; }
-.citadel-transit { fill: none; stroke: #e7b45d55; stroke-width: 3; }
-.citadel-dome { fill: #c5e7fb06; stroke: #a2d5ed33; stroke-width: 2; stroke-dasharray: 8 12; }
-:root[data-theme="rick-morty"][data-dimension="corrupted"] .portfolio-hero h1 { transform: none; color: var(--ink); text-shadow: 2px 3px #091723; }
-:root[data-theme="rick-morty"][data-dimension="corrupted"] .portfolio-hero .neon-title { color: var(--primary); text-shadow: 2px 3px #65502b; }
-:root[data-theme="rick-morty"][data-dimension="corrupted"] .dimension-instrument-panel { transform: none; border: 5px solid #557181; background: #102331; box-shadow: 5px 6px #0005; }
-:root[data-theme="rick-morty"][data-dimension="corrupted"] .hero-profile { border-color: #8ab3c5; border-radius: 9px; background: #142a39ed; box-shadow: 6px 6px #a2d5ed09; }
-:root[data-theme="rick-morty"][data-dimension="corrupted"] .hero-profile .hero-photo { border-color: var(--accent); }
-:root[data-theme="rick-morty"][data-dimension="corrupted"] .hero-dimensional-ring { filter: hue-rotate(40deg) saturate(.55); opacity: .4; }
-:root[data-theme="rick-morty"][data-dimension="corrupted"] .project-tile { border: 1px solid #496370; border-top: 3px solid var(--primary); border-radius: 8px; box-shadow: 4px 4px #a2d5ed0d; }
-:root[data-theme="rick-morty"][data-dimension="corrupted"] .project-tile::after { content: attr(data-dimension-label); border-style: solid; }
-:root[data-dimension="corrupted"] .dimension-instruments :is(i,em) { transform: none; border-style: solid; }
-:root[data-dimension="corrupted"] .workbench-monitor { background: #0a1820; color: #a2d5ed; border-color: #7e9fac; }
-:root[data-dimension="corrupted"] .meeseeks-box { visibility: hidden; }
-:root[data-dimension="corrupted"] .meeseeks-visitor { display: none; }
-:root[data-dimension="corrupted"] .portal-art > img { filter: hue-rotate(25deg) drop-shadow(0 0 5px #a2d5ed55); }
-:root[data-dimension="corrupted"] .astra-hero { background: linear-gradient(135deg, #25475a, #142a39); border-color: #557181; }
-:root[data-theme="rick-morty"] .astra-compact .center-panel { border: 5px solid #59615b; border-radius: 14px; background: #101b19; }
-:root[data-theme="rick-morty"][data-dimension="corrupted"] .astra-compact .center-panel { border-color: #557181; background: #102331; }
-
-.citadel-windows { position: absolute; inset: 0; }
-.citadel-window-scene { position: absolute; display: flex; width: 100px; height: 120px; overflow: hidden; border: 5px solid #45687c; border-radius: 40px 40px 5px 5px; background: linear-gradient(#dba85428, #102432); box-shadow: 0 0 14px #e7b45d16; opacity: .75; }
-.citadel-window-scene .series-character { width: 63px; height: 95px; flex-shrink: 0; align-self: end; }
-.scene-cargo { left: 1%; top: 35%; transform: rotate(-3deg); }
-.scene-debate { right: 1%; top: 57%; width: 120px; }
-.scene-debate .series-character:first-child { transform: rotate(-12deg); }.scene-debate .series-character:last-child { transform: scaleX(-1) rotate(-10deg); margin-left: -10px; }
-.scene-dock { left: 1%; bottom: 6%; }
-.scene-dock img { position: absolute; width: 80px; bottom: -4px; right: -20px; }
-.cargo-box { position: absolute; right: 3px; bottom: 0; color: #ba9862; font-size: 45px; }
-
-.citadel-reception { position: relative; display: flex; align-items: end; gap: 20px; min-height: 210px; margin-bottom: 24px; }
-.reception-morty { position: relative; width: 250px; height: 195px; flex-shrink: 0; cursor: pointer; }
-.reception-morty .series-character { position: absolute; width: 105px; height: 140px; left: 62px; top: 0; }
-.paper-stack { position: absolute; right: 10px; bottom: 35px; color: #d0dfdc; font-size: 47px; letter-spacing: -14px; transform: rotate(-8deg); }
-.reception-sign { position: absolute; bottom: 0; left: 0; width: 100%; padding: 19px 10px; border: 3px solid #59788a; background: #1b3545; color: #f6d69f; font: 12px/1.5 ui-monospace, monospace; box-shadow: 0 8px #0b1822; }
-.morty-badge { position: absolute; top: 31px; left: 175px; padding: 4px 6px; border: 1px solid #59788a; background: var(--panel); color: var(--accent); font: 10px ui-monospace, monospace; }
-.citadel-reception p { max-width: 30ch; padding: 12px; border: 1px solid var(--line); border-radius: 10px 10px 10px 0; background: var(--panel); color: var(--ink); font-size: 14px; }
-
-/* Scenes are brief, skippable, and never change document geometry. */
-.dimension-intro { position: fixed; inset: 0; z-index: 9000; overflow: hidden; background: #0b1115; animation: intro-arrive .18s ease-out; }
-.intro-illustration { position: absolute; inset: 0; background: linear-gradient(0deg, #080e15d9, #080e1510), url('/rick-garage-night.png') center / cover; }
-.intro-garage-door { position: absolute; inset: 0; background: repeating-linear-gradient(#48534d 0 58px, #1c2722 58px 62px); border-bottom: 12px solid #16211c; animation: garage-door-open 1.35s ease-in-out both; }
-.intro-spaceship { position: absolute; width: min(32vw, 400px); top: 22%; right: 10%; animation: garage-flyby 1.8s .2s ease-in-out both; }
-.intro-pickle { position: absolute; width: 55px; height: 90px; bottom: 19%; left: 20%; animation: pickle-dash 1.5s .35s ease-in-out both; }
-.intro-pickle .series-character { width: 100%; height: 100%; }.intro-pickle > span:not(.series-character) { color: #c3c9a6; position: absolute; bottom: -15px; right: -12px; animation: screw-drop 1s .65s ease-in both; }
-.intro-caption { position: absolute; left: max(24px, calc((100vw - 1180px) / 2)); bottom: 16%; padding: 24px; border: 6px solid #546457; border-radius: 15px; background: #08150fe8; color: #e7f7d8; min-width: min(420px, 90vw); box-shadow: 0 0 32px #91ce4b16; }
-.intro-caption small { display: block; margin-bottom: 10px; font: 11px ui-monospace, monospace; letter-spacing: .1em; color: #b6dd8d; }
-.intro-caption strong { display: block; font-size: clamp(24px, 3vw, 44px); letter-spacing: -.03em; }
-.intro-caption p { margin-top: 10px; font-size: 14px; color: #bed0c0; }
-.dimension-intro > button { position: absolute; top: 24px; right: 24px; padding: 12px 15px; border: 1px solid #c2d9c4; border-radius: 8px; background: #0b171ce6; color: #eaf5eb; font-size: 14px; }
-.dimension-intro > button span { margin-left: 10px; font-size: 11px; opacity: .7; }
-.dimension-intro > button:focus-visible { outline: 3px solid #97ce4c; outline-offset: 4px; }
-.intro-dock .intro-illustration { background: linear-gradient(#0b203988, #0b2039df), url('/rick-assets/citadel.png') center / min(90%, 900px) auto no-repeat, #091723; }
-.intro-dock .intro-garage-door { display: none; }
-.intro-dock .intro-spaceship { right: 10%; top: 18%; animation: citadel-land .8s ease-out both; }
-.intro-dock .intro-caption { background: #0b1f2de8; border-color: #62859b; }
-.intro-reception { position: absolute; right: 10%; bottom: 13%; width: 120px; color: #d6e9f3; }
-.intro-reception .series-character { width: 100%; height: 160px; }.intro-reception > span:not(.series-character) { display: block; background: #172f41; padding: 6px; font: 10px ui-monospace, monospace; text-align: center; }
-@keyframes garage-door-open { to { transform: translateY(-103%); } }
-@keyframes pickle-dash { from { transform: translateX(-35vw) rotate(-20deg); } to { transform: translateX(60vw) rotate(18deg); } }
-@keyframes screw-drop { to { transform: translateY(40px) rotate(160deg); } }
-@keyframes citadel-land { from { transform: translateY(-80px) rotate(-8deg); } to { transform: translateY(15px) rotate(0); } }
-@keyframes intro-arrive { from { opacity: 0; } to { opacity: 1; } }
-
-@media (max-width: 1100px) {
-  .citadel-window-scene { opacity: .35; width: 76px; height: 100px; }
-  .scene-debate { width: 95px; }
+:is(.garage-wall-art, .citadel-city-art, .intro-backdrop) > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
-@media (max-width: 767px) {
-  :root[data-theme="rick-morty"] .portfolio-hero { min-height: auto; }
-  .garage-wall-art { background-position: 65% center; opacity: .65; }
-  .garage-workbench { gap: 10px; }.workbench-monitor span { font-size: 9px; }
-  .meeseeks-visitor { right: -6px; width: 85px; }
-  .meeseeks-visitor p { right: 45px; width: 175px; }
-  .citadel-city-art { width: 110vw; right: -40%; opacity: .2; }
-  .citadel-windows { display: none; }
-  .citadel-reception { align-items: start; flex-direction: column; gap: 12px; }
-  .citadel-reception p { margin-top: 0; }
-  .pickle-button { width: 45px; height: 62px; top: 105px; left: calc(100% - 58px); }
-  .pickle-experiment { top: 153px; right: 0; font-size: 8px; }.lost-screw { top: 155px; right: 85px; }
-  .dimension-intro { inset: auto 12px 90px; height: 150px; border: 1px solid #92c0b5; border-radius: 12px; }
-  .intro-caption { left: 12px; bottom: 12px; padding: 10px; border-width: 2px; min-width: 0; max-width: calc(100% - 80px); }
-  .intro-caption strong { font-size: 18px; }.intro-caption small { font-size: 8px; margin-bottom: 5px; }.intro-caption p { display: none; }
-  .dimension-intro > button { top: 8px; right: 8px; font-size: 11px; padding: 6px; }.dimension-intro > button span { display: none; }
-  .intro-spaceship { width: 100px; right: 5%; top: 12%; }.intro-pickle { width: 30px; height: 50px; }
-  .intro-reception { right: 8px; bottom: 5px; width: 45px; }.intro-reception .series-character { height: 60px; }.intro-reception > span:not(.series-character) { display: none; }
+.garage-wall-art::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, #0b1014ef 0%, #0b1014a6 42%, #0b101427 78%),
+    linear-gradient(0deg, #0b1014cd, transparent 62%);
 }
-@media (prefers-reduced-motion: reduce) {
-  .dimension-intro { display: none; }
-  :root[data-theme="rick-morty"] .rick-ship { animation: none; visibility: hidden; }
-  :root[data-theme="rick-morty"] .rick-ship[data-docked="true"] { visibility: visible; }
-  .pickle-button, .project-morty .series-character { transition: none; }
+.dimension-starfield {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, #b7d9ff70 1px, transparent 1.5px) 21px 38px / 113px 137px;
+}
+.citadel-city-art { opacity: .72; }
+.citadel-city-art > img { object-position: 56% center; }
+.citadel-city-shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, #081520ee, #081520af 42%, #08152026 77%),
+    linear-gradient(0deg, #081520d9, transparent 55%, #08152033);
+}
+.citadel-windows {
+  position: absolute;
+  inset: 0;
+  z-index: var(--rick-layer-actors);
+  --citadel-gutter: calc((100% - 1180px) / 2);
+}
+.citadel-window-scene {
+  position: absolute;
+  display: flex;
+  width: min(100px, calc(var(--citadel-gutter) - 22px));
+  height: 112px;
+  overflow: hidden;
+  border: 4px solid #45687c;
+  border-radius: 38px 38px 5px 5px;
+  background: linear-gradient(#dba85428, #102432);
+  box-shadow: 0 0 14px #e7b45d16;
+  opacity: .75;
+}
+.citadel-window-scene .series-character { width: 58%; height: 84%; flex-shrink: 0; align-self: end; }
+.scene-cargo { left: 10px; top: 35%; }
+.scene-debate { right: 10px; top: 57%; }
+.scene-debate .series-character:first-child { transform: rotate(-12deg); }
+.scene-debate .series-character:last-child { transform: scaleX(-1) rotate(-10deg); margin-left: -12%; }
+.scene-dock { left: 10px; bottom: 6%; }
+.scene-dock > img { position: absolute; width: 80%; bottom: -4px; right: -12%; }
+.cargo-box { position: absolute; right: 3px; bottom: 0; color: #ba9862; font-size: 36px; }
+.citadel-windows--dock { display: none; }
+@media (width < 1360px) { .dimensional-scene .citadel-windows { display: none; } }
+@media (768px <= width < 1360px) {
+  .citadel-windows--dock {
+    position: static;
+    display: flex;
+    gap: 4px;
+  }
+  .citadel-windows--dock .citadel-window-scene {
+    position: relative;
+    inset: auto;
+    width: 36px;
+    height: 54px;
+    border-width: 2px;
+    border-radius: 14px 14px 3px 3px;
+  }
+  .citadel-windows--dock .cargo-box { font-size: 18px; }
+  .citadel-windows--dock .series-character-badge { display: none; }
+  .rick-ship-stage:has(.citadel-windows--dock) { grid-template-columns: auto auto; justify-content: center; column-gap: 8px; }
+  .rick-ship-stage:has(.citadel-windows--dock) .rick-ship { max-width: 132px; height: auto; }
 }
 
-/* Original series cutouts, downloaded from the recorded sources. */
+/* Shared geometry for the garage and the Citadel. */
+/* A pinned slide already has a fixed track height and flex basis. The browser
+   can skip layout and paint of its descendants until the slide approaches. */
+:root[data-theme="rick-morty"] .projects-scroll-section[data-pinned="true"] [data-project-slide] {
+  content-visibility: auto;
+}
+:root[data-theme="rick-morty"] .scroll-portfolio .site-header { padding-block: 8px; }
+:root[data-theme="rick-morty"] .site-header .header-brand { gap: 8px; }
+:root[data-theme="rick-morty"] .site-header .brand-logo { width: 42px; }
+:root[data-theme="rick-morty"] .site-header .brand-lockup { gap: 8px; }
+:root[data-theme="rick-morty"] .site-header .brand-lockup p:not(.brand-title) { margin-top: 2px; }
+:root[data-theme="rick-morty"] .site-header .scroll-nav .nav-astra {
+  max-width: 148px;
+  white-space: normal;
+  text-align: center;
+  line-height: 1.2;
+}
+:root[data-theme="rick-morty"] .site-header .nav-astra svg { flex-shrink: 0; }
+
+@media (width >= 1280px) {
+  :root[data-theme="rick-morty"] .scroll-portfolio .site-header {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: clamp(10px, 1.4vw, 22px);
+    padding-inline: max(16px, calc((100% - 1440px) / 2));
+  }
+  :root[data-theme="rick-morty"] .scroll-portfolio .site-header .scroll-nav {
+    grid-area: 1 / 2;
+    width: max-content;
+    max-width: 100%;
+    justify-self: center;
+    margin: 0;
+    padding: 3px;
+    overflow: visible;
+  }
+  :root[data-theme="rick-morty"] .site-header .scroll-nav a { min-height: 36px; padding: 6px clamp(5px, .68vw, 10px); }
+  :root[data-theme="rick-morty"] .scroll-portfolio .site-header .header-actions { grid-area: 1 / 3; margin: 0; }
+}
+@media (1280px <= width < 1360px) {
+  :root[data-theme="rick-morty"] .scroll-portfolio .site-header .cv-link { padding-inline: 11px; }
+  :root[data-theme="rick-morty"] .scroll-portfolio .site-header .cv-link span { display: none; }
+}
+@media (width < 768px) {
+  :root[data-theme="rick-morty"] .scroll-portfolio .site-header { gap: 6px; }
+  :root[data-theme="rick-morty"] .site-header .header-brand, :root[data-theme="rick-morty"] .site-header .brand-lockup { gap: 5px; }
+  :root[data-theme="rick-morty"] .site-header .brand-logo { width: clamp(29px, 9vw, 40px); }
+  :root[data-theme="rick-morty"] .site-header .mobile-current-section { flex-shrink: 1; font-size: 11px; padding-inline: 6px; }
+  :root[data-theme="rick-morty"] .mobile-nav { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  :root[data-theme="rick-morty"] .mobile-nav > :is(a, button) { padding-inline: 4px; text-align: center; }
+  :root[data-theme="rick-morty"] .mobile-nav svg { flex-shrink: 0; }
+  :root[data-theme="rick-morty"] .scroll-portfolio { padding-bottom: calc(104px + env(safe-area-inset-bottom)); }
+}
+
+:root[data-theme="rick-morty"] .portfolio-hero {
+  display: grid;
+  grid-template-areas: "presentation flight" "presentation portrait";
+  grid-template-rows: auto auto;
+  align-content: center;
+  align-items: start;
+  min-height: calc(100svh - var(--portfolio-header-height, 80px));
+  row-gap: 12px;
+  padding-block: clamp(18px, 3dvh, 36px);
+}
+.rick-presentation {
+  grid-area: presentation;
+  align-self: center;
+  min-width: 0;
+  padding: clamp(14px, 2.5dvh, 30px);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--rick-surface) 96%, transparent);
+  box-shadow: 0 12px 32px #0003;
+}
+:root[data-theme="rick-morty"] .portfolio-hero h1 {
+  color: var(--ink);
+  font-family: 'Trebuchet MS', sans-serif;
+  font-weight: 900;
+  line-height: .95;
+  letter-spacing: -.065em;
+  text-shadow: 2px 3px var(--page);
+}
+:root[data-theme="rick-morty"] .portfolio-hero .neon-title { color: var(--primary); text-shadow: 2px 3px var(--rick-title-shadow); }
+:root[data-theme="rick-morty"] .hero-lead {
+  margin-top: clamp(10px, 2dvh, 18px);
+  max-width: 500px;
+  font-size: clamp(17px, 1.9vw, 23px);
+  font-weight: 600;
+  line-height: 1.32;
+}
+:root[data-theme="rick-morty"] .hero-description { margin-top: 12px; font-size: 15px; line-height: 1.55; }
+:root[data-theme="rick-morty"] .hero-actions { margin-block: 14px; gap: 12px; }
+:root[data-theme="rick-morty"] .hero-actions .neon-cta { padding-block: 10px; }
+:root[data-theme="rick-morty"] .hero-profile {
+  grid-area: portrait;
+  isolation: isolate;
+  justify-self: end;
+  border: 1px solid var(--rick-portrait-border);
+  border-radius: var(--rick-portrait-radius);
+  background: var(--rick-surface);
+  box-shadow: 7px 7px 0 rgb(var(--palette-primary-rgb) / .06);
+}
+:root[data-theme="rick-morty"] .hero-profile .portrait-orbit { display: none; }
+:root[data-theme="rick-morty"] .hero-profile .hero-photo {
+  display: block;
+  aspect-ratio: 5 / 6;
+  border: 2px solid var(--rick-photo-border);
+  border-radius: var(--rick-photo-radius);
+  filter: saturate(.8);
+}
+:root[data-theme="rick-morty"] .hero-profile-caption { gap: 4px; margin-top: 10px; padding: 9px 2px 0; border-top: 1px solid var(--line); }
+.portrait-portal-stage { margin-inline: -5px; }
+@media (min-width: 900px) and (min-height: 821px) {
+  :root[data-theme="rick-morty"] .hero-profile { width: min(100%, 438px); }
+}
+
+.rick-ship-stage {
+  position: relative;
+  grid-area: flight;
+  display: grid;
+  place-items: center;
+  min-height: clamp(82px, 13dvh, 138px);
+  overflow: clip;
+  pointer-events: none;
+}
+.dimension-ship {
+  --flight-time: 1.28s;
+  --flight-delay: 0s;
+  --launch-x: 117%;
+  --launch-y: -39%;
+  --launch-bank: -11deg;
+  position: relative;
+  display: block;
+  aspect-ratio: 846 / 569;
+  transform-origin: 49% 77%;
+}
+.ship-hull, .ship-hull > img { position: relative; display: block; width: 100%; height: 100%; object-fit: contain; }
+.dimension-ship:not([data-docked="true"]) .ship-hull { animation: var(--hull-cue, engine-start) var(--flight-time) var(--flight-delay) linear both; }
+.ship-exhaust, .ship-smoke, .ship-headlight { position: absolute; pointer-events: none; opacity: 0; }
+.ship-exhaust {
+  left: -22%; top: 65%; width: 29%; height: 11%;
+  border-radius: 92% 14% 24% 84%; transform-origin: 100% 55%;
+  background: radial-gradient(ellipse at 88% 52%, #ecfbcf, #91e1c9 26%, #589ead70 56%, transparent 75%);
+  animation: var(--exhaust-cue, thrust) var(--flight-time) var(--flight-delay) ease-out both;
+}
+.ship-smoke {
+  left: -4%; top: 67%; width: 22%; height: 19%;
+  background: radial-gradient(ellipse at 69% 64%, #a8bdaf 0 19%, transparent 40%),
+    radial-gradient(ellipse at 43% 38%, #b9c9bd 0 21%, transparent 43%), radial-gradient(ellipse at 23% 66%, #819687 0 14%, transparent 38%);
+  animation: var(--smoke-cue, departure-smoke) var(--flight-time) var(--flight-delay) ease-out both;
+}
+.ship-headlight {
+  position: absolute;
+  left: 77%;
+  top: 73%;
+  width: 39%;
+  height: 16%;
+  transform: rotate(7deg);
+  transform-origin: left center;
+  clip-path: polygon(0 34%, 100% 0, 100% 100%, 0 54%);
+  background: linear-gradient(90deg, #fff2a8c2, #f7e79636 55%, transparent);
+  animation: var(--lamp-cue, departure-light) var(--flight-time) var(--flight-delay) ease-out both;
+  pointer-events: none;
+}
+.rick-ship {
+  width: auto;
+  height: clamp(68px, 12dvh, 124px);
+  object-fit: contain;
+  filter: drop-shadow(0 8px 10px #0008);
+  animation: garage-flyby var(--flight-time) var(--flight-delay) both;
+}
+.rick-ship[data-docked="true"] { animation: none; transform: rotate(-2deg); }
+@keyframes garage-flyby {
+  0%, 15% { transform: translate(-31%, 8%) rotate(-1deg) scale(.86); }
+  40% { transform: translate(-36%, 9%) rotate(3deg) scale(.86); animation-timing-function: ease-out; }
+  56% { transform: translate(-29%, 2%) rotate(-5deg) scale(.88); animation-timing-function: ease-in; }
+  76% { opacity: 1; }
+  to { transform: translate(var(--launch-x), var(--launch-y)) rotate(var(--launch-bank)) scale(.66); opacity: 0; }
+}
+@keyframes engine-start {
+  0%, 17%, 43%, 100% { transform: translate(0, 0); }
+  23%, 35% { transform: translate(.5%, -.7%); }
+  29% { transform: translate(-.5%, .6%); }
+}
+@keyframes thrust {
+  0%, 31%, 100% { opacity: 0; transform: scaleX(.18); }
+  48% { opacity: .52; transform: scaleX(.7); }
+  74% { opacity: .85; transform: scaleX(1.34); }
+}
+@keyframes departure-light { 0%, 9%, 100% { opacity: 0; } 25%, 78% { opacity: .84; } }
+@keyframes departure-smoke {
+  0%, 42% { opacity: 0; transform: translate(0, 0) scale(.3); }
+  55% { opacity: .44; }
+  87%, 100% { opacity: 0; transform: translate(-145%, -42%) scale(1.5); }
+}
+@media (width < 900px) {
+  :root[data-theme="rick-morty"] .portfolio-hero { display: flex; flex-direction: column; align-items: stretch; min-height: auto; padding-block: 20px 28px; gap: 18px; }
+  :root[data-theme="rick-morty"] .hero-profile { align-self: center; width: min(100%, 380px); }
+  .rick-presentation { width: 100%; }
+}
+@media (width < 768px) {
+  :root[data-theme="rick-morty"] .portfolio-hero h1 { font-size: clamp(53px, 15vw, 80px); }
+  :root[data-theme="rick-morty"] .hero-lead { min-height: 0; }
+  :root[data-theme="rick-morty"] .hero-profile { width: min(100%, 320px); }
+  :root[data-theme="rick-morty"] .hero-profile .hero-photo { max-height: none; }
+  .rick-presentation { width: 100%; padding: 14px; }
+  .rick-ship-stage { order: -1; min-height: 78px; }
+  .rick-ship-stage:empty { display: none; }
+  .rick-ship { height: 72px; }
+  .dimension-ship { --launch-x: 55%; --launch-y: -12%; --launch-bank: -5deg; }
+  .garage-wall-art > img { object-position: 65% center; }
+  .citadel-city-art { opacity: .58; }
+  .citadel-city-art > img { object-position: 58% center; }
+  .citadel-city-shade { background: linear-gradient(90deg, #081520d9, #08152080), linear-gradient(0deg, #081520b3, transparent); }
+}
+
 .series-character { position: relative; display: inline-block; }
 .series-character > img { display: block; width: 100%; height: 100%; object-fit: contain; object-position: center bottom; }
 .series-character-badge { position: absolute; top: 68%; left: 40%; padding: 2px; border: 1px solid #395363; border-radius: 2px; background: #dcebee; color: #203540; font: 5px/1.2 ui-monospace, monospace; text-align: center; }
-.meeseeks-box { width: 64px; height: 60px; padding: 0; background: transparent; border: 0; border-radius: 4px; box-shadow: none; }
-.meeseeks-box > img { width: 100%; height: 100%; object-fit: contain; transition: transform .15s ease; }
-.meeseeks-box[aria-pressed="true"] > img { transform: translateY(3px); }
-.citadel-city-art { inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 56% center; opacity: .72; filter: saturate(.82); }
-.citadel-city-shade { position: absolute; inset: 0; background: linear-gradient(90deg, #081520ee 0%, #081520b3 32%, #08152026 72%, #08152052), linear-gradient(0deg, #081520d9, transparent 55%, #08152033); }
-.citadel-windows { z-index: 1; }
-.intro-dock .intro-illustration { background-size: auto, cover; }
+.garage-workbench {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px 12px;
+  min-height: 60px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+}
+.workbench-monitor { min-height: 46px; padding: 7px 9px; border: 1px solid #728572; border-radius: 5px; background: #080f0c; color: #b6e581; text-align: left; cursor: pointer; }
+.workbench-monitor span { display: block; font: 9px/1.4 ui-monospace, monospace; letter-spacing: .04em; }
+.workbench-monitor strong { display: block; margin-top: 3px; font-size: 13px; }
+.workbench-monitor:hover { background: #19331c; }
+.meeseeks-box { width: 49px; height: 47px; padding: 0; border-radius: 4px; transform: rotate(4deg); cursor: pointer; }
+.meeseeks-box > img { width: 100%; height: 100%; object-fit: contain; transition: transform var(--rick-motion-quick) ease; }
+.meeseeks-visitor { grid-column: 1 / -1; display: flex; align-items: center; gap: 10px; padding: 4px 0 0; }
+.meeseeks-rig { display: block; width: 84px; height: 96px; flex-shrink: 0; }
+.meeseeks-box-glyph { display: grid; place-items: center; width: 38px; height: 36px; margin: auto; border: 2px solid #133246; border-radius: 5px; background: #7dcddc; color: #f3ba78; box-shadow: inset 0 -5px #3e879e; }
+.meeseeks-presentation[data-presented="false"] { visibility: hidden; }
+.meeseeks-visitor p { margin: 0; padding: 9px 11px; border: 1px solid #8bd6f2; border-radius: 9px 9px 9px 0; background: #132b36; color: #e8f7ff; font-size: 13px; }
+.meeseeks-visitor small { display: block; margin-top: 3px; color: #b2d9e8; font-size: 12px; }
+.workbench-screw { position: absolute; bottom: -17px; right: 55px; color: #9ba896; font-size: 13px; pointer-events: none; }
+:root[data-theme="rick-morty"][data-dimension="corrupted"] .workbench-monitor { background: #0a1820; color: #a2d5ed; border-color: #7e9fac; }
+:root[data-theme="rick-morty"][data-dimension="corrupted"] .meeseeks-box { visibility: hidden; }
+
+.code-lab-heading:has(.lab-pickle-stage:not([hidden])) { display: grid; grid-template-columns: minmax(0, 1fr) minmax(200px, 260px); gap: 12px 20px; align-items: center; }
+.lab-pickle-stage {
+  --pickle-slot: 72px;
+  position: relative;
+  height: 100px;
+  overflow: clip;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--rick-console);
+}
+.pickle-runner { position: absolute; inset: 0 var(--pickle-slot) 0 0; pointer-events: none; }
+.pickle-button { position: absolute; bottom: 3px; left: 2px; width: 68px; height: 72px; opacity: 0; cursor: pointer; pointer-events: auto; transition: opacity var(--rick-motion-quick) ease; }
+.lab-pickle-stage[data-spotted="true"] .pickle-button, .pickle-button:focus-visible { opacity: 1; }
+.pickle-button svg { display: block; width: 100%; height: 100%; }
+.pickle-experiment { position: absolute; top: 7px; inset-inline: 6px; color: var(--muted); font: 9px/1.25 ui-monospace, monospace; text-align: center; pointer-events: none; }
+.lost-screw { position: absolute; inset: auto 0 10px; color: #aebbad; font-size: 14px; text-align: center; pointer-events: none; }
+@media (width < 768px) {
+  .code-lab-heading:has(.lab-pickle-stage:not([hidden])) { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .lab-pickle-stage { width: min(100%, 260px); margin-bottom: 16px; }
+}
+
+:root[data-theme="rick-morty"] .project-tile { border-radius: 8px; border-top: 3px solid var(--primary); background: var(--panel); }
+:root[data-theme="rick-morty"][data-dimension="corrupted"] .project-tile { box-shadow: 4px 4px #a2d5ed0d; }
+.project-preview:has(.project-morty-stage) { display: grid; grid-template-columns: minmax(0, 1fr) clamp(64px, 7vw, 92px); }
+.project-preview:has(.project-morty-stage) > :first-child { min-height: 0; min-width: 0; }
+.project-morty-stage {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 3px;
+  min-width: 0;
+  min-height: 0;
+  padding: 5px 4px 0;
+  border-left: 1px solid var(--line);
+  background: var(--rick-console);
+  color: var(--primary);
+  font: 9px/1.25 ui-monospace, monospace;
+  text-align: center;
+}
+.project-morty { position: relative; overflow: clip; pointer-events: none; }
+.project-morty .series-character {
+  position: absolute;
+  inset: 0 0 auto;
+  width: 100%;
+  height: min(100%, 100px);
+  top: max(0px, calc(100% - 100px));
+  transform: translateY(68%) rotate(-7deg);
+  transform-origin: 48% 94%;
+  transition: transform var(--rick-motion-reveal) var(--rick-motion-ease);
+}
+.project-morty[data-expanded="true"] .series-character { transform: none; }
+.project-morty > :is(i,b) { position: absolute; bottom: 0; width: 12px; height: 7px; border: 2px solid #263331; border-radius: 6px; background: #f1c7a3; opacity: 0; }
+.project-morty > i { left: 5px; }
+.project-morty > b { right: 5px; }
+.project-morty[data-expanded="true"] > :is(i,b) { opacity: 1; }
+
+.citadel-reception { display: flex; flex-wrap: wrap; align-items: end; gap: 14px 20px; margin-bottom: 24px; }
+.reception-morty { position: relative; width: min(100%, 250px); height: 195px; flex-shrink: 0; cursor: pointer; }
+.reception-morty .series-character { position: absolute; width: 42%; height: 132px; left: 25%; top: 0; }
+.paper-stack { position: absolute; right: 10px; bottom: 40px; color: #d0dfdc; font-size: 42px; letter-spacing: -12px; transform: rotate(-8deg); }
+.reception-sign { position: absolute; bottom: 0; left: 0; width: 100%; padding: 16px 8px; border: 3px solid #59788a; background: #1b3545; color: #f6d69f; font: 12px/1.5 ui-monospace, monospace; box-shadow: 0 6px #0b1822; }
+.morty-badge { position: absolute; top: 12px; right: 4px; max-width: 29%; padding: 4px 6px; border: 1px solid #59788a; background: var(--panel); color: var(--accent); font: 10px/1.3 ui-monospace, monospace; }
+.citadel-reception p { max-width: 32ch; margin: 0; padding: 12px; border: 1px solid var(--line); border-radius: 10px 10px 10px 0; background: var(--panel); color: var(--ink); font-size: 14px; }
+:is(.workbench-monitor, .meeseeks-box, .pickle-button, .reception-morty):focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 3px; }
+
+.dimension-intro {
+  position: fixed;
+  inset: 0;
+  z-index: var(--rick-layer-intro);
+  overflow: hidden;
+  background: #0b1115;
+}
+.dimension-intro[data-assets="ready"] {
+  animation: scene-depart var(--rick-motion-beat) ease-in calc(var(--scene-duration) - var(--rick-motion-beat)) forwards;
+}
+.intro-dock { background: #091723; }
+.intro-illustration { position: absolute; inset: 0; isolation: isolate; background: #0b1115; }
+.intro-backdrop::after { content: ''; position: absolute; inset: 0; background: linear-gradient(0deg, #080e15d9, #080e1510); }
+.garage-lighting, .garage-lighting > i { position: absolute; inset: 0; pointer-events: none; }
+.garage-lighting { z-index: 1; }
+.garage-lighting > i {
+  background: linear-gradient(100deg, #06100fee 29%, transparent 76%);
+  animation: garage-circuit .19s .54s ease-out both;
+}
+.garage-lighting > i + i {
+  background: linear-gradient(275deg, #071419df 22%, transparent 77%);
+  animation-delay: .73s;
+}
+.intro-garage-door {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-bottom: 7px solid #18241f;
+  background: linear-gradient(90deg, #0c1917b3, transparent 37%, #73988926 72%, #0c191788),
+    repeating-linear-gradient(#41564c 0, #35463e 9px, #26372f 53px, #18251f 56px, #617368 59px, #31433b 62px);
+  box-shadow: 0 9px 20px #07130ba8;
+  animation: garage-door-open .75s both;
+}
+.intro-garage-door::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0;
+  height: 9px;
+  background: repeating-linear-gradient(125deg, #bfac62 0 16px, #39453b 16px 32px);
+}
+.intro-airspace { position: absolute; inset: max(80px, 12%) 8% auto 52%; height: min(48%, 380px); overflow: clip; }
+.intro-spaceship { --flight-time: 1.12s; --flight-delay: 1.04s; position: absolute; width: min(65%, 390px, 51dvh); bottom: 12%; right: 9%; animation: garage-flyby var(--flight-time) var(--flight-delay) both; }
+.intro-ground { position: absolute; inset: auto 8% 12% 52%; height: min(26%, 210px); overflow: clip; }
+.intro-pickle { position: absolute; width: 55px; height: 90px; bottom: 14%; left: 40%; animation: pickle-dash .43s 1.99s ease-in both; }
+.intro-pickle .series-character { width: 100%; height: 100%; }
+.intro-pickle > span:not(.series-character) { position: absolute; bottom: -10px; right: -8px; color: #c3c9a6; animation: screw-drop .31s 2.09s ease-in both; }
+.intro-caption { position: absolute; left: max(24px, calc((100% - 1180px) / 2)); bottom: 12%; max-width: min(480px, 42%); padding: clamp(12px, 2vw, 24px); border: 4px solid #546457; border-radius: 12px; background: #08150f; color: #e7f7d8; box-shadow: 0 0 32px #91ce4b16; }
+.intro-caption small { display: block; margin-bottom: 7px; color: #b6dd8d; font: 11px ui-monospace, monospace; letter-spacing: .1em; }
+.intro-caption strong { display: block; font-size: clamp(21px, 3vw, 44px); letter-spacing: -.03em; }
+.intro-caption p { margin-top: 7px; color: #bed0c0; font-size: 14px; }
+.intro-controls { position: absolute; top: 16px; right: 16px; display: flex; gap: 8px; }
+.intro-controls button { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 8px 12px; border: 1px solid #c2d9c4; border-radius: 8px; background: #0b171c; color: #eaf5eb; font-size: 13px; }
+.intro-controls .rick-theme-music { width: 44px; padding: 0; }
+.intro-controls button > span:not(.sr-only) { margin-left: 8px; font-size: 11px; opacity: .7; }
+.intro-controls button:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: 3px; }
+.intro-dock .intro-illustration { background: #091723; }
+.intro-dock .intro-backdrop::after { background: linear-gradient(#0b203988, #0b2039df); }
+.intro-dock .intro-garage-door { display: none; }
+.intro-dock .intro-spaceship {
+  --flight-time: 1.17s; --flight-delay: 0s;
+  --hull-cue: landing-settle; --exhaust-cue: landing-thrust; --smoke-cue: landing-dust; --lamp-cue: landing-light;
+  --approach-x: 48%; --approach-y: -53%;
+  animation: citadel-land var(--flight-time) both;
+}
+.intro-dock .ship-smoke { left: 17%; top: 89%; width: 54%; height: 12%; }
+.intro-dock .ship-hull { transform-origin: 51% 94%; }
+.intro-dock .intro-airspace::before {
+  content: '';
+  position: absolute;
+  bottom: 9%;
+  right: 12%;
+  width: min(54%, 330px, 42dvh);
+  height: 6%;
+  border: 1px solid #a3dbea8a;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, #07101bd9 32%, #71a8b270 71%, transparent 74%);
+  animation: dock-contact 1.17s var(--rick-motion-ease) both;
+}
+.intro-dock .intro-caption { background: #0b1f2d; border-color: #62859b; }
+.intro-reception { position: absolute; right: 5%; bottom: 0; width: 110px; color: #d6e9f3; }
+.intro-reception .series-character { width: 100%; height: 144px; }
+.intro-reception > span:not(.series-character) { display: block; padding: 6px; background: #172f41; font: 10px ui-monospace, monospace; text-align: center; }
+@media (width < 768px) {
+  .intro-airspace { inset: 20% 7% auto; width: auto; height: 35%; }
+  .intro-spaceship { width: min(56vw, 230px); }
+  .intro-dock .intro-spaceship { --approach-x: -33%; --approach-y: -17%; }
+  .intro-ground { inset: auto 6% 18% auto; width: 30%; height: 18%; }
+  .intro-pickle { width: 42px; height: 67px; bottom: 5px; }
+  .intro-caption { left: 5%; bottom: 8%; max-width: 72%; padding: 12px; border-width: 2px; }
+  .intro-caption strong { font-size: 16px; line-height: 1.25; }
+  .intro-caption small { font-size: 8px; margin-bottom: 4px; }
+  .intro-caption p, .intro-controls button > span:not(.sr-only), .intro-reception > span:not(.series-character) { display: none; }
+  .intro-controls { top: 5px; right: 7px; gap: 5px; }
+  .intro-controls button { font-size: 11px; }
+  .intro-reception { right: 3px; bottom: 0; width: 44px; }
+  .intro-reception .series-character { height: 44px; }
+}
+
+@keyframes garage-door-open {
+  0% { transform: translateY(-2px); }
+  13% { transform: translateY(1px); animation-timing-function: cubic-bezier(.55,.03,.78,.46); }
+  65% { transform: translateY(-72%); animation-timing-function: ease-out; }
+  86% { transform: translateY(-102%); }
+  94% { transform: translateY(-99.5%); }
+  to { transform: translateY(-104%); }
+}
+@keyframes garage-circuit { from { opacity: 1; } to { opacity: 0; } }
+@keyframes monitor-boot {
+  from { opacity: 0; transform: scale(.68, .025); }
+  32% { opacity: .85; transform: scale(.95, .065); }
+  83% { opacity: 1; transform: scale(1, 1.02); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes dock-contact { from { opacity: .15; transform: scaleX(.46); } to { opacity: 1; transform: scaleX(1); } }
+@keyframes pickle-dash { from { transform: rotate(-8deg); } to { transform: translateX(440%) rotate(18deg); } }
+@keyframes screw-drop { to { transform: translateY(36px) rotate(160deg); } }
+@keyframes citadel-land {
+  from { transform: translate(var(--approach-x), var(--approach-y)) scale(.64) rotate(-9deg); opacity: 0; animation-timing-function: ease-out; }
+  27% { opacity: 1; }
+  54% { transform: translate(3%, -12%) scale(.97) rotate(4deg); animation-timing-function: ease-in; }
+  68% { transform: translate(0, 1%) rotate(1deg); animation-timing-function: ease-out; }
+  80% { transform: translate(-.8%, -1.8%) rotate(-1.4deg); }
+  to { transform: none; }
+}
+@keyframes landing-settle { 0%, 62%, 100% { transform: none; } 71% { transform: scale(1.008, .985); } }
+@keyframes landing-thrust { 0%, 77%, 100% { opacity: 0; transform: scaleX(.2); } 44% { opacity: .48; transform: scaleX(.78); } }
+@keyframes landing-light { 0%, 100% { opacity: 0; } 22%, 68% { opacity: .78; } }
+@keyframes landing-dust {
+  0%, 66% { opacity: 0; transform: scale(.4); }
+  76% { opacity: .42; }
+  100% { opacity: 0; transform: translate(-16%, -13%) scale(1.6, .9); }
+}
+@keyframes scene-depart { to { opacity: 0; } }
+
+@media (prefers-reduced-motion: no-preference) {
+  .intro-dock .intro-caption, .citadel-reception p { animation: rick-caption-in var(--rick-motion-beat) var(--rick-motion-ease) both; }
+  .intro-garage .intro-monitor-screen { animation: monitor-boot .23s .86s ease-out both; }
+  .citadel-reception[data-active="true"] .reception-morty[aria-pressed="true"] .reception-sign { animation: sign-turn var(--rick-motion-reveal) var(--rick-motion-ease); }
+}
+@keyframes rick-caption-in { from { opacity: 0; transform: translateY(5px); } }
+@keyframes sign-turn { from { transform: perspective(360px) rotateX(-55deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .dimension-intro, .rick-ship:not([data-docked="true"]) { display: none; }
+  .rick-ship[data-docked="true"] { transform: none; }
+  .pickle-runner, .pickle-button, .project-morty .series-character, .meeseeks-box > img { transition: none; }
+}
+
 img[data-astra-character] { background: radial-gradient(circle at 50% 30%, #254552, #0c1a24); object-fit: contain !important; object-position: center !important; padding: 3px; }
 img[data-astra-character="meeseeks"] { object-fit: cover !important; object-position: center 15% !important; }
 img[data-astra-character="poopybutthole"] { object-fit: cover !important; object-position: center 18% !important; }
 img[data-astra-character="squanchy"] { object-fit: cover !important; object-position: center 65% !important; padding: 0; }
+:root[data-theme="rick-morty"] .astra-compact .center-panel { border: 5px solid var(--rick-frame); border-radius: 14px; background: var(--rick-console); }
 :root[data-theme="rick-morty"] .astra-full .astra-hero .astra-avatar { width: 112px; height: 112px; flex-shrink: 0; }
 :root[data-theme="rick-morty"] .astra-entrance-avatar { width: 128px; height: 128px; }
 :root[data-theme="rick-morty"] .astra-intro { gap: 20px; }
-@media (max-width: 767px) {
-  :root[data-theme="rick-morty"] .astra-full .astra-hero .astra-avatar { width: 84px; height: 84px; }
-}
 .astra-wordmark[data-persona] { font-size: clamp(34px, 5vw, 70px); letter-spacing: -.045em; line-height: 1.08; overflow-wrap: anywhere; }
 .astra-entrance-word[data-persona] { font-size: clamp(40px, 10vw, 140px); }
-:root[data-theme="rick-morty"] .scroll-nav .nav-astra { max-width: 170px; white-space: normal; text-align: center; line-height: 1.2; }
-@media (min-width: 1280px) and (max-width: 1499px) {
-  :root[data-theme="rick-morty"] .scroll-portfolio .site-header { grid-template-columns: minmax(0, 1fr) auto; gap: 6px 24px; }
-  :root[data-theme="rick-morty"] .scroll-portfolio .site-header .scroll-nav { grid-column: 1 / -1; grid-row: 2; margin-inline: auto; }
-  :root[data-theme="rick-morty"] .site-header .header-actions { grid-column: 2; grid-row: 1; }
-}
-.lab-pickle-stage[data-escaping="true"] .pickle-button .series-character { animation: pickle-escape .55s ease-in both; }
-.lab-pickle-stage[data-found="true"] .pickle-button { width: 85px; height: 95px; top: 65px; }
-.lab-pickle-stage[data-found="true"] .pickle-button .series-character { animation: rat-reveal .25s ease-out; }
-@keyframes pickle-escape { 0% { transform: translateY(0) rotate(0); } 45% { transform: translateY(-60px) rotate(25deg); opacity: 1; } 100% { transform: translateY(-20px) rotate(-15deg) scale(.5); opacity: 0; } }
-@keyframes rat-reveal { from { transform: scale(.65); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-@media (prefers-reduced-motion: reduce) {
-  .lab-pickle-stage .pickle-button .series-character { animation: none !important; }
-}
-@media (max-width: 767px) {
-  .citadel-city-art { object-position: 58% center; opacity: .58; }
-  .citadel-city-shade { background: linear-gradient(90deg, #081520d9, #08152080), linear-gradient(0deg, #081520b3, transparent); }
+@media (width < 768px) {
+  :root[data-theme="rick-morty"] .astra-full .astra-hero .astra-avatar { width: 84px; height: 84px; }
 }

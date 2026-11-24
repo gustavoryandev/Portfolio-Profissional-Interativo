@@ -1,13 +1,15 @@
 import { useContext } from 'react';
 import { ThemeContext } from '../context/ThemeContext';
-import { isGaloTheme } from '../data/themes.js';
+import { isDimensionalTheme, isGaloTheme } from '../data/themes.js';
 
 const upper = 'M-35 252 C100 42 324 76 564 -8';
 const lower = 'M-60 774 C142 741 284 946 481 899 C606 867 706 805 850 835 C1008 863 1139 931 1281 860 C1425 788 1515 699 1700 682';
 const right = 'M920 957 C1128 944 1237 889 1338 770 C1458 618 1538 520 1700 505';
 
 export default function ThemeWaves() {
-  if (isGaloTheme(useContext(ThemeContext)?.theme)) return <GaloWaves />;
+  const theme = useContext(ThemeContext)?.theme;
+  if (isDimensionalTheme(theme)) return null;
+  if (isGaloTheme(theme)) return <GaloWaves />;
 
   return (
     <svg className="theme-waves" aria-hidden="true" focusable="false" viewBox="0 0 1672 941" preserveAspectRatio="xMidYMid slice">
