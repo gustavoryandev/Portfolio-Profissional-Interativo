@@ -1,0 +1,23 @@
+.dimensional-portal {
+  position: relative;
+  isolation: isolate;
+  width: clamp(min(48px, 100%), var(--portal-width), min(100%, 800px));
+  min-width: 0;
+}
+.dimensional-portal-energy, .dimensional-portal-energy > svg,
+.dimensional-portal-content { position: absolute; inset: 0; width: 100%; height: 100%; }
+.dimensional-portal-energy {
+  pointer-events: none;
+  transform-origin: 50% 50%;
+}
+.dimensional-portal-energy svg { display: block; overflow: hidden; }
+.dimensional-portal-opening {
+  position: absolute;
+  inset: 12.5% 13.5% 13.5% 12.5%;
+  overflow: hidden;
+  border-radius: 50%;
+  isolation: isolate;
+}
+.dimensional-portal-content > :is(img,picture), .dimensional-portal-content > picture > img {
+  display: block; width: 100%; height: 100%; object-fit: cover;
+}

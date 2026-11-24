@@ -1,0 +1,17 @@
+* { box-sizing: border-box; }
+.portal-demo { color-scheme: dark; max-width: 1040px; margin: auto; padding: clamp(20px,4vw,52px); color: #e6f1eb; font-family: Inter, system-ui, sans-serif; }
+.portal-demo header a { color: #acbcb6; text-decoration: none; font-size: .9rem; }
+.portal-demo h1 { margin: 24px 0; font-size: clamp(32px,4vw,58px); letter-spacing: -.055em; line-height: 1; }
+.portal-examples { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; }
+.portal-specimen { position: relative; overflow: hidden; padding: 18px clamp(12px,4vw,54px) 16px; border-radius: 18px; border: 1px solid #39493d; background: radial-gradient(ellipse at 50% 60%,#1d301f,#111916 76%); }
+.portal-specimen[data-variant="citadel"] { border-color: #2b474b; background: radial-gradient(ellipse at 50% 60%,#133238,#111a1d 76%); }
+.portal-demo h2 { font-size: clamp(16px,2.2vw,24px); font-weight: 570; margin: 0 0 10px; letter-spacing: -.035em; }
+.portal-controls { margin: 24px 0 32px; padding: 15px; border: 1px solid #374540; border-radius: 12px; display: flex; align-items: center; flex-wrap: wrap; gap: 12px 18px; }
+.portal-controls legend { padding-inline: 6px; color: #bdcec4; }
+.portal-controls label { display: inline-flex; align-items: center; gap: 6px; }
+.portal-controls button,.portal-controls select { color: inherit; min-height: 42px; border: 1px solid #4a5b53; border-radius: 8px; background: #202c26; padding: 6px 12px; font: inherit; }
+.portal-controls input { accent-color: #b7e880; }
+.portal-controls [role="status"] { font-size: .84rem; color: #b5c5ba; min-width: 64px; }
+.portal-controls output { min-width: 4ch; font-variant-numeric: tabular-nums; }
+.portal-photo-example { display: flex; align-items: flex-start; gap: 24px; justify-content: space-between; padding-block: 18px; border-top: 1px solid #34423c; }
+@media(max-width:600px) { .portal-specimen { padding: 12px 4px 6px; } .portal-specimen h2 { margin-left: 6px; } .portal-photo-example { flex-direction: column; } }

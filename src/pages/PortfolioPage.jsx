@@ -16,7 +16,7 @@ import ScrollReveal from '../components/ui/ScrollReveal';
 import GaloCrest from '../components/GaloCrest';
 import AstraAvatar from '../components/AstraAvatar';
 import { useAssistantPersona } from '../context/AssistantAppearanceContext';
-import { PortalArt } from '../components/DimensionPortal';
+import PortraitPortal from '../components/rick/PortraitPortal';
 import DimensionalScene from '../components/DimensionalScene';
 import { PortfolioShip } from '../components/rick/DimensionShip';
 import useCharacterActivity from '../components/rick/useCharacterActivity';
@@ -120,7 +120,7 @@ export default function PortfolioPage({ activeSection, projectFocus, onSectionLi
         <ScrollReveal delay={.08} className="hero-profile glass-panel">
           {dimensional && <div className="dimension-scan-label">{t(secret ? 'rick.citizen' : 'rick.researcher')}<span>{t(secret ? 'rick.dockOnline' : 'rick.stable')}</span></div>}
           <div className="portrait-orbit" aria-hidden="true" />
-          {dimensional && <PortalArt className="hero-dimensional-ring" />}{portrait}
+          {dimensional ? <PortraitPortal secret={secret} effectsPaused={effectsPaused}>{portrait}</PortraitPortal> : portrait}
           <div className="hero-profile-caption">
             <span>{en ? 'DEVELOPER' : 'DESENVOLVEDOR'} <b>/</b> {en ? 'STUDENT' : 'ESTUDANTE'}</span>
             <strong>{galo && <MapPin size={16} aria-hidden="true" />}{perfil.localizacao}</strong>
