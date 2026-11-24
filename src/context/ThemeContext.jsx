@@ -11,7 +11,7 @@ export { ThemeContext } from './ThemeState';
 const galoAnthemUrl = '/hino-do-galo.mp3';
 
 export function ThemeProvider({ children }) {
-  const { musicStatus, playMusic, stopMusic, toggleMusic } = useRickThemeMusic();
+  const { musicStatus, musicVolume, changeMusicVolume, playMusic, stopMusic, toggleMusic } = useRickThemeMusic();
   const [theme, setSelectedTheme] = useState(() => {
     let initial = document.documentElement.dataset.theme;
     if (!initial) {
@@ -20,6 +20,28 @@ export function ThemeProvider({ children }) {
     if (Object.hasOwn(legacyThemeIds, initial)) initial = legacyThemeIds[initial];
     return themePalettes.find(option => option.id === initial)?.id ?? 'dark';
   });
+  const [effectsPaused, setEffectsPaused] = useState(() => {
+    try { return window.localStorage.getItem('rick-morty-effects-paused') === '1'; } catch { return false; }
+  });
+  const changeEffectsPaused = useCallback(paused => {
+    setEffectsPaused(paused);
+    try { window.localStorage.setItem('rick-morty-effects-paused', paused ? '1' : '0'); } catch {}
+  }, []);
+  useLayoutEffect(() => {
+    const root = document.documentElement;
+    root.toggleAttribute('data-rick-effects-paused', effectsPaused && theme === 'rick-morty');
+  }, [theme, effectsPaused]);
+  useEffect(() => {
+    if (theme !== 'rick-morty') return;
+    const root = document.documentElement;
+    const visibility = () => root.toggleAttribute('data-rick-tab-hidden', document.hidden);
+    visibility();
+    document.addEventListener('visibilitychange', visibility);
+    return () => {
+      root.removeAttribute('data-rick-tab-hidden');
+      document.removeEventListener('visibilitychange', visibility);
+    };
+  }, [theme]);
   const [dimension, setDimension] = useState(() => {
     if (document.documentElement.dataset.dimension === 'corrupted') return 'corrupted';
     try {
@@ -161,7 +183,7 @@ export function ThemeProvider({ children }) {
   }, [theme, dimension, darkMode, palette, crossing]);
 
   return (
-    <ThemeContext.Provider value={{ musicStatus, toggleMusic, theme, darkMode, setTheme, anthemPlaying, toggleAnthem, crossDimension, crossing, dimension, eggMessage, setEggMessage, shipDeparted, markShipDeparted, introScene }}>
+    <ThemeContext.Provider value={{ musicStatus, musicVolume, changeMusicVolume, effectsPaused, changeEffectsPaused, toggleMusic, theme, darkMode, setTheme, anthemPlaying, toggleAnthem, crossDimension, crossing, dimension, eggMessage, setEggMessage, shipDeparted, markShipDeparted, introScene }}>
       {children}
       <DimensionalIntro scene={introScene} onDismiss={dismissIntro} />
       {crossing && <div className="dimension-transit" style={{ '--portal-x': portalOrigin.x, '--portal-y': portalOrigin.y }} aria-hidden="true"><span /></div>}

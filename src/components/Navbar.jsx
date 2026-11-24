@@ -1,4 +1,5 @@
-import RickThemeMusic from './RickThemeMusic';
+import { resumeUrl } from '../data/resume';
+import { RickThemeControls } from './RickThemeMusic';
 import { useContext } from 'react';
 import { useAstra } from '../context/AstraContext';
 import { ThemeContext } from '../context/ThemeContext';
@@ -42,6 +43,7 @@ export default function Navbar({ ref, portfolio = false, activeSection, onSectio
       <a href="/chat" onClick={openFull} className="nav-astra">{fullPersona?.name ?? 'Astra'} <Sparkles size={14} aria-hidden="true" /></a>
     </nav>}
     {portfolio && sectionLabel && <span className="mobile-current-section">{sectionLabel}</span>}
+    {isDimensionalTheme(theme) && <RickThemeControls mobile />}
     <HeaderActions />
   </header>;
 }
@@ -49,11 +51,11 @@ export default function Navbar({ ref, portfolio = false, activeSection, onSectio
 export function HeaderActions() {
   const { i18n, t } = useTranslation();
   const en = i18n.language.startsWith('en');
-  const cv = en ? '/Gustavo Ryan Resume (English).pdf' : '/Currículo Gustavo Ryan.pdf';
+  const cv = resumeUrl(i18n.language);
   return (
     <div className="header-actions">
       <div className="language-switch" aria-label={en ? 'Language' : 'Idioma'}>{['pt', 'en'].map(lang => <button key={lang} aria-pressed={i18n.language.startsWith(lang)} onClick={() => i18n.changeLanguage(lang)}>{lang.toUpperCase()}</button>)}</div>
-      <RickThemeMusic />
+      <RickThemeControls />
       <ThemeSelector />
       <a className="cv-link" href={cv} download aria-label={t('navbar.baixarCv')}><Download size={16} /><span>{t('navbar.baixarCv')}</span></a>
     </div>
