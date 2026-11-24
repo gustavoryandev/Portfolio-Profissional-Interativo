@@ -62,15 +62,28 @@
 
 .rick-tv { margin-block: -24px 24px; max-width: 740px; }
 .rick-tv-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; color: var(--ink); }
-.rick-tv-controls select {
+.rick-tv-channel-label { color: var(--muted); font: 11px var(--font-mono); text-transform: uppercase; letter-spacing: .06em; }
+.rick-tv-channel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
   max-width: 100%;
-  min-height: 38px;
-  padding: 5px 8px;
+  min-height: 44px;
+  padding: 10px 12px;
   border: 1px solid var(--rick-frame);
-  border-radius: 6px;
+  border-radius: var(--radius-control);
   background: var(--panel);
   color: var(--ink);
+  font-size: 13px;
+  text-align: start;
+  cursor: pointer;
 }
+.rick-tv-channel > span { min-width: 0; overflow-wrap: anywhere; }
+.rick-tv-channel > svg { flex: none; color: var(--accent); }
+.rick-tv-channel:is(:hover, [aria-expanded="true"]) { border-color: var(--accent); background: var(--panel-soft); }
+.rick-tv-channel[aria-expanded="true"] > svg { transform: rotate(180deg); }
 .rick-tv-screen {
   padding: clamp(6px, 1vw, 12px);
   border: 2px solid var(--rick-frame);
@@ -101,7 +114,8 @@
 
 @media (width < 768px) {
   .rick-fold > summary { min-height: 44px; }
-  .rick-extra-links a, .rick-extra-control, .rick-tv-controls select { min-height: 44px; }
+  .rick-extra-links a, .rick-extra-control { min-height: 44px; }
+  .rick-tv-channel { width: 100%; }
 }
 @media (prefers-reduced-motion: no-preference) {
   .rick-fold[open] > .rick-fold-body, .rick-tv-screen { animation: rick-fold-in var(--rick-motion-quick) var(--rick-motion-ease); }

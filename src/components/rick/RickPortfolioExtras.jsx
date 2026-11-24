@@ -1,4 +1,4 @@
-import { useContext, useId, useState } from 'react';
+import { useContext, useState } from 'react';
 import { BookOpen, ChevronDown, CircuitBoard, Clapperboard, Database, IdCard, Terminal, Tv, Wrench } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { ThemeContext } from '../../context/ThemeState';
@@ -6,6 +6,7 @@ import { discoveries } from '../../hooks/useRickExploration';
 import { RICK_THEME_TRACK } from '../../services/rickThemeMusic';
 import { resumeUrl } from '../../data/resume';
 import { projectContent } from '../../data/projectContent';
+import OptionMenu from '../OptionMenu';
 import perfil from '../../data/perfil.json';
 import SceneBackdrop from './SceneBackdrop';
 import { useReducedSceneMotion } from './sceneAssets';
@@ -48,7 +49,6 @@ const demonstrations = demonstrationIds.map(id => perfil.projetos.find(project =
 
 export function InterdimensionalTV({ onSectionLink }) {
   const { t, i18n } = useTranslation();
-  const selectId = useId();
   const [open, setOpen] = useState(false);
   const [channel, setChannel] = useState(demonstrations[0]?.id);
   const selected = demonstrations.find(project => project.id === channel) ?? demonstrations[0];
@@ -56,10 +56,17 @@ export function InterdimensionalTV({ onSectionLink }) {
   const title = projectContent(selected, 'titulo', i18n.language, t);
   return <Fold icon={Tv} label={t('rick.extras.tv.title')} className="rick-tv" onToggle={event => setOpen(event.currentTarget.open)}>
     <div className="rick-tv-controls">
-      <label htmlFor={selectId}>{t('rick.extras.tv.channel')}</label>
-      <select id={selectId} value={channel} onChange={event => setChannel(event.currentTarget.value)}>
-        {demonstrations.map(project => <option value={project.id} key={project.id}>{projectContent(project, 'titulo', i18n.language, t)}</option>)}
-      </select>
+      <span className="rick-tv-channel-label">{t('rick.extras.tv.channel')}</span>
+      <OptionMenu
+        label={t('rick.extras.tv.channel')}
+        triggerLabel={`${t('rick.extras.tv.channel')}: ${title}`}
+        triggerClassName="rick-tv-channel"
+        triggerContent={<><span>{title}</span><ChevronDown size={16} aria-hidden="true" /></>}
+        groups={[{ options: demonstrations.map(project => ({ id: project.id, label: projectContent(project, 'titulo', i18n.language, t) })) }]}
+        value={channel}
+        onChange={setChannel}
+        width={360}
+      />
     </div>
     {open && <figure key={channel} className="rick-tv-screen" data-rick-motion>
       <img src={selected.image.src} alt={selected.image.altKey ? t(selected.image.altKey) : t('projetos.previewAlt', { title })} decoding="async" />
