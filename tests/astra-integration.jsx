@@ -5,7 +5,7 @@ import { JSDOM } from 'jsdom';
 const dom = new JSDOM('<div id="root"></div>', { url: 'http://localhost/chat', pretendToBeVisual: true });
 const { window } = dom;
 const { document } = window;
-Object.assign(globalThis, { window, document, HTMLElement: window.HTMLElement, MutationObserver: window.MutationObserver,
+Object.assign(globalThis, { window, document, HTMLElement: window.HTMLElement, SVGElement: window.SVGElement, MutationObserver: window.MutationObserver,
   requestAnimationFrame: window.requestAnimationFrame.bind(window), cancelAnimationFrame: window.cancelAnimationFrame.bind(window),
   IS_REACT_ACT_ENVIRONMENT: true });
 window.localStorage.setItem('astra-intro-seen', '1'); // Left by a previous visit.

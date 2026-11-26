@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { build } from 'esbuild';
+import { vitePublicUrls } from './vite-public-urls.mjs';
 import { fileURLToPath } from 'node:url';
 import { readFile, unlink } from 'node:fs/promises';
 import { JSDOM } from 'jsdom';
@@ -36,7 +37,7 @@ test('Full and Compact Astra use the same live Laboratory and review', async () 
   try {
     await build({ entryPoints: ['tests/astra-integration.jsx'], outfile: fileURLToPath(output), bundle: true,
       platform: 'node', format: 'esm', packages: 'external', jsx: 'automatic', define: { 'import.meta.env': '{}' }, logLevel: 'silent',
-      plugins: [{ name: 'unused-pdf', setup(build) {
+      plugins: [vitePublicUrls, { name: 'unused-pdf', setup(build) {
         build.onResolve({ filter: /ResumeCard$/ }, () => ({ path: 'resume', namespace: 'stub' }));
         build.onLoad({ filter: /.*/, namespace: 'stub' }, () => ({ contents: 'export default () => null' }));
       } }],
