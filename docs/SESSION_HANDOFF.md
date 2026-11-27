@@ -1,5 +1,11 @@
 # Passagem de sessão do portfólio
 
+## Descoberta da terceira dimensão
+
+A terceira dimensão recebeu aprovação visual. Foram adicionadas quatro pistas opcionais em PT/EN. Pessoa-Pássaro responde na Astra completa da Garagem. Sr. Meeseeks responde na Astra compacta da Garagem e da Cidadela. A Garagem exibe **Frequência anômala** abaixo do monitor da bancada. A Cidadela exibe **Registro confidencial** abaixo do terminal de atendimento. As respostas das pistas são locais e o desbloqueio segue disponível desde a primeira visita. [Localização e ativação das pistas](DIMENSION_SPEC.md#pistas-opcionais)
+
+A validação começou com uma sessão isolada e o portal amarelo bloqueado. Foram percorridas as quatro pistas no navegador, com teclado nos painéis e verificação do registro e do chat da Cidadela a 390 px. A demonstração local foi aberta de volta na Garagem com o desbloqueio pendente. [Demonstração](http://127.0.0.1:5182/)
+
 ## Pendências concluídas na Fase 02.1
 
 A revisão foi retomada em `codex/rick-morty-phase-02` a partir de `19c1a93`. A demonstração local está aberta na mansão em português e aguarda a aprovação visual. [Abrir demonstração](http://localhost:5176/)

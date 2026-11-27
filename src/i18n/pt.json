@@ -679,6 +679,19 @@
         "busy": "Uma travessia já está em andamento.",
         "alreadyThere": "Você já está além da Curva. Use os portais do cabeçalho para voltar."
       },
+      "clues": {
+        "prompt": "Rick tem alguma frase secreta?",
+        "birdperson": "Na cultura do meu povo, existem palavras cujo significado vai muito além daquilo que aparentam. Rick costuma pronunciá-las.",
+        "meeseeks": "Oooh, Rick sempre repete uma frase estranha! Começa com Wubba... Talvez você devesse tentar!",
+        "record": {
+          "label": "Registro confidencial",
+          "text": "Sinal desconhecido detectado.\nOrigem: fora dos limites da Curva.\nCódigo de acesso: W_BBA L_BBA D_B-D_B."
+        },
+        "interference": {
+          "label": "Frequência anômala",
+          "text": "Assinatura energética desconhecida. Origem não identificada."
+        }
+      },
       "scenes": {
         "detected": "Sinal reconhecido",
         "instability": "Instabilidade dimensional",

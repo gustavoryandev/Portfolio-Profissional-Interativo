@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { BEYOND_CURVE, isBeyondCurveCommand, readRickDimension } from '../src/data/rickDimensions.js';
+import { BEYOND_CURVE, beyondHintPersona, isBeyondCurveCommand, isBeyondHintQuestion, readRickDimension } from '../src/data/rickDimensions.js';
 import { themes } from '../src/data/themes.js';
 
 test('the secret command is an exact normalized utterance inside the Rick theme', () => {
@@ -15,6 +15,20 @@ test('the secret command is an exact normalized utterance inside the Rick theme'
     'Wabalaba dubdub é uma fala?', 'Wubba Lubba Dub', '...', null]) {
     assert.equal(isBeyondCurveCommand('rick-morty', mention), false);
   }
+});
+
+test('discovery hints match casual bilingual questions in the intended surfaces', () => {
+  for (const question of ['Quais são os mistérios daqui?', 'Que expressão o Rick usa?', 'Does Rick have a secret phrase?', 'Any mysteries around here?']) {
+    assert.equal(isBeyondHintQuestion(question), true, question);
+  }
+  for (const question of ['Wubba Lubba Dub-Dub', 'Explique os segredos da API', 'What does Rick say about this project?']) {
+    assert.equal(isBeyondHintQuestion(question), false, question);
+  }
+  assert.equal(beyondHintPersona('rick-morty', 'lab', 'full', 'birdperson'), 'birdperson');
+  assert.equal(beyondHintPersona('rick-morty', 'corrupted', 'compact', 'meeseeks'), 'meeseeks');
+  assert.equal(beyondHintPersona('rick-morty', 'corrupted', 'full', 'poopybutthole'), null);
+  assert.equal(beyondHintPersona('rick-morty', 'beyond-curve', 'compact', 'evil-rick'), null);
+  assert.equal(beyondHintPersona('dark', 'lab', 'full', 'birdperson'), null);
 });
 
 test('stored destination validates the unlock, prioritizes the legacy alias and rejects unknown state', () => {

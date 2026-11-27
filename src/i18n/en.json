@@ -679,6 +679,19 @@
         "busy": "A crossing is already underway.",
         "alreadyThere": "You’re already beyond the Curve. Use the portals in the header to return."
       },
+      "clues": {
+        "prompt": "Does Rick have a secret phrase?",
+        "birdperson": "In my people's culture, there are words whose meaning goes far beyond what they seem to mean. Rick often says them.",
+        "meeseeks": "Oooh, Rick keeps repeating a strange phrase! It starts with Wubba... Maybe you should try it!",
+        "record": {
+          "label": "Confidential record",
+          "text": "Unknown signal detected.\nOrigin: outside the limits of the Curve.\nAccess code: W_BBA L_BBA D_B-D_B."
+        },
+        "interference": {
+          "label": "Anomalous frequency",
+          "text": "Unknown energy signature. Origin unidentified."
+        }
+      },
       "scenes": {
         "detected": "Signal recognized",
         "instability": "Dimensional instability",

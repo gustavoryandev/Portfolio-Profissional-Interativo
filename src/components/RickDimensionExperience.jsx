@@ -74,6 +74,12 @@ export function GarageWorkbench({ onSectionLink }) {
       </div>}
     </CharacterPerformance>}
     <span className="workbench-screw" aria-hidden="true">⚙</span>
+    {(dimension === 'lab' || dimension === 'corrupted') && <details key={dimension} className="workbench-clue" data-clue={dimension}>
+      <summary>{dimension === 'lab' && <span className="workbench-clue-spark" aria-hidden="true">⌁</span>}
+        {t(`rick.beyond.clues.${dimension === 'lab' ? 'interference' : 'record'}.label`)}
+      </summary>
+      <p>{t(`rick.beyond.clues.${dimension === 'lab' ? 'interference' : 'record'}.text`)}</p>
+    </details>}
   </div>;
 }
 
