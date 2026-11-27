@@ -76,6 +76,24 @@ test('a fallback replaces the partial answer in the preview and final response',
   }
 });
 
+test('aborting an unfinished reader cancels it and never returns the staged actions', async t => {
+  const controller = new AbortController();
+  let cancelled = false;
+  let staged;
+  const waiting = new Promise(resolve => { staged = resolve; });
+  t.mock.method(globalThis, 'fetch', async () => new Response(new ReadableStream({
+    start(stream) {
+      stream.enqueue(new TextEncoder().encode('{"type":"actions","actions":[{"type":"lab.run"}]}\n'));
+    },
+    cancel() { cancelled = true; },
+  }), { headers: { 'Content-Type': 'application/x-ndjson' } }));
+  const request = requestChatStream({}, { signal: controller.signal, onEvent: staged });
+  await waiting;
+  controller.abort();
+  await assert.rejects(request, { name: 'AbortError' });
+  assert.equal(cancelled, true);
+});
+
 test('model warmup is deduplicated and reused in memory', async () => {
   const original = globalThis.fetch;
   let calls = 0;

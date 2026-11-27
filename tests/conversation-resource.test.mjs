@@ -2,6 +2,14 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { conversationResource } from '../src/services/conversationResource.js';
 
+test('compound professional questions are not reduced to the skills card', () => {
+  for (const text of [
+    'Quais são a formação, as principais tecnologias e os objetivos profissionais de Gustavo?',
+    'What are Gustavo’s skills and career goals?',
+    'What tools does he know from his experience?',
+  ]) assert.equal(conversationResource(text), null, text);
+});
+
 test('PT/EN requests distinguish a game, a rating and proficiency', () => {
   for (const text of ['Quero jogar xadrez com você', 'Vamos jogar uma partida de xadrez?', 'I want to play chess with you', "Let’s play a game of chess", 'Play chess']) assert.equal(conversationResource(text), 'play', text);
   for (const text of ['Qual é o rating do Gustavo no xadrez?', 'What is his chess rating?', 'Estatísticas do Chess.com']) assert.equal(conversationResource(text), 'chess', text);

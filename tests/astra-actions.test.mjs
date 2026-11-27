@@ -80,6 +80,28 @@ test('the action engine rejects unknown targets and cannot apply a code edit fro
   assert.equal(lab.getSnapshot().review, null);
 });
 
+test('a late Laboratory plan does not read a changed draft or stop a different execution', async () => {
+  const lab = createLaboratory({ makeWorker: () => ({ postMessage() {}, terminate() {} }) });
+  const engine = createAstraActionEngine({ lab, projectIds: new Set() });
+  const labAtSend = lab.getSnapshot();
+  lab.setCode('print("new draft")');
+  const read = await engine.execute(1, [{ type: 'lab.read', target: 'code' }], {}, { labAtSend });
+  assert.deepEqual(read.notices, ['staleEditor']);
+  assert.equal(read.snapshot, undefined);
+
+  lab.run();
+  const firstRun = lab.getSnapshot();
+  lab.stop();
+  lab.run();
+  try {
+    const stopped = await engine.execute(2, [{ type: 'lab.stop' }], {}, { labAtSend: firstRun });
+    assert.deepEqual(stopped.notices, ['staleEditor']);
+    assert.equal(lab.getSnapshot().busy, true);
+  } finally {
+    lab.destroy();
+  }
+});
+
 test('tool-only streamed responses require completion and discarded attempts never return actions', async t => {
   let frames;
   t.mock.method(globalThis, 'fetch', async () => new Response(frames.map(event => JSON.stringify(event)).join('\n'),

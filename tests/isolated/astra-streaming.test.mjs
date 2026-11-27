@@ -71,6 +71,7 @@ globalThis.Image = class {
 
 const requests = [];
 const translationRequests = [];
+const nextResponses = [];
 const originalFetch = globalThis.fetch;
 const originalAdapter = axios.defaults.adapter;
 let activeStream;
@@ -78,14 +79,19 @@ globalThis.fetch = async (_url, options) => {
   const body = JSON.parse(options.body);
   if (body.action === 'models') return Response.json({ models: ['fixture'] });
   requests.push(body);
+  return nextResponses.shift()?.(body) ?? streamResponse();
+};
+
+function streamResponse({ withFirstDelta = true } = {}) {
   const encoder = new TextEncoder();
   return new Response(new ReadableStream({
     start(controller) {
       let finished = false;
       const send = event => controller.enqueue(encoder.encode(`${JSON.stringify(event)}\n`));
       send({ type: 'meta', model: 'fixture' });
-      send({ type: 'delta', text: 'STREAM_START ' });
+      if (withFirstDelta) send({ type: 'delta', text: 'STREAM_START ' });
       activeStream = {
+        push: send,
         finish(text = '') {
           if (finished) return;
           finished = true;
@@ -96,7 +102,7 @@ globalThis.fetch = async (_url, options) => {
       };
     },
   }), { headers: { 'Content-Type': 'application/x-ndjson' } });
-};
+}
 axios.defaults.adapter = async config => {
   const body = typeof config.data === 'string' ? JSON.parse(config.data) : config.data;
   translationRequests.push(body);
@@ -116,11 +122,12 @@ async function until(predicate) {
   assert.ok(predicate(), 'expected the UI to reach the requested state');
 }
 
-async function mount(language = 'en') {
+async function mount(language = 'en', path = '/chat') {
   requests.length = 0;
   translationRequests.length = 0;
+  nextResponses.length = 0;
   activeStream = null;
-  window.history.replaceState(null, '', '/chat');
+  window.history.replaceState(null, '', path);
   document.documentElement.dataset.theme = 'rick-morty';
   document.documentElement.dataset.dimension = 'lab';
   window.localStorage.setItem('theme', 'rick-morty');
@@ -129,7 +136,13 @@ async function mount(language = 'en') {
   await act(async () => i18n.changeLanguage(language));
   root = createRoot(document.getElementById('root'));
   await act(async () => root.render(React.createElement(ThemeProvider, null, React.createElement(App))));
-  await until(() => $('.astra-full #chat-input'));
+  if (path === '/') {
+    await until(() => $('.astra-fab'));
+    await click($('.astra-fab'));
+    await until(() => $('.astra-shell-modal[open] #chat-input'));
+  } else {
+    await until(() => $('.astra-full #chat-input'));
+  }
 }
 
 async function click(node) {
@@ -137,14 +150,15 @@ async function click(node) {
   await act(async () => node.click());
 }
 
-async function send(text) {
+async function send(text, { preview = true } = {}) {
+  const before = requests.length;
   const input = $('#chat-input');
   await act(async () => {
     Object.getOwnPropertyDescriptor(Object.getPrototypeOf(input), 'value').set.call(input, text);
     input.dispatchEvent(new window.Event('input', { bubbles: true }));
   });
   await click($('.chat-form button[type="submit"]'));
-  await until(() => activeStream && $('[data-streaming-reply]'));
+  await until(() => requests.length > before && (!preview || (activeStream && $('[data-streaming-reply]'))));
   return activeStream;
 }
 
@@ -230,4 +244,122 @@ test('a simple programming example renders as code without opening a resource ca
   assert.match(reply.querySelector('pre').textContent, /const dobro = n => n \* 2/);
   assert.match(reply.querySelector('pre').textContent, /console\.log\(dobro\(3\)\)/);
   assert.equal(reply.querySelector('.project-tile, .chess-game'), null);
+});
+
+test('compact authorship survives close, reopen and opening full Astra before the first fragment', async () => {
+  await mount('en', '/');
+  assert.equal(translationRequests.length, 0, 'the localized greeting does not need Gemini');
+  nextResponses.push(() => streamResponse({ withFirstDelta: false }));
+  const stream = await send('Wait for the first fragment.', { preview: false });
+  await click($('.astra-toolbar button'));
+  assert.equal($('.astra-shell-modal').open, false);
+  await click($('.astra-fab'));
+  await click($('.astra-toolbar a'));
+  await until(() => $('.astra-full #chat-input'));
+  assert.match($('.astra-full [role="log"] [role="status"]').textContent, /Mr\. Meeseeks/);
+  await act(async () => stream.push({ type: 'delta', text: 'COMPACT_FRAGMENT ' }));
+  await until(() => $('[data-streaming-reply]'));
+  assert.equal($('[data-streaming-reply] .astra-label span').textContent, 'Mr. Meeseeks');
+  stream.finish('COMPACT_FINAL');
+  await until(() => completedReply('COMPACT_FINAL'));
+  assert.equal(completedReply('COMPACT_FINAL').querySelector('.astra-label span').textContent, 'Mr. Meeseeks');
+  assert.equal(completedReply('COMPACT_FINAL').querySelector('img').getAttribute('data-astra-character'), 'meeseeks');
+  assert.match($('#astra-welcome').textContent, /garage/);
+  assert.equal(translationRequests.length, 0);
+
+  const next = await send('Use the previous reply.');
+  assert.equal(requests.at(-1).surface, 'full');
+  assert.match(requests.at(-1).chatHistory.find(item => item.text.includes('COMPACT_FINAL')).text, /COMPACT_FRAGMENT/);
+  assert.equal($('[data-streaming-reply] .astra-label span').textContent, 'Squanchy');
+  next.finish('NEXT_FINAL');
+  await until(() => completedReply('NEXT_FINAL'));
+  assert.equal(completedReply('NEXT_FINAL').querySelector('.astra-label span').textContent, 'Squanchy');
+  assert.equal(completedReply('COMPACT_FINAL').querySelector('.astra-label span').textContent, 'Mr. Meeseeks');
+});
+
+test('an explicitly standard Astra reply retains its label and avatar after switching into Rick', async () => {
+  await mount();
+  await click($('.astra-full .header-actions button[aria-haspopup]'));
+  await click($('.astra-full [data-preview="dark"]'));
+  await until(() => document.documentElement.dataset.theme === 'dark');
+  const stream = await send('A standard Astra turn.');
+  stream.finish('STANDARD_FINAL');
+  await until(() => completedReply('STANDARD_FINAL'));
+  await click($('.astra-full .header-actions button[aria-haspopup]'));
+  await click($('.astra-full [data-preview="rick-morty"]'));
+  await until(() => document.documentElement.dataset.theme === 'rick-morty');
+
+  const reply = completedReply('STANDARD_FINAL');
+  assert.equal(reply.querySelector('.astra-label span').textContent, 'Astra');
+  assert.equal(reply.querySelector('img').getAttribute('src'), '/astra-avatar-mobile.png');
+  assert.match($('#astra-welcome').textContent, /Squanchy/);
+});
+
+test('late JSON after stopping cannot change the theme or clear the replacement stream', async () => {
+  await mount('pt');
+  let late;
+  nextResponses.push(() => new Promise(resolve => { late = resolve; }));
+  await send('Troque o tema.', { preview: false });
+  await click($('.chat-form [aria-label="Parar resposta"]'));
+  await until(() => completedReply('Resposta interrompida.'));
+  assert.equal(completedReply('Resposta interrompida.').querySelector('.astra-label span').textContent, 'Squanchy');
+  const replacement = await send('Responda de novo.');
+  await act(async () => late(Response.json({ response: 'STALE_REPLY', actions: [{ type: 'theme.set', target: 'dark' }] })));
+  assert.equal(document.documentElement.dataset.theme, 'rick-morty');
+  assert.ok($('.chat-form [aria-label="Parar resposta"]'));
+  assert.ok($('[data-streaming-reply]'));
+  assert.equal(completedReply('STALE_REPLY'), undefined);
+  assert.ok(requests.at(-1).chatHistory.every(item => !item.text.includes('Resposta interrompida.')));
+  replacement.finish('RETRY_FINAL');
+  await until(() => completedReply('RETRY_FINAL'));
+});
+
+test('a late open-full action preserves the Arcade already opened in full Astra', async () => {
+  await mount('en', '/');
+  let ready;
+  nextResponses.push(() => new Promise(resolve => { ready = resolve; }));
+  await send('Open Full Astra after a delay.', { preview: false });
+  await click($('.astra-toolbar a'));
+  await until(() => $('.astra-full .astra-arcade-trigger'));
+  await click($('.astra-full .astra-arcade-trigger'));
+  await until(() => window.location.search === '?arcade=1');
+  await act(async () => ready(Response.json({ actions: [{ type: 'astra.openFull' }] })));
+  await until(() => completedReply('You’re already in Full Astra.'));
+  assert.equal(window.location.search, '?arcade=1');
+  assert.equal(completedReply('You’re already in Full Astra.').querySelector('.astra-label span').textContent, 'Mr. Meeseeks');
+});
+
+test('an error is displayed in the current locale without changing the request or author', async () => {
+  await mount('en');
+  let fail;
+  nextResponses.push(() => new Promise(resolve => { fail = resolve; }));
+  await send('Explain what happened.', { preview: false });
+  await act(async () => i18n.changeLanguage('pt'));
+  await act(async () => fail(Response.json({ error: 'Temporarily unavailable' }, { status: 503 })));
+  await until(() => completedReply('Não foi possível processar'));
+  assert.equal(requests[0].lang, 'en');
+  assert.equal(completedReply('Não foi possível processar').querySelector('.astra-label span').textContent, 'Squanchy');
+  assert.equal(translationRequests.length, 0);
+});
+
+test('a Laboratory continuation retains its compact author and still needs review after moving to full Astra', async () => {
+  await mount('pt', '/');
+  nextResponses.push(() => Response.json({ actions: [
+    { type: 'astra.openFull' }, { type: 'lab.example', target: 'cart' }, { type: 'lab.read', target: 'code' },
+  ] }));
+  const stream = await send('Abra a Astra completa e revise o Carrinho de Compras.');
+  await until(() => $('.astra-full #chat-input'));
+  assert.equal(requests.length, 2);
+  assert.equal(requests[0].labSnapshot, undefined);
+  assert.equal(requests[1].labSnapshot.example, 'cart');
+  assert.equal(requests[1].surface, 'compact');
+  assert.equal(requests[1].lang, 'pt');
+  assert.deepEqual(requests[1].appearance, requests[0].appearance);
+  assert.equal($('[data-streaming-reply] .astra-label span').textContent, 'Sr. Meeseeks');
+  stream.push({ type: 'actions', actions: [{ type: 'lab.run' }] });
+  stream.finish('LAB_FINAL');
+  await until(() => completedReply('LAB_FINAL')?.querySelector('.lab-review'));
+  const final = completedReply('LAB_FINAL');
+  assert.equal(final.querySelector('.astra-label span').textContent, 'Sr. Meeseeks');
+  assert.match(final.querySelector('.lab-review').textContent, /Revise o código antes de executar/);
 });

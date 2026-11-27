@@ -422,6 +422,10 @@ test('both Astra surfaces share the same tool contract and request editor data o
     const snapshotTurn = requests++ % 2 === 1;
     assert.match(body.systemInstruction.parts[0].text, requests <= 2 ? /Current interface: Full Astra/ : /Current interface: Compact Astra/);
     assert.deepEqual(declarations, snapshotTurn ? ['propose_lab_edit', 'propose_lab_run'] : ['portfolio_actions']);
+    if (!snapshotTurn) {
+      assert.match(body.systemInstruction.parts[0].text, /1\. bro-fit:.*\n2\. cart:/);
+      assert.match(body.systemInstruction.parts[0].text, /neither the request nor recent conversation identifies a task/);
+    }
     assert.equal(parts.length, snapshotTurn ? 2 : 1);
     if (snapshotTurn) assert.deepEqual(JSON.parse(parts[1].text.split(' (data): ')[1]), snapshot);
     const functionCall = snapshotTurn ? { name: 'propose_lab_edit', args: { edits } }
