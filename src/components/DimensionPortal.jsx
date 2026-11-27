@@ -5,8 +5,15 @@ import { ThemeContext } from '../context/ThemeState';
 import { MOBILE_LAYOUT_QUERY, REDUCED_MOTION_QUERY } from '../motionPreferences';
 import { preloadScene, yellowPortalIcon } from './rick/sceneAssets';
 import { BEYOND_CURVE } from '../data/rickDimensions.js';
+import BeyondCurveTransit from './rick/BeyondCurveTransit';
 
-export function DimensionTransit({ trip, onArrive, onFinish }) {
+export function DimensionTransit(props) {
+  return props.trip.origin === BEYOND_CURVE || props.trip.destination === BEYOND_CURVE
+    ? <BeyondCurveTransit {...props} />
+    : <StandardTransit {...props} />;
+}
+
+function StandardTransit({ trip, onArrive, onFinish }) {
   const veil = useRef(null);
   const glow = useId();
 

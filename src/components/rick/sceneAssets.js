@@ -6,12 +6,19 @@ export const meeseeksBox = '/rick-assets/meeseeks-box.webp';
 export const shipArt = '/rick-assets/spaceship.webp';
 export const beyondMedia = '/rick-assets/beyond-curve';
 export const yellowPortalIcon = `${beyondMedia}/yellow-portal-icon-header.png`;
+export const beyondJourney = {
+  curve: `${beyondMedia}/central-finite-curve.webp`,
+  rupture: `${beyondMedia}/dimensional-rupture.webp`,
+  portal: `${beyondMedia}/yellow-portal-scene.webp`,
+  transit: `${beyondMedia}/beyond-curve-transit.webp`,
+  mansion: `${beyondMedia}/evil-morty-mansion.webp`,
+};
 export const compactBackdropQuery = '(max-width: 900px) and (orientation: portrait)';
 export const backdropAssets = {
   garage: { src: '/rick-assets/garage.webp', compact: '/rick-assets/garage-mobile.webp' },
   plaza: { src: '/rick-assets/citadel-plaza.webp', compact: '/rick-assets/citadel-plaza-mobile.webp' },
   dock: { src: '/rick-assets/citadel.webp' },
-  mansion: { src: `${beyondMedia}/evil-morty-mansion.webp` },
+  mansion: { src: beyondJourney.mansion },
 };
 const sceneAssets = {
   workbench: [meeseeksBox],
@@ -21,6 +28,9 @@ const sceneAssets = {
   citadel: [backdropAssets.dock, shipArt, '/rick-assets/morty.webp'],
   labExterior: [backdropAssets.garage],
   citadelExterior: [backdropAssets.plaza],
+  beyondDiscovery: Object.values(beyondJourney),
+  beyondVisit: [beyondJourney.portal, beyondJourney.mansion],
+  beyondPortal: [beyondJourney.portal],
 };
 
 const images = new Map();
