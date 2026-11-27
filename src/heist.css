@@ -427,9 +427,6 @@ html:has(.heist-opening[open]) { overflow: hidden; }
 :root[data-theme="la-casa-de-papel-dark"] :is(.astra-mini, .avatar-astra, .astra-avatar) {
   border-color: #ad626d;
 }
-:root[data-theme="la-casa-de-papel-dark"] :is(.astra-mini, .avatar-astra, .astra-avatar) img {
-  border-radius: inherit;
-}
 :root[data-theme="la-casa-de-papel-dark"] .astra-shell::backdrop { background: #080506bc; }
 :root[data-theme="la-casa-de-papel-dark"] .astra-conversation :is(.chat-bubble, .portfolio-card, .astra-resource) {
   border-radius: 6px;
@@ -451,10 +448,9 @@ html:has(.heist-opening[open]) { overflow: hidden; }
   border-color: #704850;
 }
 :root[data-theme="la-casa-de-papel-dark"] .astra-conversation .chat-form textarea {
-  background: var(--heist-card);
-  border: 1px solid var(--control-border);
+  background: transparent;
+  border: 0;
   caret-color: var(--ink);
-  border-radius: 5px;
 }
 @media (max-width: 767px) {
   :root[data-theme="la-casa-de-papel-dark"] .astra-conversation .chat-form textarea { font-size: 16px; padding-inline: 8px; }

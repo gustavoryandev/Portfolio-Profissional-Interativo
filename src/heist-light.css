@@ -230,9 +230,8 @@
   border-color: var(--line);
 }
 :root[data-theme="la-casa-de-papel-light"] .astra-conversation .chat-form textarea {
-  background: var(--panel);
-  border: 1px solid var(--control-border);
-  border-radius: 5px;
+  background: transparent;
+  border: 0;
   caret-color: var(--ink);
 }
 :root[data-theme="la-casa-de-papel-light"] .astra-conversation .astra-hero {
