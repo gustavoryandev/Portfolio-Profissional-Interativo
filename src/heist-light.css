@@ -28,3 +28,67 @@
 }
 
 :root[data-theme="la-casa-de-papel-light"] body { background: var(--page); }
+
+:root[data-theme="la-casa-de-papel-light"] .portfolio-hero .heist-backdrop {
+  background:
+    linear-gradient(90deg, #f2eee5 2%, #f2eee5fd 18%, #f2eee5e8 35%, #f2eee549 67%, #f2eee512),
+    linear-gradient(0deg, var(--page), #f2eee500 40%),
+    var(--heist-location-image) 63% 46% / cover no-repeat,
+    var(--page);
+}
+
+:root[data-theme="la-casa-de-papel-light"] .portfolio-hero::before {
+  content: '';
+  display: block;
+  position: absolute;
+  z-index: -1;
+  inset: 6% auto 6% calc(50% - 50vw);
+  width: min(58vw, 850px);
+  background:
+    linear-gradient(90deg, #705a4023 1px, transparent 1px) 0 0 / 32px 32px,
+    linear-gradient(#705a4023 1px, transparent 1px) 0 0 / 32px 32px;
+  mask-image: linear-gradient(90deg, #0005, #0008 55%, transparent);
+  pointer-events: none;
+}
+:root[data-theme="la-casa-de-papel-light"] .heist-variant-label {
+  background: var(--panel);
+  border-color: var(--control-border);
+}
+:root[data-theme="la-casa-de-papel-light"] .heist-variant-label i { box-shadow: none; }
+:root[data-theme="la-casa-de-papel-light"] .heist-variant-label span { border-color: var(--control-border); }
+:root[data-theme="la-casa-de-papel-light"] .portfolio-hero .neon-title {
+  color: var(--palette-on-primary);
+  background: var(--primary);
+}
+:root[data-theme="la-casa-de-papel-light"] .hero-description { color: var(--heist-paper); }
+:root[data-theme="la-casa-de-papel-light"] .hero-profile {
+  background: var(--panel);
+  border: 1px solid var(--control-border);
+  box-shadow: -6px 6px 0 var(--heist-document), 0 20px 38px -24px #51443888;
+}
+:root[data-theme="la-casa-de-papel-light"] .hero-profile::before {
+  background: linear-gradient(140deg, #d4c8b677, transparent 28%);
+}
+:root[data-theme="la-casa-de-papel-light"] .heist-portrait .photo-reveal-stage { background: var(--panel-soft); }
+:root[data-theme="la-casa-de-papel-light"] .heist-portrait .photo-reveal-toggle:not(:disabled):hover {
+  color: var(--primary);
+  background: var(--panel-soft);
+}
+:root[data-theme="la-casa-de-papel-light"] .scroll-secondary {
+  border-color: var(--control-border);
+  background: var(--panel);
+}
+:root[data-theme="la-casa-de-papel-light"] .scroll-secondary:is(:hover, :focus-visible) {
+  border-color: var(--focus-ring);
+  color: var(--primary);
+  background: var(--panel-soft);
+}
+@media (max-width: 767px) {
+  :root[data-theme="la-casa-de-papel-light"] .portfolio-hero .heist-backdrop {
+    background:
+      linear-gradient(0deg, var(--page) 5%, #f2eee5a8 32%, #fffdf7de 60%, #f2eee5df 88%, var(--page)),
+      var(--heist-location-image) 56% 16% / auto 76% no-repeat,
+      var(--page);
+  }
+  :root[data-theme="la-casa-de-papel-light"] .portfolio-hero::before { width: 100vw; }
+}

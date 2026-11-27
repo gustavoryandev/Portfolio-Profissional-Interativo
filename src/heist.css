@@ -18,7 +18,6 @@
   --heist-paper: #C9B99A;
   --heist-shadow: #030303;
   --heist-neutral: #777777;
-  --heist-display: 'Barlow Condensed', 'Arial Narrow', Impact, sans-serif;
   --panel-soft: var(--heist-card);
   --primary-hover: #B50920;
   --accent: #FF6477;
@@ -32,6 +31,8 @@
 :root[data-theme="la-casa-de-papel-dark"] body { background: var(--page); }
 
 /* Both variants inherit the portfolio grid and portrait sizing at each breakpoint. */
+:root[data-theme|="la-casa-de-papel"] { --heist-display: 'Barlow Condensed', 'Arial Narrow', Impact, sans-serif; }
+
 :root[data-theme|="la-casa-de-papel"] .portfolio-hero {
   position: relative;
   isolation: isolate;
@@ -83,7 +84,7 @@
   color: var(--heist-paper);
 }
 
-:root[data-theme="la-casa-de-papel-dark"] .portfolio-hero h1 {
+:root[data-theme|="la-casa-de-papel"] .portfolio-hero h1 {
   color: var(--ink);
   font-family: var(--heist-display);
   font-weight: 900;
@@ -92,7 +93,7 @@
   text-transform: uppercase;
 }
 
-:root[data-theme="la-casa-de-papel-dark"] .portfolio-hero .neon-title {
+:root[data-theme|="la-casa-de-papel"] .portfolio-hero .neon-title {
   display: inline-block;
   margin-block-start: .07em;
   padding: .005em .105em .085em .06em;
@@ -103,16 +104,16 @@
   text-shadow: none;
 }
 
-:root[data-theme="la-casa-de-papel-dark"] .portfolio-hero .hero-lead {
+:root[data-theme|="la-casa-de-papel"] .portfolio-hero .hero-lead {
   color: var(--ink);
   font-weight: 650;
 }
 
-:root[data-theme="la-casa-de-papel-dark"] .hero-actions { gap: 12px; }
-:root[data-theme="la-casa-de-papel-dark"] .hero-actions :is(button, a) { border-radius: 5px; }
-:root[data-theme="la-casa-de-papel-dark"] .hero-actions img { border-radius: 50%; object-fit: cover; }
+:root[data-theme|="la-casa-de-papel"] .hero-actions { gap: 12px; }
+:root[data-theme|="la-casa-de-papel"] .hero-actions :is(button, a) { border-radius: 5px; }
+:root[data-theme|="la-casa-de-papel"] .hero-actions img { border-radius: 50%; object-fit: cover; }
 
-:root[data-theme="la-casa-de-papel-dark"] .hero-profile {
+:root[data-theme|="la-casa-de-papel"] .hero-profile {
   background: #161313;
   border: 1px solid #845960;
   border-radius: 5px;
@@ -122,12 +123,12 @@
 :root[data-theme="la-casa-de-papel-dark"] .hero-profile::before {
   background: linear-gradient(140deg, #ed163750, transparent 25%);
 }
-:root[data-theme="la-casa-de-papel-dark"] .hero-profile-caption {
+:root[data-theme|="la-casa-de-papel"] .hero-profile-caption {
   gap: 5px;
   padding: 10px 4px 4px;
 }
-:root[data-theme="la-casa-de-papel-dark"] .hero-profile-caption span { color: var(--heist-paper); }
-:root[data-theme="la-casa-de-papel-dark"] .portrait-orbit { display: none; }
+:root[data-theme|="la-casa-de-papel"] .hero-profile-caption span { color: var(--heist-paper); }
+:root[data-theme|="la-casa-de-papel"] .portrait-orbit { display: none; }
 
 .heist-mask-button {
   display: inline-grid;
@@ -269,15 +270,15 @@ html:has(.heist-opening[open]) { overflow: hidden; }
 .heist-opening[data-still="true"] .heist-opening-title { animation: none; }
 
 @media (max-width: 767px) {
-  :root[data-theme="la-casa-de-papel-dark"] .portfolio-hero {
+  :root[data-theme|="la-casa-de-papel"] .portfolio-hero {
     padding-block: 28px 48px;
   }
   :root[data-theme|="la-casa-de-papel"] .portfolio-hero h1 { font-size: clamp(49px, 11.2vw, 80px); }
   .heist-variant-label { margin-block-end: 22px; }
-  :root[data-theme="la-casa-de-papel-dark"] .portfolio-hero .hero-lead { margin-top: 18px; }
-  :root[data-theme="la-casa-de-papel-dark"] .hero-description { margin-top: 12px; line-height: 1.55; }
-  :root[data-theme="la-casa-de-papel-dark"] .hero-actions { gap: 8px; margin-block: 18px; }
-  :root[data-theme="la-casa-de-papel-dark"] .hero-actions .neon-cta { min-height: 44px; padding-block: 9px; }
+  :root[data-theme|="la-casa-de-papel"] .portfolio-hero .hero-lead { margin-top: 18px; }
+  :root[data-theme|="la-casa-de-papel"] .hero-description { margin-top: 12px; line-height: 1.55; }
+  :root[data-theme|="la-casa-de-papel"] .hero-actions { gap: 8px; margin-block: 18px; }
+  :root[data-theme|="la-casa-de-papel"] .hero-actions .neon-cta { min-height: 44px; padding-block: 9px; }
   .portfolio-hero .heist-backdrop {
     background:
       linear-gradient(0deg, #080808 3%, #08080872 24%, #080808a1 70%, #0808084d),
@@ -394,13 +395,13 @@ html:has(.heist-opening[open]) { overflow: hidden; }
   --dossier-rule: #80515a;
 }
 :root[data-theme="la-casa-de-papel-dark"] .scroll-footer { border-color: #7d414a; }
-:root[data-theme="la-casa-de-papel-dark"] .scroll-secondary {
+:root[data-theme|="la-casa-de-papel"] .scroll-secondary {
   min-height: 44px;
   padding-inline: 15px;
   border: 1px solid #87646a;
   background: #151113;
 }
-:root[data-theme="la-casa-de-papel-dark"] .scroll-secondary:is(:hover, :focus-visible) {
+:root[data-theme|="la-casa-de-papel"] .scroll-secondary:is(:hover, :focus-visible) {
   border-color: var(--focus-ring);
   color: var(--ink);
   background: #47242b;
