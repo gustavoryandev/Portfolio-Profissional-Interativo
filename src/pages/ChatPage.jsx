@@ -72,7 +72,7 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
   const assistantName = persona?.name ?? 'Astra';
   const viewportRef = useMobileViewport();
   const { actions, actionUi, lab, openFull, setLabHandoff } = useAstra();
-  const { theme, dimension } = useContext(ThemeContext) ?? {};
+  const { theme, dimension, discoverBeyond } = useContext(ThemeContext) ?? {};
   const galo = isGaloTheme(theme);
   const welcomeKey = galo ? 'chat.galoWelcome.greeting' : modal ? 'chat.quickWelcome' : 'chat.boasVindas';
 
@@ -178,6 +178,15 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
       turnId: turn, attemptId: 1, personaId: persona?.id ?? ASTRA_PERSONA_ID,
       theme, dimension, surface, language: requestLanguage,
     });
+    const discovery = discoverBeyond?.(query);
+    if (discovery) {
+      const translationKey = `rick.beyond.command.${discovery}`;
+      followOutput.current = true;
+      setInput('');
+      appendMessage({ id: userId, sender: 'user', text: query, lang: requestLanguage });
+      appendMessage({ id, sender: 'ai', text: t(translationKey), translationKey, lang: requestLanguage, author });
+      return;
+    }
     if (isChessReplayRequest(query)) {
       followOutput.current = true;
       setInput('');

@@ -663,6 +663,32 @@
     "voluntario_puc_skills": "Teamwork, Communication, Organization"
   },
   "rick": {
+    "beyond": {
+      "name": "Beyond the Central Finite Curve",
+      "enter": "Cross into Beyond the Central Finite Curve",
+      "citadel": "Return to the Citadel of Ricks",
+      "short": "CURVE",
+      "citadelShort": "DOCK",
+      "skip": "Skip transit",
+      "signal": "The connection is stable. I can guide you through the projects and code.",
+      "archive": "MANSION / ARCHIVE",
+      "command": {
+        "accepted": "Signal recognized. Coordinates confirmed.",
+        "busy": "A crossing is already underway.",
+        "alreadyThere": "You’re already beyond the Curve. Use the portals in the header to return."
+      },
+      "scenes": {
+        "detected": "Signal recognized",
+        "instability": "Dimensional instability",
+        "curve": "Central Finite Curve",
+        "rupture": "Barrier breached",
+        "portal": "Yellow portal opened",
+        "transit": "Interdimensional transit",
+        "mansion": "Evil Morty’s mansion"
+      },
+      "achievement": "Interdimensional Traveler",
+      "earned": "Achievement unlocked"
+    },
     "portal": {
       "return": "Return to Rick’s garage",
       "cross": "Cross the portal",

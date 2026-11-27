@@ -5,6 +5,7 @@ import { isGaloTheme, isDimensionalTheme, legacyThemeIds, themePalettes, themes 
 import { DimensionalIntro } from '../components/RickDimensionExperience';
 import { DimensionTransit } from '../components/DimensionPortal';
 import { REDUCED_MOTION_QUERY } from '../motionPreferences';
+import { BEYOND_CURVE, BEYOND_UNLOCK_KEY, RICK_DIMENSION_KEY, isBeyondCurveCommand, readRickDimension } from '../data/rickDimensions.js';
 export { themes };
 
 import { ThemeContext } from './ThemeState';
@@ -15,7 +16,7 @@ const galoAnthemUrl = '/hino-do-galo.mp3';
 
 export function ThemeProvider({ children }) {
   const { playMusic, stopMusic, toggleMusic, musicStatus, musicVolume, changeMusicVolume } = useRickThemeMusic();
-  const { progress, enable: enableExploration, reset: resetExploration, recordDiscovery } = useRickExploration();
+  const { progress, enable: enableExploration, reset: resetJournal, recordDiscovery } = useRickExploration();
   const [theme, setSelectedTheme] = useState(() => {
     let initial = document.documentElement.dataset.theme;
     if (!initial) {
@@ -46,10 +47,14 @@ export function ThemeProvider({ children }) {
       document.removeEventListener('visibilitychange', visibility);
     };
   }, [theme]);
+  const [beyondUnlocked, setBeyondUnlocked] = useState(() => {
+    try { return localStorage.getItem(BEYOND_UNLOCK_KEY) === '1'; } catch { return false; }
+  });
+  const unlocked = useRef(beyondUnlocked);
   const [dimension, setDimension] = useState(() => {
-    if (document.documentElement.dataset.dimension === 'corrupted') return 'corrupted';
     try {
-      return localStorage.getItem('theme') === 'rick-morty-secret' || localStorage.getItem('rick-morty-dimension') === 'corrupted' ? 'corrupted' : 'lab';
+      return readRickDimension(localStorage.getItem('theme'),
+        localStorage.getItem(RICK_DIMENSION_KEY) ?? document.documentElement.dataset.dimension, beyondUnlocked);
     } catch { return 'lab'; }
   });
   const [introScene, setIntroScene] = useState(null);
@@ -164,7 +169,7 @@ export function ThemeProvider({ children }) {
     const wasRick = selectedTheme.current === 'rick-morty';
     selectedTheme.current = nextTheme;
     setSelectedTheme(nextTheme);
-    if (nextTheme === 'rick-morty') {
+    if (nextTheme === 'rick-morty' && !wasRick && selectedDimension.current !== BEYOND_CURVE) {
       selectedDimension.current = 'lab';
       setDimension('lab');
     }
@@ -193,6 +198,7 @@ export function ThemeProvider({ children }) {
     }
     selectedDimension.current = next;
     if (next === 'corrupted') recordDiscovery('citadel');
+    if (next === BEYOND_CURVE) recordDiscovery(BEYOND_CURVE);
     setDimension(next);
     setIntroScene(withDock ? 'citadel' : null);
   }, [recordDiscovery]);
@@ -200,23 +206,46 @@ export function ThemeProvider({ children }) {
     setTrip(null);
     if (interrupted) setIntroScene(null);
   }, []);
-  const crossDimension = useCallback(event => {
-    if (!isDimensionalTheme(selectedTheme.current) || tripLocked.current || replayTrigger.current) return;
+  const crossDimension = useCallback((event, target, firstDiscovery = false) => {
+    if (!isDimensionalTheme(selectedTheme.current) || tripLocked.current || replayTrigger.current) return false;
+    const destination = target ?? (selectedDimension.current === 'lab' ? 'corrupted' : 'lab');
+    if (destination === selectedDimension.current || (destination === BEYOND_CURVE && !unlocked.current)) return false;
     tripLocked.current = true;
-    const destination = selectedDimension.current === 'lab' ? 'corrupted' : 'lab';
     if (introScene === 'garage') markShipDeparted();
-    if (window.matchMedia?.(REDUCED_MOTION_QUERY).matches) {
+    if (effectsPaused || document.hidden || window.matchMedia?.(REDUCED_MOTION_QUERY).matches) {
       arrive(destination);
-      return;
+      return true;
     }
     const button = event?.currentTarget;
     const bounds = (button?.querySelector('.portal-art') ?? button)?.getBoundingClientRect();
     setIntroScene(null);
-    setTrip({ destination,
+    setTrip({ destination, firstDiscovery, origin: selectedDimension.current,
       x: bounds ? bounds.left + bounds.width / 2 : window.innerWidth / 2,
       y: bounds ? bounds.top + bounds.height / 2 : window.innerHeight / 2,
     });
-  }, [arrive, introScene, markShipDeparted]);
+    return true;
+  }, [arrive, effectsPaused, introScene, markShipDeparted]);
+  const discoverBeyond = useCallback(query => {
+    if (!isBeyondCurveCommand(selectedTheme.current, query)) return null;
+    if (tripLocked.current || replayTrigger.current) return 'busy';
+    if (selectedDimension.current === BEYOND_CURVE) return 'alreadyThere';
+    const firstDiscovery = !unlocked.current;
+    if (firstDiscovery) {
+      unlocked.current = true;
+      setBeyondUnlocked(true);
+      try { localStorage.setItem(BEYOND_UNLOCK_KEY, '1'); } catch {}
+    }
+    crossDimension(null, BEYOND_CURVE, firstDiscovery);
+    return 'accepted';
+  }, [crossDimension]);
+  const resetExploration = useCallback(() => {
+    unlocked.current = false;
+    setBeyondUnlocked(false);
+    try { localStorage.removeItem(BEYOND_UNLOCK_KEY); } catch {}
+    resetJournal();
+    setTrip(null);
+    if (selectedDimension.current === BEYOND_CURVE) arrive('lab');
+  }, [arrive, resetJournal]);
   useEffect(() => () => {
     cancelAnimationFrame(restoreFrame.current);
     cancelAnimationFrame(focusFrame.current);
@@ -241,7 +270,7 @@ export function ThemeProvider({ children }) {
     else delete root.dataset.dimension;
     root.classList.toggle('dark', darkMode);
     root.toggleAttribute('data-custom-theme', Boolean(palette.name));
-    try { localStorage.setItem('theme', theme); localStorage.setItem('rick-morty-dimension', dimension); } catch { /* The palette still works without storage. */ }
+    try { localStorage.setItem('theme', theme); localStorage.setItem(RICK_DIMENSION_KEY, dimension); } catch { /* The palette still works without storage. */ }
     if (scrollPosition.current) {
       const { left, top, section, sectionTop } = scrollPosition.current;
       // A taller mobile dock can shift all sections below the hero.
@@ -256,7 +285,7 @@ export function ThemeProvider({ children }) {
   }, [theme, dimension, darkMode, palette]);
 
   return (
-      <ThemeContext.Provider value={{ musicStatus, musicVolume, changeMusicVolume, toggleMusic, effectsPaused, changeEffectsPaused, theme, darkMode, setTheme, anthemPlaying, toggleAnthem, crossDimension, crossing, dimension, eggMessage, setEggMessage, shipDeparted, markShipDeparted, introScene, replayIntro, progress, enableExploration, resetExploration, recordDiscovery }}>
+      <ThemeContext.Provider value={{ musicStatus, musicVolume, changeMusicVolume, toggleMusic, effectsPaused, changeEffectsPaused, theme, darkMode, setTheme, anthemPlaying, toggleAnthem, crossDimension, crossing, dimension, beyondUnlocked, discoverBeyond, eggMessage, setEggMessage, shipDeparted, markShipDeparted, introScene, replayIntro, progress, enableExploration, resetExploration, recordDiscovery }}>
       {children}
       {introScene && <DimensionalIntro key={introScene} scene={introScene} onDismiss={dismissIntro} />}
       {trip && <DimensionTransit trip={trip} onArrive={arrive} onFinish={finishTrip} />}

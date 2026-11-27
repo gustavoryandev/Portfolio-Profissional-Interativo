@@ -663,12 +663,38 @@
     "voluntario_puc_skills": "Trabalho em equipe, Comunicação, Organização"
   },
   "rick": {
+    "beyond": {
+      "name": "Além da Curva Finita Central",
+      "enter": "Atravessar para Além da Curva Finita Central",
+      "citadel": "Voltar à Cidadela dos Ricks",
+      "short": "CURVA",
+      "citadelShort": "DOCA",
+      "skip": "Pular travessia",
+      "signal": "A conexão está estável. Posso orientar você pelos projetos e pelo código.",
+      "archive": "MANSÃO / ARQUIVO",
+      "command": {
+        "accepted": "Sinal reconhecido. Coordenadas confirmadas.",
+        "busy": "Uma travessia já está em andamento.",
+        "alreadyThere": "Você já está além da Curva. Use os portais do cabeçalho para voltar."
+      },
+      "scenes": {
+        "detected": "Sinal reconhecido",
+        "instability": "Instabilidade dimensional",
+        "curve": "Curva Finita Central",
+        "rupture": "Barreira rompida",
+        "portal": "Portal amarelo aberto",
+        "transit": "Travessia interdimensional",
+        "mansion": "Mansão de Evil Morty"
+      },
+      "achievement": "Viajante Interdimensional",
+      "earned": "Conquista desbloqueada"
+    },
     "portal": {
       "return": "Voltar à Garagem do Rick",
       "cross": "Atravessar o portal",
       "back": "VOLTAR",
       "enter": "ENTRAR",
-      "secret": "Você está na dimensão secreta.",
+      "secret": "Você está na Cidadela dos Ricks.",
       "original": "Dimensão original."
     },
     "garageCode": "DIMENSÃO C-131 / GARAGEM",
