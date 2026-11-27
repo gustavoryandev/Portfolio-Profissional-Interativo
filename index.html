@@ -17,15 +17,16 @@
       // Keep these aliases in sync with src/data/themes.js.
       const legacyThemeIds = {
         'rick-morty-secret': 'rick-morty',
-        'obsidian-gold': 'midnight-pink',
-        'grafite-coral': 'midnight-pink',
+        'midnight-pink': 'la-casa-de-papel-dark',
+        'obsidian-gold': 'la-casa-de-papel-dark',
+        'grafite-coral': 'la-casa-de-papel-dark',
         'champagne-gold': 'ardosia-cobalto',
         'mint-frost': 'petroleo-gelo',
         'porcelain-indigo': 'papel-violeta',
       };
       if (Object.hasOwn(legacyThemeIds, savedTheme)) savedTheme = legacyThemeIds[savedTheme];
       const lightThemes = ['light', 'galo-light', 'papel-violeta', 'quartzo-framboesa', 'ardosia-cobalto', 'petroleo-gelo'];
-      const darkThemes = ['rick-morty', 'dark', 'galo', 'aurora', 'midnight-violet', 'midnight-pink', 'cobalto-intenso', 'petroleo-eletrico', 'floresta-mineral'];
+      const darkThemes = ['rick-morty', 'dark', 'galo', 'aurora', 'midnight-violet', 'la-casa-de-papel-dark', 'cobalto-intenso', 'petroleo-eletrico', 'floresta-mineral'];
       const theme = lightThemes.includes(savedTheme) || darkThemes.includes(savedTheme) ? savedTheme : 'dark';
       const root = document.documentElement;
       root.dataset.theme = theme;

@@ -1,3 +1,5 @@
+import { HEIST_DARK } from './heistThemes.js';
+
 export const themes = [
   { id: 'light', light: true },
   { id: 'dark' },
@@ -7,7 +9,7 @@ export const themes = [
   { id: 'aurora', name: 'Aurora' },
   { id: 'midnight-violet', name: 'Midnight Violet' },
   { id: 'papel-violeta', name: 'Papel violeta', light: true },
-  { id: 'midnight-pink', name: 'Midnight Pink' },
+  { id: HEIST_DARK, name: 'La Casa de Papel — O Assalto' },
   { id: 'quartzo-framboesa', name: 'Quartzo framboesa', light: true },
   { id: 'ardosia-cobalto', name: 'Ardósia e Cobalto', light: true },
   { id: 'cobalto-intenso', name: 'Cobalto intenso' },
@@ -21,8 +23,9 @@ export const themePalettes = themes;
 // Keep these aliases in sync with the first-paint script in index.html.
 export const legacyThemeIds = {
   'rick-morty-secret': 'rick-morty',
-  'obsidian-gold': 'midnight-pink',
-  'grafite-coral': 'midnight-pink',
+  'midnight-pink': HEIST_DARK,
+  'obsidian-gold': HEIST_DARK,
+  'grafite-coral': HEIST_DARK,
   'champagne-gold': 'ardosia-cobalto',
   'mint-frost': 'petroleo-gelo',
   'porcelain-indigo': 'papel-violeta',

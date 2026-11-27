@@ -1,5 +1,6 @@
 import { useContext } from 'react';
 import { ThemeContext } from '../context/ThemeContext';
+import { isHeistTheme } from '../data/heistThemes.js';
 import { isDimensionalTheme, isGaloTheme } from '../data/themes.js';
 
 const upper = 'M-35 252 C100 42 324 76 564 -8';
@@ -8,7 +9,7 @@ const right = 'M920 957 C1128 944 1237 889 1338 770 C1458 618 1538 520 1700 505'
 
 export default function ThemeWaves() {
   const theme = useContext(ThemeContext)?.theme;
-  if (isDimensionalTheme(theme)) return null;
+  if (isDimensionalTheme(theme) || isHeistTheme(theme)) return null;
   if (isGaloTheme(theme)) return <GaloWaves />;
 
   return (

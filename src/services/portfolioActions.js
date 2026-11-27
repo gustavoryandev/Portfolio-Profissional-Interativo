@@ -1,6 +1,6 @@
 import { playgroundExamples } from '../data/playgroundExamples.js';
 import { languages } from '../data/playgroundLanguages.js';
-import { themes } from '../data/themes.js';
+import { themes, legacyThemeIds } from '../data/themes.js';
 import { DESIGN_SYSTEM_ACTION } from '../data/designSystem.js';
 
 export const LAB_CODE_LIMIT = 20000;
@@ -39,8 +39,10 @@ export function validateActions(raw, projectIds, snapshot = false) {
   const seen = new Set();
   for (const action of raw) {
     if (!action || typeof action !== 'object') return [];
-    const { type, target } = action;
+    const { type } = action;
     if (typeof type !== 'string') return [];
+    const target = type === 'theme.set' && typeof action.target === 'string' && Object.hasOwn(legacyThemeIds, action.target)
+      ? legacyThemeIds[action.target] : action.target;
     let normalized;
     if (snapshot && type === 'lab.edit') {
       if (!Array.isArray(action.edits) || !action.edits.length || action.edits.length > 12) return [];

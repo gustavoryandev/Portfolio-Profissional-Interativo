@@ -1,0 +1,30 @@
+:root[data-theme="la-casa-de-papel-dark"], .menu-option[data-preview="la-casa-de-papel-dark"] {
+  --palette-bg: #080808;
+  --palette-surface: #141414;
+  --palette-primary: #D90416;
+  --palette-on-primary: #FFFFFF;
+  --palette-accent: #FF1734;
+  --palette-text: #F1EEE8;
+  --palette-muted: #A6A6A6;
+  --palette-border: #4D151B;
+  --palette-tint: 20 20 20;
+  --palette-accent-rgb: 255 23 52;
+  --palette-primary-rgb: 217 4 22;
+}
+
+:root[data-theme="la-casa-de-papel-dark"] {
+  --heist-card: #202020;
+  --heist-deep-red: #780B14;
+  --heist-paper: #C9B99A;
+  --heist-shadow: #030303;
+  --heist-neutral: #777777;
+  --heist-display: 'Barlow Condensed', 'Arial Narrow', Impact, sans-serif;
+  --panel-soft: var(--heist-card);
+  --primary-hover: #B50920;
+  --accent: #FF6477;
+  --control-border: #87777A;
+  --focus-ring: #FF96A2;
+  --neon-strength: .13;
+  --glass-alpha: .95;
+  --portfolio-logo-dot: var(--palette-primary);
+}

@@ -10,6 +10,7 @@ import './mobile.css';
 import './header.css';
 import './astra.css';
 import './themes.css';
+import './heist.css';
 import './dimensions.css';
 import './rick-experience.css';
 import './beyond-curve.css';
