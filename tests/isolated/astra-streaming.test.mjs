@@ -246,6 +246,16 @@ test('the phrase remains an ordinary Astra request outside Rick and Morty', asyn
 test('a direct full visit restores the dimension and renders historical Squanchy without reassignment', async () => {
   await mount('en', '/chat', { dimension: 'beyond-curve', unlocked: true });
   assert.equal($('.chat-heading img').dataset.astraCharacter, 'evil-morty');
+  const themeMenu = $('.astra-full .header-actions button[aria-haspopup]');
+  await click(themeMenu);
+  await click($('.astra-full [data-preview="dark"]'));
+  assert.equal(document.documentElement.dataset.dimension, undefined);
+  assert.equal(window.localStorage.getItem('rick-morty-dimension'), 'beyond-curve');
+  await click(themeMenu);
+  await click($('.astra-full [data-preview="rick-morty"]'));
+  assert.equal(document.documentElement.dataset.dimension, 'beyond-curve');
+  await click($('.astra-full .brand-lockup'));
+  await until(() => window.location.pathname === '/' && $('.astra-fab img')?.dataset.astraCharacter === 'evil-rick');
   const author = Object.freeze({ personaId: 'squanchy', theme: 'rick-morty', dimension: 'lab', surface: 'full', language: 'pt' });
   await act(async () => root.render(React.createElement(ThemeProvider, null,
     React.createElement(MessageBubble, { message: { id: 'old', sender: 'ai', lang: 'pt', author, text: 'Resposta antiga.' } }))));
