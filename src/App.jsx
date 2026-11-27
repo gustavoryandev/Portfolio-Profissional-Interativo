@@ -143,7 +143,7 @@ export default function App() {
   };
   const actionUi = {
     navigate: selectSection, setTheme, setLanguage: language => i18n.changeLanguage(language),
-    openFull: () => { if (full) return false; openFull(); return true; },
+    openFull: () => { if (readRoute().path === '/chat') return false; openFull(); return true; },
     openProject: id => { close(); navigate('/?project=' + encodeURIComponent(id) + '#projetos'); },
   };
   const openArcade = (game, challenge) => {

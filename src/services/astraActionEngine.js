@@ -14,7 +14,7 @@ export function createAstraActionEngine({ lab, projectIds }) {
   let lastTurn = 0;
   let handled = new Set();
   return {
-    async execute(turn, raw, ui, { base, signal } = {}) {
+    async execute(turn, raw, ui, { base, signal, labAtSend } = {}) {
       const result = { notices: [], cards: [] };
       if (signal?.aborted || turn < lastTurn) return result;
       if (turn !== lastTurn) { lastTurn = turn; handled = new Set(); }
@@ -23,8 +23,18 @@ export function createAstraActionEngine({ lab, projectIds }) {
       handled.add(phase);
       const actions = validateActions(raw, projectIds, Boolean(base));
       if (raw?.length && !actions.length) result.notices.push('invalid');
+      let expectedEditor = labAtSend;
       for (const { type, target, edits, runAfter } of actions) {
         if (signal?.aborted) break;
+        if (expectedEditor && type.startsWith('lab.')) {
+          const current = lab.getSnapshot();
+          if (current.language !== expectedEditor.language || current.example !== expectedEditor.example
+            || current.revision !== expectedEditor.revision
+            || (type === 'lab.stop' && current.executionId !== expectedEditor.executionId)) {
+            result.notices.push('staleEditor');
+            break;
+          }
+        }
         if (type === 'astra.openFull') result.notices.push(ui.openFull() ? 'fullOpened' : 'alreadyFull');
         else if (type === DESIGN_SYSTEM_ACTION.type) result.cards.push(DESIGN_SYSTEM_CARD);
         else if (type === 'navigate') { ui.navigate(target); result.notices.push('navigated'); }
@@ -35,6 +45,7 @@ export function createAstraActionEngine({ lab, projectIds }) {
         else if (type === 'lab.language' || type === 'lab.example') {
           const field = type === 'lab.language' ? 'language' : 'example';
           if (!lab.select({ [field]: target })) { result.notices.push('busy'); break; }
+          if (expectedEditor) expectedEditor = lab.getSnapshot();
           result.notices.push(field === 'language' ? 'labLanguage' : 'labExample');
         } else if (type === 'lab.read') {
           const { language, example, status, code, output, revision } = lab.getSnapshot();

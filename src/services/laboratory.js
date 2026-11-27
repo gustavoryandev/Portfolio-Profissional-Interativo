@@ -16,9 +16,10 @@ export function createLaboratory({ makeWorker = language => new Worker(`/${langu
   let review = null;
   let reviewResults = {};
   let reviewId = 0;
+  let executionId = 0;
   const entry = target => entries.get(keyOf(target)) ?? { code: original(target), output: '', status: 'idle', revision: 0 };
   const publish = () => {
-    snapshot = { ...selection, ...entry(selection), busy: Boolean(active), review, latestReviewId: reviewId, reviewResults };
+    snapshot = { ...selection, ...entry(selection), busy: Boolean(active), executionId, review, latestReviewId: reviewId, reviewResults };
     for (const listener of listeners) listener();
   };
   const update = (target, values) => { entries.set(keyOf(target), { ...entry(target), ...values }); };
@@ -55,6 +56,7 @@ export function createLaboratory({ makeWorker = language => new Worker(`/${langu
     if (active || !code.trim()) return false;
     const execution = {};
     active = execution;
+    executionId++;
     update(target, { output: '', status: 'loading' });
     publish();
     const finish = (status, output = '') => {

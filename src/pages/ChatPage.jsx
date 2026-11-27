@@ -71,7 +71,7 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
   const persona = useAssistantPersona(surface);
   const assistantName = persona?.name ?? 'Astra';
   const viewportRef = useMobileViewport();
-  const { actions, actionUi, openFull, setLabHandoff } = useAstra();
+  const { actions, actionUi, lab, openFull, setLabHandoff } = useAstra();
   const { theme, dimension } = useContext(ThemeContext) ?? {};
   const galo = isGaloTheme(theme);
   const welcomeKey = galo ? 'chat.galoWelcome.greeting' : modal ? 'chat.quickWelcome' : 'chat.boasVindas';
@@ -87,7 +87,6 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
   const arcadeSession = useRef(null);
   const showArcade = !modal && visible && Boolean(arcade);
   const activeRequest = useRef(null);
-  const mounted = useRef(true);
   const followOutput = useRef(true);
   const fullCardTarget = useRef(null);
   const messagesContainerRef = useRef(null);
@@ -95,17 +94,16 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
   const wasLoading = useRef(false);
   const idCounter = useRef(0);
   const messagesRef = useRef(messages);
-  const sendingRef = useRef(false);
   const conversationRef = useRef({ chatContext: null, model: null });
   const live = useLiveContext();
 
   useEffect(() => {
-    mounted.current = true;
     void warmModelCatalog(); // independent of chat history, which already lives locally
     return () => {
-      mounted.current = false;
-      activeRequest.current?.controller.abort();
-      activeRequest.current?.buffer.dispose();
+      const request = activeRequest.current;
+      activeRequest.current = null;
+      request?.controller.abort();
+      request?.buffer?.dispose();
     };
   }, []);
 
@@ -171,7 +169,7 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
       setResourcesOpen(true);
       return;
     }
-    if (!query || sendingRef.current) return;
+    if (!query || activeRequest.current) return;
     const userId = nextId();
     const id = nextId();
     const turn = idCounter.current;
@@ -201,58 +199,92 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
       return;
     }
     const selectedActions = resourceActions ?? (isDesignSystemRequest(query) ? [DESIGN_SYSTEM_ACTION] : undefined);
-    sendingRef.current = true;
     followOutput.current = true;
 
     appendMessage({ id: userId, sender: 'user', text: query, lang: requestLanguage });
     setInput('');
     const session = showArcade ? arcadeSession.current : null;
     const intent = arcadeShortcut ?? (!selectedActions && !predefinedSuggestion && arcadeIntent(query, session?.getState().game, showArcade));
-    if (intent) {
-      setLoading(true);
-      try {
-        const response = await answerArcade(intent, { en, compact: modal || !visible, session, openArcade: onOpenArcade });
-        if (mounted.current) appendMessage({ id, sender: 'ai', lang: requestLanguage, ...response, author });
-      } catch {
-        if (mounted.current) appendMessage({ id, sender: 'ai', tone: 'error', lang: requestLanguage, text: t('chat.erro'), author });
-      } finally {
-        sendingRef.current = false;
-        if (mounted.current) setLoading(false);
-      }
-      return;
-    }
-    setLoading(true);
+    const labAtSend = lab?.getSnapshot();
     const controller = new AbortController();
-    const buffer = createStreamBuffer();
-    activeRequest.current = { controller, buffer };
+    const buffer = intent ? null : createStreamBuffer();
     let replyAuthor = author;
-    setStreaming({ id, buffer, author });
+    let pendingAttempt;
+    const request = { controller, buffer, stop };
+    const isCurrent = () => activeRequest.current === request;
+    activeRequest.current = request;
+    setLoading(true);
+    if (buffer) setStreaming({ id, buffer, author });
     const updateHandoff = reply => setLabHandoff?.(current => current?.turn === turn ? { ...current, reply } : current);
+
+    function finish() {
+      if (!isCurrent()) return;
+      activeRequest.current = null;
+      buffer?.dispose();
+      setLoading(false);
+      setStreaming(null);
+    }
+
+    function reportFailure(cancelled) {
+      if (!cancelled) setInput(current => current || query);
+      const notice = cancelled
+        ? (requestLanguage.startsWith('en') ? 'Response stopped.' : 'Resposta interrompida.')
+        : t('chat.erro', { lng: requestLanguage });
+      updateHandoff(notice);
+      appendMessage({
+        id, sender: 'ai', author: replyAuthor, degraded: true, lang: requestLanguage,
+        tone: cancelled ? undefined : 'error',
+        text: cancelled ? [buffer?.getText(), notice].filter(Boolean).join('\n\n') : notice,
+      });
+    }
+
+    function stop() {
+      if (!isCurrent()) return;
+      controller.abort();
+      reportFailure(true);
+      finish();
+    }
+
+    async function requestReply(history, context, suggested, labSnapshot) {
+      const attempt = replyAuthor;
+      pendingAttempt = attempt;
+      try {
+        return await sendMessage(query, attempt.language, history, context, suggested, {
+          signal: controller.signal,
+          surface: attempt.surface,
+          appearance: { theme: attempt.theme, dimension: attempt.dimension },
+          labSnapshot,
+          onEvent: event => {
+            if (isCurrent() && pendingAttempt === attempt && !controller.signal.aborted) buffer.push(event);
+          },
+        });
+      } finally {
+        if (pendingAttempt === attempt) pendingAttempt = null;
+      }
+    }
+
     try {
+      if (intent) {
+        const response = await answerArcade(intent, { en, compact: modal || !visible, session, openArcade: onOpenArcade });
+        if (isCurrent()) appendMessage({ id, sender: 'ai', lang: requestLanguage, ...response, author });
+        return;
+      }
       // O campo "id" é só da interface: não vai para o backend
       const history = messagesRef.current.filter(message => !message.degraded).map(({ id, sender, text, translationKey }) => id === 'welcome'
         ? { sender, text: persona?.welcome ?? t(welcomeKey), ...(persona ? {} : { translationKey: welcomeKey }) }
         : { sender, text, translationKey });
-      const options = {
-        signal: controller.signal,
-        surface: author.surface,
-        appearance: { theme: author.theme, dimension: author.dimension },
-        onEvent: event => {
-          if (mounted.current && !controller.signal.aborted) buffer.push(event);
-        },
-      };
       // Catalog shortcuts provide a fixed plan; typed requests use Gemini to choose the same actions.
       let data = selectedActions ? { actions: selectedActions }
-        : await sendMessage(query, requestLanguage, history, conversationRef.current.chatContext, predefinedSuggestion, options);
-      controller.signal.throwIfAborted();
-      if (!mounted.current) return;
+        : await requestReply(history, conversationRef.current.chatContext, predefinedSuggestion);
+      if (!isCurrent()) return;
       const plan = actions && await actions.execute(turn, data.actions, {
         ...actionUi,
         navigate: section => {
           if (section === 'laboratorio') setLabHandoff({ turn, modal, author });
           actionUi.navigate(section);
         },
-      }, { signal: controller.signal });
+      }, { signal: controller.signal, labAtSend });
+      if (!isCurrent()) return;
       const notices = [...(plan?.notices ?? [])];
       const cards = plan?.cards ?? [];
       let reviewId = plan?.reviewId;
@@ -260,15 +292,14 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
         live.absorb(data.liveContext);
         buffer.push({ type: 'reset' });
         replyAuthor = Object.freeze({ ...author, attemptId: 2 });
-        data = await sendMessage(query, requestLanguage, history, data.chatContext ?? conversationRef.current.chatContext,
-          false, { ...options, labSnapshot: plan.snapshot });
-        controller.signal.throwIfAborted();
-        if (!mounted.current) return;
+        setStreaming({ id, buffer, author: replyAuthor });
+        data = await requestReply(history, data.chatContext ?? conversationRef.current.chatContext, false, plan.snapshot);
+        if (!isCurrent()) return;
         const proposal = await actions.execute(turn, data.actions, actionUi, { base: plan.base, signal: controller.signal });
         reviewId = proposal.reviewId;
         notices.push(...proposal.notices);
       }
-      controller.signal.throwIfAborted();
+      if (!isCurrent()) return;
       if (data.degraded) setInput(current => current || query);
       const replyLanguage = data.response || data.error ? requestLanguage : i18n.language;
       const reply = [data.response || data.error, actionReply(notices, replyLanguage.startsWith('en'))].filter(Boolean).join('\n\n');
@@ -297,27 +328,9 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
       // Refresh only missing/stale sources; avoid a second forced HTTP request.
       void live.refresh(cardSources);
     } catch {
-      if (!mounted.current) return;
-      const cancelled = controller.signal.aborted;
-      if (!cancelled) setInput(current => current || query);
-      const notice = cancelled
-        ? (requestLanguage.startsWith('en') ? 'Response stopped.' : 'Resposta interrompida.')
-        : t('chat.erro', { lng: requestLanguage });
-      updateHandoff(notice);
-      appendMessage({
-        id,
-        sender: 'ai',
-        author: replyAuthor,
-        tone: cancelled ? undefined : 'error',
-        degraded: true,
-        lang: requestLanguage,
-        text: cancelled ? [buffer.getText(), notice].filter(Boolean).join('\n\n') : notice,
-      });
+      if (isCurrent()) reportFailure(false);
     } finally {
-      buffer.dispose();
-      activeRequest.current = null;
-      sendingRef.current = false;
-      if (mounted.current) { setLoading(false); setStreaming(null); }
+      finish();
     }
   };
 
@@ -476,7 +489,7 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
                     autoComplete="off"
                     className="min-h-12 min-w-0 flex-1 resize-none bg-transparent py-3 pl-4 pr-2 text-[15px] font-medium text-ink outline-none placeholder:text-muted disabled:opacity-60 sm:pl-2"
                   />
-                  {loading && <button type="button" onClick={() => activeRequest.current?.controller.abort()}
+                  {loading && <button type="button" onClick={() => activeRequest.current?.stop()}
                     className="icon-button shrink-0" aria-label={en ? 'Stop response' : 'Parar resposta'}><Square size={16} aria-hidden="true" /></button>}
                   <button
                     type="submit"

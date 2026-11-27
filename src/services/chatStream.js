@@ -8,11 +8,13 @@ export async function requestChatStream(payload, { signal: callerSignal, onEvent
   });
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
+    signal.throwIfAborted();
     throw new Error(error.error || `Chat request failed (${response.status})`);
   }
   // Deterministic replies and validation branches can still return ordinary JSON.
   if (response.headers.get('content-type')?.includes('application/json')) {
     const result = await response.json();
+    signal.throwIfAborted();
     const hasText = typeof result?.response === 'string' && result.response.trim();
     const hasTranslation = typeof result?.translationKey === 'string' && result.translationKey.trim();
     const hasActions = Array.isArray(result?.actions) && result.actions.length;
@@ -23,6 +25,8 @@ export async function requestChatStream(payload, { signal: callerSignal, onEvent
   }
   if (!response.body || !response.headers.get('content-type')?.includes('application/x-ndjson')) throw new Error('Invalid chat stream');
   const reader = response.body.getReader();
+  const cancelReader = () => reader.cancel().catch(() => {});
+  signal.addEventListener('abort', cancelReader, { once: true });
   const decoder = new TextDecoder();
   let buffer = '';
   let text = '';
@@ -30,6 +34,7 @@ export async function requestChatStream(payload, { signal: callerSignal, onEvent
   const result = {};
   function consume(line) {
     if (!line.trim() || done) return;
+    signal.throwIfAborted();
     const event = JSON.parse(line);
     if (event.type === 'error') throw new Error(event.error || 'Chat stream failed');
     if (event.type === 'meta') {
@@ -52,8 +57,9 @@ export async function requestChatStream(payload, { signal: callerSignal, onEvent
   }
   try {
     while (!done) {
-      signal?.throwIfAborted();
+      signal.throwIfAborted();
       const chunk = await reader.read();
+      signal.throwIfAborted();
       buffer += decoder.decode(chunk.value, { stream: !chunk.done });
       if (buffer.length > 1024 * 1024) throw new Error('Chat frame too large');
       let newline;
@@ -63,11 +69,13 @@ export async function requestChatStream(payload, { signal: callerSignal, onEvent
       }
       if (chunk.done) { consume(buffer); break; }
     }
+    signal.throwIfAborted();
     if (!done) throw new Error('Chat stream interrupted');
     if (!text.trim() && !result.actions?.length) throw new Error('Empty chat response');
     return { ...result, response: text };
   } finally {
-    await reader.cancel().catch(() => {});
+    signal.removeEventListener('abort', cancelReader);
+    await cancelReader();
     reader.releaseLock();
   }
 }

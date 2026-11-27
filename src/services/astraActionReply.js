@@ -12,6 +12,7 @@ const notices = {
   review: ['A proposta está pronta para revisão.', 'The proposal is ready to review.'],
   pending: ['Revise ou descarte a proposta anterior primeiro.', 'Review or discard the previous proposal first.'],
   stale: ['O código mudou. Peça uma nova proposta.', 'The code changed. Ask for a new proposal.'],
+  staleEditor: ['O Laboratório mudou durante o pedido. Envie o pedido novamente.', 'The Laboratory changed during the request. Please resend the request.'],
   patch: ['Não consegui preparar a alteração com segurança. Nenhum código foi modificado.', 'I couldn’t prepare the change safely. No code was modified.'],
   empty: ['O editor está vazio.', 'The editor is empty.'],
   original: ['O editor já contém o código original.', 'The editor already contains the original code.'],
