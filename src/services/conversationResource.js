@@ -4,6 +4,7 @@ const askToPlay = /^(?:(?:vamos|bora|podemos|quer|topa) jogar|(?:let.s|can we|sh
 const chessOffer = /(?:quer(?:ia)?|gostaria|topa|would you like|do you want)\b[^?\n]*(?:jogar|partida|play|game)[^?\n]*(?:xadrez|chess)[^?\n]*\?/;
 const missingBoard = /^(?:kd|cade(?: o tabuleiro)?|where is (?:it|the board))[\s,.!?]*$/;
 const startingChess = /(?:comecar|iniciar|start)[^.\n]*(?:xadrez|chess)/;
+const professionalTopics = /\b(?:formacao|graduacao|experiencias?|objetivos? profissionais?|education|degree|experience|career goals?)\b/;
 
 // Resource requests are deliberately separate: a game is not a Chess.com rating.
 export function conversationResource(text, { lastAssistant = '', offeredGame = false } = {}) {
@@ -16,6 +17,7 @@ export function conversationResource(text, { lastAssistant = '', offeredGame = f
   const chess = /xadrez|chess/.test(query);
   if (chess && /rating|\belo\b|estatistica|stats|statistics|historico|history/.test(query)) return 'chess';
   if (chess && /(?:quero|vamos|bora|podemos|pode|gostaria).*(?:jogar|partida)|(?:jogue|joga) comigo|(?:want to|let.s|can we|play|start).*(?:play|game|match)|^(?:play chess|jogar xadrez|bora xadrez)|abr[aei].*tabuleiro|open.*board/.test(query)) return 'play';
-  if (/proficiencia|proficiency|nivel.*(?:habilidade|tecnologia)|skill levels?|(?:tecnologias|ferramentas|habilidades).*(?:domina|gustavo|dele)|(?:gustavo|ele).*(?:domina|habilidades)|(?:technologies|tools|skills).*(?:he|gustavo)|(?:his|gustavo.s) skills/.test(query)) return 'skills';
+  if (!professionalTopics.test(query) &&
+    /proficiencia|proficiency|nivel.*(?:habilidade|tecnologia)|skill levels?|(?:tecnologias|ferramentas|habilidades).*(?:domina|gustavo|dele)|(?:gustavo|ele).*(?:domina|habilidades)|(?:technologies|tools|skills).*(?:he|gustavo)|(?:his|gustavo.s) skills/.test(query)) return 'skills';
   return null;
 }
