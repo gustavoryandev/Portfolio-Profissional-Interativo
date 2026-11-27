@@ -18,6 +18,7 @@ import './components/rick/character-performance.css';
 import './glassFx.js';
 import './i18n';
 import { ThemeProvider } from './context/ThemeContext.jsx';
+import { HeistOpeningProvider } from './components/heist/HeistExperience';
 import ThemeWaves from './components/ThemeWaves.jsx';
 import ThemedFavicon from './components/ThemedFavicon.jsx';
 
@@ -26,7 +27,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <ThemeProvider>
       <ThemedFavicon />
       <ThemeWaves />
-      <App />
+      <HeistOpeningProvider><App /></HeistOpeningProvider>
     </ThemeProvider>
   </React.StrictMode>
 );

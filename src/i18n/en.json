@@ -663,6 +663,28 @@
     "voluntario_puc_desc": "Logistical support, accreditation, and attendee service at the We Make Software event at PUC Minas.",
     "voluntario_puc_skills": "Teamwork, Communication, Organization"
   },
+  "heist": {
+    "variant": {
+      "dark": "The Heist",
+      "light": "The Plan"
+    },
+    "theme": "Money Heist",
+    "location": "The Royal Mint",
+    "opening": {
+      "replay": "Dalí mask. Replay opening",
+      "switch": "Dalí mask. Enter {{name}}",
+      "skip": "Skip opening",
+      "close": "Close opening"
+    },
+    "portrait": {
+      "alt": "Professional portrait of Gustavo Ryan",
+      "show": "Reveal masked portrait",
+      "hide": "Return to professional portrait",
+      "label": "Portrait of Gustavo in a Dalí mask and red jumpsuit"
+    },
+    "contactBerlin": "Talk to Berlin",
+    "desk": "Planning desk"
+  },
   "heistPersonas": {
     "berlin": {
       "name": "Berlin",

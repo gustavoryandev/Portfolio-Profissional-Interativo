@@ -1,16 +1,20 @@
 import { useEffect, useRef, useState } from 'react';
 import useEntranceInteraction from '../hooks/useEntranceInteraction';
 import PortfolioLogo from './PortfolioLogo';
+import { useHeistPortfolioOpening } from './heist/HeistExperience';
+import { isHeistTheme } from '../data/heistThemes.js';
 import { STATIC_MOTION_QUERY } from '../motionPreferences';
 
 function shouldPlay() {
-  if (!window.matchMedia || window.matchMedia(STATIC_MOTION_QUERY).matches) return false;
+  if (!window.matchMedia || window.matchMedia(STATIC_MOTION_QUERY).matches
+    || isHeistTheme(document.documentElement.dataset.theme)) return false;
   if (new URLSearchParams(window.location.search).get('intro') === '1') return true;
   if (document.documentElement.dataset.theme === 'rick-morty') return false;
   return !window.location.hash;
 }
 
 export default function PortfolioIntro({ children, en }) {
+  useHeistPortfolioOpening();
   const interaction = useEntranceInteraction();
   const [playing, setPlaying] = useState(shouldPlay);
   const button = useRef(null);

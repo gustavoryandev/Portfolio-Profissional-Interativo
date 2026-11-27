@@ -15,6 +15,9 @@ import { SocialLinks } from '../components/ProfilePanel';
 import ScrollReveal from '../components/ui/ScrollReveal';
 import GaloCrest from '../components/GaloCrest';
 import AstraAvatar from '../components/AstraAvatar';
+import HeistPortrait from '../components/heist/HeistPortrait';
+import { HeistBackdrop, HeistLabel } from '../components/heist/HeistExperience';
+import { isHeistTheme } from '../data/heistThemes.js';
 import { useAssistantPersona } from '../context/AssistantAppearanceContext';
 import PortraitPortal from '../components/rick/PortraitPortal';
 import DimensionalScene, { MansionBackdrop } from '../components/DimensionalScene';
@@ -31,6 +34,7 @@ export default function PortfolioPage({ activeSection, projectFocus, onSectionLi
   const { openAstra, openFull } = useAstra();
   const { theme, dimension, shipDeparted, markShipDeparted, introScene, crossing, effectsPaused } = useContext(ThemeContext) ?? {};
   const galo = isGaloTheme(theme);
+  const heist = isHeistTheme(theme);
   const persona = useAssistantPersona();
   const fullPersona = useAssistantPersona('full');
   const dimensional = isDimensionalTheme(theme);
@@ -95,18 +99,21 @@ export default function PortfolioPage({ activeSection, projectFocus, onSectionLi
     <MobileNav en={en} active={visibleSection} onSectionLink={onSectionLink} />
     <main id="main-content" tabIndex={-1} className="scroll-content">
       <section ref={heroRef} id="inicio" className="portfolio-hero" aria-labelledby="hero-title">
+        {heist && <HeistBackdrop theme={theme} />}
         {galo && <GaloCrest className="hero-galo-watermark" />}
         <ScrollReveal className={dimensional ? 'rick-presentation' : ''}>
           {dimensional && <div className="dimension-label">{beyond
             ? <b className="beyond-location">{t('rick.beyond.name')}</b>
             : <><span>{t(secret ? 'rick.citadelCode' : 'rick.garageCode')}</span><b>{t(secret ? 'rick.citadelName' : 'rick.garageName')}</b></>}</div>}
+          {heist && <HeistLabel theme={theme} />}
           <p className="section-eyebrow">{en ? 'SOFTWARE ENGINEERING · PUC MINAS' : 'ENGENHARIA DE SOFTWARE · PUC MINAS'}</p>
           <h1 id="hero-title">Gustavo<br /><span className="neon-title">Ryan.</span></h1>
           <p className="hero-lead">{dimensional && !beyond ? t(secret ? 'rick.citadelLead' : 'rick.garageLead') : (en ? 'Turning ideas into digital experiences.' : 'Transformando ideias em experiências digitais.')}</p>
           <p className="hero-description">{en ? 'Java, Spring Boot and React. Explore my projects, skills and the journey behind the code.' : 'Java, Spring Boot e React. Explore meus projetos, habilidades e a trajetória por trás do código.'}</p>
           <div className="hero-actions">
             {galo && <a className="neon-cta" href="/chat" onClick={openFull}><Sparkles size={18} aria-hidden="true" />{fullPersona ? (en ? `Talk to ${fullPersona.name}` : `Conversar com ${fullPersona.name}`) : (en ? 'Talk to Astra' : 'Conversar com Astra')}<ArrowUpRight size={18} aria-hidden="true" /></a>}
-            <a className={galo ? 'scroll-secondary' : 'neon-cta'} href="#projetos" onClick={onSectionLink}>{en ? 'Explore projects' : 'Explorar projetos'}<ArrowDown size={17} aria-hidden="true" /></a>
+            {heist && <button type="button" className="neon-cta" onClick={openAstra} aria-haspopup="dialog"><AstraAvatar width="24" height="24" />{t('heist.contactBerlin')}<ArrowUpRight size={17} aria-hidden="true" /></button>}
+            <a className={galo || heist ? 'scroll-secondary' : 'neon-cta'} href="#projetos" onClick={onSectionLink}>{en ? 'Explore projects' : 'Explorar projetos'}<ArrowDown size={17} aria-hidden="true" /></a>
           </div>
           <SocialLinks />
           {dimensional && <div className="dimension-instrument-panel">
@@ -125,7 +132,7 @@ export default function PortfolioPage({ activeSection, projectFocus, onSectionLi
         <ScrollReveal delay={beyond ? 0 : .08} className="hero-profile glass-panel">
           {dimensional && !beyond && <div className="dimension-scan-label">{t(secret ? 'rick.citizen' : 'rick.researcher')}<span>{t(secret ? 'rick.dockOnline' : 'rick.stable')}</span></div>}
           <div className="portrait-orbit" aria-hidden="true" />
-          {dimensional ? <PortraitPortal variant={beyond ? BEYOND_CURVE : secret ? 'citadel' : 'garage'} effectsPaused={effectsPaused || (beyond && crossing)}>{portrait}</PortraitPortal> : portrait}
+          {dimensional ? <PortraitPortal variant={beyond ? BEYOND_CURVE : secret ? 'citadel' : 'garage'} effectsPaused={effectsPaused || (beyond && crossing)}>{portrait}</PortraitPortal> : heist ? <HeistPortrait /> : portrait}
           <div className="hero-profile-caption">
             <span>{en ? 'DEVELOPER' : 'DESENVOLVEDOR'} <b>/</b> {en ? 'STUDENT' : 'ESTUDANTE'}</span>
             <strong>{galo && <MapPin size={16} aria-hidden="true" />}{perfil.localizacao}</strong>

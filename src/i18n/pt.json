@@ -663,6 +663,28 @@
     "voluntario_puc_desc": "Apoio logístico, credenciamento e atendimento ao público no evento We Make Software na PUC Minas.",
     "voluntario_puc_skills": "Trabalho em equipe, Comunicação, Organização"
   },
+  "heist": {
+    "variant": {
+      "dark": "O Assalto",
+      "light": "O Plano"
+    },
+    "theme": "La Casa de Papel",
+    "location": "Casa da Moeda",
+    "opening": {
+      "replay": "Máscara de Dalí. Rever abertura",
+      "switch": "Máscara de Dalí. Entrar em {{name}}",
+      "skip": "Pular abertura",
+      "close": "Fechar abertura"
+    },
+    "portrait": {
+      "alt": "Retrato profissional de Gustavo Ryan",
+      "show": "Revelar retrato mascarado",
+      "hide": "Voltar ao retrato profissional",
+      "label": "Retrato de Gustavo com máscara de Dalí e traje vermelho"
+    },
+    "contactBerlin": "Conversar com Berlim",
+    "desk": "Mesa de planejamento"
+  },
   "heistPersonas": {
     "berlin": {
       "name": "Berlim",

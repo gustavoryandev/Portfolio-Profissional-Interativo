@@ -9,6 +9,7 @@ import ThemeSelector from './ThemeSelector';
 import GaloCrest from './GaloCrest';
 import { useAssistantPersona } from '../context/AssistantAppearanceContext';
 import DimensionPortal from './DimensionPortal';
+import { HeistHeaderBadge } from './heist/HeistExperience';
 import PortfolioLogo from './PortfolioLogo';
 import { isGaloTheme, isDimensionalTheme } from '../data/themes.js';
 import { PORTFOLIO_SECTIONS as portfolioLinks } from '../services/portfolioActions';
@@ -33,6 +34,7 @@ export default function Navbar({ ref, portfolio = false, activeSection, onSectio
         <GaloCrest />
       </button>}
       {isDimensionalTheme(theme) && <DimensionPortal />}
+      <HeistHeaderBadge />
     </div>
     {portfolio && <nav className="scroll-nav" aria-label={en ? 'Portfolio sections' : 'Seções do portfólio'}>
       {portfolioLinks.map(([id, pt, english]) => (
