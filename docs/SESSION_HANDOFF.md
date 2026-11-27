@@ -1,5 +1,11 @@
 # Passagem de sessão do portfólio
 
+## Assinatura visual das personas completas em 27 de novembro de 2026
+
+O chip compartilhado **ASSISTENTE IA DO GUSTAVO** aparece novamente abaixo de **Currículo IA interativo** no Professor (O Assalto e O Plano), Pessoa-Pássaro (Garagem), Sr. Bunda Cagada (Cidadela) e Morty Maligno (Além da Curva). O mesmo elemento, suas quatro alças e a regra responsiva dos temas convencionais são reutilizados; as cores seguem as variáveis de cada tema ou dimensão. A variante inglesa continua usando a alternância de idioma já presente em `AstraHero`. Nenhuma resposta, persona ou mensagem foi alterada.
+
+No navegador local, as cinco apresentações foram verificadas, incluindo PT/EN e a mansão a 390 px sem rolagem horizontal. Passaram 8 testes focados, o build Vite temporário e `git diff --check`. O aviso anterior de chunk grande permanece. [Demonstração da Astra completa](http://127.0.0.1:5183/chat). Aprovação visual pendente; sem merge, push ou deploy.
+
 ## Ajustes finais da Astra completa em 27 de novembro de 2026
 
 Na branch `codex/la-casa-de-papel-dark`, a limpeza visual foi registrada separadamente em `95bf1db`. O avatar do Professor no cabeçalho voltou a ser circular; os avatares e seus halos permanecem. O campo de digitação de O Assalto e O Plano usa somente o contorno externo do formulário, com o foco preservado.
