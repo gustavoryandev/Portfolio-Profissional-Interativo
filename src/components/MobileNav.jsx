@@ -10,9 +10,15 @@ export default function MobileNav({ en, active, onSelect, onSectionLink }) {
   const persona = useAssistantPersona('full');
   const { openFull } = useAstra();
   const dialog = useRef(null);
+  const menuButton = useRef(null);
   const { theme } = useContext(ThemeContext) ?? {};
+  const closeMenu = () => {
+    if (!dialog.current?.open) return;
+    dialog.current.close();
+    menuButton.current?.focus({ preventScroll: true });
+  };
   useEffect(() => {
-    if (theme === 'rick-morty' && dialog.current?.open) dialog.current.close();
+    if (theme === 'rick-morty' && dialog.current?.open) closeMenu();
   }, [theme]);
   useEffect(() => {
     const desktop = window.matchMedia('(min-width: 768px)');
@@ -31,18 +37,21 @@ export default function MobileNav({ en, active, onSelect, onSectionLink }) {
         <a className={target} href="/chat" onClick={openFull}><Sparkles size={20} aria-hidden="true" />{persona?.name ?? 'Astra'}</a>
         <a className={target} href="#projetos" onClick={onSectionLink} aria-current={active === 'projetos' ? 'location' : undefined}><Code2 size={20} aria-hidden="true" />{en ? 'Projects' : 'Projetos'}</a>
       </>}
-      <button className={target} onClick={() => dialog.current.showModal()}><Menu size={20} aria-hidden="true" />Menu</button>
+      <button ref={menuButton} className={target} onClick={() => dialog.current.showModal()}><Menu size={20} aria-hidden="true" />Menu</button>
     </nav>
-    <dialog ref={dialog} className="mobile-menu fixed inset-x-0 bottom-0 top-auto m-0 max-h-[80dvh] w-full max-w-none overflow-y-auto rounded-t-2xl border border-line bg-panel p-5 pb-[max(20px,env(safe-area-inset-bottom))] text-ink" aria-labelledby="mobile-menu-title" onClick={event => { if (event.target === event.currentTarget) dialog.current.close(); }}>
-      <div className="mb-4 flex items-center justify-between gap-4"><h2 id="mobile-menu-title" className="text-lg font-semibold">{en ? 'Explore portfolio' : 'Explorar portfólio'}</h2><button autoFocus className={target} aria-label={en ? 'Close menu' : 'Fechar menu'} onClick={() => dialog.current.close()}><X aria-hidden="true" /></button></div>
+    <dialog ref={dialog} className="mobile-menu fixed inset-x-0 bottom-0 top-auto m-0 max-h-[80dvh] w-full max-w-none overflow-y-auto rounded-t-2xl border border-line bg-panel p-5 pb-[max(20px,env(safe-area-inset-bottom))] text-ink" aria-labelledby="mobile-menu-title"
+      onCancel={event => { event.preventDefault(); closeMenu(); }}
+      onKeyDown={event => { if (event.key === 'Escape') { event.preventDefault(); closeMenu(); } }}
+      onClick={event => { if (event.target === event.currentTarget) closeMenu(); }}>
+      <div className="mb-4 flex items-center justify-between gap-4"><h2 id="mobile-menu-title" className="text-lg font-semibold">{en ? 'Explore portfolio' : 'Explorar portfólio'}</h2><button autoFocus className={target} aria-label={en ? 'Close menu' : 'Fechar menu'} onClick={closeMenu}><X aria-hidden="true" /></button></div>
       <nav className="flex flex-col gap-3" aria-label={en ? 'More sections' : 'Mais seções'}>
         {chat && <a className={target} href="/"><Home size={20} aria-hidden="true" />{en ? 'Portfolio' : 'Portfólio'}</a>}
         {(chat ? sections : portfolioLinks).map(row => {
           const [id] = row;
           const label = chat ? row[en ? 3 : 2] : row[en ? 2 : 1];
-          return chat ? <button key={id} className={target} aria-current={active === id ? 'page' : undefined} onClick={() => { onSelect(id); dialog.current.close(); }}>{label}</button> : (
+          return chat ? <button key={id} className={target} aria-current={active === id ? 'page' : undefined} onClick={() => { onSelect(id); closeMenu(); }}>{label}</button> : (
             <a key={id} className={target} href={`#${id}`} aria-current={active === id ? 'location' : undefined} onClick={event => {
-              dialog.current.close();
+              closeMenu();
               onSectionLink?.(event);
             }}>{label}</a>
           );

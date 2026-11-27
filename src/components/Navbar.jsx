@@ -52,11 +52,10 @@ export default function Navbar({ ref, portfolio = false, activeSection, onSectio
 
 export function HeaderActions() {
   const { i18n, t } = useTranslation();
-  const en = i18n.language.startsWith('en');
   const cv = resumeUrl(i18n.language);
   return (
     <div className="header-actions">
-      <div className="language-switch" aria-label={en ? 'Language' : 'Idioma'}>{['pt', 'en'].map(lang => <button key={lang} aria-pressed={i18n.language.startsWith(lang)} onClick={() => i18n.changeLanguage(lang)}>{lang.toUpperCase()}</button>)}</div>
+      <div className="language-switch" role="group" aria-label={t('navbar.idioma')}>{['pt', 'en'].map(lang => <button key={lang} aria-pressed={i18n.language.startsWith(lang)} onClick={() => i18n.changeLanguage(lang)}>{lang.toUpperCase()}</button>)}</div>
       <RickThemeControls />
       <ThemeSelector />
       <a className="cv-link" href={cv} download aria-label={t('navbar.baixarCv')}><Download size={16} /><span>{t('navbar.baixarCv')}</span></a>

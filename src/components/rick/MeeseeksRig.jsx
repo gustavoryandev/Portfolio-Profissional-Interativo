@@ -33,7 +33,7 @@ function Face({ pose }) {
   const mouth = { d: mouths[pose.mouth] };
   return <>
     <defs>
-      <clipPath id={mouthClip}><motion.path animate={mouth} /></clipPath>
+      <clipPath id={mouthClip}><motion.path d={mouth.d} animate={mouth} /></clipPath>
       <clipPath id={eyesClip}><ellipse cx="-6" cy="-19" rx="3" ry="4.2" /><ellipse cx="5" cy="-19" rx="3" ry="4.2" /></clipPath>
     </defs>
     <path fill={skin} d="M -7 1 C -19 -2 -24 -13 -21 -26 C -18 -40 -4 -44 8 -39 C 24 -33 26 -15 18 -5 Q 9 6 -2 3 Z" />
@@ -48,7 +48,7 @@ function Face({ pose }) {
           d="M -11 -33 H 10 V -24 Q 4 -21 0 -24 Q -6 -21 -11 -24 Z" animate={{ y: pose.lid }} />
       </g>
     </motion.g>
-    <motion.path data-joint="mouth" animate={mouth} fill="#50233b" strokeWidth="1.5" />
+    <motion.path data-joint="mouth" d={mouth.d} animate={mouth} fill="#50233b" strokeWidth="1.5" />
     <g clipPath={`url(#${mouthClip})`}>
       <path fill="#f9edcf" strokeWidth=".7" d="M -14 -15 H 13 L 10 -10 Q 7 -7 5 -10 Q 2 -6 -1 -9 Q -5 -6 -7 -10 Q -12 -8 -14 -15 Z" />
       <ellipse fill="#e37e8e" stroke="none" cx="4" cy="-2" rx="8" ry="3.8" />

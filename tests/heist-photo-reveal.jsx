@@ -19,6 +19,10 @@ export async function verifyPhotoReveal() {
   let matteRect;
   let hidden = false;
   let intersection;
+  let resize;
+  let bounds = { left: 22, top: 30, width: 220, height: 260 };
+  let disconnected = 0;
+  let failureType;
   const preference = new window.EventTarget();
   preference.matches = false;
   window.matchMedia = () => preference;
@@ -29,9 +33,14 @@ export async function verifyPhotoReveal() {
   globalThis.IntersectionObserver = class {
     constructor(listener) { intersection = listener; }
     observe() {}
-    disconnect() {}
+    disconnect() { disconnected += 1; }
   };
-  window.HTMLElement.prototype.getBoundingClientRect = () => ({ left: 22, top: 30, width: 220, height: 260 });
+  globalThis.ResizeObserver = class {
+    constructor(listener) { resize = listener; }
+    observe() {}
+    disconnect() { disconnected += 1; }
+  };
+  window.HTMLElement.prototype.getBoundingClientRect = () => bounds;
   window.HTMLCanvasElement.prototype.getContext = () => ({
     setTransform() {},
     clearRect() {},
@@ -61,12 +70,20 @@ export async function verifyPhotoReveal() {
   const stage = () => check().querySelector('.photo-reveal-stage');
   const toggle = () => check().querySelector('button');
   try {
+    await act(async () => root.render(<PhotoReveal originalSrc="/base.jpeg" alt="Professional portrait" />));
+    assert.equal(stage().querySelectorAll('img').length, 1);
+    assert.equal(stage().querySelector('img').getAttribute('src'), '/base.jpeg');
+    assert.equal(stage().style.aspectRatio, '572 / 777');
+    assert.equal(frames.size, 0);
+
     await act(async () => root.render(<PhotoReveal originalSrc="/base.jpeg" alt="Professional portrait"
       alternativeSrc="/alternate.webp" alternativeAlt="Masked portrait" showLabel="Reveal" hideLabel="Return"
+      onAlternativeError={event => { failureType = event.type; }}
       alternativePlacement={{ x: -.125, y: .025, width: .75, fadeRight: .125 }} />));
     assert.equal(stage().querySelector('img').alt, 'Professional portrait');
     assert.equal(stage().querySelector('img').style.objectFit, 'contain');
     assert.equal(toggle().disabled, true);
+    assert.equal(frames.size, 0);
     const alternative = stage().querySelector('img[src="/alternate.webp"]');
     Object.defineProperty(alternative, 'naturalWidth', { value: 918 });
     Object.defineProperty(alternative, 'naturalHeight', { value: 1713 });
@@ -99,9 +116,26 @@ export async function verifyPhotoReveal() {
     assert.equal(frames.size, 0);
     hidden = false;
 
+    bounds = { left: 32, top: 35, width: 200, height: 150 };
+    resize();
+    assert.equal(stage().querySelector('canvas').width, 400);
+    assert.equal(stage().querySelector('canvas').height, 300);
+    assert.deepEqual(matteRect, [0, 0, 200, 150]);
+    pointer(stage(), 'pointermove', { pointerType: 'mouse' });
+    runFrame(900);
+    assert.deepEqual(alternativeRect, [-25, 3.75, 150, 150 * 1713 / 918]);
+    pointer(stage(), 'pointerleave', { pointerType: 'mouse' });
+    runFrame(1000);
+    assert.equal(frames.size, 1, 'the trail continues to fade after the pointer leaves');
+    runFrame(1700);
+    assert.equal(frames.size, 0, 'the trail does not maintain an idle animation');
+
     preference.matches = true;
     await act(async () => preference.dispatchEvent(new window.Event('change')));
     assert.equal(stage().querySelector('canvas'), null);
+    assert.equal(disconnected, 2);
+    pointer(stage(), 'pointermove', { pointerType: 'mouse' });
+    assert.equal(frames.size, 0);
     await act(async () => toggle().click());
     assert.equal(alternative.alt, 'Masked portrait');
     assert.equal(alternative.style.width, '75%');
@@ -115,6 +149,7 @@ export async function verifyPhotoReveal() {
     assert.equal(stage().querySelector('img').hasAttribute('aria-hidden'), false);
     assert.equal(stage().querySelector('img').style.visibility, 'visible');
     assert.equal(alternative.style.opacity, '0');
+    assert.equal(failureType, 'error');
   } finally {
     await act(async () => root.unmount());
     dom.window.close();
@@ -122,5 +157,6 @@ export async function verifyPhotoReveal() {
     delete globalThis.document;
     delete globalThis.IS_REACT_ACT_ENVIRONMENT;
     delete globalThis.IntersectionObserver;
+    delete globalThis.ResizeObserver;
   }
 }
