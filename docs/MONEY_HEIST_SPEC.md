@@ -16,6 +16,18 @@ O seletor existente continua oferecendo 15 temas. `midnight-pink`, `obsidian-gol
 
 A hero usa o enquadramento noturno da Casa da Moeda, com a fachada preservada por pontos focais CSS e degradês distintos em celular e desktop. A mesma linguagem de cartões grafite, bordas e texto papel percorre o portfólio e as ferramentas da Astra. As regras se aplicam às seções existentes, inclusive cartões de projeto, laboratório, métricas, contato e rodapé. Os estilos dos dossiês ficam preparados para os componentes existentes. O Arcade mantém as cores semânticas de cada jogo sobre a superfície temática, e o tabuleiro de replay usa bronze claro e vinho. A análise e os motores continuam compartilhados.
 
+A grade e a largura do card seguem os mesmos breakpoints do tema Escuro. A escala do nome é compartilhada pela família La Casa de Papel e serve de referência para O Plano. O Assalto mantém caixa alta, faixa vermelha e o enquadramento de 425:500 do PhotoReveal.
+
+| Viewport | Fonte do nome antes → depois | Largura do card antes → depois | Card do tema Escuro |
+| --- | --- | --- | --- |
+| 375 × 844 | 61 → 49 px | 316 → 343 px | 343 px |
+| 768 × 1024 | 72,19 → 57,75 px | 249,84 → 380 px | 380 px |
+| 1024 × 900 | 96,26 → 77 px | 316 → 357,44 px | 357,44 px |
+| 1440 × 810 | 135,36 → 108,29 px | 316 → 340 px | 340 px |
+| 1920 × 946 | 138 → 110 px | 316 → 437,16 px | 437,16 px |
+
+Em nove viewports no Chrome, a diferença entre os centros verticais ficou em até 0,02 px no layout de duas colunas. No empilhado, o card fica centralizado abaixo do texto. A alternância das fotos manteve a geometria do quadro e o rastro foi verificado antes e depois de redimensionar a janela.
+
 A máscara do cabeçalho abre uma sequência de 2,65 s com obturadores CSS, varredura vermelha, fachada e dissolução para a hero. O botão e Escape pulam a sequência. O fechamento devolve o foco ao acionador. A abertura automática funciona uma vez por sessão no portfólio. Com movimento reduzido, a máscara abre um quadro estático descartável. O Registro da operação revela atalhos para o catálogo de projetos e para o laboratório. As interações são locais e a abertura é silenciosa.
 
 | Superfície | Persona | Identidade |

@@ -31,13 +31,14 @@
 
 :root[data-theme="la-casa-de-papel-dark"] body { background: var(--page); }
 
-:root[data-theme="la-casa-de-papel-dark"] .portfolio-hero {
+/* Both variants inherit the portfolio grid and portrait sizing at each breakpoint. */
+:root[data-theme|="la-casa-de-papel"] .portfolio-hero {
   position: relative;
   isolation: isolate;
-  min-height: min(775px, 88svh);
-  grid-template-columns: minmax(0, 1fr) minmax(240px, .62fr);
-  gap: clamp(22px, 5vw, 84px);
-  padding-block: clamp(36px, 9vh, 100px);
+}
+
+:root[data-theme|="la-casa-de-papel"] .portfolio-hero h1 {
+  font-size: clamp(51px, 7.52vw, 110px);
 }
 
 .heist-backdrop {
@@ -85,7 +86,6 @@
 :root[data-theme="la-casa-de-papel-dark"] .portfolio-hero h1 {
   color: var(--ink);
   font-family: var(--heist-display);
-  font-size: clamp(64px, 9.4vw, 138px);
   font-weight: 900;
   line-height: .87;
   letter-spacing: -.025em;
@@ -113,8 +113,6 @@
 :root[data-theme="la-casa-de-papel-dark"] .hero-actions img { border-radius: 50%; object-fit: cover; }
 
 :root[data-theme="la-casa-de-papel-dark"] .hero-profile {
-  width: min(100%, 316px);
-  justify-self: end;
   padding: 10px;
   background: #161313;
   border: 1px solid #845960;
@@ -273,13 +271,9 @@ html:has(.heist-opening[open]) { overflow: hidden; }
 
 @media (max-width: 767px) {
   :root[data-theme="la-casa-de-papel-dark"] .portfolio-hero {
-    grid-template-columns: minmax(0, 1fr);
-    min-height: 0;
-    gap: 24px;
     padding-block: 28px 48px;
   }
-  :root[data-theme="la-casa-de-papel-dark"] .portfolio-hero h1 { font-size: clamp(61px, 14vw, 100px); }
-  :root[data-theme="la-casa-de-papel-dark"] .hero-profile { justify-self: center; }
+  :root[data-theme|="la-casa-de-papel"] .portfolio-hero h1 { font-size: clamp(49px, 11.2vw, 80px); }
   .heist-variant-label { margin-block-end: 22px; }
   :root[data-theme="la-casa-de-papel-dark"] .portfolio-hero .hero-lead { margin-top: 18px; }
   :root[data-theme="la-casa-de-papel-dark"] .hero-description { margin-top: 12px; line-height: 1.55; }
