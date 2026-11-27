@@ -219,9 +219,10 @@ export default function PhotoReveal({
       alternativeFrame.width = backingWidth;
       alternativeFrame.height = backingHeight;
       if (!width || !height) return;
-      // Paint the opaque alternate once at this size. Only the brush mask changes per frame.
+      // Paint the alternate once at this size. Only the brush mask changes per frame.
       frameContext.setTransform(backingWidth / width, 0, 0, backingHeight / height, 0, 0);
       drawAlternative(frameContext, alternative, width, height, alternativePlacement);
+      if (!alternativePlacement) return;
       frameContext.globalCompositeOperation = 'destination-over';
       const matte = frameContext.createLinearGradient(0, 0, 0, height);
       const colors = alternativePlacement?.matte ?? DEFAULT_MATTE;
@@ -301,8 +302,8 @@ export default function PhotoReveal({
         <img src={originalSrc} alt={alt} draggable="false" fetchPriority="high"
           aria-hidden={showingAlternative || undefined}
           style={{ ...containedImageStyle, visibility: showingAlternative ? 'hidden' : 'visible' }} />
-        {showingAlternative && <div aria-hidden="true" style={{ position: 'absolute', inset: 0,
-          background: `linear-gradient(${(alternativePlacement?.matte ?? DEFAULT_MATTE).join(', ')})` }} />}
+        {showingAlternative && alternativePlacement && <div aria-hidden="true" style={{ position: 'absolute', inset: 0,
+          background: `linear-gradient(${(alternativePlacement.matte ?? DEFAULT_MATTE).join(', ')})` }} />}
         {alternativeSrc && (
           <img key={alternativeSrc} ref={alternativeRef} src={alternativeSrc}
             alt={showingAlternative ? alternativeAlt : ''} aria-hidden={!showingAlternative}

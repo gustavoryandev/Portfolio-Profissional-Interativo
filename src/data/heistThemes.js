@@ -6,7 +6,7 @@ export const isHeistTheme = theme => theme === HEIST_DARK || theme === HEIST_LIG
 export const heistMedia = {
   mask: '/la-casa-de-papel/dali-mask-header.png',
   portrait: '/perfil-foto.jpeg',
-  previewPortrait: '/la-casa-de-papel/masked-portrait-candidate.webp',
+  maskedPortrait: '/la-casa-de-papel/perfil-foto-reveal.webp',
   backgrounds: {
     [HEIST_DARK]: '/la-casa-de-papel/dark-background.webp',
     [HEIST_LIGHT]: '/la-casa-de-papel/light-background.webp',
