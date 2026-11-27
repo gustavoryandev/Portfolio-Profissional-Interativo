@@ -4,13 +4,16 @@ import { useTranslation } from 'react-i18next';
 import { ThemeContext } from '../context/ThemeState';
 
 export default function RickThemeMusic({ className = '' }) {
-  const { theme, musicStatus, musicVolume, toggleMusic } = useContext(ThemeContext) ?? {};
+  const { theme, dimension, musicStatus, musicVolume, toggleMusic } = useContext(ThemeContext) ?? {};
   const { t } = useTranslation();
   if (theme !== 'rick-morty') return null;
   const active = musicStatus === 'playing' || musicStatus === 'loading';
-  const label = t(active ? 'rick.music.pause' : musicStatus === 'error' ? 'rick.music.retry' : musicStatus === 'ended' ? 'rick.music.replay' : 'rick.music.play');
+  const unavailable = musicStatus === 'unavailable';
+  const trackControls = dimension === 'beyond-curve' ? 'rick.beyond.music' : 'rick.music';
+  const label = t(unavailable ? 'rick.music.state.unavailable' : active ? `${trackControls}.pause` : musicStatus === 'error' ? 'rick.music.retry'
+    : musicStatus === 'ended' ? 'rick.music.replay' : `${trackControls}.play`);
   return <button type="button" className={`icon-button rick-theme-music ${className}`} onClick={toggleMusic}
-    aria-label={label} title={label} aria-pressed={active}>
+    aria-label={label} title={label} aria-pressed={active} disabled={unavailable}>
     {active && musicVolume > 0 ? <Volume2 size={18} aria-hidden="true" /> : <VolumeX size={18} aria-hidden="true" />}
     <span className="sr-only" role="status">{['loading', 'error', 'ended'].includes(musicStatus) ? t(`rick.music.state.${musicStatus}`) : ''}</span>
   </button>;

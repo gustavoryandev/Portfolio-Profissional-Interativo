@@ -550,7 +550,8 @@ test('model discovery excludes unapproved models and quota stops generation imme
 test('themed identity and deterministic resources work without a model and retain markers', async () => {
   process.env.GEMINI_API_KEY = '';
   for (const [dimension, surface, name] of [
-    ['lab', 'compact', 'Sr. Meeseeks'], ['lab', 'full', 'Squanchy'], ['corrupted', 'full', 'Sr. Bunda Cagada'],
+    ['lab', 'compact', 'Sr. Meeseeks'], ['lab', 'full', 'Pessoa-Pássaro'], ['corrupted', 'full', 'Sr. Bunda Cagada'],
+    ['beyond-curve', 'compact', 'Rick Maligno'], ['beyond-curve', 'full', 'Evil Morty'],
   ]) {
     const appearance = { theme: 'rick-morty', dimension };
     const identity = response();
@@ -585,7 +586,8 @@ test('current character reaches JSON and streaming model instructions without ch
   };
   try {
     for (const [dimension, surface, name] of [
-      ['lab', 'compact', 'Mr. Meeseeks'], ['lab', 'full', 'Squanchy'], ['corrupted', 'full', 'Mr. Poopybutthole'],
+      ['lab', 'compact', 'Mr. Meeseeks'], ['lab', 'full', 'Birdperson'], ['corrupted', 'full', 'Mr. Poopybutthole'],
+      ['beyond-curve', 'compact', 'Evil Rick'], ['beyond-curve', 'full', 'Evil Morty'],
     ]) {
       for (const stream of [false, true]) {
         const res = { ...response(), flushHeaders() { this.headersSent = true; }, write() { return true; }, end() {} };
@@ -616,7 +618,7 @@ test('common evaluator questions use verified portfolio facts and cards without 
   process.env.GEMINI_API_KEY = '';
   for (const [userMessage, lang, surface, dimension, expected] of [
     ['Quem é Gustavo?', 'pt', 'compact', 'lab', /Pode deixar! Gustavo Ryan Gomes Guedes cursa Bacharelado em Engenharia de Software na PUC Minas/],
-    ['What are Gustavo’s main projects?', 'en', 'full', 'lab', /Let’s squanch this\. .*\[PROJECTS_CARD\]/s],
+    ['What are Gustavo’s main projects?', 'en', 'full', 'lab', /Let’s take it step by step\. .*\[PROJECTS_CARD\]/s],
     ['Mostre o currículo do Gustavo.', 'pt', 'full', 'corrupted', /Ooo-wee! .*\[RESUME_CARD\]/s],
     ['How can I contact Gustavo?', 'en', 'compact', 'corrupted', /Can do! .*\[CONTACT_FORM\]/s],
   ]) {

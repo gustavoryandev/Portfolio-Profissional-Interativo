@@ -33,7 +33,7 @@ export default function useRickThemeMusic() {
       player.current?.dispose();
       player.current = null;
       track.current = source;
-      setMusicStatus('idle');
+      setMusicStatus(source ? 'idle' : 'unavailable');
     }
     if (autoplay && source && !pausedByVisitor.current && savedVolume.current > 0) void getPlayer().play();
   }, [getPlayer]);
@@ -43,7 +43,7 @@ export default function useRickThemeMusic() {
     setMusicStatus('idle');
   }, []);
   const toggleMusic = useCallback(() => {
-    if (!track.current) { setMusicStatus('error'); return; }
+    if (!track.current) return;
     const current = getPlayer();
     pausedByVisitor.current = current.isActive();
     try { window.localStorage.setItem(pauseKey, pausedByVisitor.current ? '1' : '0'); } catch {}

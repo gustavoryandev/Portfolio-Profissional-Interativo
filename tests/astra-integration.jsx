@@ -427,8 +427,8 @@ try {
       const log = $('.astra-full [role="log"]');
       const portal = $('.astra-full .dimension-portal');
       assert.ok(portal);
-      assert.match($('.astra-full .chat-heading h2').textContent, /Squanchy/);
-      assert.equal($('.astra-full .chat-heading img').dataset.astraCharacter, 'squanchy');
+      assert.match($('.astra-full .chat-heading h2').textContent, /Birdperson/);
+      assert.equal($('.astra-full .chat-heading img').dataset.astraCharacter, 'birdperson');
       assert.equal($('.astra-fab img').dataset.astraCharacter, 'meeseeks');
       const details = $('.dimension-project-details');
       const projectCard = details.closest('.project-tile');

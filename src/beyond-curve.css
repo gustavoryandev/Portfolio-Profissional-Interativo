@@ -182,6 +182,11 @@
 :root[data-dimension="beyond-curve"] .astra-hero {
   background: linear-gradient(132deg, var(--panel-soft), var(--panel) 75%);
 }
+:root[data-dimension="beyond-curve"] .workbench-monitor {
+  border-color: var(--rick-frame);
+  background: var(--panel-soft);
+  color: var(--accent);
+}
 
 .dimension-portals { display: flex; flex: none; gap: 1px; }
 .dimension-portal-gold { color: #ffd84a; }
@@ -203,5 +208,13 @@
   .mansion-art > img { object-position: 64% center; }
   .mansion-art::after {
     background: linear-gradient(180deg, #09090dcc 7%, #09090da8 45%, #09090d30 67%, #09090df0);
+  }
+}
+@media (width < 480px) {
+  .site-header:has(.dimension-portal-gold) .mobile-current-section { display: none; }
+  .site-header:has(.dimension-portal-gold) .brand-lockup p {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 }

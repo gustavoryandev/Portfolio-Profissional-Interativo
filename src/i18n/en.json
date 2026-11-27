@@ -672,6 +672,7 @@
       "skip": "Skip transit",
       "signal": "The connection is stable. I can guide you through the projects and code.",
       "archive": "MANSION / ARCHIVE",
+      "music": { "play": "Play For the Damaged Coda", "pause": "Pause For the Damaged Coda" },
       "command": {
         "accepted": "Signal recognized. Coordinates confirmed.",
         "busy": "A crossing is already underway.",
@@ -893,7 +894,8 @@
         "paused": "Preview paused.",
         "hidden": "Preview suspended while the tab is hidden.",
         "ended": "Preview finished. Use the sound button to replay it.",
-        "error": "The preview could not be loaded. Use the sound button to try again."
+        "error": "The preview could not be loaded. Use the sound button to try again.",
+        "unavailable": "The track is unavailable in this version."
       },
       "notice": "Theme music · Official Ryan Elder preview"
     }

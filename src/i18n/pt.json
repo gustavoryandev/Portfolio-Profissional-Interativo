@@ -672,6 +672,7 @@
       "skip": "Pular travessia",
       "signal": "A conexão está estável. Posso orientar você pelos projetos e pelo código.",
       "archive": "MANSÃO / ARQUIVO",
+      "music": { "play": "Tocar For the Damaged Coda", "pause": "Pausar For the Damaged Coda" },
       "command": {
         "accepted": "Sinal reconhecido. Coordenadas confirmadas.",
         "busy": "Uma travessia já está em andamento.",
@@ -893,7 +894,8 @@
         "paused": "Prévia pausada.",
         "hidden": "Prévia suspensa enquanto a aba está oculta.",
         "ended": "Prévia encerrada. Use o botão de som para repetir.",
-        "error": "Não foi possível carregar a prévia. Use o botão de som para tentar novamente."
+        "error": "Não foi possível carregar a prévia. Use o botão de som para tentar novamente.",
+        "unavailable": "A faixa está indisponível nesta versão."
       },
       "notice": "Música tema · Prévia oficial de Ryan Elder"
     }

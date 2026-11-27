@@ -328,7 +328,7 @@
 .meeseeks-visitor small { display: block; margin-top: 3px; color: #b2d9e8; font-size: 12px; }
 .workbench-screw { position: absolute; bottom: -17px; right: 55px; color: #9ba896; font-size: 13px; pointer-events: none; }
 :root[data-theme="rick-morty"][data-dimension="corrupted"] .workbench-monitor { background: #0a1820; color: #a2d5ed; border-color: #7e9fac; }
-:root[data-theme="rick-morty"][data-dimension="corrupted"] .meeseeks-box { visibility: hidden; }
+:root[data-theme="rick-morty"]:is([data-dimension="corrupted"], [data-dimension="beyond-curve"]) .meeseeks-box { visibility: hidden; }
 
 .code-lab-heading:has(.lab-pickle-stage:not([hidden])) { display: grid; grid-template-columns: minmax(0, 1fr) minmax(200px, 260px); gap: 12px 20px; align-items: center; }
 .lab-pickle-stage {

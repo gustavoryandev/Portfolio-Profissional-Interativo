@@ -51,15 +51,20 @@ test('Full and Compact Astra use the same live Laboratory and review', async () 
 
 test('First paint restores dimensions separately and migrates the former secret palette', async () => {
   const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
-  for (const [theme, savedDimension, expected] of [
+  for (const [theme, savedDimension, expected, unlocked] of [
     ['rick-morty', 'lab', 'lab'], ['rick-morty', 'corrupted', 'corrupted'],
     ['rick-morty-secret', null, 'corrupted'], ['rick-morty', 'invalid', 'lab'],
     ['dark', 'corrupted', undefined],
+    ['rick-morty', 'beyond-curve', 'lab'],
+    ['rick-morty', 'beyond-curve', 'beyond-curve', true],
+    ['rick-morty-secret', 'beyond-curve', 'corrupted', true],
+    ['dark', 'beyond-curve', undefined, true],
   ]) {
     const dom = new JSDOM(html, { url: 'https://portfolio.test', runScripts: 'dangerously',
       beforeParse({ localStorage }) {
         localStorage.setItem('theme', theme);
         if (savedDimension) localStorage.setItem('rick-morty-dimension', savedDimension);
+        if (unlocked) localStorage.setItem('rick-morty-beyond-unlocked', '1');
       },
     });
     assert.equal(dom.window.document.documentElement.dataset.dimension, expected);

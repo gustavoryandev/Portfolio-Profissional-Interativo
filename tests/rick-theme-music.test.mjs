@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createRickThemeMusic, readRickMusicVolume, RICK_THEME_TRACK } from '../src/services/rickThemeMusic.js';
+import { BEYOND_CURVE_TRACK, createRickThemeMusic, readRickMusicVolume, RICK_THEME_TRACK } from '../src/services/rickThemeMusic.js';
 
 function makeClock() {
   let now = 0;
@@ -105,6 +105,23 @@ test('blocked playback, buffering timeout and media error each allow a retry', a
   assert.equal(statuses.at(-1), 'error');
   await player.play();
   assert.equal(statuses.at(-1), 'playing');
+  player.dispose();
+});
+
+test('the local transition track can fail without restarting or looping', async () => {
+  const clock = makeClock();
+  const { player, statuses, audio } = fixture(() => Promise.reject(new Error('missing media')),
+    { clock, source: BEYOND_CURVE_TRACK.preview });
+  assert.equal(audio.src, '/rick-assets/audio/evil-morty-30s.mp3');
+  await player.play();
+  assert.equal(statuses.at(-1), 'error');
+  assert.equal(player.isActive(), false);
+  assert.equal(audio.paused, true);
+  player.setVisibility(true);
+  player.setVisibility(false);
+  clock.advance(20000);
+  assert.equal(audio.plays, 1);
+  assert.ok(!audio.loop);
   player.dispose();
 });
 

@@ -44,8 +44,9 @@ Object.assign(globalThis, {
 });
 Object.defineProperty(globalThis, 'localStorage', { configurable: true, value: window.localStorage });
 Object.defineProperty(globalThis, 'sessionStorage', { configurable: true, value: window.sessionStorage });
+let reducedMotion = true;
 window.matchMedia = query => ({
-  matches: query.includes('prefers-reduced-motion') || query.includes('pointer: coarse') || query.includes('max-width'),
+  matches: (reducedMotion && query.includes('prefers-reduced-motion')) || query.includes('pointer: coarse') || query.includes('max-width'),
   addEventListener() {},
   removeEventListener() {},
   addListener() {},
@@ -109,7 +110,7 @@ axios.defaults.adapter = async config => {
   return { data: { text: 'Resposta traduzida.' }, status: 200, statusText: 'OK', headers: {}, config };
 };
 
-const { App, ThemeProvider, i18n } = await import(output.href);
+const { App, ThemeProvider, i18n, MessageBubble } = await import(output.href);
 const { createRoot } = await import('react-dom/client');
 const { act } = await import('react');
 const $ = selector => document.querySelector(selector);
@@ -122,16 +123,19 @@ async function until(predicate) {
   assert.ok(predicate(), 'expected the UI to reach the requested state');
 }
 
-async function mount(language = 'en', path = '/chat') {
+async function mount(language = 'en', path = '/chat', { theme = 'rick-morty', dimension = 'lab', unlocked = false, reduce = true } = {}) {
   requests.length = 0;
   translationRequests.length = 0;
   nextResponses.length = 0;
   activeStream = null;
+  reducedMotion = reduce;
   window.history.replaceState(null, '', path);
-  document.documentElement.dataset.theme = 'rick-morty';
-  document.documentElement.dataset.dimension = 'lab';
-  window.localStorage.setItem('theme', 'rick-morty');
-  window.localStorage.setItem('rick-morty-dimension', 'lab');
+  document.documentElement.dataset.theme = theme;
+  document.documentElement.dataset.dimension = dimension;
+  window.localStorage.clear();
+  window.localStorage.setItem('theme', theme);
+  window.localStorage.setItem('rick-morty-dimension', dimension);
+  if (unlocked) window.localStorage.setItem('rick-morty-beyond-unlocked', '1');
   window.sessionStorage.setItem('rick-garage-intro-seen', '1');
   await act(async () => i18n.changeLanguage(language));
   root = createRoot(document.getElementById('root'));
@@ -150,14 +154,18 @@ async function click(node) {
   await act(async () => node.click());
 }
 
-async function send(text, { preview = true } = {}) {
-  const before = requests.length;
+async function submit(text) {
   const input = $('#chat-input');
   await act(async () => {
     Object.getOwnPropertyDescriptor(Object.getPrototypeOf(input), 'value').set.call(input, text);
     input.dispatchEvent(new window.Event('input', { bubbles: true }));
   });
   await click($('.chat-form button[type="submit"]'));
+}
+
+async function send(text, { preview = true } = {}) {
+  const before = requests.length;
+  await submit(text);
   await until(() => requests.length > before && (!preview || (activeStream && $('[data-streaming-reply]'))));
   return activeStream;
 }
@@ -179,6 +187,95 @@ afterEach(async () => {
   }
 });
 
+test('compact discovery from the Garage is local, awards once, and follows the normal journal reset', async () => {
+  await mount('pt', '/');
+  assert.equal($('.dimension-portal-gold'), null);
+  assert.equal($('.beyond-achievement'), null);
+  await submit('Wabalabadubdub');
+  await until(() => document.documentElement.dataset.dimension === 'beyond-curve');
+  assert.equal(requests.length, 0);
+  assert.equal($('.beyond-transit'), null, 'reduced motion crosses directly');
+  assert.equal($('.chat-heading img').dataset.astraCharacter, 'evil-rick');
+  assert.match(completedReply('Sinal reconhecido').textContent, /Sr\. Meeseeks/);
+  assert.match($('.beyond-achievement').textContent, /Viajante Interdimensional/);
+  assert.equal(window.localStorage.getItem('rick-morty-beyond-unlocked'), '1');
+  assert.equal(window.localStorage.getItem('rick-morty-dimension'), 'beyond-curve');
+  assert.deepEqual(JSON.parse(window.localStorage.getItem('rick-morty-exploration')).found, ['beyond-curve']);
+  await click($('.astra-toolbar button'));
+  await click($('.dimension-portals button'));
+  assert.equal(document.documentElement.dataset.dimension, 'lab');
+  await click($('.dimension-portal-gold'));
+  assert.equal(document.documentElement.dataset.dimension, 'beyond-curve');
+  assert.equal($('.beyond-achievement'), null);
+  const reset = [...document.querySelectorAll('.rick-extra-archive button')].find(button => button.textContent === i18n.t('rick.extras.discovery.reset'));
+  await click(reset);
+  assert.equal(document.documentElement.dataset.dimension, 'lab');
+  assert.equal($('.dimension-portal-gold'), null);
+  assert.equal(window.localStorage.getItem('rick-morty-beyond-unlocked'), null);
+  assert.deepEqual(JSON.parse(window.localStorage.getItem('rick-morty-exploration')).found, []);
+});
+
+test('full discovery from the Citadel preserves authors as the journey and language change', async () => {
+  await mount('en', '/chat', { dimension: 'corrupted' });
+  await submit('Wubba Lubba Dub-Dub');
+  await until(() => document.documentElement.dataset.dimension === 'beyond-curve');
+  assert.equal(requests.length, 0);
+  assert.equal($('.chat-heading img').dataset.astraCharacter, 'evil-morty');
+  assert.match(completedReply('Signal recognized').textContent, /Mr\. Poopybutthole/);
+  const stream = await send('Explain a design choice.');
+  assert.equal(requests.at(-1).appearance.dimension, 'beyond-curve');
+  await click($('.dimension-portal-gold'));
+  assert.equal(document.documentElement.dataset.dimension, 'corrupted');
+  assert.match($('[data-streaming-reply] .astra-label').textContent, /Evil Morty/);
+  await act(async () => i18n.changeLanguage('pt'));
+  stream.finish('CURVE_FINAL');
+  await until(() => completedReply('Resposta traduzida.'));
+  const reply = completedReply('Resposta traduzida.');
+  assert.equal(reply.querySelector('.astra-label span').textContent, 'Evil Morty');
+  assert.equal(reply.querySelector('img').dataset.astraCharacter, 'evil-morty');
+  assert.match(completedReply('Sinal reconhecido').textContent, /Sr\. Bunda Cagada/);
+});
+
+test('the phrase remains an ordinary Astra request outside Rick and Morty', async () => {
+  await mount('en', '/chat', { theme: 'dark' });
+  await send('Wubba Lubba Dub Dub');
+  assert.equal(requests[0].userMessage, 'Wubba Lubba Dub Dub');
+  assert.equal(window.localStorage.getItem('rick-morty-beyond-unlocked'), null);
+});
+
+test('a direct full visit restores the dimension and renders historical Squanchy without reassignment', async () => {
+  await mount('en', '/chat', { dimension: 'beyond-curve', unlocked: true });
+  assert.equal($('.chat-heading img').dataset.astraCharacter, 'evil-morty');
+  const author = Object.freeze({ personaId: 'squanchy', theme: 'rick-morty', dimension: 'lab', surface: 'full', language: 'pt' });
+  await act(async () => root.render(React.createElement(ThemeProvider, null,
+    React.createElement(MessageBubble, { message: { id: 'old', sender: 'ai', lang: 'pt', author, text: 'Resposta antiga.' } }))));
+  assert.match($('.astra-label').textContent, /Squanchy/);
+  assert.equal($('img[data-astra-character="squanchy"]')?.getAttribute('src'), '/rick-assets/avatar-squanchy.webp');
+});
+
+test('a missing cinematic image and Escape still settle the trip and grant one arrival', async () => {
+  await mount('en', '/chat', { dimension: 'corrupted', reduce: false });
+  await submit('WubbaLubbaDubDub');
+  const dialog = $('.beyond-transit[open]');
+  assert.ok(dialog);
+  assert.equal(document.documentElement.dataset.dimension, 'corrupted');
+  assert.equal($('.beyond-achievement'), null);
+  assert.equal(window.localStorage.getItem('rick-morty-beyond-unlocked'), '1');
+  const portal = $('.astra-full .dimension-portal-gold');
+  await click(portal);
+  assert.equal($('.beyond-transit[open]'), dialog);
+  await act(async () => { await new Promise(resolve => setTimeout(resolve, 830)); });
+  const curve = dialog.querySelector('img');
+  assert.match(curve.src, /central-finite-curve/);
+  await act(async () => curve.dispatchEvent(new window.Event('error')));
+  assert.equal(curve.hidden, true);
+  await act(async () => dialog.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true })));
+  assert.equal($('.beyond-transit'), null);
+  assert.equal(document.documentElement.dataset.dimension, 'beyond-curve');
+  assert.equal(document.activeElement.id, 'chat-input');
+  assert.equal(document.querySelectorAll('.beyond-achievement').length, 1);
+});
+
 after(async () => {
   globalThis.fetch = originalFetch;
   axios.defaults.adapter = originalAdapter;
@@ -197,9 +294,9 @@ test('reply authorship stays with the original persona across a dimension change
   await until(() => completedReply('PERSONA_FINAL'));
   const finalAuthor = completedReply('PERSONA_FINAL').querySelector('.astra-label span').textContent;
 
-  assert.equal(initialAuthor, 'Squanchy');
-  assert.equal(streamingAuthor, 'Squanchy');
-  assert.equal(finalAuthor, 'Squanchy');
+  assert.equal(initialAuthor, 'Birdperson');
+  assert.equal(streamingAuthor, 'Birdperson');
+  assert.equal(finalAuthor, 'Birdperson');
 });
 
 test('reply authorship stays with the original persona across a theme change during streaming', async () => {
@@ -214,9 +311,9 @@ test('reply authorship stays with the original persona across a theme change dur
   await until(() => completedReply('THEME_FINAL'));
   const finalAuthor = completedReply('THEME_FINAL').querySelector('.astra-label span').textContent;
 
-  assert.equal(initialAuthor, 'Squanchy');
-  assert.equal(streamingAuthor, 'Squanchy');
-  assert.equal(finalAuthor, 'Squanchy');
+  assert.equal(initialAuthor, 'Birdperson');
+  assert.equal(streamingAuthor, 'Birdperson');
+  assert.equal(finalAuthor, 'Birdperson');
 });
 
 test('a language change during streaming keeps the request language and translates the completed reply', async () => {
@@ -264,16 +361,16 @@ test('compact authorship survives close, reopen and opening full Astra before th
   await until(() => completedReply('COMPACT_FINAL'));
   assert.equal(completedReply('COMPACT_FINAL').querySelector('.astra-label span').textContent, 'Mr. Meeseeks');
   assert.equal(completedReply('COMPACT_FINAL').querySelector('img').getAttribute('data-astra-character'), 'meeseeks');
-  assert.match($('#astra-welcome').textContent, /garage/);
+  assert.match($('#astra-welcome').textContent, /garage/i);
   assert.equal(translationRequests.length, 0);
 
   const next = await send('Use the previous reply.');
   assert.equal(requests.at(-1).surface, 'full');
   assert.match(requests.at(-1).chatHistory.find(item => item.text.includes('COMPACT_FINAL')).text, /COMPACT_FRAGMENT/);
-  assert.equal($('[data-streaming-reply] .astra-label span').textContent, 'Squanchy');
+  assert.equal($('[data-streaming-reply] .astra-label span').textContent, 'Birdperson');
   next.finish('NEXT_FINAL');
   await until(() => completedReply('NEXT_FINAL'));
-  assert.equal(completedReply('NEXT_FINAL').querySelector('.astra-label span').textContent, 'Squanchy');
+  assert.equal(completedReply('NEXT_FINAL').querySelector('.astra-label span').textContent, 'Birdperson');
   assert.equal(completedReply('COMPACT_FINAL').querySelector('.astra-label span').textContent, 'Mr. Meeseeks');
 });
 
@@ -292,7 +389,7 @@ test('an explicitly standard Astra reply retains its label and avatar after swit
   const reply = completedReply('STANDARD_FINAL');
   assert.equal(reply.querySelector('.astra-label span').textContent, 'Astra');
   assert.equal(reply.querySelector('img').getAttribute('src'), '/astra-avatar-mobile.png');
-  assert.match($('#astra-welcome').textContent, /Squanchy/);
+  assert.match($('#astra-welcome').textContent, /Birdperson/);
 });
 
 test('late JSON after stopping cannot change the theme or clear the replacement stream', async () => {
@@ -302,7 +399,7 @@ test('late JSON after stopping cannot change the theme or clear the replacement 
   await send('Troque o tema.', { preview: false });
   await click($('.chat-form [aria-label="Parar resposta"]'));
   await until(() => completedReply('Resposta interrompida.'));
-  assert.equal(completedReply('Resposta interrompida.').querySelector('.astra-label span').textContent, 'Squanchy');
+  assert.equal(completedReply('Resposta interrompida.').querySelector('.astra-label span').textContent, 'Pessoa-Pássaro');
   const replacement = await send('Responda de novo.');
   await act(async () => late(Response.json({ response: 'STALE_REPLY', actions: [{ type: 'theme.set', target: 'dark' }] })));
   assert.equal(document.documentElement.dataset.theme, 'rick-morty');
@@ -338,7 +435,7 @@ test('an error is displayed in the current locale without changing the request o
   await act(async () => fail(Response.json({ error: 'Temporarily unavailable' }, { status: 503 })));
   await until(() => completedReply('Não foi possível processar'));
   assert.equal(requests[0].lang, 'en');
-  assert.equal(completedReply('Não foi possível processar').querySelector('.astra-label span').textContent, 'Squanchy');
+  assert.equal(completedReply('Não foi possível processar').querySelector('.astra-label span').textContent, 'Pessoa-Pássaro');
   assert.equal(translationRequests.length, 0);
 });
 

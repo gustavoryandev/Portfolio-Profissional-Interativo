@@ -110,12 +110,10 @@ export default function PortfolioPage({ activeSection, projectFocus, onSectionLi
           </div>
           <SocialLinks />
           {dimensional && <div className="dimension-instrument-panel">
-            {!beyond && <>
-            <div className="dimension-console-heading">
+            {!beyond && <div className="dimension-console-heading">
               <div className="dimension-readout"><span>{t('rick.control')}</span><strong>{t(secret ? 'rick.access' : 'rick.stabilized')}</strong></div>
               <div className="dimension-instruments" aria-hidden="true"><i /><span>⏚</span><b>137.0 Hz</b><em /></div>
-            </div>
-            </>}
+            </div>}
             <DimensionAstraSignal />
             <GarageWorkbench onSectionLink={onSectionLink} />
           </div>}

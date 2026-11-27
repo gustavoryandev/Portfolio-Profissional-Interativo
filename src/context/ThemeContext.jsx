@@ -186,15 +186,14 @@ export function ThemeProvider({ children }) {
       setDimension('lab');
     }
 
-    if (nextTheme === 'rick-morty') selectMusic(selectedDimension.current, !wasRick);
-    else if (nextTheme !== 'rick-morty' && wasRick) stopMusic();
-
-    if (isGalo && !wasGalo) {
-      playAnthem();
-    } else if (!isGalo && wasGalo && anthem.current) {
+    if (!isGalo && wasGalo && anthem.current) {
       anthem.current.pause();
       anthem.current.currentTime = 0;
     }
+    if (nextTheme === 'rick-morty') selectMusic(selectedDimension.current, !wasRick);
+    else if (wasRick) stopMusic();
+
+    if (isGalo && !wasGalo) playAnthem();
   }, [introScene, markShipDeparted, playAnthem, selectMusic, stopMusic]);
 
   const arrive = useCallback((next, withDock = false) => {
@@ -229,6 +228,7 @@ export function ThemeProvider({ children }) {
   const crossDimension = useCallback((event, target, firstDiscovery = false) => {
     if (!isDimensionalTheme(selectedTheme.current) || tripLocked.current || replayTrigger.current) return false;
     const destination = target ?? (selectedDimension.current === 'lab' ? 'corrupted' : 'lab');
+    if (!['lab', 'corrupted', BEYOND_CURVE].includes(destination)) return false;
     if (destination === selectedDimension.current || (destination === BEYOND_CURVE && !unlocked.current)) return false;
     tripLocked.current = true;
     if (destination === BEYOND_CURVE || selectedDimension.current === BEYOND_CURVE) selectMusic(destination, true);
