@@ -674,6 +674,7 @@
       "replay": "Máscara de Dalí. Rever abertura",
       "switch": "Máscara de Dalí. Entrar em {{name}}",
       "skip": "Pular abertura",
+      "replayFromRecord": "Rever abertura",
       "close": "Fechar abertura"
     },
     "portrait": {
@@ -685,6 +686,10 @@
     "contactBerlin": "Conversar com Berlim",
     "desk": "Mesa de planejamento",
     "composer": "Pergunte sobre o portfólio",
+    "planRecord": {
+      "title": "Caderno de planejamento",
+      "description": "Consulte as decisões de engenharia nos projetos e teste os exemplos no laboratório."
+    },
     "record": {
       "title": "Registro da operação",
       "description": "Os projetos mostram decisões de engenharia. No laboratório, você pode editar e executar os exemplos.",

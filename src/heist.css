@@ -355,7 +355,7 @@ html:has(.heist-opening[open]) { overflow: hidden; }
 .heist-record summary::after { content: '+'; color: var(--accent); font-size: 15px; }
 .heist-record[open] summary::after { content: '−'; }
 .heist-record summary:focus-visible,
-.heist-record a:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 3px; }
+.heist-record :is(a, button):focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 3px; }
 .heist-record > div {
   padding: 10px 14px;
   border-inline-start: 2px solid var(--palette-primary);
@@ -363,7 +363,7 @@ html:has(.heist-opening[open]) { overflow: hidden; }
   color: var(--muted);
   font-size: 13px;
 }
-.heist-record a {
+.heist-record :is(a, button) {
   display: inline-flex;
   align-items: center;
   gap: 5px;
@@ -373,7 +373,7 @@ html:has(.heist-opening[open]) { overflow: hidden; }
   text-underline-offset: 3px;
   text-decoration: underline;
 }
-.heist-record a:hover { color: var(--accent); }
+.heist-record :is(a, button):hover { color: var(--accent); }
 
 :root[data-theme="la-casa-de-papel-dark"] .scroll-content > :is(.scroll-section, .projects-scroll-section) {
   border-block-start: 1px solid #43292b;

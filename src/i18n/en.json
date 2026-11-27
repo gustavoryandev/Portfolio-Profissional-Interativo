@@ -674,6 +674,7 @@
       "replay": "Dalí mask. Replay opening",
       "switch": "Dalí mask. Enter {{name}}",
       "skip": "Skip opening",
+      "replayFromRecord": "Replay opening",
       "close": "Close opening"
     },
     "portrait": {
@@ -685,6 +686,10 @@
     "contactBerlin": "Talk to Berlin",
     "desk": "Planning desk",
     "composer": "Ask about the portfolio",
+    "planRecord": {
+      "title": "Planning notebook",
+      "description": "Review engineering decisions in the projects and test examples in the code lab."
+    },
     "record": {
       "title": "Operation log",
       "description": "The projects show the engineering decisions. In the lab, you can edit and run the examples.",

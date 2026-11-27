@@ -92,3 +92,72 @@
   }
   :root[data-theme="la-casa-de-papel-light"] .portfolio-hero::before { width: 100vw; }
 }
+
+:root[data-theme="la-casa-de-papel-light"] .heist-mask-button {
+  background: var(--panel);
+  border-color: var(--control-border);
+  color: var(--primary);
+}
+:root[data-theme="la-casa-de-papel-light"] .heist-mask-button:is(:hover, :focus-visible) {
+  background: var(--heist-document);
+  border-color: var(--focus-ring);
+}
+:root[data-theme="la-casa-de-papel-light"] .heist-mask-button:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.heist-opening[data-variant="plan"] .heist-backdrop {
+  background: linear-gradient(0deg, #f2eee5c7, #fffdf72b 64%, #f2eee546),
+    var(--heist-location-image) 56% 48% / cover no-repeat, var(--page);
+}
+.heist-plan-sheet {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background:
+    linear-gradient(90deg, #9d795e26 1px, transparent 1px) center / 24px 24px,
+    linear-gradient(#9d795e26 1px, transparent 1px) center / 24px 24px,
+    var(--panel-soft);
+  animation: heist-plan-unfold 1750ms cubic-bezier(.64, .03, .25, 1) both;
+  pointer-events: none;
+}
+.heist-plan-sheet > i {
+  position: absolute;
+  inset: 14% 16% 22%;
+  border: 1px solid #9b7961;
+  box-shadow: inset 0 0 0 10px #b5092015;
+  transform-origin: left top;
+  animation: heist-plan-trace 940ms ease-out both;
+}
+.heist-plan-sheet > i:nth-child(2) { inset: 28% 26% 34%; animation-delay: 120ms; }
+.heist-plan-sheet > i:nth-child(3) { inset: 28% 48% 23%; border-color: #a50920; animation-delay: 200ms; }
+@keyframes heist-plan-unfold { 0%, 34% { clip-path: inset(0); } to { clip-path: inset(0 100% 0 0); } }
+@keyframes heist-plan-trace { from { clip-path: inset(0 100% 100% 0); } to { clip-path: inset(0); } }
+.heist-opening[data-variant="plan"] .heist-opening-frame { border-color: #977c65; }
+.heist-opening[data-variant="plan"] .heist-opening-frame span {
+  background: #b50920;
+  box-shadow: none;
+  height: 2px;
+}
+.heist-opening[data-variant="plan"] .heist-opening-title {
+  padding: 18px clamp(22px, 5vw, 70px);
+  background: #fffdf7ed;
+  border: 1px solid #9f8874;
+  box-shadow: 6px 6px 0 #b9aa9670;
+  color: var(--ink);
+  text-shadow: none;
+}
+.heist-opening[data-variant="plan"] .heist-opening-title p {
+  background: transparent;
+  color: var(--primary);
+}
+.heist-opening[data-variant="plan"] .heist-opening-mask { filter: none; }
+.heist-opening[data-variant="plan"] .heist-opening-skip {
+  color: var(--ink);
+  background: var(--panel);
+  border-color: var(--control-border);
+}
+.heist-opening[data-variant="plan"] .heist-opening-skip:hover { background: var(--heist-document); }
+.heist-opening[data-still="true"] .heist-plan-sheet { display: none; }
+@media (prefers-reduced-motion: reduce) { .heist-plan-sheet { display: none; } }

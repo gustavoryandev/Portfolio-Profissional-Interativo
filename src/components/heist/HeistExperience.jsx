@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { ArrowUpRight, FileText, ScanFace } from 'lucide-react';
+import { ArrowUpRight, FileText, RotateCcw, ScanFace } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { ThemeContext } from '../../context/ThemeState';
 import { HEIST_DARK, HEIST_LIGHT, heistMedia, isHeistTheme } from '../../data/heistThemes.js';
@@ -33,7 +33,7 @@ export function useHeistPortfolioOpening() {
   useEffect(() => {
     if (!open || !isHeistTheme(theme) || window.location.pathname !== '/' || document.hidden || seen.current.has(theme)) return;
     const forced = new URLSearchParams(window.location.search).get('intro') === '1';
-    if (window.location.hash && !forced) return;
+    if (!forced && (window.location.hash || window.scrollY > 24)) return;
     if (window.matchMedia?.(REDUCED_MOTION_QUERY).matches) return;
     const storageKey = `${theme}:opening-seen`;
     seen.current.add(theme);
@@ -78,18 +78,25 @@ export function HeistBackdrop({ theme }) {
 }
 
 export function HeistOperationRecord({ onSectionLink }) {
+  const { theme } = useContext(ThemeContext) ?? {};
+  const open = useContext(OpeningContext);
   const { t } = useTranslation();
+  const recordKey = theme === HEIST_LIGHT ? 'heist.planRecord' : 'heist.record';
   return <details className="heist-record">
-    <summary><FileText size={16} aria-hidden="true" />{t('heist.record.title')}</summary>
+    <summary><FileText size={16} aria-hidden="true" />{t(`${recordKey}.title`)}</summary>
     <div>
-      <p>{t('heist.record.description')}</p>
+      <p>{t(`${recordKey}.description`)}</p>
       <a href="#projetos" onClick={onSectionLink}>{t('heist.record.projects')}<ArrowUpRight size={14} aria-hidden="true" /></a>
       <a href="#laboratorio" onClick={onSectionLink}>{t('heist.record.lab')}<ArrowUpRight size={14} aria-hidden="true" /></a>
+      {open && <button type="button" aria-haspopup="dialog" onClick={event => open(event.currentTarget)}>
+        <RotateCcw size={14} aria-hidden="true" />{t('heist.opening.replayFromRecord')}
+      </button>}
     </div>
   </details>;
 }
 
 function HeistOpening({ opener, theme, onFinish }) {
+  const plan = theme === HEIST_LIGHT;
   const { t } = useTranslation();
   const dialog = useRef(null);
   const skip = useRef(null);
@@ -122,10 +129,11 @@ function HeistOpening({ opener, theme, onFinish }) {
     };
   }, [onFinish, reduced]);
 
-  return <dialog ref={dialog} className="heist-opening" data-still={reduced} aria-labelledby="heist-opening-title"
+  return <dialog ref={dialog} className="heist-opening" data-variant={plan ? 'plan' : 'heist'} data-still={reduced} aria-labelledby="heist-opening-title"
     onCancel={event => { event.preventDefault(); onFinish(); }}>
     <HeistBackdrop theme={theme} />
-    <div className="heist-opening-shutters" aria-hidden="true"><i /><i /></div>
+    {plan ? <div className="heist-plan-sheet" aria-hidden="true"><i /><i /><i /></div>
+      : <div className="heist-opening-shutters" aria-hidden="true"><i /><i /></div>}
     <div className="heist-opening-frame" aria-hidden="true"><span /></div>
     <div className="heist-opening-title">
       <HeistMask className="heist-opening-mask" />
