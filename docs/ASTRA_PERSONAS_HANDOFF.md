@@ -33,7 +33,7 @@ Pessoa-Pássaro usa o ID histórico `birdperson`. O cabeçalho, o canal, a entra
 
 ## Personas de O Assalto
 
-O tema `la-casa-de-papel-dark` resolve `berlin` na compacta e `professor` na completa. A dimensão fica reservada ao contrato Rick. Os textos de La Casa usam `heistPersonas.<personaId>` e os assets têm caminhos próprios. Trocar idioma, superfície ou tema preserva o ID, avatar e autoria de cada resposta. A variante Light terá os mesmos perfis quando entrar no registro de temas. [Tema](MONEY_HEIST_SPEC.md)
+Os temas `la-casa-de-papel-dark` e `la-casa-de-papel-light` resolvem `berlin` na compacta e `professor` na completa. A dimensão fica reservada ao contrato Rick. Os textos de La Casa usam `heistPersonas.<personaId>` e os assets têm caminhos próprios. Trocar idioma, superfície ou tema preserva o ID, avatar e autoria de cada resposta. [Tema](MONEY_HEIST_SPEC.md)
 
 ## Como estender o contrato
 

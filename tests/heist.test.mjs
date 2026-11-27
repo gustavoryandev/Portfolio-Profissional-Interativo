@@ -14,8 +14,6 @@ test('O Assalto uses the existing theme slot and migrates directly before React'
   const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
   assert.equal(themes.length, 15);
   assert.ok(themes.some(theme => theme.id === HEIST_DARK && !theme.light));
-  assert.ok(themes.some(theme => theme.id === 'quartzo-framboesa' && theme.light));
-  assert.ok(!themes.some(theme => theme.id === HEIST_LIGHT));
   for (const saved of ['midnight-pink', 'obsidian-gold', 'grafite-coral', HEIST_DARK]) {
     const dom = new JSDOM(html, { url: 'https://portfolio.test/chat', runScripts: 'dangerously', beforeParse(window) {
       window.localStorage.setItem('theme', saved);
@@ -30,7 +28,32 @@ test('O Assalto uses the existing theme slot and migrates directly before React'
     } finally { dom.window.close(); }
     assert.deepEqual(validateActions([{ type: 'theme.set', target: saved }], new Set()), [{ type: 'theme.set', target: HEIST_DARK }]);
   }
-  assert.deepEqual(validateActions([{ type: 'theme.set', target: HEIST_LIGHT }], new Set()), []);
+});
+
+test('O Plano replaces Raspberry Quartz on first paint and in Astra actions', async () => {
+  assert.equal(themes.length, 15);
+  assert.equal(themes.filter(theme => theme.light).length, 6);
+  assert.ok(themes.some(theme => theme.id === HEIST_LIGHT && theme.light));
+  assert.ok(!themes.some(theme => theme.id === 'quartzo-framboesa'));
+  const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
+  for (const saved of ['quartzo-framboesa', HEIST_LIGHT]) {
+    for (const path of ['/', '/chat']) {
+      const dom = new JSDOM(html, {
+        url: 'https://portfolio.test' + path,
+        runScripts: 'dangerously',
+        beforeParse(window) { window.localStorage.setItem('theme', saved); },
+      });
+      try {
+        const root = dom.window.document.documentElement;
+        assert.equal(root.dataset.theme, HEIST_LIGHT, path);
+        assert.ok(root.hasAttribute('data-custom-theme'));
+        assert.ok(!root.classList.contains('dark'));
+        assert.equal(root.dataset.dimension, undefined);
+      } finally { dom.window.close(); }
+    }
+    assert.deepEqual(validateActions([{ type: 'theme.set', target: saved }], new Set()),
+      [{ type: 'theme.set', target: HEIST_LIGHT }]);
+  }
 });
 
 test('Astra gives each Heist surface its own bilingual identity and keeps Rick dimensions separate', () => {
@@ -48,7 +71,8 @@ test('Astra gives each Heist surface its own bilingual identity and keeps Rick d
   assert.match(assistantPersonaInstruction(compact, 'pt'), /Money Heist.*\nYour displayed name for THIS turn is Berlim/);
   assert.doesNotMatch(assistantPersonaInstruction(compact, 'en'), /injected/);
   assert.equal(resolveAssistantPersona({ theme: HEIST_DARK, dimension: 'beyond-curve' }, 'full'), null);
-  assert.equal(resolveAssistantPersona({ theme: HEIST_LIGHT }, 'compact'), null);
+  assert.equal(resolveAssistantPersona({ theme: HEIST_LIGHT }, 'compact').id, compact.id);
+  assert.equal(resolveAssistantPersona({ theme: HEIST_LIGHT }, 'full').id, full.id);
   assert.equal(resolveAssistantPersona(appearance, 'unknown'), null);
   assert.equal(resolveAssistantPersona({ theme: 'rick-morty', dimension: 'beyond-curve' }, 'full').id, 'evil-morty');
 });

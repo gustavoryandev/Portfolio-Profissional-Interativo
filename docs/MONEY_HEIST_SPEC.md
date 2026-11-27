@@ -1,4 +1,4 @@
-# La Casa de Papel — O Assalto
+# La Casa de Papel — O Assalto e O Plano
 
 27 de novembro de 2026. A Fase 03 partiu do commit consolidado `2e84d2b` em `codex/la-casa-de-papel-dark`. O Vite atende por loopback na porta 5177. A worktree de Rick and Morty manteve sua execução independente na porta 5176. [Portfólio](http://127.0.0.1:5177/) · [Astra completa](http://127.0.0.1:5177/chat)
 
@@ -28,7 +28,7 @@ A grade, a largura e o espaçamento interno do card seguem os mesmos breakpoints
 
 Em nove viewports no Chrome, a diferença entre os centros verticais ficou em até 0,02 px no layout de duas colunas. No empilhado, o card fica centralizado abaixo do texto. A alternância das fotos manteve a geometria do quadro e o rastro foi verificado antes e depois de redimensionar a janela.
 
-A máscara do cabeçalho abre uma sequência de 2,65 s com obturadores CSS, varredura vermelha, fachada e dissolução para a hero. O botão e Escape pulam a sequência. O fechamento devolve o foco ao acionador. A abertura automática funciona uma vez por sessão no portfólio. Com movimento reduzido, a máscara abre um quadro estático descartável. O Registro da operação revela atalhos para o catálogo de projetos e para o laboratório. As interações são locais e a abertura é silenciosa.
+A abertura de O Assalto usa uma sequência de 2,65 s com obturadores CSS, varredura vermelha, fachada e dissolução para a hero. O botão e Escape pulam a sequência. O fechamento devolve o foco ao acionador. A abertura automática funciona uma vez por sessão no portfólio. Com movimento reduzido, o comando de reprise abre um quadro estático descartável. O Registro da operação revela atalhos para o catálogo de projetos e para o laboratório. As interações são locais e a abertura é silenciosa.
 
 | Superfície | Persona | Identidade |
 | --- | --- | --- |
@@ -41,14 +41,15 @@ A seleção usa o mesmo resolvedor e as mesmas ferramentas da Astra. Cada mensag
 
 | Caminho local | Uso |
 | --- | --- |
-| `public/la-casa-de-papel/dark-background.webp` | Casa da Moeda, 1600 × 900. Hero e abertura |
+| `public/la-casa-de-papel/dark-background.webp` | Casa da Moeda noturna, 1600 × 900. Hero e abertura |
+| `public/la-casa-de-papel/light-background.webp` | Casa da Moeda diurna, 1600 × 900. Hero e abertura |
 | `public/la-casa-de-papel/dali-mask-header.png` | Ícone transparente da máscara. Símbolo vetorial de interface na falha |
 | `public/la-casa-de-papel/avatar-berlin.webp` | Conversa compacta |
 | `public/la-casa-de-papel/avatar-professor.webp` | Conversa completa |
 | `public/perfil-foto.jpeg` | Retrato profissional versionado |
-| `public/la-casa-de-papel/masked-portrait-candidate.webp` | Alternativa autorizada para o Vite em loopback |
+| `public/la-casa-de-papel/perfil-foto-reveal.webp` | Fotografia mascarada definitiva, versão sem perdas de 1076 × 1462 |
 
-Os arquivos com direitos de distribuição pendentes estão disponíveis localmente, fora dos commits. A worktree também recebeu seis mídias já usadas pelo código consolidado de Rick and Morty. As cópias foram conferidas por SHA-256 e o servidor entregou as 13 mídias públicas verificadas sem divergência. Para reproduzir a demonstração em outro checkout, providenciar os mesmos arquivos locais e instalar com `npm ci`. A fotografia mascarada definitiva e a liberação de publicação das artes são pendências. [Recortes e fallback](HEIST_PORTRAIT_HANDOFF.md)
+Os arquivos com direitos de distribuição pendentes estão disponíveis localmente, fora dos commits. A worktree também recebeu seis mídias já usadas pelo código consolidado de Rick and Morty. As cópias foram conferidas por SHA-256 e o servidor entregou as 13 mídias públicas verificadas sem divergência. Para reproduzir a demonstração em outro checkout, providenciar os mesmos arquivos locais e instalar com `npm ci`. A liberação de publicação dos demais assets locais continua pendente. [Recortes e fallback](HEIST_PORTRAIT_HANDOFF.md)
 
 ## Validação
 
@@ -77,6 +78,29 @@ A leitura simultânea da Fase 02.2 identificou alterações compartilhadas em `C
 | `1431c8e` | Seções, ferramentas, registro e ajustes responsivos |
 | Commit que contém este documento | Testes e handoff da Fase 03 |
 
-## Próxima fase — O Plano
+## Fase 04 — O Plano
 
-A família de temas reconhece `la-casa-de-papel-light` na infraestrutura. A variante entra no registro e na primeira pintura quando substituir Quartzo Framboesa. A máscara consulta as opções realmente registradas antes de liberar alternância. O Plano reaproveitará Berlim, Professor, PhotoReveal, traduções e o tratamento de movimento reduzido, com o fundo diurno existente. A implementação visual de O Plano aguarda a aprovação de O Assalto.
+O Plano ocupa o slot de Quartzo Framboesa, com migração direta de `quartzo-framboesa` para `la-casa-de-papel-light` no HTML e nas ações da Astra. As duas variantes passam pelo seletor existente de quinze temas. O Plano é Money Heist — The Plan em inglês.
+
+| Uso | Cor |
+| --- | --- |
+| Fundo e superfície | `#F2EEE5`, `#FFFDF7` |
+| Primária e realce | `#B50920`, `#D90416` |
+| Texto e texto secundário | `#24201D`, `#756A60` |
+| Borda, documento e sombra | `#D4C8B6`, `#E5D8C3`, `#B9AA96` |
+| Borda interativa e foco | `#8F7965`, `#9B0920` |
+
+A Casa da Moeda diurna fica atrás da hero. As demais seções usam superfícies claras. As duas variantes mantêm a mesma grade, composição tipográfica e dimensões do card. O componente compartilhado `HeistPortrait` usa a fotografia profissional e o WebP definitivo sem reconstruir o rastro ou a lógica de interação.
+
+A máscara alterna as variantes no cabeçalho. A seleção mantém a rota, a âncora de seção e as conversas. O Caderno de planejamento reúne os atalhos existentes e o botão de reprise da abertura. O Assalto também oferece a reprise no Registro da operação. A abertura de O Plano traça linhas de planta em papel, revela a Casa da Moeda e termina em 2,65 s. Escape e o botão de pular funcionam em ambas. Com movimento reduzido, a seleção é imediata e a reprise exibe um quadro estático.
+
+A Astra usa as identidades existentes `berlin` e `professor`. O estilo claro se estende ao painel compacto, à mesa de planejamento da Astra completa, aos cards, ao laboratório, ao contato, ao Arcade e ao tabuleiro. Os componentes de dossiês mantêm a disponibilidade anterior e já têm cores para a superfície clara.
+
+### Validação da Fase 04
+
+- Passaram 132 testes principais e 17 isolados da Astra, build temporário, typecheck do portal, importação do handler e `git diff --check`. O build mantém o aviso de chunks acima de 500 kB.
+- O Chrome conferiu 375, 390, 768, 1024, 1440 e 1920 px, com toque emulado nas larguras móveis. O teste mediu as mesmas dimensões de card e retrato nos dois modos, verificou a seção preservada na alternância e exercitou navegação mobile, laboratório, Astra nas duas superfícies, os cinco jogos do Arcade e replay PGN.
+- Foram conferidos migração na entrada direta de `/chat`, persistência após recarga, favicon, seletor com 15 opções, inglês, abertura com animação e reprise estática com retorno do foco. O Canvas foi exercitado a 390 e 1440 px nas duas variantes. A API local respondeu as duas identidades, que se mantiveram no histórico após a alternância. O teste isolado cobre a troca durante o streaming.
+- Contraste dos pares sólidos em O Plano: texto e superfície 15,89:1, secundário e fundo 4,55:1, branco e botão primário 6,94:1, borda interativa e superfície 4,06:1, foco e fundo 7,39:1. A amostra usa navegador emulado e respostas determinísticas do endpoint local. Aparelhos físicos, leitor de tela e conversas abertas com Gemini ficam fora dessa amostra.
+
+Checkpoint local em `codex/checkpoint-la-casa-light-ac71231`. Os quatro commits de implementação são `c241003`, `3f0ed18`, `76db0e8` e `f5ef07f`. Para a integração posterior, conferir `src/i18n/pt.json`, `src/i18n/en.json`, `tests/isolated/astra-streaming.test.mjs` e `docs/SESSION_HANDOFF.md`, que também aparecem na linha da Fase 02.2. `HeistExperience.jsx` concentra a alternância e a abertura. `heist-light.css` concentra o visual claro. O retrato e o catálogo de personas permanecem compartilhados.

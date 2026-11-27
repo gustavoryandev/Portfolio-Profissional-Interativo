@@ -110,7 +110,7 @@ axios.defaults.adapter = async config => {
   return { data: { text: 'Resposta traduzida.' }, status: 200, statusText: 'OK', headers: {}, config };
 };
 
-const { App, ThemeProvider, i18n, MessageBubble } = await import(output.href);
+const { App, ThemeProvider, HeistOpeningProvider, i18n, MessageBubble } = await import(output.href);
 const { createRoot } = await import('react-dom/client');
 const { act } = await import('react');
 const $ = selector => document.querySelector(selector);
@@ -139,7 +139,8 @@ async function mount(language = 'en', path = '/chat', { theme = 'rick-morty', di
   window.sessionStorage.setItem('rick-garage-intro-seen', '1');
   await act(async () => i18n.changeLanguage(language));
   root = createRoot(document.getElementById('root'));
-  await act(async () => root.render(React.createElement(ThemeProvider, null, React.createElement(App))));
+  await act(async () => root.render(React.createElement(ThemeProvider, null,
+    React.createElement(HeistOpeningProvider, null, React.createElement(App)))));
   if (path === '/') {
     await until(() => $('.astra-fab'));
     await click($('.astra-fab'));
@@ -342,6 +343,26 @@ test('reply authorship stays with the original persona across a theme change dur
   assert.equal(initialAuthor, 'Birdperson');
   assert.equal(streamingAuthor, 'Birdperson');
   assert.equal(finalAuthor, 'Birdperson');
+});
+
+test('the Dalí mask switches Heist variants without changing the Professor or discarding history', async () => {
+  const dark = 'la-casa-de-papel-dark';
+  const light = 'la-casa-de-papel-light';
+  await mount('en', '/chat', { theme: light });
+  const stream = await send('Explain one project decision.');
+  assert.equal(requests.at(-1).appearance.theme, light);
+  const mask = $('.astra-full .heist-mask-button');
+  assert.match(mask.getAttribute('aria-label'), /The Heist/);
+  await click(mask);
+  await until(() => localStorage.getItem('theme') === dark);
+  assert.equal($('[data-streaming-reply] img').dataset.astraCharacter, 'professor');
+  stream.finish('PLAN_HISTORY_TEST');
+  await until(() => completedReply('PLAN_HISTORY_TEST'));
+  assert.match(mask.getAttribute('aria-label'), /The Plan/);
+  await click(mask);
+  await until(() => localStorage.getItem('theme') === light);
+  assert.equal(completedReply('PLAN_HISTORY_TEST').querySelector('img').dataset.astraCharacter, 'professor');
+  assert.equal(window.location.pathname, '/chat');
 });
 
 test('a language change during streaming keeps the request language and translates the completed reply', async () => {

@@ -1,10 +1,16 @@
 # Passagem de sessão do portfólio
 
+## Fase 04 em 27 de novembro de 2026
+
+O Plano está em `codex/la-casa-de-papel-dark`, na mesma worktree de O Assalto. A base de segurança é `codex/checkpoint-la-casa-light-ac71231`. Quartzo Framboesa migra diretamente para O Plano e o seletor mantém quinze temas. A máscara alterna as variantes. Para rever a abertura, abra o Caderno de planejamento ou o Registro da operação e escolha **Rever abertura**. [Demonstração](http://127.0.0.1:5177/) · [Astra completa](http://127.0.0.1:5177/chat)
+
+A geometria da hero, Berlim, Professor e o PhotoReveal definitivo são compartilhados. Passaram 132 testes principais, 17 isolados, build, typecheck do portal e importação do handler. A inspeção em Chrome cobriu seis larguras. Os fundos diurno e noturno, a máscara e os avatares ainda usam as cópias locais. A documentação registra os arquivos que exigem atenção na futura integração. A fase aguarda aprovação visual. [Especificação](MONEY_HEIST_SPEC.md) · [PhotoReveal](HEIST_PORTRAIT_HANDOFF.md)
+
 ## Fase 03 em 27 de novembro de 2026
 
-La Casa de Papel — O Assalto está em `codex/la-casa-de-papel-dark`, worktree independente baseada em `2e84d2b`. A demonstração em `127.0.0.1:5177` usa a Casa da Moeda noturna, a máscara no cabeçalho, o PhotoReveal com a candidata autorizada para uso local, Berlim e Professor. A máscara permite rever a abertura e o Registro da operação abre projetos e laboratório. [Portfólio](http://127.0.0.1:5177/) · [Professor](http://127.0.0.1:5177/chat)
+La Casa de Papel — O Assalto está em `codex/la-casa-de-papel-dark`, worktree independente baseada em `2e84d2b`. A demonstração em `127.0.0.1:5177` usa a Casa da Moeda noturna, a máscara no cabeçalho, o PhotoReveal com a fotografia definitiva aprovada, Berlim e Professor. Na entrega original, a máscara permitia rever a abertura. O Registro da operação abre projetos e laboratório. [Portfólio](http://127.0.0.1:5177/) · [Professor](http://127.0.0.1:5177/chat)
 
-A integração aguarda a conclusão da Fase 02.2 e a aprovação das duas tarefas. O Plano é a próxima fase obrigatória após a aprovação de O Assalto. O mapa de arquivos compartilhados, a matriz de validação e as pendências de mídia estão na especificação. [O Assalto](MONEY_HEIST_SPEC.md) · [PhotoReveal](HEIST_PORTRAIT_HANDOFF.md)
+A integração aguarda a conclusão da Fase 02.2 e a aprovação das duas tarefas. O Plano foi entregue na Fase 04. O mapa de arquivos compartilhados, a matriz de validação e as pendências de mídia estão na especificação. [O Assalto](MONEY_HEIST_SPEC.md) · [PhotoReveal](HEIST_PORTRAIT_HANDOFF.md)
 
 ## Pendências concluídas na Fase 02.1
 
@@ -232,7 +238,7 @@ Foi criado `src/components/PhotoReveal.jsx`, sem importá-lo na interface princi
 
 Foram importados 20 arquivos do pacote `PORTFOLIO_ASSETS_V11_2.zip`: 16 em `public/` (cinco de La Casa incluindo a candidata mascarada; tres avatares Rick; sete cenas da terceira dimensao; um MP3) e quatro referencias em `references/la-casa-de-papel/`. Os 20 hashes SHA-256 conferem com os membros do ZIP; nenhum destino foi sobrescrito e nenhum hash novo duplicou os 90 arquivos anteriormente existentes em `public/`. Os recursos foram preservados sem recorte/recompressao e nao foram conectados ao codigo.
 
-O MP3 tem 1.151 quadros, 44,1 kHz e duracao calculada de 30,067 s; `evil-morty-portal-15s.mp3` nao existe no checkout e nao possui referencias encontradas. A candidata mascarada (918 x 1713, razao 0,536) nao alinha com a foto atualmente usada (572 x 777, razao 0,736); permanece candidata e nao deve ser ligada ao PhotoReveal. As cenas `yellow-portal*.webp` sao completas e sem alfa, portanto nao foram convertidas em icones improvisados. A mansao (1125 x 603) perde grande parte da largura com `cover` central em retrato; nenhuma variante mobile foi gerada sem layout/foco aprovados. Direitos de distribuicao das imagens ainda precisam ser confirmados; a autorizacao da musica foi informada pelo proprietario, sem documento comprobatório inspecionado.
+O MP3 tem 1.151 quadros, 44,1 kHz e duracao calculada de 30,067 s; `evil-morty-portal-15s.mp3` nao existe no checkout e nao possui referencias encontradas. A candidata mascarada (918 x 1713, razao 0,536) nao alinha com a foto atualmente usada (572 x 777, razao 0,736); permanece como referência histórica. O PhotoReveal usa o WebP definitivo aprovado. As cenas `yellow-portal*.webp` sao completas e sem alfa, portanto nao foram convertidas em icones improvisados. A mansao (1125 x 603) perde grande parte da largura com `cover` central em retrato; nenhuma variante mobile foi gerada sem layout/foco aprovados. Direitos de distribuicao das imagens ainda precisam ser confirmados; a autorizacao da musica foi informada pelo proprietario, sem documento comprobatório inspecionado.
 
 Suíte completa (`node --test --test-reporter=dot tests/*.test.mjs`), build de producao (2.271 modulos), typecheck e `git diff --check` passaram. O build foi validado em diretorio temporario; permanece o aviso conhecido de chunks maiores que 500 kB. `docs/THEME_PREPARATION.md` nao existia no checkout durante a importacao V11.2; foi criado nesta etapa. Os demais documentos de contexto e as tres notas internas do ZIP foram consultados. Inventario, pendencias, avaliacao visual, caminhos, hashes, audio, direitos e orientacoes de integracao: [ASSET_IMPORT_V11_2_REPORT.md](ASSET_IMPORT_V11_2_REPORT.md). O relatorio esta incluido no exportador de contexto.
 

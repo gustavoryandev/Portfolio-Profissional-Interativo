@@ -1,6 +1,6 @@
 # Inventário atual de temas
 
-27 de novembro de 2026 · Fase 03. O seletor oferece **15 temas, seis claros e nove escuros**. Garagem, Cidadela e Além da Curva Finita Central são dimensões de Rick and Morty. La Casa de Papel — O Assalto ocupa o antigo slot de Midnight Pink. Quartzo Framboesa segue disponível até a fase de O Plano.
+27 de novembro de 2026 · Fase 04. O seletor oferece **15 temas, seis claros e nove escuros**. Garagem, Cidadela e Além da Curva Finita Central são dimensões de Rick and Morty. La Casa de Papel — O Assalto ocupa o antigo slot de Midnight Pink. O Plano ocupa o antigo slot de Quartzo Framboesa.
 
 ## Registro que alimenta o menu
 
@@ -17,7 +17,7 @@ Os pares hexadecimais indicam fundo e primária da amostra do seletor. Nas palet
 | `midnight-violet` | Midnight Violet | Escuro | #080910 / #8B5CF6. Controles violeta e intensidade de onda própria |
 | `papel-violeta` | Papel violeta | Claro | #EFEDF5 / #56429E |
 | `la-casa-de-papel-dark` | La Casa de Papel — O Assalto | Escuro | #080808 / #D90416. Casa da Moeda noturna, máscara, PhotoReveal, Berlim e Professor |
-| `quartzo-framboesa` | Quartzo framboesa | Claro | #F7E8F0 / #9A3D72. Superfície #FCF5F9 e realce #71498A |
+| `la-casa-de-papel-light` | La Casa de Papel — O Plano | Claro | #F2EEE5 / #B50920. Casa da Moeda diurna, abertura de planta e Caderno de planejamento |
 | `ardosia-cobalto` | Ardósia e Cobalto | Claro | #E7EDF5 / #244DA8 |
 | `cobalto-intenso` | Cobalto intenso | Escuro | #101D44 / #97AEFF |
 | `petroleo-gelo` | Petróleo e Gelo | Claro | #EAF6F5 / #0D675F |
@@ -32,15 +32,16 @@ O script no HTML aplica `data-theme`, a classe `dark`, `data-custom-theme` e, pa
 | --- | --- | --- |
 | `rick-morty-secret` | `rick-morty` | Entra em `corrupted` |
 | `midnight-pink`, `obsidian-gold`, `grafite-coral` | `la-casa-de-papel-dark` | Migração direta para O Assalto, inclusive em `/chat` |
+| `quartzo-framboesa` | `la-casa-de-papel-light` | Migração direta para O Plano, inclusive em `/chat` |
 | `champagne-gold` | `ardosia-cobalto` | Claro |
 | `mint-frost` | `petroleo-gelo` | Claro |
 | `porcelain-indigo` | `papel-violeta` | Claro |
 
 Selecionar Rick explicitamente inicia em `lab`, salvo quando a última dimensão ativa era `beyond-curve`. Recarregar com Rick selecionado restaura uma dimensão válida. Em localStorage também ficam `rick-morty-beyond-unlocked`, `rick-morty-volume`, `rick-morty-music-paused`, `rick-morty-effects-paused` e `rick-morty-exploration`. Em sessionStorage, `rick-garage-intro-seen` e `rick-ship-departed` controlam a abertura e o voo. Mensagens de easter egg são mantidas por dimensão em memória. O favicon usa as cores computadas e reage à mudança de tema.
 
-## La Casa de Papel — O Assalto
+## La Casa de Papel — O Assalto e O Plano
 
-Abertura da Casa da Moeda, retrato profissional com revelação na demonstração local e Registro da operação com atalhos para projetos e laboratório. A máscara do cabeçalho repete a abertura. Berlim conduz a conversa rápida e o Professor atende em `/chat`. [Tema, mídias e integração](MONEY_HEIST_SPEC.md)
+A máscara do cabeçalho alterna as duas variantes. O Registro da operação e o Caderno de planejamento oferecem a reprise e os atalhos para projetos e laboratório. A Casa da Moeda noturna e diurna fica restrita à hero e à abertura de cada variante. Ambas usam o mesmo PhotoReveal definitivo. Berlim conduz a conversa rápida e o Professor atende em `/chat`. [Tema, mídias e integração](MONEY_HEIST_SPEC.md)
 
 ## Garagem e Cidadela dos Ricks
 

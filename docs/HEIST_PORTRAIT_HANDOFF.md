@@ -12,6 +12,6 @@ A imagem mascarada é opaca. O Canvas e a alternância estática exibem a imagem
 
 O Chrome executou o teste de dimensões do card antes e depois de alternar o retrato em seis larguras. Também foram conferidos o rastro pelo mouse, a dissipação, o toque emulado, a troca via Enter, movimento reduzido e erros de imagem simulados. O teste automatizado verificou interrupção fora da viewport e em aba oculta. [Teste](../tests/heist.test.mjs)
 
-A futura variante Light deve reutilizar `HeistPortrait` e o mesmo WebP aprovado.
+O Assalto e O Plano reutilizam `HeistPortrait` e o mesmo WebP aprovado.
 
 O endereço publicado da referência estava inacessível na consulta. O experimento consultou o conceito de rastro no código de Lucas Dias Melo. O README declara MIT e o caminho `LICENSE` retornou 404 na revisão consultada. A aplicação estende seu próprio componente Canvas 2D com sua própria geometria e mídias locais. [Componente de referência](https://raw.githubusercontent.com/lucasdiasmz/lucas-portfolio/f0970bcfa9daf014806762fcff1d06a2c03ac328/src/components/HeroPortrait.jsx) · [README da revisão](https://raw.githubusercontent.com/lucasdiasmz/lucas-portfolio/f0970bcfa9daf014806762fcff1d06a2c03ac328/README.md)
