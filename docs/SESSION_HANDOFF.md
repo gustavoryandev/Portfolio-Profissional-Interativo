@@ -1,5 +1,21 @@
 # Passagem de sessão do portfólio
 
+## Fase 02.1 em 27 de novembro de 2026
+
+A revisão continua em `codex/rick-morty-phase-02`, sobre `6d631dc`. O ambiente local usa a porta 5176. Na mansão, **Rever travessia** repete a sequência completa. O comando de estreia permanece disponível em uma sessão ainda sem descoberta.
+
+| Commit | Escopo e arquivos |
+| --- | --- |
+| `d59448d` | Narrativa em `server/assistantPersona.js`, `api/chat.js`, `ChatPage.jsx`, `DimensionAstraSignal.jsx`, `AstraHero.jsx`, `AstraEntrance.jsx`, `RickDimensionExperience.jsx` e traduções PT/EN. |
+| `57d2f11` | Canvas e travessia em `curveFlight.js`, `BeyondCurveTransit.jsx`, `sceneAssets.js` e `beyond-curve.css`. Marcos de áudio em `ThemeContext.jsx`, `useRickThemeMusic.js` e `rickThemeMusic.js`. |
+| `0dcb528` | Grade da hero da mansão e sincronização de entrada dos cartões em `beyond-curve.css` e `PortfolioPage.jsx`. |
+| `bb9dd51` | Portal animado em `PortraitPortal.jsx`, `DimensionalPortal.tsx`, `portalConfig.ts` e `PortfolioPage.jsx`. |
+| `183b3f7` | Refinamento das superfícies, iluminação e ação de rever a viagem. Ajustes em CSS, Canvas, travessia, contexto, bancada e traduções. |
+
+Foram vistos no navegador a Garagem, a Cidadela, a mansão e as duas superfícies de conversa. Nas larguras 375, 390, 768, 1024, 1440 e 1920 px, portfólio e Astra completa permaneceram dentro da largura disponível. Em 1024, 1440 e 1920 px, a diferença medida entre os centros verticais dos cartões ficou abaixo de 1 px. Em medições consecutivas, as duas correntes do SVG mudaram de ângulo e o retângulo do retrato manteve posição e dimensões. A sequência completa foi conferida em execução, incluindo a abertura sobre a mansão. O Arcade exibiu cinco jogos e o tabuleiro de uma partida PGN local abriu com a paleta da mansão.
+
+Passaram **130 testes principais e 16 isolados**, o build temporário, o typecheck do portal, a importação do handler e `git diff --check`. O build mantém o aviso de chunks acima de 500 kB. Gemini real, dispositivos físicos e a liberação de mídia para publicação ficam fora desta rodada. As alterações preexistentes continuaram locais. A aprovação visual do proprietário está pendente. [Dimensão](DIMENSION_SPEC.md) · [Personas](ASTRA_PERSONAS_HANDOFF.md) · [Regressões](ASTRA_REGRESSION_REPORT.md)
+
 ## Fase 02 em 27 de novembro de 2026
 
 A branch local `codex/rick-morty-phase-02` deriva da Fase 01 aprovada em `5637d64`. A demonstração está em [Portfólio local](http://127.0.0.1:5176/) e [Astra completa](http://127.0.0.1:5176/chat). Selecionar Rick and Morty e enviar **Wubba Lubba Dub-Dub** na Astra. A [especificação da dimensão](DIMENSION_SPEC.md) detalha os estados, o diário, o áudio e as permissões pendentes.

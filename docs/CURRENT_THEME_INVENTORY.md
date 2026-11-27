@@ -46,7 +46,7 @@ Selecionar Rick explicitamente inicia em `lab`, salvo quando a última dimensão
 | Abertura | Porta, luzes, monitor e partida da nave. 2.450 ms de animação, uma vez por sessão | Chegada à doca e pouso da mesma nave. 1.650 ms na ida pelo portal |
 | Portais | Botão com textura local, expansão que cobre a troca. Retrato SVG verde, energia #39FF14 | Retorno à Garagem. Retrato ciano, energia #45F6ED |
 | Astra compacta | Sr. Meeseeks, breve e orientado à tarefa | Sr. Meeseeks |
-| Astra completa | Pessoa-Pássaro / Birdperson, calmo e prático | Sr. Bunda Cagada / Mr. Poopybutthole, afetuoso e reflexivo |
+| Astra completa | Pássaro-Pessoa / Birdperson, calmo e reflexivo | Sr. Bunda Cagada / Mr. Poopybutthole, afetuoso e reflexivo |
 | Interações | Caixa e Meeseeks articulado, filtro Java, currículo, pergunta sobre ROTA. Experimento com Pickle Rick, traje e corrida reversível | Morty vira a placa da recepção. Rick, Morty, nave e janelas compõem a cena. Credencial com links profissionais |
 | Recursos compartilhados | Dossiês, diagramas para projetos sem prévia adequada, Morty nos cards, arquivos de exploração e reprise | Dossiês apresentados como relatórios. TV com canais estáticos Portfólio e GEOSOLAR |
 
@@ -58,4 +58,4 @@ Garagem e Cidadela compartilham a prévia oficial de “Rick and Morty Theme”.
 
 ## Além da Curva Finita Central
 
-O comando local da Astra abre `beyond-curve`. Depois do desbloqueio, o portal amarelo entra no cabeçalho das três dimensões. A mansão recebe a chegada cinematográfica, a conquista Viajante Interdimensional e a paleta grafite e dourada. Rick Maligno e Evil Morty representam a Astra compacta e completa. A música da mansão está ligada à demonstração local, com distribuição pendente. [Especificação](DIMENSION_SPEC.md)
+O comando local da Astra abre `beyond-curve`. Depois do desbloqueio, o portal amarelo entra no cabeçalho das três dimensões. A viagem procedural revela a mansão, que usa a paleta grafite e dourada e concede a conquista Viajante Interdimensional na primeira chegada. O canal da mansão permite rever a sequência completa. Rick Maligno e Evil Morty representam a Astra compacta e completa. A música da mansão está ligada à demonstração local, com distribuição pendente. [Especificação](DIMENSION_SPEC.md)

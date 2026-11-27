@@ -1,5 +1,11 @@
 # Matriz de regressão da Astra
 
+## Fase 02.1 · 27 de novembro de 2026
+
+- **130 testes principais e 16 isolados aprovados.** Passaram também build temporário, typecheck do portal, importação da API e verificação do diff.
+- No navegador, as cinco personas responderam à pergunta de identidade em PT e EN. Uma pergunta explícita sobre tecnologia devolveu a explicação sobre a Astra. Os prompts conversacionais foram verificados com o adaptador de testes do provedor.
+- Os testes exercitam autoria preservada, cancelamento, respostas tardias, tradução, recarga, ida e volta, imagem da mansão indisponível, movimento reduzido e ganho de áudio relativo ao volume escolhido.
+
 ## Fase 02 · 27 de novembro de 2026
 
 - **128 testes principais e 16 isolados aprovados.** O endpoint foi importado em um processo Node comum. O typecheck do portal, o build temporário e a checagem do diff passaram.

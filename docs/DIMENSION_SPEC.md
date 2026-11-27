@@ -4,7 +4,7 @@ Fase 02 do tema Rick and Morty. A dimensão `beyond-curve` usa o mesmo seletor, 
 
 | Dimensão | ID | Astra compacta | Astra completa |
 | --- | --- | --- | --- |
-| Garagem do Rick | `lab` | Sr. Meeseeks | Pessoa-Pássaro / Birdperson |
+| Garagem do Rick | `lab` | Sr. Meeseeks | Pássaro-Pessoa / Birdperson |
 | Cidadela dos Ricks | `corrupted` | Sr. Meeseeks | Sr. Bunda Cagada / Mr. Poopybutthole |
 | Além da Curva Finita Central | `beyond-curve` | Rick Maligno / Evil Rick | Evil Morty |
 
@@ -18,13 +18,13 @@ Fase 02 do tema Rick and Morty. A dimensão `beyond-curve` usa o mesmo seletor, 
 
 ## Cena, áudio e interface
 
-A estreia dura cerca de 3,95 s. A detecção e a instabilidade precedem a Curva, a ruptura, o portal, a travessia e o plano da mansão com o título. Uma revisita dura cerca de 850 ms. Escape, o botão de pular, aba em segundo plano e ativação de movimento reduzido concluem a chegada. O diálogo devolve o foco ao controle de origem. Alterações de viewport ajustam o enquadramento sem reiniciar a sequência. A arte ausente cede ao fundo de contraste. Com movimento reduzido ou efeitos pausados, a troca é direta.
+A estreia dura 6,7 s. Uma câmera em Canvas 2D avança pelos anéis e pelas partículas projetados em perspectiva. Fendas luminosas acompanham a abertura da barreira. A luz do túnel muda à medida que o visitante se aproxima do portal, e uma íris revela o único cenário da sequência, a mansão. Uma revisita pelo cabeçalho dura cerca de 1,18 s. **Rever travessia**, no canal da mansão, abre a versão completa novamente. Escape, o botão de pular, aba em segundo plano, perda do contexto do Canvas e ativação de movimento reduzido concluem a chegada. O diálogo devolve o foco ao controle de origem. A escala e a quantidade de elementos variam com a tela e o dispositivo. A arte ausente cede ao fundo de contraste. Com movimento reduzido ou efeitos pausados, a troca é direta.
 
-A mansão usa o WebP local de 1125 × 603 com enquadramento CSS para retrato. O degradê protege títulos e painéis. A paleta combina `#09090D`, `#13131A`, `#1C1B23` e o dourado `#EAB308`, com `#FFD84A` reservado à energia do portal. O portal do cabeçalho usa o PNG transparente compacto de 123 × 128 e tem alternativa CSS. A moldura do retrato usa a variante procedural dourada. Os avatares temáticos novos são estáticos e têm alternativa visual em caso de erro.
+A mansão usa o WebP local de 1125 × 603 com enquadramento CSS para retrato. O degradê protege títulos e painéis. A paleta combina `#09090D`, `#13131A`, `#1C1B23` e o dourado `#EAB308`, com `#FFD84A` reservado à energia do portal. O portal do cabeçalho usa o PNG transparente compacto de 123 × 128 e tem alternativa CSS. A moldura do retrato reutiliza o SVG procedural com correntes em contrarrotação, partículas douradas e pulsação no halo. O retrato mantém a geometria em uma camada própria. A animação contínua cede fora da viewport, em aba oculta, quando pausada ou com preferência por movimento reduzido. Os avatares temáticos são estáticos com alternativa visual em caso de erro.
 
 Nas superfícies opacas, o texto principal tem contraste de 15,36:1 e o secundário de 7,89:1 sobre os cards. O anel amarelo tem 13,36:1 sobre a superfície escura. Portfólio e Astra completa foram medidos nas seis larguras solicitadas, de 375 a 1920 px.
 
-O arquivo local **For the Damaged Coda**, de Blonde Redhead, está no caminho `public/rick-assets/audio/evil-morty-30s.mp3`. O player sincroniza a tentativa inicial de áudio com a ação do visitante no ambiente de desenvolvimento. Volume zero, pausa explícita e ausência de gesto podem deixar a travessia silenciosa. A faixa toca uma vez, usa os controles de som existentes e é interrompida ao sair da dimensão. A compilação de produção sinaliza a faixa como indisponível.
+O arquivo local **For the Damaged Coda**, de Blonde Redhead, está no caminho `public/rick-assets/audio/evil-morty-30s.mp3`. O player sincroniza a tentativa inicial com o gesto do visitante no ambiente de desenvolvimento. O ganho relativo começa em 48%, sobe a 78% na ruptura e chega ao limite escolhido pelo visitante no túnel. Volume zero, pausa explícita e ausência de gesto podem deixar a travessia silenciosa. A faixa toca uma vez, usa os controles existentes e é interrompida ao sair da dimensão. A compilação de produção sinaliza a faixa como indisponível.
 
 ## Mídia e distribuição
 

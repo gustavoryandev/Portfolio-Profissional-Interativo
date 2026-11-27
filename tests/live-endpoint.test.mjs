@@ -549,16 +549,28 @@ test('model discovery excludes unapproved models and quota stops generation imme
 
 test('themed identity and deterministic resources work without a model and retain markers', async () => {
   process.env.GEMINI_API_KEY = '';
-  for (const [dimension, surface, name] of [
-    ['lab', 'compact', 'Sr. Meeseeks'], ['lab', 'full', 'Pessoa-Pássaro'], ['corrupted', 'full', 'Sr. Bunda Cagada'],
-    ['beyond-curve', 'compact', 'Rick Maligno'], ['beyond-curve', 'full', 'Evil Morty'],
+  for (const [dimension, surface, pt, en] of [
+    ['lab', 'compact', 'Sr. Meeseeks', 'Mr. Meeseeks'], ['lab', 'full', 'Pássaro-Pessoa', 'Birdperson'],
+    ['corrupted', 'full', 'Sr. Bunda Cagada', 'Mr. Poopybutthole'],
+    ['beyond-curve', 'compact', 'Rick Maligno', 'Evil Rick'], ['beyond-curve', 'full', 'Evil Morty', 'Evil Morty'],
   ]) {
     const appearance = { theme: 'rick-morty', dimension };
-    const identity = response();
-    await handler({ method: 'POST', body: { userMessage: 'Quem é você?', lang: 'pt', surface, appearance } }, identity);
-    assert.equal(identity.code, 200);
-    assert.ok(identity.body.response.includes(name));
-    assert.match(identity.body.translationKey, /^rick\./);
+    for (const [lang, name, introduction, technology] of [
+      ['pt', pt, 'Quem é você?', 'Qual tecnologia está por trás do personagem?'],
+      ['en', en, 'Who are you?', 'What technology is behind this character?'],
+    ]) {
+      const identity = response();
+      await handler({ method: 'POST', body: { userMessage: introduction, lang, surface, appearance } }, identity);
+      assert.equal(identity.code, 200);
+      assert.ok(identity.body.response.includes(name));
+      assert.doesNotMatch(identity.body.response, /\bAstra\b/);
+      assert.match(identity.body.translationKey, /^rick\..*\.identity$/);
+      const disclosure = response();
+      await handler({ method: 'POST', body: { userMessage: technology, lang, surface, appearance } }, disclosure);
+      assert.equal(disclosure.code, 200);
+      assert.match(disclosure.body.response, /persona.*Astra/);
+      assert.equal(disclosure.body.translationKey, 'rick.assistant.technology');
+    }
     const version = response();
     await handler({ method: 'POST', body: { userMessage: 'Which version of Astra am I using?', lang: 'en', surface, appearance } }, version);
     assert.match(version.body.translationKey, new RegExp(`surface.${surface}$`));

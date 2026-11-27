@@ -263,22 +263,36 @@ test('a direct full visit restores the dimension and renders historical Squanchy
   assert.equal($('img[data-astra-character="squanchy"]')?.getAttribute('src'), '/rick-assets/avatar-squanchy.webp');
 });
 
-test('a missing cinematic image and Escape still settle the trip and grant one arrival', async () => {
+test('one moving canvas survives a missing mansion image and Escape settles the trip', async t => {
+  let rendered = 0;
+  const noop = () => {};
+  t.mock.method(window.HTMLCanvasElement.prototype, 'getContext', () => ({
+    clearRect() { rendered++; },
+    setTransform: noop, beginPath: noop, closePath: noop, moveTo: noop, lineTo: noop,
+    stroke: noop, fill: noop, fillRect: noop, quadraticCurveTo: noop,
+    createRadialGradient: () => ({ addColorStop: noop }),
+  }));
   await mount('en', '/chat', { dimension: 'corrupted', reduce: false });
   await submit('WubbaLubbaDubDub');
   const dialog = $('.beyond-transit[open]');
   assert.ok(dialog);
+  assert.equal(dialog.dataset.renderer, 'canvas');
+  const canvas = dialog.querySelector('canvas');
+  const initialFrames = rendered;
   assert.equal(document.documentElement.dataset.dimension, 'corrupted');
   assert.equal($('.beyond-achievement'), null);
   assert.equal(window.localStorage.getItem('rick-morty-beyond-unlocked'), '1');
   const portal = $('.astra-full .dimension-portal-gold');
   await click(portal);
   assert.equal($('.beyond-transit[open]'), dialog);
-  await act(async () => { await new Promise(resolve => setTimeout(resolve, 830)); });
-  const curve = dialog.querySelector('img');
-  assert.match(curve.src, /central-finite-curve/);
-  await act(async () => curve.dispatchEvent(new window.Event('error')));
-  assert.equal(curve.hidden, true);
+  await act(async () => { await new Promise(resolve => setTimeout(resolve, 1060)); });
+  assert.equal(dialog.dataset.shot, 'curve');
+  assert.equal(dialog.querySelector('canvas'), canvas);
+  assert.ok(rendered > initialFrames);
+  const mansion = dialog.querySelector('img');
+  assert.match(mansion.src, /evil-morty-mansion/);
+  await act(async () => mansion.dispatchEvent(new window.Event('error')));
+  assert.equal(mansion.hidden, true);
   await act(async () => dialog.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true })));
   assert.equal($('.beyond-transit'), null);
   assert.equal(document.documentElement.dataset.dimension, 'beyond-curve');
@@ -409,7 +423,7 @@ test('late JSON after stopping cannot change the theme or clear the replacement 
   await send('Troque o tema.', { preview: false });
   await click($('.chat-form [aria-label="Parar resposta"]'));
   await until(() => completedReply('Resposta interrompida.'));
-  assert.equal(completedReply('Resposta interrompida.').querySelector('.astra-label span').textContent, 'Pessoa-Pássaro');
+  assert.equal(completedReply('Resposta interrompida.').querySelector('.astra-label span').textContent, 'Pássaro-Pessoa');
   const replacement = await send('Responda de novo.');
   await act(async () => late(Response.json({ response: 'STALE_REPLY', actions: [{ type: 'theme.set', target: 'dark' }] })));
   assert.equal(document.documentElement.dataset.theme, 'rick-morty');
@@ -443,9 +457,9 @@ test('an error is displayed in the current locale without changing the request o
   await send('Explain what happened.', { preview: false });
   await act(async () => i18n.changeLanguage('pt'));
   await act(async () => fail(Response.json({ error: 'Temporarily unavailable' }, { status: 503 })));
-  await until(() => completedReply('Não foi possível processar'));
+  await until(() => completedReply('A resposta ficou incompleta.'));
   assert.equal(requests[0].lang, 'en');
-  assert.equal(completedReply('Não foi possível processar').querySelector('.astra-label span').textContent, 'Pessoa-Pássaro');
+  assert.equal(completedReply('A resposta ficou incompleta.').querySelector('.astra-label span').textContent, 'Pássaro-Pessoa');
   assert.equal(translationRequests.length, 0);
 });
 

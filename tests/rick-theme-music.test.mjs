@@ -108,6 +108,25 @@ test('blocked playback, buffering timeout and media error each allow a retry', a
   player.dispose();
 });
 
+test('cinematic cues ramp relative to the visitor’s volume and never start playback', async () => {
+  const clock = makeClock();
+  const { audio, player } = fixture(null, { clock, volume: 40 });
+  player.setCinematicGain(.48);
+  assert.equal(audio.plays, undefined);
+  await player.play();
+  clock.advance(260);
+  assert.ok(Math.abs(audio.volume - .192) < 1e-6);
+  player.setCinematicGain(.78);
+  clock.advance(520);
+  assert.ok(Math.abs(audio.volume - .312) < 1e-6);
+  player.setVolume(0);
+  player.setCinematicGain(1);
+  clock.advance(520);
+  assert.equal(audio.volume, 0);
+  assert.equal(audio.plays, 1);
+  player.dispose();
+});
+
 test('the local transition track can fail without restarting or looping', async () => {
   const clock = makeClock();
   const { player, statuses, audio } = fixture(() => Promise.reject(new Error('missing media')),
