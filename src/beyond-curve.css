@@ -134,6 +134,24 @@
   background: linear-gradient(90deg, #09090df5, #09090daa 37%, #09090d36 74%),
     linear-gradient(0deg, #09090df2, transparent 52%, #09090d50);
 }
+@media (width >= 900px) {
+  :root[data-dimension="beyond-curve"] .portfolio-hero {
+    grid-template: "presentation portrait" auto / minmax(0, 1.25fr) minmax(0, .9fr);
+    align-items: center;
+    align-content: center;
+    gap: clamp(24px, 5vw, 76px);
+    min-height: calc(100svh - var(--portfolio-header-height, 80px));
+    padding-block: clamp(22px, 3.4svh, 42px);
+  }
+  :root[data-dimension="beyond-curve"] .portfolio-hero .hero-profile {
+    align-self: center;
+    justify-self: center;
+    width: min(100%, clamp(280px, 47svh, 426px));
+  }
+  :root[data-dimension="beyond-curve"] .portfolio-hero h1 {
+    font-size: clamp(56px, min(8vw, 11svh), 108px);
+  }
+}
 :root[data-dimension="beyond-curve"] .dimension-label .beyond-location {
   border-inline-start: 2px solid var(--primary);
   padding: 6px 10px;

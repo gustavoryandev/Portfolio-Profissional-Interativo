@@ -122,7 +122,7 @@ export default function PortfolioPage({ activeSection, projectFocus, onSectionLi
           {secret && <CitadelWindows dock />}
           {!crossing && !introScene && (secret || !shipDeparted) && <PortfolioShip docked={secret} onDepart={markShipDeparted} visible={heroActive} />}
         </div>}
-        <ScrollReveal delay={.08} className="hero-profile glass-panel">
+        <ScrollReveal delay={beyond ? 0 : .08} className="hero-profile glass-panel">
           {dimensional && !beyond && <div className="dimension-scan-label">{t(secret ? 'rick.citizen' : 'rick.researcher')}<span>{t(secret ? 'rick.dockOnline' : 'rick.stable')}</span></div>}
           <div className="portrait-orbit" aria-hidden="true" />
           {dimensional ? <PortraitPortal variant={beyond ? BEYOND_CURVE : secret ? 'citadel' : 'garage'} effectsPaused={effectsPaused || beyond}>{portrait}</PortraitPortal> : portrait}
