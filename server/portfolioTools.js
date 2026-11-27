@@ -1,4 +1,5 @@
 import { ACTION_TARGETS, validateActions } from '../src/services/portfolioActions.js';
+import { playgroundExamples } from '../src/data/playgroundExamples.js';
 
 const string = { type: 'STRING' };
 const object = (properties, required) => ({ type: 'OBJECT', properties, required });
@@ -15,6 +16,7 @@ const editTool = {
   parameters: object({ edits: array(object({ find: string, replace: string }, ['find', 'replace'])), runAfter: { type: 'BOOLEAN' } }, ['edits']),
 };
 const runTool = { name: 'propose_lab_run', description: 'Ask the user to review and run the current code.' };
+const laboratoryProjects = playgroundExamples.map(({ id, pt, en }, index) => `${index + 1}. ${id}: ${pt} / ${en}`).join('\n');
 
 const FULL_ASTRA = '(?:astra completa|versao completa(?: da astra)?|modo completo(?: da astra)?|full astra|astra full|full (?:version|mode)(?: of astra)?)';
 const OPEN_FULL = new RegExp('^(?:(?:por favor|please)[, ]+)?(?:(?:voce pode|pode|poderia|can you|could you|quero|i want to) )?'
@@ -53,6 +55,10 @@ For explicit commands to operate the portfolio, call portfolio_actions once, in 
 Allowed type and target pairs: ${JSON.stringify(Object.fromEntries(Object.entries(ACTION_TARGETS).filter(([, targets]) => targets?.[0])))}
 project.open takes one project ID from this catalog: ${JSON.stringify(projects.map(({ id, titulo }) => ({ id, title: titulo })))}
 Open the actual portfolio sections using navigate. To show the Laboratory, use navigate with laboratorio; lab.language and lab.example select the editor's language and example without resetting drafts.
+The Laboratory shows these project demos in order:
+${laboratoryProjects}
+Free coding is a separate mode, not a project. Each project demo is available in Python, JavaScript and Java. The editor may contain a visitor's draft based on a demo; its contents are not the source files of a repository.
+If the visitor asks for code by language alone (for example, "Quero o código Python") and neither the request nor recent conversation identifies a task, example, project or the current editor, ask which one they want. Do not select or read the editor on that basis alone. If the visitor explicitly refers to a numbered Laboratory project, use the displayed order above. Use the requested language, or keep the current selection if no language is given. Only state what is in the editor after receiving its snapshot. For a standalone generated example or a language outside the Laboratory, answer in text and distinguish generated code from project source.
 When the current interface is Compact Astra and the user asks to open or switch to Full Astra, use astra.openFull with no target. When already in Full Astra, say so if asked to switch there.
 For a request to read, explain, debug or change the current editor, use lab.read as the last step, after any requested selections. Use target code for edits and explanations, result for output alone, or both when diagnosing a run. This fetches the live snapshot for a follow-up model turn. Always read fresh before proposing a custom change. If the user asks to change then run, end this first plan with lab.read; execution can be proposed together with the edit. For execution alone use lab.run as the last step, with no target. Use lab.stop without a target to stop an ongoing run. To restore the original example, use lab.reset as the last step, with no target (or with target run if explicitly asked to run after resetting); it requires review.
 Use metrics.open for GitHub and/or WakaTime dashboards. Use a detail target only when asked for details.
