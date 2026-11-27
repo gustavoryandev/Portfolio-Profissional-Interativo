@@ -1,6 +1,6 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { REDUCED_MOTION_QUERY } from '../../motionPreferences';
+import { REDUCED_MOTION_QUERY, RICK_ARRIVAL_DURATION } from '../../motionPreferences';
 import { BEYOND_CURVE } from '../../data/rickDimensions';
 import SceneBackdrop from './SceneBackdrop';
 import { preloadScene } from './sceneAssets';
@@ -14,8 +14,12 @@ export default function BeyondCurveTransit({ trip, onArrive, onFinish, onMusicCu
   const skip = useRef(null);
   const finish = useRef(null);
   const incoming = trip.destination === BEYOND_CURVE;
+  const dock = trip.destination === 'corrupted';
+  const backdrop = incoming ? 'mansion' : dock ? 'dock' : 'garage';
+  const portal = incoming || trip.origin === BEYOND_CURVE ? undefined : trip.origin;
   const extended = incoming && trip.extended;
-  const route = incoming ? extended ? curveFlightRoutes.discovery : curveFlightRoutes.revisit : curveFlightRoutes.departure;
+  const route = extended ? curveFlightRoutes.discovery
+    : trip.origin === BEYOND_CURVE && !incoming ? curveFlightRoutes.departure : curveFlightRoutes.revisit;
   const [shot, setShot] = useState(extended ? 'instability' : 'portal');
   const [fallback, setFallback] = useState(false);
 
@@ -27,10 +31,11 @@ export default function BeyondCurveTransit({ trip, onArrive, onFinish, onMusicCu
     let timer;
     let active = true;
     let arrived = false;
-    const arrive = () => {
+    let presentationStart;
+    const arrive = (withDock = false) => {
       if (arrived) return;
       arrived = true;
-      onArrive(trip.destination);
+      onArrive(trip.destination, withDock);
     };
     const settle = interrupted => {
       if (!active) return;
@@ -53,7 +58,27 @@ export default function BeyondCurveTransit({ trip, onArrive, onFinish, onMusicCu
     if (node.showModal) node.showModal();
     else node.setAttribute('open', '');
     skip.current.focus({ preventScroll: true });
-    if (!incoming) void preloadScene(trip.destination === 'lab' ? 'labExterior' : 'citadelExterior');
+    if (!incoming) void preloadScene(dock ? 'citadelExterior' : 'labExterior');
+    if (dock) void preloadScene('citadel', 'high');
+
+    function present(now) {
+      if (presentationStart !== undefined) return;
+      presentationStart = now;
+      setShot(backdrop);
+      arrive();
+    }
+
+    function finishFlight(now) {
+      if (dock) {
+        arrive(true);
+        settle(false);
+        return;
+      }
+      present(now);
+      stage.style.visibility = 'hidden';
+      // Keep the overlapping reveal at its original speed and time only the destination shot.
+      timer = window.setTimeout(() => settle(false), Math.max(0, presentationStart + RICK_ARRIVAL_DURATION - now));
+    }
 
     const context = stage.getContext('2d');
     let viewWidth = 0;
@@ -74,7 +99,7 @@ export default function BeyondCurveTransit({ trip, onArrive, onFinish, onMusicCu
         context.setTransform(density, 0, 0, density, 0, 0);
         dirty = false;
       }
-      paintCurveFlight(context, viewWidth, viewHeight, progress, lowQuality);
+      paintCurveFlight(context, viewWidth, viewHeight, progress, lowQuality, portal);
     }
     if (context) {
       let cueIndex = curveFlightCues.findLastIndex(cue => route.from >= cue.progress);
@@ -85,21 +110,22 @@ export default function BeyondCurveTransit({ trip, onArrive, onFinish, onMusicCu
         const fraction = Math.min(1, Math.max(0, (now - start) / route.duration));
         const progress = route.from + (route.to - route.from) * fraction;
         paint(progress);
+        if (dock && progress >= .78) arrive(true);
         while (curveFlightCues[cueIndex + 1]?.progress <= progress) {
           const cue = curveFlightCues[++cueIndex];
-          setShot(cue.shot);
           if (extended && cue.volume) onMusicCue?.(cue.volume);
-          if (cue.shot === 'mansion') arrive();
+          if (cue.shot === 'mansion') {
+            if (!dock) present(now);
+          } else if (extended) setShot(cue.shot);
         }
-        if (fraction === 1) settle(false);
+        if (fraction === 1) finishFlight(now);
         else frame = requestAnimationFrame(advance);
       }
       frame = requestAnimationFrame(advance);
       window.addEventListener('resize', resize);
     } else {
       setFallback(true);
-      if (incoming) { setShot('mansion'); arrive(); }
-      timer = setTimeout(() => settle(false), 700);
+      finishFlight(window.performance.now());
     }
     preference?.addEventListener('change', onPreference);
     stage.addEventListener('contextlost', interrupt);
@@ -120,21 +146,23 @@ export default function BeyondCurveTransit({ trip, onArrive, onFinish, onMusicCu
       const opener = returnFocus.current;
       if (restore && opener?.isConnected) opener.focus({ preventScroll: true });
     };
-  }, [extended, incoming, onArrive, onFinish, onMusicCue, route, trip]);
+  }, [backdrop, dock, extended, incoming, onArrive, onFinish, onMusicCue, portal, route, trip]);
 
-  return <dialog ref={dialog} className="beyond-transit" data-shot={shot} data-renderer={fallback ? 'fallback' : 'canvas'}
+  return <dialog ref={dialog} className="beyond-transit" data-shot={shot} data-destination={trip.destination}
+    data-portal={portal ?? BEYOND_CURVE} data-renderer={fallback ? 'fallback' : 'canvas'}
     aria-label={t('rick.beyond.scenes.transit')}
     onCancel={event => { event.preventDefault(); finish.current?.(); }}
     onKeyDown={event => {
       if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); finish.current?.(); }
     }}>
     <div className="beyond-transit-field" aria-hidden="true">
-      {incoming && <SceneBackdrop scene="mansion" className="beyond-transit-destination" />}
+      <SceneBackdrop scene={backdrop} className="beyond-transit-destination" />
       <canvas ref={canvas} className="beyond-transit-canvas" />
     </div>
     <div className="beyond-transit-caption">
-      {shot === 'mansion' ? <><p>{t('rick.beyond.scenes.mansion')}</p><h2>{t('rick.beyond.name')}</h2></> :
-        <p>{t(`rick.beyond.scenes.${shot}`)}</p>}
+      {shot === 'mansion' ? <><p>{t('rick.beyond.scenes.mansion')}</p><h2>{t('rick.beyond.name')}</h2></>
+        : shot === 'garage' ? <h2>{t('rick.garageName')}</h2>
+          : <p>{t(portal ? 'rick.beyond.scenes.transit' : `rick.beyond.scenes.${shot}`)}</p>}
     </div>
     <button ref={skip} type="button" className="beyond-transit-skip" onClick={() => finish.current?.()}>
       {t('rick.beyond.skip')}

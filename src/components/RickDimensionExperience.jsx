@@ -121,12 +121,14 @@ export function CitadelWindows({ dock = false }) {
   </div>;
 }
 
-export function DimensionalIntro({ scene, onDismiss }) {
+export function DimensionalIntro({ scene, covered, onDismiss }) {
   const { t } = useTranslation();
   const skip = useRef(null);
   const duration = RICK_INTRO_DURATION[scene];
   const assets = useSceneAssets(scene);
-  useLayoutEffect(() => { skip.current?.focus({ preventScroll: true }); }, []);
+  useLayoutEffect(() => {
+    if (!covered) skip.current?.focus({ preventScroll: true });
+  }, [covered]);
   useEffect(() => {
     if (!scene) return;
     const motion = window.matchMedia?.(REDUCED_MOTION_QUERY);
@@ -134,10 +136,10 @@ export function DimensionalIntro({ scene, onDismiss }) {
     const onPreference = () => { if (motion?.matches) onDismiss(); };
     const onKey = event => { if (event.key === 'Escape') onDismiss(); };
     const onVisibility = () => { if (document.hidden) onDismiss(); };
-    const timer = assets === 'ready' ? window.setTimeout(onDismiss, duration) : null;
+    const timer = assets === 'ready' && !covered ? window.setTimeout(onDismiss, duration) : null;
     motion?.addEventListener('change', onPreference);
     window.addEventListener('keydown', onKey);
-    window.addEventListener('resize', onDismiss);
+    if (!covered) window.addEventListener('resize', onDismiss);
     document.addEventListener('visibilitychange', onVisibility);
     return () => {
       window.clearTimeout(timer);
@@ -146,7 +148,7 @@ export function DimensionalIntro({ scene, onDismiss }) {
       window.removeEventListener('resize', onDismiss);
       document.removeEventListener('visibilitychange', onVisibility);
     };
-  }, [scene, duration, onDismiss, assets]);
+  }, [scene, duration, onDismiss, assets, covered]);
   const dock = scene === 'citadel';
   function keepControlsInScene(event) {
     if (event.key !== 'Tab') return;
@@ -158,7 +160,8 @@ export function DimensionalIntro({ scene, onDismiss }) {
     }
   }
   return <section className={`dimension-intro ${dock ? 'intro-dock' : 'intro-garage'}`} role="dialog" aria-modal="true" onKeyDown={keepControlsInScene}
-    data-assets={assets} data-rick-motion style={{ '--scene-duration': `${duration}ms` }} aria-label={dock ? t('rick.dockCamera') : t('rick.garageOpening')}>
+    data-assets={covered && assets === 'ready' ? 'covered' : assets} data-covered={covered || undefined}
+    data-rick-motion style={{ '--scene-duration': `${duration}ms` }} aria-label={dock ? t('rick.dockCamera') : t('rick.garageOpening')}>
     {assets === 'ready' && <><div className="intro-illustration" aria-hidden="true">
       <SceneBackdrop scene={dock ? 'dock' : 'garage'} className="intro-backdrop" />
       <div className="intro-garage-door" />

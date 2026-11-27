@@ -58,6 +58,7 @@ export function ThemeProvider({ children }) {
     } catch { return 'lab'; }
   });
   const [introScene, setIntroScene] = useState(null);
+  const tripLocked = useRef(false);
   const [signals, setSignals] = useState({});
   const eggMessage = signals[dimension] ?? '';
   const setEggMessage = message => setSignals(previous => ({ ...previous, [dimension]: message }));
@@ -108,7 +109,7 @@ export function ThemeProvider({ children }) {
     if (seen || garageSeen.current) return;
     garageSeen.current = true;
     try { sessionStorage.setItem('rick-garage-intro-seen', '1'); } catch {}
-    if (window.matchMedia?.(REDUCED_MOTION_QUERY).matches) { markShipDeparted(); return; }
+    if (tripLocked.current || window.matchMedia?.(REDUCED_MOTION_QUERY).matches) { markShipDeparted(); return; }
     setIntroScene('garage');
   }, [theme, dimension, markShipDeparted]);
   useEffect(() => {
@@ -129,7 +130,6 @@ export function ThemeProvider({ children }) {
   const [achievementVisible, setAchievementVisible] = useState(false);
   const earnedBeyond = useRef(progress.found.includes(BEYOND_CURVE));
   const crossing = Boolean(trip) || introScene === 'citadel';
-  const tripLocked = useRef(false);
   const scrollPosition = useRef(null);
   const palette = themePalettes.find(option => option.id === theme);
   const darkMode = !palette.light;
@@ -246,12 +246,9 @@ export function ThemeProvider({ children }) {
       return true;
     }
     const button = event?.currentTarget;
-    const bounds = (button?.querySelector('.portal-art') ?? button)?.getBoundingClientRect();
     setIntroScene(null);
     setTrip({ destination, extended, origin: selectedDimension.current,
       opener: button ?? document.getElementById('chat-input'),
-      x: bounds ? bounds.left + bounds.width / 2 : window.innerWidth / 2,
-      y: bounds ? bounds.top + bounds.height / 2 : window.innerHeight / 2,
     });
     return true;
   }, [arrive, effectsPaused, finishTrip, introScene, markShipDeparted, selectMusic]);
@@ -324,7 +321,7 @@ export function ThemeProvider({ children }) {
   return (
       <ThemeContext.Provider value={{ musicStatus, musicVolume, changeMusicVolume, toggleMusic, effectsPaused, changeEffectsPaused, theme, darkMode, setTheme, anthemPlaying, toggleAnthem, crossDimension, crossing, dimension, beyondUnlocked, discoverBeyond, achievementVisible, eggMessage, setEggMessage, shipDeparted, markShipDeparted, introScene, replayIntro, replayBeyond, progress, enableExploration, resetExploration, recordDiscovery }}>
       {children}
-      {introScene && <DimensionalIntro key={introScene} scene={introScene} onDismiss={dismissIntro} />}
+      {introScene && <DimensionalIntro key={introScene} scene={introScene} covered={Boolean(trip)} onDismiss={dismissIntro} />}
       {trip && <DimensionTransit trip={trip} onArrive={arrive} onFinish={finishTrip} onMusicCue={setMusicCue} />}
     </ThemeContext.Provider>
   );

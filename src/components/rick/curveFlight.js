@@ -28,6 +28,10 @@ const gold = [255, 197, 55];
 const indigo = [122, 113, 255];
 const ice = [107, 194, 246];
 const energy = [255, 241, 170];
+const portalTints = {
+  lab: { hue: [118, 225, 70], light: [218, 255, 155], core: [43, 83, 21], mist: [18, 40, 22] },
+  corrupted: { hue: [47, 220, 225], light: [178, 255, 247], core: [14, 69, 86], mist: [11, 33, 51] },
+};
 const tint = (color, alpha) => `rgba(${color.join(',')},${alpha})`;
 const blendColor = (a, b, amount) => a.map((channel, index) => Math.round(mix(channel, b[index], amount)));
 
@@ -62,13 +66,11 @@ function traceRidge(ctx, points) {
 }
 
 function drawTunnel(ctx, camera, lowQuality) {
-  const { x, y, focal, clock, distance, visible, golden, dissolve } = camera;
+  const { x, y, focal, clock, distance, visible, golden, dissolve, hue, highlight } = camera;
   const samples = lowQuality ? 28 : 44;
   const depthCount = lowQuality ? 14 : 22;
   const step = lowQuality ? .76 : .61;
   const baseIndex = Math.floor(distance / step);
-  const hue = blendColor(indigo, gold, golden);
-  const highlight = blendColor(ice, energy, golden);
   const rings = [];
   for (let i = depthCount; i >= 0; i--) {
     const at = (baseIndex + i) * step;
@@ -134,8 +136,7 @@ function drawTunnel(ctx, camera, lowQuality) {
 }
 
 function drawParticles(ctx, camera, lowQuality, progress) {
-  const { x, y, focal, clock, distance, golden, dissolve } = camera;
-  const hue = blendColor(ice, energy, golden);
+  const { x, y, focal, clock, distance, golden, dissolve, highlight } = camera;
   const speed = .008 + .045 * ease(.05, .59, progress) * (1 - ease(.72, 1, progress));
   const count = lowQuality ? 66 : 126;
   for (let index = 0; index < count; index++) {
@@ -145,7 +146,7 @@ function drawParticles(ctx, camera, lowQuality, progress) {
     const dx = Math.cos(angle) * radius;
     const dy = Math.sin(angle) * radius * .83;
     const alpha = (.38 + noise(index + 240) * .48) * (1 - Math.min(.9, depth / 27)) * dissolve;
-    ctx.strokeStyle = tint(hue, alpha);
+    ctx.strokeStyle = tint(highlight, alpha);
     ctx.lineWidth = .6 + (1 - depth / 24) * 1.5;
     ctx.beginPath();
     ctx.moveTo(x + dx * (1 - speed * (4 - depth / 9)), y + dy * (1 - speed * (4 - depth / 9)));
@@ -227,10 +228,11 @@ function drawBreach(ctx, camera, progress, lowQuality) {
   }
 }
 
-export function paintCurveFlight(ctx, width, height, progress, lowQuality) {
+export function paintCurveFlight(ctx, width, height, progress, lowQuality, portal) {
   const clock = clamp(progress);
   const revolve = ease(.015, .24, clock);
   const golden = ease(.39, .64, clock);
+  const palette = portalTints[portal];
   const landing = ease(.78, 1, clock);
   const focus = Math.min(width, height);
   const x = width * (.5 + Math.sin(clock * 9.4) * .09 * (1 - landing));
@@ -238,19 +240,21 @@ export function paintCurveFlight(ctx, width, height, progress, lowQuality) {
   const focal = Math.max(focus * .89, Math.hypot(width, height) * .335);
   const distance = .8 * clock + 19 * ease(.04, .91, clock);
   const camera = { x, y, focal, clock, distance, golden,
+    hue: palette?.hue ?? blendColor(indigo, gold, golden),
+    highlight: palette?.light ?? blendColor(ice, energy, golden),
     visible: (.14 + .86 * revolve) * (1 - .13 * ease(.47, .54, clock)), dissolve: 1 - landing };
 
   ctx.clearRect(0, 0, width, height);
   const atmosphere = ctx.createRadialGradient(x, y, 0, x, y, focal * 1.85);
-  atmosphere.addColorStop(0, tint(blendColor([35, 27, 85], [88, 51, 9], golden), 1));
-  atmosphere.addColorStop(.45, tint(blendColor([21, 14, 46], [42, 26, 14], golden), 1));
+  atmosphere.addColorStop(0, tint(palette?.core ?? blendColor([35, 27, 85], [88, 51, 9], golden), 1));
+  atmosphere.addColorStop(.45, tint(palette?.mist ?? blendColor([21, 14, 46], [42, 26, 14], golden), 1));
   atmosphere.addColorStop(1, '#09090d');
   ctx.fillStyle = atmosphere;
   ctx.fillRect(0, 0, width, height);
   ctx.lineJoin = 'round';
   ctx.lineCap = 'round';
   drawTunnel(ctx, camera, lowQuality);
-  drawBreach(ctx, camera, clock, lowQuality);
+  if (!palette) drawBreach(ctx, camera, clock, lowQuality);
 
   if (landing > 0) {
     ctx.globalCompositeOperation = 'destination-out';

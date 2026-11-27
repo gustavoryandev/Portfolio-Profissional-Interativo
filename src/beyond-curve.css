@@ -57,6 +57,7 @@
   object-fit: cover;
   object-position: 62% center;
 }
+.beyond-transit[data-destination="corrupted"] .beyond-transit-destination > img { object-position: center; }
 .beyond-transit[data-renderer="fallback"] .beyond-transit-canvas { display: none; }
 .beyond-transit-field::after {
   content: '';
@@ -92,6 +93,10 @@
   background: #13131a;
 }
 .beyond-transit-skip:focus-visible { outline: 2px solid #ffd84a; outline-offset: 3px; }
+
+.dimension-intro[data-covered] *,
+.dimension-intro[data-covered] *::before,
+.dimension-intro[data-covered] *::after { animation-play-state: paused; }
 
 .beyond-achievement-region {
   position: fixed;
