@@ -31,6 +31,10 @@ Cliente e servidor resolvem os nomes a partir das chaves `rick.<personaId>.name`
 
 Pessoa-Pássaro usa o ID histórico `birdperson`. O cabeçalho, o canal, a entrada completa, a saudação e as sugestões usam textos complementares em PT e EN. Espera e erro local obtêm o perfil pelo autor do turno. As perguntas diretas de identidade recebem a fala do personagem. Perguntas expressas sobre a tecnologia usam `rick.assistant.technology`, com a explicação da infraestrutura compartilhada. Ambas as rotas diretas funcionam no endpoint local. O prompt conversacional preserva a voz e a transparência junto das ferramentas e do contexto profissional.
 
+## Personas de O Assalto
+
+O tema `la-casa-de-papel-dark` resolve `berlin` na compacta e `professor` na completa. A dimensão fica reservada ao contrato Rick. Os textos de La Casa usam `heistPersonas.<personaId>` e os assets têm caminhos próprios. Trocar idioma, superfície ou tema preserva o ID, avatar e autoria de cada resposta. A variante Light terá os mesmos perfis quando entrar no registro de temas. [Tema](MONEY_HEIST_SPEC.md)
+
 ## Como estender o contrato
 
 1. Estender o resolvedor compartilhado `assistantPersonaId` para a combinação aprovada de tema, dimensão e superfície. O servidor resolve a mesma combinação permitida a partir de `appearance` e `surface`. Instruções e nomes arbitrários do cliente seguem fora desse contrato.

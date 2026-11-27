@@ -1,5 +1,11 @@
 # Passagem de sessão do portfólio
 
+## Fase 03 em 27 de novembro de 2026
+
+La Casa de Papel — O Assalto está em `codex/la-casa-de-papel-dark`, worktree independente baseada em `2e84d2b`. A demonstração em `127.0.0.1:5177` usa a Casa da Moeda noturna, a máscara no cabeçalho, o PhotoReveal com a candidata autorizada para uso local, Berlim e Professor. A máscara permite rever a abertura e o Registro da operação abre projetos e laboratório. [Portfólio](http://127.0.0.1:5177/) · [Professor](http://127.0.0.1:5177/chat)
+
+A integração aguarda a conclusão da Fase 02.2 e a aprovação das duas tarefas. O Plano é a próxima fase obrigatória após a aprovação de O Assalto. O mapa de arquivos compartilhados, a matriz de validação e as pendências de mídia estão na especificação. [O Assalto](MONEY_HEIST_SPEC.md) · [PhotoReveal](HEIST_PORTRAIT_HANDOFF.md)
+
 ## Pendências concluídas na Fase 02.1
 
 A revisão foi retomada em `codex/rick-morty-phase-02` a partir de `19c1a93`. A demonstração local está aberta na mansão em português e aguarda a aprovação visual. [Abrir demonstração](http://localhost:5176/)

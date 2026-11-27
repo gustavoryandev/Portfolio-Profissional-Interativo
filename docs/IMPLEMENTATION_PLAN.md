@@ -1,6 +1,6 @@
 # Plano de implementação posterior
 
-O plano reúne as propostas da auditoria e as entregas futuras. O handoff acompanha o estado da API, da autoria e da Fase 02.1 de Rick and Morty. **La Casa de Papel Dark e La Casa de Papel Light são entregas obrigatórias**. O início aguarda a aprovação da demonstração local da Fase 02.1. [Estado da implementação](SESSION_HANDOFF.md)
+O plano reúne as propostas da auditoria e as entregas futuras. A Fase 03 implementou La Casa de Papel Dark em worktree separada da Fase 02.2. **La Casa de Papel Light segue como entrega obrigatória**, após a aprovação de O Assalto. [Estado da implementação](SESSION_HANDOFF.md)
 
 ## 1. Recuperar a baseline executável
 
@@ -47,7 +47,7 @@ Repetir ao menos cinco pares frio/quente com a abertura normal, depois com acess
 
 ## 6. Expandir a apresentação sem multiplicar a lógica da Astra
 
-A Fase 02.1 tem cinco personas temáticas ativas em Rick and Morty. Berlim e Professor são as duas personas previstas para as variantes Dark e Light de La Casa de Papel.
+A Fase 02.1 tem cinco personas temáticas ativas em Rick and Morty. A Fase 03 usa Berlim e Professor em O Assalto e prepara o reaproveitamento desses IDs em O Plano.
 
 | Cenário | Compacta | Completa | Direção de escrita |
 | --- | --- | --- | --- |
@@ -57,21 +57,21 @@ A Fase 02.1 tem cinco personas temáticas ativas em Rick and Morty. Berlim e Pro
 | La Casa de Papel Dark | **Berlim** | **Professor** | Berlim conciso, teatral e cortês. Professor metódico, com explicações por etapas quando ajudarem. |
 | La Casa de Papel Light | Berlim | Professor | Reaproveitar as mesmas definições e adaptar contraste e estados visuais. |
 
-**Contrato de extensão.** Ampliar o resolvedor compartilhado de `tema × dimensão × superfície`, os perfis permitidos no servidor, nomes reconhecidos, boas-vindas, identidade e avisos PT/EN. Hoje as chaves `rick.<id>`, a instrução que nomeia Rick and Morty, o caminho derivado `/rick-assets/avatar-<id>.webp` e o envio de aparência exclusivo de Rick impedem cadastrar La Casa apenas somando uma linha. Generalizar somente esses pontos. `AssistantPortrait` lê geometria por ID e usa `art.view` diretamente. Cada personagem precisa de geometria própria ou de um caminho explícito para retrato estático. Incluir fallback padrão para combinações desconhecidas e mensagens de sessões antigas.
+**Contrato de extensão.** O resolvedor compartilhado valida tema, dimensão e superfície. La Casa usa `heistPersonas.<id>` e caminhos explícitos para avatares estáticos. Rick conserva combinações dimensionais e o namespace `rick.<id>`. A fase de O Plano inclui a nova variante no registro para habilitar as mesmas personas.
 
 **Terceira dimensão.** `beyond-curve` está implementada dentro de `rick-morty`, com restauração, viagens de ida e volta, travessias em Canvas e chegada à mansão. O modo de movimento reduzido permite troca direta. [Especificação da dimensão](DIMENSION_SPEC.md)
 
 A demonstração local da mansão já usa **For the Damaged Coda**, de Blonde Redhead. A publicação da faixa depende da comprovação da autorização ou de uma alternativa autorizada. [Estado da mídia](DIMENSION_SPEC.md#midia-e-distribuicao) · [Gravadora](https://touchandgorecords.com/products/blonde-redhead-melody-of-certain-damaged-lemons)
 
-**La Casa Dark.** Proposta de ID `la-casa-de-papel-dark`. Migrar `midnight-pink`, `obsidian-gold` e `grafite-coral` diretamente para o novo ID, pois o bootstrap atual resolve apenas um salto. Manter a quantidade de opções ao substituir o slot. Atualizar menu, amostra, tokens, favicon, exemplos do sistema de design, comandos e textos PT/EN. O fundo deve ser o **original já aprovado pelo usuário**. O repositório não identifica inequivocamente esse original. Recuperar caminho ou arquivo e confirmar sua identidade antes de preparar derivações responsivas. Não há motivo para gerar outro fundo com base na referência de Lucas.
+**La Casa Dark.** O Assalto ocupa `la-casa-de-papel-dark`. Os três aliases migram em um salto no bootstrap e nas ações da Astra. O fundo indicado `dark-background.webp` está ligado à hero por enquadramento CSS. [Especificação da Fase 03](MONEY_HEIST_SPEC.md)
 
-**La Casa Light.** Entrega obrigatória após a variante Dark, com os mesmos IDs de persona. Migrar `quartzo-framboesa` diretamente para `la-casa-de-papel-light`, manter classificação clara desde a primeira pintura e testar contraste sobre o fundo, controles e retrato.
+**La Casa Light.** O Plano é entrega obrigatória após aprovação de O Assalto, com os mesmos IDs de persona. Migrar `quartzo-framboesa` diretamente para `la-casa-de-papel-light`, manter classificação clara desde a primeira pintura e testar contraste sobre o fundo, controles e retrato.
 
 ## 7. Fotografia interativa e licença da referência
 
 O endereço publicado indicado devolveu HTTP 404 em requisição direta nesta sessão. A análise da interação baseou-se no repositório de Lucas Dias Melo, revisão `f0970bcfa9daf014806762fcff1d06a2c03ac328`. A foto base e a versão cyber são recortes diferentes. O repositório de referência contém também `public/media/fundo.mp4` e `public/media/fundo-poster.jpg`. São o fundo daquele site, sem identificação como o arquivo aprovado para La Casa. O ponteiro inclina a moldura por variáveis CSS. Um canvas 2D constrói uma máscara com pincel radial suave e inércia. A composição apaga o rastro aos poucos e revela a segunda fotografia apenas na área pintada. Toque amplia a região de revelação. O loop cessa quando o rastro termina, limita DPR a 2 e respeita movimento reduzido. [Site indicado](https://lucas-portfolio-eta.vercel.app) · [Componente na revisão consultada](https://github.com/lucasdiasmz/lucas-portfolio/blob/f0970bcfa9daf014806762fcff1d06a2c03ac328/src/components/HeroPortrait.jsx) · [CSS](https://github.com/lucasdiasmz/lucas-portfolio/blob/f0970bcfa9daf014806762fcff1d06a2c03ac328/src/components/HeroPortrait.css)
 
-O README **declara licença MIT**. A árvore consultada não contém arquivo LICENSE independente, o campo de licença da API estava vazio e o endpoint de licença respondeu 404. Uma eventual cópia substancial deve conservar os avisos de copyright e permissão aplicáveis. A declaração do README não esclarece direitos de imagem sobre as fotografias ou de terceiros sobre cada mídia. Para o portfólio, a proposta é implementar a interação a partir do comportamento descrito, com retrato próprio e uma segunda versão autorizada e alinhada ao primeiro. Considerar a foto base como fallback em toque sem movimento, aba oculta, preferência reduzida ou falha da segunda imagem. O portal local continua tendo sua função de moldura dimensional. [README do autor](https://github.com/lucasdiasmz/lucas-portfolio/blob/f0970bcfa9daf014806762fcff1d06a2c03ac328/README.md) · [Árvore](https://github.com/lucasdiasmz/lucas-portfolio/tree/f0970bcfa9daf014806762fcff1d06a2c03ac328) · [Texto MIT](https://opensource.org/license/mit)
+O README **declara licença MIT**. A árvore consultada não contém arquivo LICENSE independente, o campo de licença da API estava vazio e o endpoint de licença respondeu 404. Uma eventual cópia substancial deve conservar os avisos de copyright e permissão aplicáveis. A declaração do README não esclarece direitos de imagem sobre as fotografias ou de terceiros sobre cada mídia. A Fase 03 estendeu o PhotoReveal já preparado com composição própria, retrato profissional e candidata mascarada autorizada para demonstração local. Toque, teclado e movimento reduzido têm caminhos de interação. [Recortes e condições para a fotografia final](HEIST_PORTRAIT_HANDOFF.md) [README do autor](https://github.com/lucasdiasmz/lucas-portfolio/blob/f0970bcfa9daf014806762fcff1d06a2c03ac328/README.md) · [Árvore](https://github.com/lucasdiasmz/lucas-portfolio/tree/f0970bcfa9daf014806762fcff1d06a2c03ac328) · [Texto MIT](https://opensource.org/license/mit)
 
 ## Critérios para encerrar a implementação futura
 

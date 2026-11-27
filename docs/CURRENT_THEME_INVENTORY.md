@@ -1,6 +1,6 @@
 # Inventário atual de temas
 
-27 de novembro de 2026 · Fase 02. O seletor oferece **15 temas, seis claros e nove escuros**. Garagem, Cidadela e Além da Curva Finita Central são dimensões do tema Rick and Morty. **O rosa escuro é `midnight-pink` e o rosa claro é `quartzo-framboesa`.** “Papel violeta” é outra paleta.
+27 de novembro de 2026 · Fase 03. O seletor oferece **15 temas, seis claros e nove escuros**. Garagem, Cidadela e Além da Curva Finita Central são dimensões de Rick and Morty. La Casa de Papel — O Assalto ocupa o antigo slot de Midnight Pink. Quartzo Framboesa segue disponível até a fase de O Plano.
 
 ## Registro que alimenta o menu
 
@@ -10,13 +10,13 @@ Os pares hexadecimais indicam fundo e primária da amostra do seletor. Nas palet
 | --- | --- | --- | --- |
 | `light` | Claro | Claro | #F4F4F5 / #0B5ED7. Original |
 | `dark` | Escuro | Escuro | #030A10 / #0B5ED7. Original e padrão |
-| `rick-morty` | Rick and Morty | Escuro | Duas cenas, portais, aberturas, dossiês, exploração, música e três personagens da Astra |
+| `rick-morty` | Rick and Morty | Escuro | Três dimensões, portais, aberturas, dossiês, exploração, música e personagens da Astra |
 | `galo` | Galo CAM Dark | Escuro | #080808 / #F5C400. Escudo, ondas próprias, avatar escuro, saudação e hino |
 | `galo-light` | Galo CAM Light | Claro | #F8F8F8 / #D49A00. Variante clara com avatar próprio e mesmo player do hino |
 | `aurora` | Aurora | Escuro | #090E1C / #3B82F6. Realce violeta e ondas multicoloridas |
 | `midnight-violet` | Midnight Violet | Escuro | #080910 / #8B5CF6. Controles violeta e intensidade de onda própria |
 | `papel-violeta` | Papel violeta | Claro | #EFEDF5 / #56429E |
-| `midnight-pink` | Midnight Pink | Escuro | #0C0910 / #FF3BA7. Superfície #19121E e onda rosa atenuada |
+| `la-casa-de-papel-dark` | La Casa de Papel — O Assalto | Escuro | #080808 / #D90416. Casa da Moeda noturna, máscara, PhotoReveal, Berlim e Professor |
 | `quartzo-framboesa` | Quartzo framboesa | Claro | #F7E8F0 / #9A3D72. Superfície #FCF5F9 e realce #71498A |
 | `ardosia-cobalto` | Ardósia e Cobalto | Claro | #E7EDF5 / #244DA8 |
 | `cobalto-intenso` | Cobalto intenso | Escuro | #101D44 / #97AEFF |
@@ -31,12 +31,16 @@ O script no HTML aplica `data-theme`, a classe `dark`, `data-custom-theme` e, pa
 | ID antigo | ID atual | Efeito na restauração |
 | --- | --- | --- |
 | `rick-morty-secret` | `rick-morty` | Entra em `corrupted` |
-| `obsidian-gold`, `grafite-coral` | `midnight-pink` | Ambos levam ao rosa escuro |
+| `midnight-pink`, `obsidian-gold`, `grafite-coral` | `la-casa-de-papel-dark` | Migração direta para O Assalto, inclusive em `/chat` |
 | `champagne-gold` | `ardosia-cobalto` | Claro |
 | `mint-frost` | `petroleo-gelo` | Claro |
 | `porcelain-indigo` | `papel-violeta` | Claro |
 
 Selecionar Rick explicitamente inicia em `lab`, salvo quando a última dimensão ativa era `beyond-curve`. Recarregar com Rick selecionado restaura uma dimensão válida. Em localStorage também ficam `rick-morty-beyond-unlocked`, `rick-morty-volume`, `rick-morty-music-paused`, `rick-morty-effects-paused` e `rick-morty-exploration`. Em sessionStorage, `rick-garage-intro-seen` e `rick-ship-departed` controlam a abertura e o voo. Mensagens de easter egg são mantidas por dimensão em memória. O favicon usa as cores computadas e reage à mudança de tema.
+
+## La Casa de Papel — O Assalto
+
+Abertura da Casa da Moeda, retrato profissional com revelação na demonstração local e Registro da operação com atalhos para projetos e laboratório. A máscara do cabeçalho repete a abertura. Berlim conduz a conversa rápida e o Professor atende em `/chat`. [Tema, mídias e integração](MONEY_HEIST_SPEC.md)
 
 ## Garagem e Cidadela dos Ricks
 

@@ -2,6 +2,7 @@ import { useContext, useEffect, useId, useRef, useState } from 'react';
 import { Check, ChevronRight, Layers, Palette, RectangleEllipsis, Ruler, Shapes, Type } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { ThemeContext, themes } from '../context/ThemeContext';
+import { isHeistTheme } from '../data/heistThemes.js';
 import AstraAvatar from './AstraAvatar';
 import PortfolioLogo from './PortfolioLogo';
 import './designSystem.css';
@@ -52,7 +53,8 @@ function GuideSection({ title, icon: Icon, children }) {
 export default function DesignSystemCard() {
   const { t, i18n } = useTranslation();
   const { theme = 'dark' } = useContext(ThemeContext) ?? {};
-  const themeName = t(`navbar.appearance.${theme}`, { defaultValue: themes.find(option => option.id === theme)?.name ?? t(`chat.designSystem.themes.${theme}`) });
+  const themeName = isHeistTheme(theme) ? t(`navbar.appearance.${theme}`)
+    : themes.find(option => option.id === theme)?.name ?? t(`chat.designSystem.themes.${theme}`);
   const copy = t('chat.designSystem', { returnObjects: true });
   const titleId = useId();
   const guide = useRef(null);

@@ -42,10 +42,10 @@
 | Dependência | Evidência e impacto | Condição para avançar |
 | --- | --- | --- |
 | Terceira dimensão | A Fase 02 integra descoberta, navegação, cena, áudio local e conquista. | Aprovação da demonstração e liberação de mídia antes da distribuição. [Especificação](DIMENSION_SPEC.md) |
-| Novos personagens | A Fase 02 integra Pessoa-Pássaro, Rick Maligno e Evil Morty com retratos estáticos e autoria por turno. | Perfis e artes de La Casa de Papel pertencem a uma fase própria. [Contrato](ASTRA_PERSONAS_HANDOFF.md) |
-| Fundo La Casa Dark | Nenhum asset de produção está identificado como o original aprovado. | Localizar e vincular o arquivo aprovado à sua origem antes da integração artística. |
+| Artes das personas | A Fase 03 usa Berlim e Professor com avatares locais e a mesma autoria por turno. | Comprovar os direitos de distribuição dos avatares. [Especificação](MONEY_HEIST_SPEC.md) |
+| Mídias de O Assalto | A demonstração usa o fundo noturno indicado, a máscara e os avatares do pacote local. A candidata mascarada está habilitada no Vite em loopback. | Documentar distribuição das artes e adicionar a alternativa definitiva somente após validar o alinhamento e a licença. [PhotoReveal](HEIST_PORTRAIT_HANDOFF.md) |
 | “For the Damaged Coda” e novas artes | O MP3 e as imagens V11.2 existem no checkout e ficaram fora dos commits da Fase 02. | Validar a documentação da gravação e a licença de uso, adaptação e distribuição das imagens ou substituir por mídia autorizada. |
-| Fotografia de Lucas | O endereço publicado indicado retornou 404. O código está acessível e o README declara MIT, sem LICENSE independente na revisão consultada. | Usar fotos próprias/autorizadas e preservar os avisos aplicáveis se houver cópia de código. |
+| Referência de interação | O código de Lucas está acessível na revisão consultada. O README declara MIT e o caminho `LICENSE` retornou 404. | O PhotoReveal usa a implementação própria do portfólio e seus assets locais. [Referência consultada](HEIST_PORTRAIT_HANDOFF.md) |
 | Nome e formato divergentes | `public/github.png` contém WebP lossless de 1024 × 512. O catálogo usa a URL histórica. | Ao reprocessar imagens, detectar formato pela assinatura e preservar referências. |
 
 ## Hipóteses ainda sem confirmação
