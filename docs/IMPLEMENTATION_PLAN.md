@@ -1,5 +1,14 @@
 # Plano de implementação posterior
 
+## Fase 05 e ordem de aprovação
+
+A integração local reúne Astra, Rick and Morty, O Assalto e O Plano em `codex/release-integration`. O histórico parte de La Casa de Papel e incorpora a única revisão divergente de Rick a partir de `2e84d2b`. A Fase 01 já compõe essa base. [Relatório e validação](SESSION_HANDOFF.md#fase-05-em-27-de-novembro-de-2026)
+
+1. Aguardar a aprovação da demonstração da Fase 05. [Portfólio local](http://127.0.0.1:5178/) · [Astra completa](http://127.0.0.1:5178/chat)
+2. Em etapas autorizadas separadamente, tratar a assinatura nas personas completas especiais, os dossiês universais, a ativação do reCAPTCHA v3 e a otimização geral de fluidez.
+3. Fazer a auditoria técnica e visual definitiva e a auditoria especializada de IHC.
+4. Confirmar as permissões de distribuição, tratar as pendências restantes e remover os Markdown temporários de contexto antes do merge final. [Pendências](KNOWN_ISSUES.md#estado-da-fase-05)
+
 O plano reúne as propostas da auditoria e as entregas futuras. A Fase 03 implementou La Casa de Papel Dark em worktree separada da Fase 02.2. A Fase 04 implementou O Plano após a aprovação de O Assalto e aguarda revisão visual. [Estado da implementação](SESSION_HANDOFF.md)
 
 ## 1. Recuperar a baseline executável

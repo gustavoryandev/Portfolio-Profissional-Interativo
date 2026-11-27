@@ -1,5 +1,13 @@
 # Problemas conhecidos e limites de verificação
 
+## Estado da Fase 05
+
+- O build local passou com o aviso preexistente de chunks acima de 500 kB. A análise de fluidez geral fica para a etapa prevista no plano.
+- As mídias pendentes de distribuição continuam em cópias locais. A demonstração usa o Vite por loopback. O build temporário copia o conteúdo de `public/` e fica reservado à validação local. [Inventário](ASSET_INVENTORY.md)
+- A 390 px, o rótulo “Início” pode quebrar no cabeçalho da Cidadela. O Chrome reproduziu a mesma quebra na demonstração da Fase 02 e na integração.
+- A cobertura de navegadores desta fase é em Chrome emulado. Aparelhos físicos, leitor de tela, produção e conversas abertas com Gemini permanecem fora da verificação. As integrações externas foram cobertas por testes com provedores simulados.
+- Assinatura nas personas completas especiais, dossiês universais, reCAPTCHA v3, otimização geral, auditorias definitivas e limpeza de contexto aguardam suas fases. [Plano](IMPLEMENTATION_PLAN.md#fase-05-e-ordem-de-aprovacao)
+
 27 de novembro de 2026 · Os resultados da Fase 01 estão na [avaliação da Astra](ASTRA_EVALUATION.md) e na [matriz de regressão](ASTRA_REGRESSION_REPORT.md). Os demais itens mantêm o contexto da auditoria de 26 de novembro. “Reproduzido” indica comportamento observado, “confirmado em código” indica uma condição verificável nas fontes, e “hipótese” indica uma explicação que ainda precisa de teste.
 
 ## 1. API da Astra indisponível em processo novo — resolvido
