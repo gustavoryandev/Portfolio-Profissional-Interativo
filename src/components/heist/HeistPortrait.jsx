@@ -9,10 +9,12 @@ const alternativeCrop = { x: 89, y: 25, width: 773, height: 909.41, imageWidth: 
 
 export default function HeistPortrait() {
   const { t } = useTranslation();
+  const preview = import.meta.env?.DEV
+    && ['127.0.0.1', 'localhost', '[::1]'].includes(window.location.hostname);
   return <PhotoReveal className="heist-portrait"
-    originalSrc={heistMedia.portrait} alternativeSrc={heistMedia.maskedPortrait}
+    originalSrc={heistMedia.portrait} alternativeSrc={preview ? heistMedia.previewPortrait : undefined}
     originalCrop={originalCrop} alternativeCrop={alternativeCrop} aspectRatio="425 / 500"
     alt={t('heist.portrait.alt')} alternativeAlt={t('heist.portrait.label')}
-    showLabel={t('heist.portrait.show')} hideLabel={t('heist.portrait.hide')}
+    showLabel={preview ? t('heist.portrait.show') : undefined} hideLabel={t('heist.portrait.hide')}
     radius={108} softness={54} />;
 }

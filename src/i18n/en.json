@@ -683,7 +683,14 @@
       "label": "Portrait of Gustavo in a Dalí mask and red jumpsuit"
     },
     "contactBerlin": "Talk to Berlin",
-    "desk": "Planning desk"
+    "desk": "Planning desk",
+    "composer": "Ask about the portfolio",
+    "record": {
+      "title": "Operation log",
+      "description": "The projects show the engineering decisions. In the lab, you can edit and run the examples.",
+      "projects": "Open project catalog",
+      "lab": "Open code lab"
+    }
   },
   "heistPersonas": {
     "berlin": {

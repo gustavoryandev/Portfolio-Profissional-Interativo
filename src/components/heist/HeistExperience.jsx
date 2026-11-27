@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { ScanFace } from 'lucide-react';
+import { ArrowUpRight, FileText, ScanFace } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { ThemeContext } from '../../context/ThemeState';
 import { HEIST_DARK, HEIST_LIGHT, heistMedia, isHeistTheme } from '../../data/heistThemes.js';
@@ -75,6 +75,18 @@ export function HeistLabel({ theme }) {
 export function HeistBackdrop({ theme }) {
   return <div className="heist-backdrop" aria-hidden="true"
     style={{ '--heist-location-image': `url("${heistMedia.backgrounds[theme]}")` }} />;
+}
+
+export function HeistOperationRecord({ onSectionLink }) {
+  const { t } = useTranslation();
+  return <details className="heist-record">
+    <summary><FileText size={16} aria-hidden="true" />{t('heist.record.title')}</summary>
+    <div>
+      <p>{t('heist.record.description')}</p>
+      <a href="#projetos" onClick={onSectionLink}>{t('heist.record.projects')}<ArrowUpRight size={14} aria-hidden="true" /></a>
+      <a href="#laboratorio" onClick={onSectionLink}>{t('heist.record.lab')}<ArrowUpRight size={14} aria-hidden="true" /></a>
+    </div>
+  </details>;
 }
 
 function HeistOpening({ opener, theme, onFinish }) {

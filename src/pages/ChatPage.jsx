@@ -8,6 +8,7 @@ import AstraHero from '../components/AstraHero';
 import AstraAvatar, { AstraSurfaceProvider } from '../components/AstraAvatar';
 import DimensionAstraSignal from '../components/DimensionAstraSignal';
 import { useAssistantPersona } from '../context/AssistantAppearanceContext';
+import { isHeistTheme } from '../data/heistThemes.js';
 import { ASTRA_PERSONA_ID, assistantAppearance } from '../data/assistantPersonas';
 import { ThemeContext } from '../context/ThemeContext';
 import { isGaloTheme } from '../data/themes';
@@ -79,6 +80,8 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
   const { actions, actionUi, lab, openFull, setLabHandoff } = useAstra();
   const { theme, dimension, discoverBeyond } = useContext(ThemeContext) ?? {};
   const galo = isGaloTheme(theme);
+  const heist = isHeistTheme(theme);
+  const composerLabel = t(heist ? 'heist.composer' : 'chat.placeholder');
   const welcomeKey = galo ? 'chat.galoWelcome.greeting' : modal ? 'chat.quickWelcome' : 'chat.boasVindas';
 
   const [messages, setMessages] = useState(() => [{ id: 'welcome', sender: 'ai', text: t('chat.boasVindas'), translationKey: 'chat.boasVindas' }]);
@@ -397,7 +400,7 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
                   <h2>{persona ? (en ? `Talk to ${assistantName}` : `Converse com ${assistantName}`) : (en ? 'Talk to Astra' : 'Converse com a Astra')}</h2>
                 </div>
                 <span className="astra-heading-actions">
-                  <span className="astra-heading-description">{en ? 'AI assistant' : 'Assistente de IA'}</span>
+                  <span className="astra-heading-description">{heist && !modal ? t('heist.desk') : en ? 'AI assistant' : 'Assistente de IA'}</span>
                   <button type="button" className="icon-button astra-arcade-trigger" aria-label={persona ? `${assistantName} Arcade` : 'Astra Arcade'} title={persona ? `${assistantName} Arcade` : 'Astra Arcade'}
                     aria-expanded={modal ? undefined : showArcade} onClick={() => {
                       setResourcesOpen(false);
@@ -500,11 +503,11 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
                         if (!loading) event.currentTarget.form.requestSubmit();
                       }
                     }}
-                    aria-label={showArcade ? (t('rick.assistant.game', { name: assistantName })) : t('chat.placeholder')}
+                    aria-label={showArcade ? (t('rick.assistant.game', { name: assistantName })) : composerLabel}
                     value={input}
                     onChange={(event) => setInput(event.target.value)}
                     placeholder={showArcade ? (`${t('rick.assistant.game', { name: assistantName })}…`)
-                      : t('chat.placeholder') || 'Digite uma pergunta sobre o Gustavo...'}
+                      : composerLabel || 'Digite uma pergunta sobre o Gustavo...'}
                     disabled={!modal && loading}
                     autoComplete="off"
                     className="min-h-12 min-w-0 flex-1 resize-none bg-transparent py-3 pl-4 pr-2 text-[15px] font-medium text-ink outline-none placeholder:text-muted disabled:opacity-60 sm:pl-2"

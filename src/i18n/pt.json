@@ -683,7 +683,14 @@
       "label": "Retrato de Gustavo com máscara de Dalí e traje vermelho"
     },
     "contactBerlin": "Conversar com Berlim",
-    "desk": "Mesa de planejamento"
+    "desk": "Mesa de planejamento",
+    "composer": "Pergunte sobre o portfólio",
+    "record": {
+      "title": "Registro da operação",
+      "description": "Os projetos mostram decisões de engenharia. No laboratório, você pode editar e executar os exemplos.",
+      "projects": "Abrir catálogo de projetos",
+      "lab": "Abrir laboratório de código"
+    }
   },
   "heistPersonas": {
     "berlin": {

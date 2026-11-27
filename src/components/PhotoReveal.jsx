@@ -206,6 +206,7 @@ export default function PhotoReveal({
     const handleDown = event => {
       if (event.pointerType !== 'touch' || !event.isPrimary || !inView || document.hidden) return;
       touchId = event.pointerId;
+      tip = null;
       handleMove(event);
     };
     const handleLeave = event => {
@@ -214,7 +215,15 @@ export default function PhotoReveal({
       target = null;
       tip = null;
     };
-    const handleTouchEnd = event => { if (event.pointerType === 'touch') handleLeave(event); };
+    const handleTouchEnd = event => {
+      if (event.pointerType !== 'touch' || event.pointerId !== touchId) return;
+      if (event.type === 'pointerup' && target && !tip) {
+        // A quick tap can end before its first animation frame.
+        touchId = null;
+      } else {
+        handleLeave(event);
+      }
+    };
     const handleVisibility = () => { if (document.hidden) stop(); };
     const intersection = typeof IntersectionObserver === 'function' ? new IntersectionObserver(([entry]) => {
       inView = entry.isIntersecting;

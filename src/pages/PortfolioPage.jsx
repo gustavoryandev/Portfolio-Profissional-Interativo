@@ -16,7 +16,7 @@ import ScrollReveal from '../components/ui/ScrollReveal';
 import GaloCrest from '../components/GaloCrest';
 import AstraAvatar from '../components/AstraAvatar';
 import HeistPortrait from '../components/heist/HeistPortrait';
-import { HeistBackdrop, HeistLabel } from '../components/heist/HeistExperience';
+import { HeistBackdrop, HeistLabel, HeistOperationRecord } from '../components/heist/HeistExperience';
 import { isHeistTheme } from '../data/heistThemes.js';
 import { useAssistantPersona } from '../context/AssistantAppearanceContext';
 import PortraitPortal from '../components/rick/PortraitPortal';
@@ -116,6 +116,7 @@ export default function PortfolioPage({ activeSection, projectFocus, onSectionLi
             <a className={galo || heist ? 'scroll-secondary' : 'neon-cta'} href="#projetos" onClick={onSectionLink}>{en ? 'Explore projects' : 'Explorar projetos'}<ArrowDown size={17} aria-hidden="true" /></a>
           </div>
           <SocialLinks />
+          {heist && <HeistOperationRecord onSectionLink={onSectionLink} />}
           {dimensional && <div className="dimension-instrument-panel">
             {!beyond && <div className="dimension-console-heading">
               <div className="dimension-readout"><span>{t('rick.control')}</span><strong>{t(secret ? 'rick.access' : 'rick.stabilized')}</strong></div>

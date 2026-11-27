@@ -85,7 +85,7 @@
 :root[data-theme="la-casa-de-papel-dark"] .portfolio-hero h1 {
   color: var(--ink);
   font-family: var(--heist-display);
-  font-size: clamp(68px, 10.8vw, 156px);
+  font-size: clamp(64px, 9.4vw, 138px);
   font-weight: 900;
   line-height: .87;
   letter-spacing: -.025em;
@@ -119,13 +119,12 @@
   background: #161313;
   border: 1px solid #845960;
   border-radius: 5px;
-  box-shadow: -6px 6px 0 #502026, 0 24px 64px #030303cc;
+  box-shadow: -6px 6px 0 color-mix(in srgb, var(--heist-deep-red), var(--panel) 35%), 0 24px 64px #030303cc;
 }
 
 :root[data-theme="la-casa-de-papel-dark"] .hero-profile::before {
   background: linear-gradient(140deg, #ed163750, transparent 25%);
 }
-:root[data-theme="la-casa-de-papel-dark"] .hero-photo { border-radius: 2px; }
 :root[data-theme="la-casa-de-papel-dark"] .hero-profile-caption {
   gap: 5px;
   padding: 10px 4px 4px;
@@ -175,6 +174,9 @@ html:has(.heist-opening[open]) { overflow: hidden; }
 }
 .heist-opening[open] { display: grid; place-items: center; }
 .heist-opening::backdrop { background: var(--page); }
+.heist-opening[data-still="false"],
+.heist-opening[data-still="false"]::backdrop { animation: heist-opening-out 380ms ease-in 2270ms both; }
+@keyframes heist-opening-out { to { opacity: 0; } }
 .heist-opening .heist-backdrop {
   inset: 0;
   background: linear-gradient(0deg, #080808df, #0808084d 70%, #080808a8),
@@ -273,11 +275,16 @@ html:has(.heist-opening[open]) { overflow: hidden; }
   :root[data-theme="la-casa-de-papel-dark"] .portfolio-hero {
     grid-template-columns: minmax(0, 1fr);
     min-height: 0;
-    gap: 30px;
-    padding-block: 32px 52px;
+    gap: 24px;
+    padding-block: 28px 48px;
   }
   :root[data-theme="la-casa-de-papel-dark"] .portfolio-hero h1 { font-size: clamp(61px, 14vw, 100px); }
   :root[data-theme="la-casa-de-papel-dark"] .hero-profile { justify-self: center; }
+  .heist-variant-label { margin-block-end: 22px; }
+  :root[data-theme="la-casa-de-papel-dark"] .portfolio-hero .hero-lead { margin-top: 18px; }
+  :root[data-theme="la-casa-de-papel-dark"] .hero-description { margin-top: 12px; line-height: 1.55; }
+  :root[data-theme="la-casa-de-papel-dark"] .hero-actions { gap: 8px; margin-block: 18px; }
+  :root[data-theme="la-casa-de-papel-dark"] .hero-actions .neon-cta { min-height: 44px; padding-block: 9px; }
   .portfolio-hero .heist-backdrop {
     background:
       linear-gradient(0deg, #080808 3%, #08080872 24%, #080808a1 70%, #0808084d),
@@ -291,6 +298,7 @@ html:has(.heist-opening[open]) { overflow: hidden; }
 }
 @media (prefers-reduced-motion: reduce) {
   .heist-opening :is(.heist-opening-shutters, .heist-opening-frame span) { display: none; }
+  .heist-opening[data-still], .heist-opening[data-still]::backdrop,
   .heist-opening .heist-opening-title, .heist-mask-button { animation: none; transition: none; }
   .heist-mask-button:active .heist-mask-art { transform: none; }
 }
@@ -306,7 +314,7 @@ html:has(.heist-opening[open]) { overflow: hidden; }
   width: 100%;
   min-height: 44px;
   margin-top: 4px;
-  border-bottom: 1px solid #5b3d41;
+  border-bottom: 1px solid color-mix(in srgb, var(--heist-neutral), var(--line) 60%);
   color: var(--heist-paper);
   font-size: 12px;
   text-align: start;
@@ -325,3 +333,174 @@ html:has(.heist-opening[open]) { overflow: hidden; }
 .heist-portrait .photo-reveal-toggle:disabled { color: var(--muted); }
 .heist-portrait .photo-reveal-toggle:not(:disabled):hover { color: var(--ink); background: #3a1c22; }
 .heist-portrait .photo-reveal-toggle:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: -2px; }
+
+:root[data-theme="la-casa-de-papel-dark"] {
+  --chess-dark-square: #88545B;
+  --chess-light-square: #E3D1B6;
+  --loss: #FF8490;
+}
+
+.heist-record {
+  max-width: 390px;
+  margin-top: 18px;
+  border-block-start: 1px solid #6e464b;
+}
+.heist-record summary {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 44px;
+  width: fit-content;
+  cursor: pointer;
+  color: var(--heist-paper);
+  font: 650 11px / 1.4 ui-monospace, monospace;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+.heist-record summary::-webkit-details-marker { display: none; }
+.heist-record summary::after { content: '+'; color: var(--accent); font-size: 15px; }
+.heist-record[open] summary::after { content: '−'; }
+.heist-record summary:focus-visible,
+.heist-record a:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 3px; }
+.heist-record > div {
+  padding: 10px 14px;
+  border-inline-start: 2px solid var(--palette-primary);
+  background: var(--panel);
+  color: var(--muted);
+  font-size: 13px;
+}
+.heist-record a {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 44px;
+  margin-inline-end: 12px;
+  color: var(--ink);
+  text-underline-offset: 3px;
+  text-decoration: underline;
+}
+.heist-record a:hover { color: var(--accent); }
+
+:root[data-theme="la-casa-de-papel-dark"] .scroll-content > :is(.scroll-section, .projects-scroll-section) {
+  border-block-start: 1px solid #43292b;
+}
+:root[data-theme="la-casa-de-papel-dark"] .scroll-portfolio :is(.section-eyebrow, .portfolio-section > p:first-child) {
+  color: var(--heist-paper);
+}
+:root[data-theme="la-casa-de-papel-dark"] .scroll-portfolio :is(.about-scroll, .detail-card, .project-tile, .code-lab-panel, .astra-scroll-cta) {
+  border-color: #634148;
+  border-radius: 6px;
+  background-color: var(--panel);
+  box-shadow: 0 10px 36px -26px var(--heist-shadow);
+}
+:root[data-theme="la-casa-de-papel-dark"] .scroll-portfolio :is(.project-tile, .code-lab-panel, .astra-scroll-cta) {
+  border-block-start-color: #9b4d58;
+}
+:root[data-theme="la-casa-de-papel-dark"] .dimension-project-details {
+  --dossier-fill: var(--heist-card);
+  --dossier-rule: #80515a;
+}
+:root[data-theme="la-casa-de-papel-dark"] .scroll-footer { border-color: #7d414a; }
+:root[data-theme="la-casa-de-papel-dark"] .scroll-secondary {
+  min-height: 44px;
+  padding-inline: 15px;
+  border: 1px solid #87646a;
+  background: #151113;
+}
+:root[data-theme="la-casa-de-papel-dark"] .scroll-secondary:is(:hover, :focus-visible) {
+  border-color: var(--focus-ring);
+  color: var(--ink);
+  background: #47242b;
+}
+
+:root[data-theme="la-casa-de-papel-dark"] :is(.astra-full, .astra-entrance) {
+  background:
+    linear-gradient(90deg, #c9b99a0b 1px, transparent 1px) 50% 0 / 28px 28px,
+    linear-gradient(#c9b99a0b 1px, transparent 1px) 50% 0 / 28px 28px,
+    radial-gradient(ellipse at 20% 20%, #41131b, transparent 63%),
+    var(--page);
+}
+:root[data-theme="la-casa-de-papel-dark"] .astra-full .center-panel {
+  border-color: #78535a;
+  border-radius: 8px;
+}
+:root[data-theme="la-casa-de-papel-dark"] :is(.astra-toolbar, .astra-conversation .chat-heading) {
+  background: linear-gradient(90deg, #321922, #171315 62%);
+  border-color: #78424b;
+}
+:root[data-theme="la-casa-de-papel-dark"] .chat-heading h2 { color: var(--ink); }
+:root[data-theme="la-casa-de-papel-dark"] .chat-heading .astra-heading-description { color: var(--heist-paper); }
+:root[data-theme="la-casa-de-papel-dark"] :is(.astra-mini, .avatar-astra, .astra-avatar) {
+  border-color: #ad626d;
+}
+:root[data-theme="la-casa-de-papel-dark"] :is(.astra-mini, .avatar-astra, .astra-avatar) img {
+  border-radius: inherit;
+}
+:root[data-theme="la-casa-de-papel-dark"] .astra-shell::backdrop { background: #080506bc; }
+:root[data-theme="la-casa-de-papel-dark"] .astra-conversation :is(.chat-bubble, .portfolio-card, .astra-resource) {
+  border-radius: 6px;
+}
+:root[data-theme="la-casa-de-papel-dark"] .astra-conversation .chat-bubble--astra {
+  background: #201a1b;
+  border-color: #684149;
+}
+:root[data-theme="la-casa-de-papel-dark"] .astra-conversation .chat-bubble--user {
+  background: #3b1b22;
+  border-color: #8b5360;
+}
+:root[data-theme="la-casa-de-papel-dark"] .astra-conversation .chat-bubble--error {
+  background: #321a20;
+  border-color: var(--loss);
+}
+:root[data-theme="la-casa-de-papel-dark"] .astra-conversation :is(.chat-composer, .astra-resources, .astra-resources-header) {
+  background: var(--panel);
+  border-color: #704850;
+}
+:root[data-theme="la-casa-de-papel-dark"] .astra-conversation .chat-form textarea {
+  background: var(--heist-card);
+  border: 1px solid var(--control-border);
+  caret-color: var(--ink);
+  border-radius: 5px;
+}
+@media (max-width: 767px) {
+  :root[data-theme="la-casa-de-papel-dark"] .astra-conversation .chat-form textarea { font-size: 16px; padding-inline: 8px; }
+}
+:root[data-theme="la-casa-de-papel-dark"] .astra-conversation .astra-hero {
+  border-radius: 8px;
+  border-color: #794c54;
+  background:
+    linear-gradient(to right, #c9b99a12 1px, transparent 1px) center / 24px 24px,
+    linear-gradient(#c9b99a12 1px, transparent 1px) center / 24px 24px,
+    linear-gradient(132deg, #211419, #131313 60%);
+}
+:root[data-theme="la-casa-de-papel-dark"] .astra-hero::before,
+:root[data-theme="la-casa-de-papel-dark"] .astra-hero .astra-spark { display: none; }
+:root[data-theme="la-casa-de-papel-dark"] .astra-wordmark {
+  color: var(--ink);
+  font-family: var(--heist-display);
+  letter-spacing: .005em;
+  -webkit-text-fill-color: var(--ink);
+  -webkit-text-stroke: 0;
+}
+:root[data-theme="la-casa-de-papel-dark"] .astra-hero:hover .astra-wordmark { -webkit-text-fill-color: var(--ink); }
+:root[data-theme="la-casa-de-papel-dark"] .astra-entrance-panel {
+  border-color: #7c4650;
+  background: #181315ee;
+}
+:root[data-theme="la-casa-de-papel-dark"] .arcade {
+  --arcade-radius: 8px;
+  border-color: #78535a;
+}
+:root[data-theme="la-casa-de-papel-dark"] :is(.arcade-card, .arcade-stat-section) {
+  background: var(--heist-card);
+  border-color: #704850;
+}
+:root[data-theme="la-casa-de-papel-dark"] .arcade-toolbar {
+  background: #28191d;
+  border-color: #78424b;
+}
+:root[data-theme="la-casa-de-papel-dark"] .chess-replay-board {
+  padding: 6px;
+  border: 1px solid #78535a;
+  background: #22181a;
+}
