@@ -1,5 +1,27 @@
 # Passagem de sessão do portfólio
 
+## Fase 02 em 27 de novembro de 2026
+
+A branch local `codex/rick-morty-phase-02` deriva da Fase 01 aprovada em `5637d64`. A demonstração está em [Portfólio local](http://127.0.0.1:5176/) e [Astra completa](http://127.0.0.1:5176/chat). Selecionar Rick and Morty e enviar **Wubba Lubba Dub-Dub** na Astra. A [especificação da dimensão](DIMENSION_SPEC.md) detalha os estados, o diário, o áudio e as permissões pendentes.
+
+| Commit | Escopo |
+| --- | --- |
+| `d152fdd` | Primeira pintura, compatibilidade dimensional e reconhecimento local. |
+| `e5df22d` | Descoberta nas duas superfícies, persistência e roteamento da travessia. |
+| `cd761a5` | Mansão, paleta, portais e interface do portfólio e da Astra. |
+| `58fef27` | Sequência cinematográfica, revisitas e recuperação da travessia. |
+| `9f34a6b` | Pessoa-Pássaro, Rick Maligno e Evil Morty, com perfis PT/EN e avatares estáticos. |
+| `6920d54` | Faixa local, controles de som e conquista de chegada. |
+| `31803e8` | Regressões de descoberta, autoria, armazenamento e falhas de mídia. |
+| `89c982e` | Ajustes do cabeçalho estreito, contraste e tabuleiro. |
+| `1710830` | Regressão de troca de tema e retorno da Astra completa ao portfólio. |
+
+**Validação.** Passaram 128 testes da suíte principal e 16 isolados. A importação normal de `api/chat.js`, o typecheck do portal, `git diff --check` e o build temporário passaram. O build conserva o aviso de chunks acima de 500 kB. No Chrome foram medidas as larguras 375, 390, 768, 1024, 1440 e 1920 em portfólio e Astra completa. A amostra incluiu recarga, arcade, transição no diálogo compacto, teclado e foco, redimensionamento durante a viagem, aba oculta simulada e erros induzidos de áudio e imagens. A duração reconhecida do MP3 no Chrome foi de 30 s. Permanecem fora da verificação dispositivos físicos e respostas abertas do Gemini real. [Regressões](ASTRA_REGRESSION_REPORT.md)
+
+**Checkpoint local.** `%LOCALAPPDATA%/Portfolio-Phase02-1271bfb8177948e09eb55aa254bed0b6` guarda a referência da Fase 01, o status, o patch binário e as preparações não rastreadas. O patch das seis alterações rastreadas preexistentes foi comparado byte a byte após a implementação. O cache Python ficou no checkout. As mídias pendentes e as configurações locais ficaram fora dos commits. A fase ficou na branch local.
+
+**Próxima fase.** Validar a demonstração e registrar as permissões das mídias antes de publicar. La Casa de Papel Dark começa após a aprovação da Fase 02.
+
 ## Fase 01 em 27 de novembro de 2026
 
 **Branch local:** `codex/astra-phase-01`, criada no estado de `e13942d`. A demonstração foi aberta em [Astra completa](http://127.0.0.1:5174/chat). A sessão local não fez merge, push nem deploy.

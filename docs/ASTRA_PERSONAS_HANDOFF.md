@@ -15,6 +15,16 @@
 
 [Envio e histórico](../src/pages/ChatPage.jsx) · [Prévia](../src/components/StreamingReply.jsx) · [Bolha](../src/components/MessageBubble.jsx) · [Parser](../src/services/chatStream.js)
 
+## Personas ativas na Fase 02
+
+| Dimensão | Compacta | Completa |
+| --- | --- | --- |
+| `lab` | `meeseeks` | `birdperson` |
+| `corrupted` | `meeseeks` | `poopybutthole` |
+| `beyond-curve` | `evil-rick` | `evil-morty` |
+
+O servidor deriva o ID da combinação de tema, dimensão e superfície. Combinações inválidas usam a Astra. `squanchy` segue reconhecido na apresentação de mensagens históricas. A resposta local ao comando secreto usa o autor capturado antes da travessia. O próximo envio resolve o autor no destino. Rick Maligno é o Rick associado a Evil Morty. Todos os avatares novos são imagens estáticas, e os perfis localizados compartilham as ferramentas, o contexto e os limites da Astra.
+
 ## Como estender o contrato
 
 1. Estender o resolvedor compartilhado `assistantPersonaId` para a combinação aprovada de tema, dimensão e superfície. O servidor resolve a mesma combinação permitida a partir de `appearance` e `surface`. Instruções e nomes arbitrários do cliente seguem fora desse contrato.

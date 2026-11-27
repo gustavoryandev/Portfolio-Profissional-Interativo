@@ -1,6 +1,16 @@
 # Matriz de regressão da Astra
 
-27 de novembro de 2026 · Validação da Fase 01 em `codex/astra-phase-01`.
+## Fase 02 · 27 de novembro de 2026
+
+- **128 testes principais e 16 isolados aprovados.** O endpoint foi importado em um processo Node comum. O typecheck do portal, o build temporário e a checagem do diff passaram.
+- Os casos de mudança dimensional na Garagem agora esperam Pessoa-Pássaro, conforme a nova apresentação. Uma bolha histórica criada com `squanchy` mantém seu nome e avatar.
+- A compacta na Garagem e a completa na Cidadela desbloqueiam a mansão sem solicitar Gemini. A autoria da resposta local fica no ponto de partida. Uma resposta de Evil Morty em andamento mantém nome e avatar depois da travessia e da tradução.
+- A regressão inclui recarga, alias, reset, áudio indisponível, falha de imagem, Escape, movimento reduzido, duplicidade de conquista e validação de combinações cliente/servidor. Cancelamento, requisições tardias, retentativas, histórico e revisão do Laboratório continuam cobertos pelas suítes.
+- O endpoint e o streaming foram exercitados com transporte e provedores controlados. A verificação da Fase 02 não mediu respostas abertas do Gemini real.
+
+## Fase 01 · 27 de novembro de 2026
+
+Validação em `codex/astra-phase-01`.
 
 Os testes isolados originais foram executados na entrada da fase. Três passaram e dois falharam, com as respostas de Squanchy passando a exibir Mr. Poopybutthole e Astra no final. As asserções originais continuam na suíte isolada, que agora passou nos **11 casos**.
 

@@ -41,10 +41,10 @@
 
 | Dependência | Evidência e impacto | Condição para avançar |
 | --- | --- | --- |
-| Terceira dimensão | Bootstrap, passagem Garagem/Cidadela, variantes do portal, cenas, áudio e resolvedor de persona supõem dois destinos. | Definir destino e retorno em cada estado e testar restauração e interrupção. |
-| Novos personagens | A aparência do turno chega ao servidor. O resolvedor só reconhece a matriz Rick atual, e os caminhos, traduções, perfis e contornos do retrato usam os IDs existentes. | Perfil permitido, chaves PT/EN e retrato estático ou geometria de atuação por ID. [Contrato](ASTRA_PERSONAS_HANDOFF.md) |
+| Terceira dimensão | A Fase 02 integra descoberta, navegação, cena, áudio local e conquista. | Aprovação da demonstração e liberação de mídia antes da distribuição. [Especificação](DIMENSION_SPEC.md) |
+| Novos personagens | A Fase 02 integra Pessoa-Pássaro, Rick Maligno e Evil Morty com retratos estáticos e autoria por turno. | Perfis e artes de La Casa de Papel pertencem a uma fase própria. [Contrato](ASTRA_PERSONAS_HANDOFF.md) |
 | Fundo La Casa Dark | Nenhum asset de produção está identificado como o original aprovado. | Localizar e vincular o arquivo aprovado à sua origem antes da integração artística. |
-| “For the Damaged Coda” e novas artes | A faixa é identificável no catálogo oficial. As mídias novas não constam no inventário de produção. | Definir reprodução autorizada e origem dos novos retratos e fundos. |
+| “For the Damaged Coda” e novas artes | O MP3 e as imagens V11.2 existem no checkout e ficaram fora dos commits da Fase 02. | Validar a documentação da gravação e a licença de uso, adaptação e distribuição das imagens ou substituir por mídia autorizada. |
 | Fotografia de Lucas | O endereço publicado indicado retornou 404. O código está acessível e o README declara MIT, sem LICENSE independente na revisão consultada. | Usar fotos próprias/autorizadas e preservar os avisos aplicáveis se houver cópia de código. |
 | Nome e formato divergentes | `public/github.png` contém WebP lossless de 1024 × 512. O catálogo usa a URL histórica. | Ao reprocessar imagens, detectar formato pela assinatura e preservar referências. |
 
