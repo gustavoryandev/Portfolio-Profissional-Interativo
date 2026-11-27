@@ -24,7 +24,7 @@ export default function useRickThemeMusic() {
     player.current?.setVolume(value);
     try { window.localStorage.setItem('rick-morty-volume', String(value)); } catch {}
   }, []);
-  const selectMusic = useCallback((dimension, autoplay = false) => {
+  const selectMusic = useCallback((dimension, autoplay = false, mix = 1) => {
     // The imported recording is available to local review while distribution rights are pending.
     const source = dimension === BEYOND_CURVE
       ? import.meta.env.DEV ? BEYOND_CURVE_TRACK.preview : null
@@ -35,8 +35,14 @@ export default function useRickThemeMusic() {
       track.current = source;
       setMusicStatus(source ? 'idle' : 'unavailable');
     }
-    if (autoplay && source && !pausedByVisitor.current && savedVolume.current > 0) void getPlayer().play();
+    player.current?.setCinematicGain(mix);
+    if (autoplay && source && !pausedByVisitor.current && savedVolume.current > 0) {
+      const current = getPlayer();
+      current.setCinematicGain(mix);
+      void current.play();
+    }
   }, [getPlayer]);
+  const setMusicCue = useCallback(scale => player.current?.setCinematicGain(scale), []);
   const stopMusic = useCallback(() => {
     player.current?.dispose();
     player.current = null;
@@ -59,5 +65,5 @@ export default function useRickThemeMusic() {
       player.current = null;
     };
   }, []);
-  return { musicStatus, musicVolume, changeMusicVolume, selectMusic, stopMusic, toggleMusic };
+  return { musicStatus, musicVolume, changeMusicVolume, selectMusic, setMusicCue, stopMusic, toggleMusic };
 }

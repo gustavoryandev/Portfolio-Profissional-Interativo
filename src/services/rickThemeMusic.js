@@ -29,6 +29,7 @@ export function createRickThemeMusic(Audio, onStatus, {
   audio.src = source;
 
   let target = volume / 100;
+  let cinematicGain = 1;
   audio.volume = .5;
   let context;
   let gain;
@@ -113,11 +114,12 @@ export function createRickThemeMusic(Audio, onStatus, {
     clearDeadline();
     hasPlayed = true;
     update('playing');
-    ramp(target, 260);
+    ramp(outputLevel(), 260);
   }
   function outputLevel() {
     const end = audio.duration - audio.currentTime;
-    return end >= 0 && end < .65 ? target * end / .65 : target;
+    const ceiling = target * cinematicGain;
+    return end >= 0 && end < .65 ? ceiling * end / .65 : ceiling;
   }
   audio.onplaying = playbackStarted;
   audio.onwaiting = () => {
@@ -126,7 +128,7 @@ export function createRickThemeMusic(Audio, onStatus, {
     watchLoading();
   };
   audio.ontimeupdate = () => {
-    if (status === 'playing' && outputLevel() < target) ramp(outputLevel(), 180);
+    if (status === 'playing' && outputLevel() < target * cinematicGain) ramp(outputLevel(), 180);
   };
   audio.onended = () => {
     wanted = resumeOnShow = hasPlayed = false;
@@ -183,6 +185,11 @@ export function createRickThemeMusic(Audio, onStatus, {
     setVolume(percent) {
       target = percent / 100;
       if (wanted && status === 'playing') ramp(outputLevel(), 90);
+    },
+    setCinematicGain(scale) {
+      if (cinematicGain === scale) return;
+      cinematicGain = scale;
+      if (wanted && status === 'playing') ramp(outputLevel(), 520);
     },
     setVisibility(inBackground) {
       if (inBackground === hidden || disposed) return;

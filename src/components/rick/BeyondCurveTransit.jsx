@@ -2,29 +2,28 @@ import { useLayoutEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { REDUCED_MOTION_QUERY } from '../../motionPreferences';
 import { BEYOND_CURVE } from '../../data/rickDimensions';
-import { beyondJourney, preloadScene } from './sceneAssets';
+import SceneBackdrop from './SceneBackdrop';
+import { preloadScene } from './sceneAssets';
+import { curveFlightCues, curveFlightRoutes, paintCurveFlight } from './curveFlight.js';
 
-const discovery = [
-  ['detected', 325], ['instability', 425], ['curve', 600], ['rupture', 580],
-  ['portal', 720], ['transit', 570], ['mansion', 730],
-];
-const revisit = [['portal', 420], ['mansion', 430]];
-const departure = [['portal', 420]];
-
-export default function BeyondCurveTransit({ trip, onArrive, onFinish }) {
+export default function BeyondCurveTransit({ trip, onArrive, onFinish, onMusicCue }) {
   const { t } = useTranslation();
   const returnFocus = useRef(null);
   const dialog = useRef(null);
+  const canvas = useRef(null);
   const skip = useRef(null);
   const finish = useRef(null);
-  const [frame, setFrame] = useState(0);
   const incoming = trip.destination === BEYOND_CURVE;
-  const frames = incoming ? trip.firstDiscovery ? discovery : revisit : departure;
-  const [shot] = frames[frame];
+  const discovery = incoming && trip.firstDiscovery;
+  const route = incoming ? discovery ? curveFlightRoutes.discovery : curveFlightRoutes.revisit : curveFlightRoutes.departure;
+  const [shot, setShot] = useState(discovery ? 'instability' : 'portal');
+  const [fallback, setFallback] = useState(false);
 
   useLayoutEffect(() => {
     const node = dialog.current;
+    const stage = canvas.current;
     const preference = window.matchMedia?.(REDUCED_MOTION_QUERY);
+    let frame;
     let timer;
     let active = true;
     let arrived = false;
@@ -36,6 +35,7 @@ export default function BeyondCurveTransit({ trip, onArrive, onFinish }) {
     const settle = interrupted => {
       if (!active) return;
       active = false;
+      cancelAnimationFrame(frame);
       clearTimeout(timer);
       arrive();
       onFinish(interrupted);
@@ -53,28 +53,64 @@ export default function BeyondCurveTransit({ trip, onArrive, onFinish }) {
     if (node.showModal) node.showModal();
     else node.setAttribute('open', '');
     skip.current.focus({ preventScroll: true });
-    void preloadScene(incoming ? trip.firstDiscovery ? 'beyondDiscovery' : 'beyondVisit' : 'beyondPortal');
     if (!incoming) void preloadScene(trip.destination === 'lab' ? 'labExterior' : 'citadelExterior');
-    let index = 0;
-    function advance() {
-      index++;
-      if (index >= frames.length) {
-        settle(false);
-        return;
+
+    const context = stage.getContext('2d');
+    let viewWidth = 0;
+    let viewHeight = 0;
+    let lowQuality;
+    let dirty = true;
+    const resize = () => { dirty = true; };
+    function paint(progress) {
+      if (dirty) {
+        const { width, height } = stage.getBoundingClientRect();
+        viewWidth = Math.max(1, width);
+        viewHeight = Math.max(1, height);
+        lowQuality = width < 768 || (navigator.hardwareConcurrency || 4) <= 4;
+        const density = Math.min(window.devicePixelRatio || 1, lowQuality ? 1.15 : 1.45,
+          Math.sqrt(1850000 / (viewWidth * viewHeight)));
+        stage.width = Math.max(1, Math.round(viewWidth * density));
+        stage.height = Math.max(1, Math.round(viewHeight * density));
+        context.setTransform(density, 0, 0, density, 0, 0);
+        dirty = false;
       }
-      if (frames[index][0] === 'mansion') arrive();
-      setFrame(index);
-      timer = setTimeout(advance, frames[index][1]);
+      paintCurveFlight(context, viewWidth, viewHeight, progress, lowQuality);
     }
-    timer = setTimeout(advance, frames[0][1]);
+    if (context) {
+      let cueIndex = curveFlightCues.findLastIndex(cue => route.from >= cue.progress);
+      const start = window.performance.now();
+      paint(route.from);
+      function advance(now) {
+        if (!active) return;
+        const fraction = Math.min(1, Math.max(0, (now - start) / route.duration));
+        const progress = route.from + (route.to - route.from) * fraction;
+        paint(progress);
+        while (curveFlightCues[cueIndex + 1]?.progress <= progress) {
+          const cue = curveFlightCues[++cueIndex];
+          setShot(cue.shot);
+          if (discovery && cue.volume) onMusicCue?.(cue.volume);
+          if (cue.shot === 'mansion') arrive();
+        }
+        if (fraction === 1) settle(false);
+        else frame = requestAnimationFrame(advance);
+      }
+      frame = requestAnimationFrame(advance);
+      window.addEventListener('resize', resize);
+    } else {
+      setFallback(true);
+      if (incoming) { setShot('mansion'); arrive(); }
+      timer = setTimeout(() => settle(false), 700);
+    }
     preference?.addEventListener('change', onPreference);
     document.addEventListener('visibilitychange', onVisibility);
     window.addEventListener('popstate', interrupt);
     return () => {
       active = false;
+      cancelAnimationFrame(frame);
       clearTimeout(timer);
       preference?.removeEventListener('change', onPreference);
       document.removeEventListener('visibilitychange', onVisibility);
+      window.removeEventListener('resize', resize);
       window.removeEventListener('popstate', interrupt);
       const restore = node.contains(document.activeElement);
       if (node.close) node.close();
@@ -82,16 +118,17 @@ export default function BeyondCurveTransit({ trip, onArrive, onFinish }) {
       const opener = returnFocus.current;
       if (restore && opener?.isConnected) opener.focus({ preventScroll: true });
     };
-  }, [frames, incoming, onArrive, onFinish, trip]);
+  }, [discovery, incoming, onArrive, onFinish, onMusicCue, route, trip]);
 
-  return <dialog ref={dialog} className="beyond-transit" data-shot={shot} aria-label={t('rick.beyond.scenes.transit')}
+  return <dialog ref={dialog} className="beyond-transit" data-shot={shot} data-renderer={fallback ? 'fallback' : 'canvas'}
+    aria-label={t('rick.beyond.scenes.transit')}
     onCancel={event => { event.preventDefault(); finish.current?.(); }}
     onKeyDown={event => {
       if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); finish.current?.(); }
     }}>
-    <div key={shot} className="beyond-transit-frame" aria-hidden="true">
-      {beyondJourney[shot] && <img src={beyondJourney[shot]} alt="" decoding="async"
-        onError={event => { event.currentTarget.hidden = true; }} />}
+    <div className="beyond-transit-field" aria-hidden="true">
+      {incoming && <SceneBackdrop scene="mansion" className="beyond-transit-destination" />}
+      <canvas ref={canvas} className="beyond-transit-canvas" />
     </div>
     <div className="beyond-transit-caption">
       {shot === 'mansion' ? <><p>{t('rick.beyond.scenes.mansion')}</p><h2>{t('rick.beyond.name')}</h2></> :
