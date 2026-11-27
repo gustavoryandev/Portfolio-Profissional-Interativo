@@ -318,6 +318,10 @@ a.tile:hover, .tile--hover:hover, .stat-tile:hover {
     animation: gn-panel-in var(--gn-dur) var(--gn-ease) .2s backwards;
   }
   .astra-wordmark { animation: gn-power-on 1.4s linear .45s backwards; }
+  .chat-heading h2[data-wordmark-replay="true"] { animation: gn-power-on 1.4s linear both; }
+  :root[data-dimension="beyond-curve"] .astra-wordmark[data-presentation-replay="true"] {
+    animation: gn-power-on 1.4s linear .45s backwards;
+  }
   .astra-starters > li {
     --gn-base: 520ms;
     transform-origin: 50% 0;

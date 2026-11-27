@@ -16,7 +16,7 @@ const SPARKS = [
   { x: '30%', y: '64%', dx: '40px',  dy: '-50px', d: '.18s' },
 ];
 
-export default function AstraHero({ en, compact, prompts, onPick, disabled, greeting, shortcuts }) {
+export default function AstraHero({ en, compact, prompts, onPick, disabled, greeting, shortcuts, presentationToken }) {
   const { t } = useTranslation();
   const persona = useAssistantPersona('full');
   return (
@@ -35,7 +35,7 @@ export default function AstraHero({ en, compact, prompts, onPick, disabled, gree
             {!persona && <p className="astra-greet">{en ? 'Hello, I’m' : 'Olá, eu sou'}</p>}
           </div>
 
-          <p className="astra-wordmark" data-persona={persona?.id} aria-hidden="true">{persona?.name ?? 'Astra'}</p>
+          <p key={presentationToken} className="astra-wordmark" data-persona={persona?.id} data-presentation-replay={presentationToken > 0 || undefined} aria-hidden="true">{persona?.name ?? 'Astra'}</p>
           <div className="dim-line">
             <span className="dim-tag">{en ? 'Interactive AI résumé' : 'Currículo IA interativo'}</span>
           </div>

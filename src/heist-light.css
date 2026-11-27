@@ -245,11 +245,16 @@
 :root[data-theme="la-casa-de-papel-light"] .astra-hero::before,
 :root[data-theme="la-casa-de-papel-light"] .astra-hero .astra-spark { display: none; }
 :root[data-theme="la-casa-de-papel-light"] .astra-hero .astra-wordmark {
-  color: var(--ink);
+  color: var(--primary);
   font-family: var(--heist-display);
-  -webkit-text-fill-color: var(--ink);
-  -webkit-text-stroke: 0;
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: 1.5px var(--primary);
   filter: none;
+  transition: -webkit-text-fill-color 300ms ease, filter 300ms ease;
+}
+:root[data-theme="la-casa-de-papel-light"] .astra-hero:hover .astra-wordmark {
+  -webkit-text-fill-color: var(--primary);
+  filter: drop-shadow(0 0 7px #d9041659) drop-shadow(0 0 20px #b509203d);
 }
 :root[data-theme="la-casa-de-papel-light"] .astra-entrance-panel {
   border-color: var(--control-border);

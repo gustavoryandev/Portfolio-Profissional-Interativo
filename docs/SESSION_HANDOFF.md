@@ -1,5 +1,15 @@
 # Passagem de sessão do portfólio
 
+## Ajustes finais da Astra completa em 27 de novembro de 2026
+
+Na branch `codex/la-casa-de-papel-dark`, a limpeza visual foi registrada separadamente em `95bf1db`. O avatar do Professor no cabeçalho voltou a ser circular; os avatares e seus halos permanecem. O campo de digitação de O Assalto e O Plano usa somente o contorno externo do formulário, com o foco preservado.
+
+O letreiro PROFESSOR agora alterna entre contorno e preenchimento iluminado ao passar o mouse, com vermelho ajustado a cada variante. A animação existente `gn-power-on` é reproduzida ao mudar de tema ou de dimensão na Astra completa, inclusive pela máscara de Dalí e após as travessias de Rick. Quando a conversa recolhe a apresentação, o título do cabeçalho recebe a animação. A troca usa apenas a chave do letreiro e do título; a conversa, os pedidos em andamento e as mensagens não são remontados. Selecionar o mesmo destino novamente não altera a chave. O replay espera o fim das cenas dimensionais e continua sob `prefers-reduced-motion: no-preference`.
+
+Validação: `node --test tests/*.test.mjs` (132/132), `node --test tests/isolated/astra-streaming.test.mjs` (16/16), build Vite fora do checkout, typecheck do portal e `git diff --check` passaram. No navegador local foram vistos O Assalto e O Plano no desktop, O Plano a 390 px sem rolagem horizontal, tema claro convencional, Garagem e Cidadela. Confirmaram-se raio de 50% no avatar do cabeçalho, 0 px de borda no textarea e 1 px no formulário. Os testes isolados cobrem autoria e resposta em curso durante troca de tema/dimensão e a alternância pela máscara. A preferência de movimento reduzido é atendida pela regra CSS existente; não houve ensaio em dispositivo físico. O build conserva o aviso anterior de chunk acima de 500 kB.
+
+[Demonstração local da Astra completa](http://127.0.0.1:5183/chat). A aprovação visual permanece pendente. Nenhuma branch foi integrada; não houve push nem deploy.
+
 ## Fase 04 em 27 de novembro de 2026
 
 O Plano está em `codex/la-casa-de-papel-dark`, na mesma worktree de O Assalto. A base de segurança é `codex/checkpoint-la-casa-light-ac71231`. Quartzo Framboesa migra diretamente para O Plano e o seletor mantém quinze temas. A máscara alterna as variantes. Para rever a abertura, abra o Caderno de planejamento ou o Registro da operação e escolha **Rever abertura**. [Demonstração](http://127.0.0.1:5177/) · [Astra completa](http://127.0.0.1:5177/chat)

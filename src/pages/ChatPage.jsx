@@ -1,5 +1,5 @@
 // src/App.jsx
-import { lazy, Suspense, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useCallback, useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { CircleHelp, Gamepad2, Send, Sparkles, Square } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import Navbar from '../components/Navbar';
@@ -78,7 +78,10 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
   const assistantName = persona?.name ?? 'Astra';
   const viewportRef = useMobileViewport();
   const { actions, actionUi, lab, openFull, setLabHandoff } = useAstra();
-  const { theme, dimension, discoverBeyond } = useContext(ThemeContext) ?? {};
+  const { theme, dimension, crossing, introScene, discoverBeyond } = useContext(ThemeContext) ?? {};
+  const destination = theme === 'rick-morty' ? `${theme}:${dimension}` : theme;
+  const [presentation, setPresentation] = useState(() => ({ destination, token: 0 }));
+  const [presentationActive, setPresentationActive] = useState(false);
   const galo = isGaloTheme(theme);
   const heist = isHeistTheme(theme);
   const composerLabel = t(heist ? 'heist.composer' : 'chat.placeholder');
@@ -104,6 +107,18 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
   const messagesRef = useRef(messages);
   const conversationRef = useRef({ chatContext: null, model: null });
   const live = useLiveContext();
+
+  useLayoutEffect(() => {
+    if (crossing || introScene || presentation.destination === destination) return;
+    setPresentation(current => ({ destination, token: current.token + 1 }));
+    setPresentationActive(true);
+  }, [destination, crossing, introScene, presentation.destination]);
+
+  useEffect(() => {
+    if (!presentation.token) return;
+    const timer = window.setTimeout(() => setPresentationActive(false), 1850);
+    return () => window.clearTimeout(timer);
+  }, [presentation.token]);
 
   useEffect(() => {
     void warmModelCatalog(); // independent of chat history, which already lives locally
@@ -397,7 +412,7 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
               <div className="chat-heading">
                 <div>
                   <span className="astra-mini" aria-hidden="true"><AstraAvatar /></span>
-                  <h2>{persona ? (en ? `Talk to ${assistantName}` : `Converse com ${assistantName}`) : (en ? 'Talk to Astra' : 'Converse com a Astra')}</h2>
+                  <h2 key={presentation.token} data-wordmark-replay={(compact && presentationActive) || undefined}>{persona ? (en ? `Talk to ${assistantName}` : `Converse com ${assistantName}`) : (en ? 'Talk to Astra' : 'Converse com a Astra')}</h2>
                 </div>
                 <span className="astra-heading-actions">
                   <span className="astra-heading-description">{heist && !modal ? t('heist.desk') : en ? 'AI assistant' : 'Assistente de IA'}</span>
@@ -433,7 +448,7 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
                 <div className="space-y-6">
                   {!modal && !showArcade && <AstraHero en={en} compact={compact} prompts={prompts} disabled={loading}
                     onPick={prompt => handleSend(prompt, true)} greeting={showGaloHero ? t(welcomeKey) : undefined}
-                    shortcuts={showGaloHero ? galoShortcuts : undefined} />}
+                    shortcuts={showGaloHero ? galoShortcuts : undefined} presentationToken={presentation.token} />}
 
                   {messages.filter(message => !showGaloHero || message.id !== 'welcome').map(message => (
                     <div id={messageAnchor(message.id)} tabIndex={-1} className="chat-msg-in outline-none" key={message.id}>

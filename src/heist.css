@@ -466,13 +466,21 @@ html:has(.heist-opening[open]) { overflow: hidden; }
 :root[data-theme="la-casa-de-papel-dark"] .astra-hero::before,
 :root[data-theme="la-casa-de-papel-dark"] .astra-hero .astra-spark { display: none; }
 :root[data-theme="la-casa-de-papel-dark"] .astra-wordmark {
-  color: var(--ink);
+  color: var(--accent);
   font-family: var(--heist-display);
   letter-spacing: .005em;
-  -webkit-text-fill-color: var(--ink);
-  -webkit-text-stroke: 0;
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: 1.5px var(--accent);
+  filter: none;
+  transition: -webkit-text-fill-color 300ms ease, filter 300ms ease;
 }
-:root[data-theme="la-casa-de-papel-dark"] .astra-hero:hover .astra-wordmark { -webkit-text-fill-color: var(--ink); }
+:root[data-theme="la-casa-de-papel-dark"] .astra-hero:hover .astra-wordmark {
+  -webkit-text-fill-color: var(--accent);
+  filter: drop-shadow(0 0 8px #ff1734a8) drop-shadow(0 0 25px #d9041680);
+}
+@media (prefers-reduced-motion: reduce) {
+  :root[data-theme|="la-casa-de-papel"] .astra-wordmark { transition: none; }
+}
 :root[data-theme="la-casa-de-papel-dark"] .astra-entrance-panel {
   border-color: #7c4650;
   background: #181315ee;
