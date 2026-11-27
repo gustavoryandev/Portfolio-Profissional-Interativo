@@ -1,6 +1,6 @@
 # Problemas conhecidos e limites de verificação
 
-26 de novembro de 2026 · HEAD `e13942d`; árvore de trabalho com alterações preexistentes. A validação após as correções passou nos 120 testes, no build e no typecheck do portal. Os itens 1 e 5 foram cobertos pela validação atual; os demais registram evidências da auditoria anterior e não foram reproduzidos novamente nesta etapa. “Reproduzido” indica comportamento observado, “confirmado em código” indica uma condição verificável nas fontes, e “hipótese” indica uma explicação que ainda precisa de teste.
+27 de novembro de 2026 · Os resultados da Fase 01 estão na [avaliação da Astra](ASTRA_EVALUATION.md) e na [matriz de regressão](ASTRA_REGRESSION_REPORT.md). Os demais itens mantêm o contexto da auditoria de 26 de novembro. “Reproduzido” indica comportamento observado, “confirmado em código” indica uma condição verificável nas fontes, e “hipótese” indica uma explicação que ainda precisa de teste.
 
 ## 1. API da Astra indisponível em processo novo — resolvido
 
@@ -8,13 +8,11 @@
 - **Verificação atual.** A importação normal de `api/chat.js` retornou um handler válido e a suíte completa passou nos 120 testes, sem injeção de variável global. Build e typecheck do portal também passaram. Não foi feita validação de produção.
 - O diff local independente em `api/chat.js` foi preservado e não fez parte desta validação corretiva. [Código](../api/chat.js) · [Resultados](SESSION_HANDOFF.md)
 
-## 2. Respostas antigas recebem o nome da nova persona — alto, reproduzido
+## 2. Respostas antigas recebem o nome da nova persona — resolvido
 
 - **Evidência.** No cliente real com NDJSON controlado, texto enviado para Meeseeks terminou sob o rótulo Squanchy, texto enviado para Squanchy terminou sob Sr. Bunda Cagada e o turno dessa última persona terminou sob Astra ao selecionar Escuro.
-- **Regressão isolada.** Os novos casos determinísticos repetem troca de dimensão e de tema depois do primeiro fragmento. Ambos confirmam que a prévia continua sob Squanchy, mas a mensagem final troca para Mr. Poopybutthole ou Astra. São duas falhas esperadas em `node --test tests/isolated/astra-streaming.test.mjs tests/isolated/project-question.test.mjs`; permanecem fora da suíte principal. [Matriz e limitações](ASTRA_REGRESSION_REPORT.md)
-- **Causa.** `ChatPage` sobrevive às trocas, mantém o pedido em andamento e captura a aparência só no envio. A mensagem final não guarda identidade e a bolha consulta o contexto visual atual. O mesmo vale para mensagens anteriores já concluídas.
-- **Risco associado.** Um plano ou continuação de revisão pode chegar depois da mudança. O código verifica abort e versão do editor, mas o teste de reprodução reteve texto, não executou uma ação tardia. Não há evidência de execução indevida nesta amostra.
-- **Critério de resolução.** A autoria visível do turno acompanha sua requisição antes, durante e depois da troca. O próximo turno usa a nova persona. Testar também a troca de interface pedida por uma ferramenta. [Envio](../src/pages/ChatPage.jsx) · [Bolha](../src/components/MessageBubble.jsx) · [Plano](IMPLEMENTATION_PLAN.md)
+- **Causa e correção.** As bolhas concluídas consultavam o cenário atual. O commit `947060d` inclui o autor de origem na espera, no streaming, no histórico e na conclusão. A saudação acompanha o cenário e o próximo turno resolve sua própria identidade.
+- **Validação.** As duas reproduções originais passaram. Também foram verificados troca antes do primeiro fragmento, mudança de superfície, fechamento, autoria da Astra padrão e abertura da completa por ferramenta. [Matriz e limitações](ASTRA_REGRESSION_REPORT.md)
 
 ## 3. Definições vazias desativam o contato local — alto, reproduzido
 
@@ -44,7 +42,7 @@
 | Dependência | Evidência e impacto | Condição para avançar |
 | --- | --- | --- |
 | Terceira dimensão | Bootstrap, passagem Garagem/Cidadela, variantes do portal, cenas, áudio e resolvedor de persona supõem dois destinos. | Definir destino e retorno em cada estado e testar restauração e interrupção. |
-| Novos personagens | A aparência só sai do cliente para Rick. Caminhos, traduções, nomes no servidor e contornos do retrato estão ligados aos IDs existentes. | Perfil permitido, chaves PT/EN e retrato estático ou geometria de atuação por ID. |
+| Novos personagens | A aparência do turno chega ao servidor. O resolvedor só reconhece a matriz Rick atual, e os caminhos, traduções, perfis e contornos do retrato usam os IDs existentes. | Perfil permitido, chaves PT/EN e retrato estático ou geometria de atuação por ID. [Contrato](ASTRA_PERSONAS_HANDOFF.md) |
 | Fundo La Casa Dark | Nenhum asset de produção está identificado como o original aprovado. | Localizar e vincular o arquivo aprovado à sua origem antes da integração artística. |
 | “For the Damaged Coda” e novas artes | A faixa é identificável no catálogo oficial. As mídias novas não constam no inventário de produção. | Definir reprodução autorizada e origem dos novos retratos e fundos. |
 | Fotografia de Lucas | O endereço publicado indicado retornou 404. O código está acessível e o README declara MIT, sem LICENSE independente na revisão consultada. | Usar fotos próprias/autorizadas e preservar os avisos aplicáveis se houver cópia de código. |
@@ -59,3 +57,8 @@ O histórico inclui vozes antigas e a saudação mutável participa da âncora d
 - A auditoria pontual da fase 14 identificou que o controle de idioma tinha `aria-label`, mas seu contêiner era um `<div>` genérico sem papel de grupo. O contêiner agora expõe `role="group"` e reutiliza a tradução existente para o nome acessível.
 - No menu mobile, Escape não fechava o diálogo e o foco permanecia no botão interno de fechar. O menu agora trata Escape e `cancel`, fecha o `<dialog>` e devolve foco ao acionador; o foco visível foi conferido no navegador.
 - A inspeção foi localizada aos fluxos e viewports exercitados. Não representa auditoria completa de WCAG nem substitui testes com tecnologia assistiva; veja [ACCESSIBILITY_PREPARATION_REPORT.md](ACCESSIBILITY_PREPARATION_REPORT.md).
+
+## 9. Disponibilidade de Gemini e cobertura semântica
+
+- Uma chamada real em JSON expirou no provedor e retornou HTTP 500. A repetição em NDJSON completou. A política de fallback atual continua cobrindo indisponibilidade e resposta incompleta dentro dos limites por modelo. A cobertura de cota, cancelamento e erro de transporte usa mocks.
+- A política da saudação e do erro local foi corrigida. Fallbacks de provedor e respostas parciais canceladas continuam no idioma do turno. O ensaio semântico usou uma amostra curta. [Avaliação](ASTRA_EVALUATION.md) · [I18N](I18N_PENDING.md)

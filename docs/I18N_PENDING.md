@@ -1,5 +1,13 @@
 # Levantamento de internacionalização pendente
 
+## Atualização da Fase 01
+
+- **I18N-02 resolvido.** O tratamento compartilhado de erro usa o idioma capturado e a chave `chat.erro` para apresentar o texto no idioma atual sem pedir tradução ao provedor. O teste atrasado de HTTP 503 troca o idioma antes da falha e verifica texto e autor.
+- **Saudação temática após trocar idioma e interface.** O navegador exibiu a saudação antiga da Cidadela na compacta. A saudação já chega localizada e agora informa à bolha o próprio idioma. O teste verifica a saudação atual e a ausência de chamadas de tradução para esse texto. A demonstração final exibiu a saudação Squanchy na completa e a resposta anterior de Meeseeks em inglês.
+- **Pendências de produto.** I18N-H01 permanece para fallbacks de provedor e fragmentos cancelados. I18N-H02 descreve a diferença atual entre os onboardings.
+
+O levantamento a seguir registra o estado em 26 de novembro. [Resultados da fase](ASTRA_REGRESSION_REPORT.md)
+
 26 de novembro de 2026 · Revisão estática focada na Astra compacta e completa, seguida de correções pontuais em I18N-01 e I18N-03. Nenhum prompt, persona, modelo, streaming, autoria de resposta ou histórico foi alterado. O teste isolado de mudança de idioma durante streaming, já registrado como aprovado em `ASTRA_REGRESSION_REPORT.md`, não foi repetido.
 
 ## Inconsistência pendente

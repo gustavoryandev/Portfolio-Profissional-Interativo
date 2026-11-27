@@ -1,4 +1,24 @@
-# Passagem de sessão — auditoria local
+# Passagem de sessão do portfólio
+
+## Fase 01 em 27 de novembro de 2026
+
+**Branch local:** `codex/astra-phase-01`, criada no estado de `e13942d`. A demonstração foi aberta em [Astra completa](http://127.0.0.1:5174/chat). A sessão local não fez merge, push nem deploy.
+
+| Commit | Escopo |
+| --- | --- |
+| `a95b51f` | Preparações anteriores à fase nos arquivos da Astra, incluindo fixtures, traduções e relatórios. |
+| `947060d` | Autoria imutável por turno em `ChatPage`, bolhas, avatares e Laboratório. |
+| `751babc` | Estado assíncrono, cancelamento do leitor, ações tardias e validação do editor e da execução. |
+| `69675fd` | Idioma da saudação e dos erros fixos em `ChatPage`. |
+| `77a749d` | Roteamento de perguntas profissionais compostas em `conversationResource.js`. |
+| `0305710` | Referências a código, exemplos e linguagem no prompt de ferramentas do Laboratório. |
+| `4d5eafb` | Regressões de cliente, transporte, motor de ações e contrato do endpoint. |
+
+**Checkpoint.** A pasta local `%LOCALAPPDATA%/Portfolio-Astra-Phase01-a33d96f698844ef8829d2704fc5358a1` guarda HEAD, inventário, patch binário das alterações rastreadas e cópia dos arquivos não rastreados. O cache Python permaneceu no checkout. Configuração de ambiente e mídia pendente ficaram fora dos commits. As preparações que não cruzavam a fase continuam na árvore de trabalho, incluindo o diff de `api/chat.js`, a foto, os ajustes de acessibilidade e as mídias.
+
+**Aceite técnico.** 11 testes isolados e 125 da suíte principal aprovados, com build temporário, typecheck do portal, importação direta de `api/chat.js` e `git diff --check`. Rodar as duas suítes a cada mudança da Astra. A avaliação distingue simulações, Gemini real, execução no navegador e fatos ainda sem cobertura. A terceira dimensão fica para depois da aprovação desta demonstração. [Matriz](ASTRA_REGRESSION_REPORT.md) · [Avaliação](ASTRA_EVALUATION.md) · [Contrato das personas](ASTRA_PERSONAS_HANDOFF.md)
+
+## Histórico da auditoria em 26 de novembro
 
 **Validação após as correções — 26 de novembro de 2026.** HEAD está em `e13942d` (`main`), dois commits à frente de `origin/main`. Em execução local, a importação normal de `api/chat.js`, a suíte completa (**120 testes**), o build de produção e `tsc --noEmit -p tsconfig.portal.json` passaram. O build transformou 2.271 módulos e emitiu o aviso já conhecido de chunks acima de 500 kB. Foi gerado em diretório temporário fora do repositório. Nenhum arquivo de implementação, credencial, commit, merge, push ou deploy foi alterado nesta validação.
 

@@ -1,45 +1,43 @@
-# Relatório de regressão isolada da Astra
+# Matriz de regressão da Astra
 
-Preparação local com mocks determinísticos. Não houve chamadas a provedores reais, alteração de código de produção, prompt, configuração da Astra, dependência ou teste existente.
+27 de novembro de 2026 · Validação da Fase 01 em `codex/astra-phase-01`.
 
-## Resultados
+Os testes isolados originais foram executados na entrada da fase. Três passaram e dois falharam, com as respostas de Squanchy passando a exibir Mr. Poopybutthole e Astra no final. As asserções originais continuam na suíte isolada, que agora passou nos **11 casos**.
 
-| Cenário | Cobertura | Resultado verificado |
+## Cenários verificados
+
+| Cenário | Meio de verificação | Resultado |
 | --- | --- | --- |
-| Troca de persona durante streaming | Novo caso isolado: atravessar Garagem → Cidadela depois do primeiro fragmento | **Reproduzido.** A bolha de streaming permanece como Squanchy, mas a mensagem final aparece como Mr. Poopybutthole. O teste falha intencionalmente. |
-| Troca de tema durante streaming | Novo caso isolado: trocar Rick por Escuro depois do primeiro fragmento | **Reproduzido.** A bolha de streaming permanece como Squanchy, mas a mensagem final aparece como Astra. O teste falha intencionalmente. |
-| Atribuição correta das respostas | Os dois casos acima verificam nome inicial, nome durante o fluxo e autoria final | **Falha conhecida confirmada** nos dois resultados finais; não foi corrigida nesta tarefa. |
-| Mudança de idioma | Novo caso isolado durante um fluxo pendente; mock determinístico para tradução | **Passou.** O pedido conserva `lang: en`; a resposta concluída recebe a tradução portuguesa da interface atual. |
-| Arcade somente na versão completa | `tests/arcade.test.mjs`: “arcade actions load and run only in Full Astra and stale async loads are discarded”; integração verifica o contexto completo | Cobertura existente; não duplicada nem reexecutada nesta tarefa. |
-| Pergunta sobre projeto sem abrir card | Novo teste isolado com o handler real e Gemini simulado; pergunta direta sobre ROTA, sem histórico de conversa | **Passou.** O perfil e a regra sobre não emitir card para pergunta específica chegam ao prompt. O texto final usa uma resposta fixa do mock; qualidade semântica de geração não é medida. |
-| Exemplo simples de programação | Novo caso isolado de renderização de resposta JavaScript simulada; a integração existente também verifica que marcador dentro de código não abre card | **Passou.** O bloco de código é exibido e não cria card de projeto/xadrez. Não avalia a correção de código produzido por um modelo real. |
-| Provedor de IA indisponível | `tests/live-endpoint.test.mjs`: “identity replies survive a provider outage while model-dependent requests stay degraded” e “when no completion is available the browser gets a themed reply and no partial text or actions” | Cobertura determinística existente; não duplicada nem reexecutada nesta tarefa. |
+| Garagem → Cidadela e Rick → Escuro, durante streaming | NDJSON controlado nos dois casos originais | Rótulo inicial, prévia e final mantêm Squanchy. |
+| Compacta → completa antes do primeiro fragmento, fechamento e reabertura | NDJSON controlado no cliente e navegação no navegador | A espera, o primeiro fragmento, a mensagem final e o histórico conservam Meeseeks. O turno seguinte usa Squanchy e recebe o texto anterior no histórico. |
+| Troca depois de concluir e Astra padrão | Mock e navegador | A resposta anterior mantém a autoria. O avatar padrão se conserva ao mudar para Rick. |
+| Idioma antes, durante e depois da resposta | Mock de tradução, verificações de UI e tradução do endpoint | O pedido mantém o idioma inicial. Texto, nomes e erro fixo acompanham a interface conforme o tipo de mensagem. Blocos de código, marcadores e URLs são preservados pelo contrato da tradução. |
+| Parar, reenviar e receber JSON atrasado | Resposta atrasada controlada | O pedido anterior não aplica ações, não limpa a prévia nova e não entra como resposta válida no histórico do modelo. |
+| Cancelar NDJSON em leitura, receber reset ou receber ações antes de done | Mocks no parser e endpoint | O leitor é cancelado, texto parcial é substituído em fallback e ações descartadas não chegam ao motor. |
+| Abrir a completa por comando, repetir abertura com Arcade ativo | Browser e mocks de integração | A ação abre a completa quando aplicável. A resposta tardia conserva o Arcade já aberto. |
+| Continuação do Laboratório após mudança de superfície | JSON de plano e NDJSON de continuação | O segundo pedido leva exemplo e código corretos e conserva superfície, persona e idioma de origem. A execução proposta aparece para revisão. |
+| Leitura de editor modificado, parada de execução posterior, revisão, aprovação e duplicação | Motor de ações e worker simulados | O plano velho é descartado quando o editor ou a execução mudou. Aprovar duas vezes não dispara nova execução. Alterar o código após revisão invalida a proposta. |
+| Código e saída do Laboratório | Navegador com workers reais e fixtures de edição | JavaScript e Python retornam `6`. A saída e o rascunho JavaScript sobrevivem à navegação. Propor/confirmar edição e distinguir código de saída têm cobertura automatizada. |
+| Projeto sem card, formação, lacuna factual, referência anterior e programação simples | Contratos simulados e amostra Gemini real | Catálogo enviado, ROTA identificado, formação e objetivo respondidos, certificação indisponível sinalizada e exemplos/conversão apresentados. |
+| Pedido ambíguo de código e projeto 2 do Laboratório | Gemini real e teste do contrato de ferramentas | Sem referência, pede esclarecimento. Com referência, seleciona e lê `cart`. O snapshot público permite explicação do código. |
+| Indisponibilidade do Gemini | Mocks no endpoint e amostra real | Fallback cobre falhas e respostas incompletas. A amostra teve um timeout em JSON e completou a repetição em NDJSON. |
+| GitHub, WakaTime, Canvas e Chess.com | Atualização de contexto real e cobertura de contratos | HTTP 200 e fontes `ok`. WakaTime informou também `processing`. |
+| Arcade, Xadrez e análise de partidas | Suíte principal e demonstração | O lobby está na completa. A compacta encaminha à completa. O Xadrez abriu pelo chat. Replay e análise foram exercitados pela suíte. |
 
-Os testes existentes de parser NDJSON, fallback, persona, catálogo e integração estão em `tests/chat-stream.test.mjs`, `tests/assistant-persona.test.mjs`, `tests/projects-catalog.test.mjs` e `tests/astra-integration.test.mjs`. A amostra real de programação e a pergunta sobre ROTA descritas na auditoria anterior são verificações manuais; não equivalem a testes automatizados determinísticos.
+A amostra de troca de persona em dois turnos não evidenciou perda de fatos ou mistura de apresentação. Conversas longas representativas, dispositivos físicos, Wandbox e execução prolongada de jogos ficam fora da verificação desta fase. [Amostras e limites](ASTRA_EVALUATION.md)
 
-## Execução
+## Validação obrigatória antes de alterar a Astra
 
-Na raiz do repositório, com as dependências já instaladas:
+Executar a suíte isolada e a principal. A primeira inclui as regressões de autoria e a pergunta de projeto sem card. A expansão do catálogo de personas deve passar nas duas.
 
 ```powershell
 node --test tests/isolated/astra-streaming.test.mjs tests/isolated/project-question.test.mjs
+node --test --test-reporter=dot tests/*.test.mjs
+node node_modules/typescript/bin/tsc --noEmit -p tsconfig.portal.json
+node --input-type=module -e 'const {default: handler}=await import("./api/chat.js"); if(typeof handler!=="function") process.exitCode=1'
+git diff --check
+$astraBuild = Join-Path $env:TEMP ('portfolio-astra-build-' + [guid]::NewGuid().ToString('N'))
+npm run build -- --outDir $astraBuild
 ```
 
-Resultado nesta execução: **5 testes; 3 passaram e 2 falharam**. As duas falhas são os resultados esperados que reproduzem a autoria final incorreta. O código de saída é diferente de zero enquanto o defeito existir. Os testes ficam em `tests/isolated/` e não entram no comando principal existente:
-
-```powershell
-node --test tests/*.test.mjs
-```
-
-Para executar só os casos sem falha conhecida:
-
-```powershell
-node --test --test-name-pattern "language change|simple programming|typed project question" tests/isolated/astra-streaming.test.mjs tests/isolated/project-question.test.mjs
-```
-
-## Limitações e próximos passos
-
-- Os mocks validam o contrato de streaming, a captura do idioma, o encaminhamento dos fatos de perfil e a renderização. Não certificam qualidade ou factualidade de respostas de Gemini.
-- A autoria incorreta observada ocorre na mensagem final; nos dois casos isolados, o rótulo da prévia durante o streaming permaneceu Squanchy.
-- Os testes de indisponibilidade, Arcade e demais integrações existentes foram identificados por inspeção e não repetidos.
-- A correção futura deve preservar a identidade do turno desde o envio e usar esse snapshot na bolha final, conforme o contrato e os critérios de aceite em `IMPLEMENTATION_PLAN.md`.
+**Resultado final.** 11 casos isolados e 125 na suíte principal, todos aprovados. Importação normal da API, typecheck do portal, `git diff --check` e build de produção aprovados. O Vite transformou 2.271 módulos e reportou o aviso conhecido de chunks maiores que 500 kB. A saída do build foi gravada em pasta temporária.
