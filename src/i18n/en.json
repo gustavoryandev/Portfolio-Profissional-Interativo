@@ -814,6 +814,33 @@
         "full": "You’re in the full version with Mr. Meeseeks, on the dedicated chat page."
       }
     },
+    "birdperson": {
+      "name": "Birdperson",
+      "intro": "Let’s take a careful look at the problem.",
+      "welcome": "I’m Birdperson, Astra’s presentation in the Garage. We can explore Gustavo’s projects or walk through a piece of code together.",
+      "identity": "I’m Birdperson in this Astra presentation. I can help you understand Gustavo’s projects and make considered technical decisions.",
+      "surface": {
+        "full": "You’re in the full conversation with Birdperson, in the Garage."
+      }
+    },
+    "evil-rick": {
+      "name": "Evil Rick",
+      "intro": "Start with the problem. Details can follow.",
+      "welcome": "Evil Rick. Tell me what you want to know about Gustavo’s projects, background, or code.",
+      "identity": "In this dimension I’m Evil Rick, the Rick associated with Evil Morty. I’m still Astra, Gustavo’s portfolio assistant.",
+      "surface": {
+        "compact": "You’re in the compact conversation with Evil Rick, inside the portfolio."
+      }
+    },
+    "evil-morty": {
+      "name": "Evil Morty",
+      "intro": "Every decision opens one path and closes another.",
+      "welcome": "I’m Evil Morty, Astra’s presentation beyond the Curve. We can examine a project’s decisions, their consequences, or a problem in the Lab.",
+      "identity": "I’m Evil Morty in this Astra presentation. I help you investigate Gustavo’s projects and understand the consequences of technical choices.",
+      "surface": {
+        "full": "You’re in the full conversation with Evil Morty, beyond the Curve."
+      }
+    },
     "squanchy": {
       "name": "Squanchy",
       "intro": "Ready to squanch?",

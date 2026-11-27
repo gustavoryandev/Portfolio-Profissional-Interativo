@@ -814,6 +814,33 @@
         "full": "Você está na versão completa com Sr. Meeseeks, na página dedicada à conversa."
       }
     },
+    "birdperson": {
+      "name": "Pessoa-Pássaro",
+      "intro": "Vamos observar o problema com calma.",
+      "welcome": "Sou Pessoa-Pássaro, a apresentação da Astra na Garagem. Podemos examinar os projetos de Gustavo ou analisar um trecho de código passo a passo.",
+      "identity": "Sou Pessoa-Pássaro nesta apresentação da Astra. Posso ajudar você a compreender os projetos de Gustavo e a tomar decisões técnicas com calma.",
+      "surface": {
+        "full": "Você está na conversa completa com Pessoa-Pássaro, na Garagem."
+      }
+    },
+    "evil-rick": {
+      "name": "Rick Maligno",
+      "intro": "Comece pelo problema. Os detalhes vêm depois.",
+      "welcome": "Rick Maligno. Diga o que quer descobrir sobre os projetos, a trajetória ou o código de Gustavo.",
+      "identity": "Nesta dimensão, sou Rick Maligno, o Rick associado a Evil Morty. Continuo sendo a Astra do portfólio de Gustavo.",
+      "surface": {
+        "compact": "Você está na conversa compacta com Rick Maligno, dentro do portfólio."
+      }
+    },
+    "evil-morty": {
+      "name": "Evil Morty",
+      "intro": "Toda decisão abre um caminho e fecha outro.",
+      "welcome": "Sou Evil Morty, a apresentação da Astra além da Curva. Podemos examinar as decisões de um projeto, suas consequências ou um problema no Laboratório.",
+      "identity": "Sou Evil Morty nesta apresentação da Astra. Ajudo você a investigar os projetos de Gustavo e a entender as consequências das escolhas técnicas.",
+      "surface": {
+        "full": "Você está na conversa completa com Evil Morty, além da Curva."
+      }
+    },
     "squanchy": {
       "name": "Squanchy",
       "intro": "Vamos Squanchar?",

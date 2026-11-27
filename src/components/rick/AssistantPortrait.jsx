@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState, useSyncExternalStore } from 'react';
 import { useReducedSceneMotion } from './sceneAssets';
 import useCharacterActivity from './useCharacterActivity';
+import AstraAvatar from '../AstraAvatar';
 
 // Eye contours are registered in the original PNG coordinates. Only the lids
 // move over the intact portrait, including where the eyes extend past the face.
@@ -21,7 +22,12 @@ const portraits = {
 const noSubscribe = () => () => {};
 const neutral = { name: 'idle', beat: 0 };
 
-export default function AssistantPortrait({ persona, visible, focused, typing, loading, streaming, last }) {
+export default function AssistantPortrait({ persona, ...performance }) {
+  if (!portraits[persona.id]) return <span className="assistant-portrait assistant-portrait-static" aria-hidden="true"><AstraAvatar /></span>;
+  return <AnimatedPortrait persona={persona} {...performance} />;
+}
+
+function AnimatedPortrait({ persona, visible, focused, typing, loading, streaming, last }) {
   const ref = useRef(null);
   const previous = useRef(null);
   const reduced = useReducedSceneMotion();

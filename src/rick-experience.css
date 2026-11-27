@@ -545,6 +545,11 @@ img[data-astra-character] { background: radial-gradient(circle at 50% 30%, #2545
 img[data-astra-character="meeseeks"] { object-fit: cover !important; object-position: center 15% !important; }
 img[data-astra-character="poopybutthole"] { object-fit: cover !important; object-position: center 18% !important; }
 img[data-astra-character="squanchy"] { object-fit: cover !important; object-position: center 65% !important; padding: 0; }
+img[data-astra-character]:is([data-astra-character="birdperson"], [data-astra-character="evil-rick"], [data-astra-character="evil-morty"]) {
+  object-fit: cover !important;
+  padding: 0;
+}
+.assistant-portrait-static > img { width: 100%; height: 100%; border-radius: inherit; }
 :root[data-theme="rick-morty"] .astra-compact .center-panel { border: 5px solid var(--rick-frame); border-radius: 14px; background: var(--rick-console); }
 :root[data-theme="rick-morty"] .astra-full .astra-hero .astra-avatar { width: 112px; height: 112px; flex-shrink: 0; }
 :root[data-theme="rick-morty"] .astra-entrance-avatar { width: 128px; height: 128px; }
