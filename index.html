@@ -12,6 +12,8 @@
       try { savedTheme = localStorage.getItem('theme'); } catch {}
       let savedDimension = 'lab';
       try { savedDimension = savedTheme === 'rick-morty-secret' ? 'corrupted' : localStorage.getItem('rick-morty-dimension'); } catch {}
+      let beyondUnlocked = false;
+      try { beyondUnlocked = localStorage.getItem('rick-morty-beyond-unlocked') === '1'; } catch {}
       // Keep these aliases in sync with src/data/themes.js.
       const legacyThemeIds = {
         'rick-morty-secret': 'rick-morty',
@@ -27,7 +29,11 @@
       const theme = lightThemes.includes(savedTheme) || darkThemes.includes(savedTheme) ? savedTheme : 'dark';
       const root = document.documentElement;
       root.dataset.theme = theme;
-      if (theme === 'rick-morty') root.dataset.dimension = savedDimension === 'corrupted' ? 'corrupted' : 'lab';
+      // Match readRickDimension in src/data/rickDimensions.js.
+      if (theme === 'rick-morty') {
+        root.dataset.dimension = savedDimension === 'corrupted' ? 'corrupted'
+          : beyondUnlocked && savedDimension === 'beyond-curve' ? 'beyond-curve' : 'lab';
+      }
       root.classList.toggle('dark', darkThemes.includes(theme));
       root.toggleAttribute('data-custom-theme', theme !== 'light' && theme !== 'dark');
     </script>
