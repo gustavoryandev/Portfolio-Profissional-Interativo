@@ -26,6 +26,7 @@ interface DrawingRefs {
   surface: RefObject<SVGGElement | null>;
   noise: RefObject<SVGFEOffsetElement | null>;
   light: RefObject<SVGGElement | null>;
+  rim: RefObject<SVGGElement | null>;
   drops: RefObject<SVGGElement | null>;
 }
 
@@ -46,6 +47,7 @@ function CurrentClock({ refs, elapsed, speed, rate }: {
     refs.noise.current?.setAttribute('dx', String(3.2*Math.sin(t*.48)));
     refs.noise.current?.setAttribute('dy', String(2.1*Math.sin(t*.66)));
     refs.light.current?.setAttribute('opacity', String(.8+.13*Math.sin(t*.81)));
+    refs.rim.current?.setAttribute('opacity', String(.84+.13*Math.sin(t*1.32)));
     const particles = refs.drops.current?.children;
     if (!particles) return;
     for (let i=0; i<particles.length; i++) {
@@ -100,11 +102,12 @@ export default function DimensionalPortal({ isOpen, variant = 'garage', size = 3
   }, [isOpen, progress, reduced, style]);
   const elapsed = useRef(0);
   const refs = { deep: useRef<SVGGElement>(null), surface: useRef<SVGGElement>(null),
-    noise: useRef<SVGFEOffsetElement>(null), light: useRef<SVGGElement>(null), drops: useRef<SVGGElement>(null) };
+    noise: useRef<SVGFEOffsetElement>(null), light: useRef<SVGGElement>(null), rim: useRef<SVGGElement>(null),
+    drops: useRef<SVGGElement>(null) };
   const flowing = isOpen && visible && !effectsPaused && !reduced;
   const box = { '--portal-width': portalWidth(size), aspectRatio: bounded(aspectRatio, 1, .65, 1.6) } as CSSProperties;
   return <div ref={host} className={`dimensional-portal ${className}`.trim()} style={box}
-    data-quality={level} data-flowing={flowing} data-rick-motion>
+    data-portal-variant={variant} data-quality={level} data-flowing={flowing} data-rick-motion>
     <motion.div aria-hidden="true" className="dimensional-portal-energy"
       style={{ opacity, scale: reduced ? 1 : scale, rotate: reduced ? 0 : rotate }}>
       <svg viewBox="0 0 240 240" preserveAspectRatio="none" focusable="false">
@@ -134,7 +137,11 @@ export default function DimensionalPortal({ isOpen, variant = 'garage', size = 3
             <feDisplacementMap in="SourceGraphic" in2="drift" scale={style.displacement} xChannelSelector="R" yChannelSelector="G"/>
           </filter>
         </defs>
-        <motion.g style={{opacity: openingGlow}}><ellipse cx="120" cy="120" rx="119" ry="118" fill={url('halo')} opacity={glow}/></motion.g>
+        <motion.g style={{opacity: openingGlow}}>
+          <g ref={variant === 'beyond-curve' ? refs.rim : undefined}>
+            <ellipse cx="120" cy="120" rx="119" ry="118" fill={url('halo')} opacity={glow}/>
+          </g>
+        </motion.g>
         <g mask={url('opening')}>
           <path d={silhouette} fill={url('pool')} stroke={p.shadow} strokeWidth="1.8"/>
           <g clipPath={url('edge')}>

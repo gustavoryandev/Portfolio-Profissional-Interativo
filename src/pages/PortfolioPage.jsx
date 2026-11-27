@@ -125,7 +125,7 @@ export default function PortfolioPage({ activeSection, projectFocus, onSectionLi
         <ScrollReveal delay={beyond ? 0 : .08} className="hero-profile glass-panel">
           {dimensional && !beyond && <div className="dimension-scan-label">{t(secret ? 'rick.citizen' : 'rick.researcher')}<span>{t(secret ? 'rick.dockOnline' : 'rick.stable')}</span></div>}
           <div className="portrait-orbit" aria-hidden="true" />
-          {dimensional ? <PortraitPortal variant={beyond ? BEYOND_CURVE : secret ? 'citadel' : 'garage'} effectsPaused={effectsPaused || beyond}>{portrait}</PortraitPortal> : portrait}
+          {dimensional ? <PortraitPortal variant={beyond ? BEYOND_CURVE : secret ? 'citadel' : 'garage'} effectsPaused={effectsPaused || (beyond && crossing)}>{portrait}</PortraitPortal> : portrait}
           <div className="hero-profile-caption">
             <span>{en ? 'DEVELOPER' : 'DESENVOLVEDOR'} <b>/</b> {en ? 'STUDENT' : 'ESTUDANTE'}</span>
             <strong>{galo && <MapPin size={16} aria-hidden="true" />}{perfil.localizacao}</strong>

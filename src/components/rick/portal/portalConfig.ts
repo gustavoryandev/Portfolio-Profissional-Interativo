@@ -29,7 +29,7 @@ export const portalVariants: Record<PortalVariant, PortalStyle> = {
   },
   'beyond-curve': {
     palette: { abyss: '#211807', shadow: '#6e5116', body: '#b18016', energy: '#ffd84a', current: '#eab308', accent: '#e9c66a', light: '#fff4ba' },
-    speed: .64, displacement: 2.8, spring: { stiffness: 166, damping: 24, mass: .82 },
+    speed: 1.32, displacement: 2.8, spring: { stiffness: 166, damping: 24, mass: .82 },
   },
 };
 
