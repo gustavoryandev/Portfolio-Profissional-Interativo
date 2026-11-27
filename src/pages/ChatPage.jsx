@@ -8,6 +8,7 @@ import AstraHero from '../components/AstraHero';
 import AstraAvatar, { AstraSurfaceProvider } from '../components/AstraAvatar';
 import DimensionAstraSignal from '../components/DimensionAstraSignal';
 import { useAssistantPersona } from '../context/AssistantAppearanceContext';
+import { ASTRA_PERSONA_ID } from '../data/assistantPersonas';
 import { ThemeContext } from '../context/ThemeContext';
 import { isGaloTheme } from '../data/themes';
 import { DESIGN_SYSTEM_ACTION, isDesignSystemRequest } from '../data/designSystem';
@@ -43,12 +44,12 @@ const MOTION_CSS = `
 `;
 
 // Mesmo avatar, rótulo e forma do bubble da Astra: sem salto de layout quando a resposta chega
-function TypingIndicator({ label }) {
-  const persona = useAssistantPersona();
+function TypingIndicator({ author, label }) {
+  const persona = useAssistantPersona(undefined, author);
   return (
     <div className="my-2 flex w-full justify-start gap-3" role="status" aria-label={label}>
       <div aria-hidden="true" className="avatar-astra mt-2 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border">
-        <AstraAvatar />
+        <AstraAvatar author={author} />
       </div>
       <div className="message-content">
         <div className="astra-label" aria-hidden="true"><span>{persona?.name ?? 'Astra'}</span></div>
@@ -66,7 +67,8 @@ function TypingIndicator({ label }) {
 export default function ChatPage({ modal = false, visible = true, onReady, onSelectSection, draft,
   arcade, arcadeChallenge, onOpenArcade, onCloseArcade }) {
   const { t, i18n } = useTranslation();
-  const persona = useAssistantPersona(modal ? 'compact' : 'full');
+  const surface = modal ? 'compact' : 'full';
+  const persona = useAssistantPersona(surface);
   const assistantName = persona?.name ?? 'Astra';
   const viewportRef = useMobileViewport();
   const { actions, actionUi, openFull, setLabHandoff } = useAstra();
@@ -170,6 +172,14 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
       return;
     }
     if (!query || sendingRef.current) return;
+    const userId = nextId();
+    const id = nextId();
+    const turn = idCounter.current;
+    const requestLanguage = i18n.language;
+    const author = Object.freeze({
+      turnId: turn, attemptId: 1, personaId: persona?.id ?? ASTRA_PERSONA_ID,
+      theme, dimension, surface, language: requestLanguage,
+    });
     if (isChessReplayRequest(query)) {
       followOutput.current = true;
       setInput('');
@@ -182,9 +192,9 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
         invalid = /^(?:\s*\[|```|\d+\.|\/pgn\s)/i.test(query);
       }
       const translationKey = game ? 'chat.chessReplay.sent' : 'chat.chessReplay.title';
-      appendMessage({ id: nextId(), sender: 'user', text: t(translationKey), translationKey, lang: i18n.language });
+      appendMessage({ id: userId, sender: 'user', text: t(translationKey), translationKey, lang: requestLanguage });
       appendMessage({
-        id: nextId(), sender: 'ai', lang: i18n.language,
+        id, sender: 'ai', lang: requestLanguage, author,
         text: '[CHESS_REPLAY]',
         chessReplay: { game, invalid },
       });
@@ -192,10 +202,9 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
     }
     const selectedActions = resourceActions ?? (isDesignSystemRequest(query) ? [DESIGN_SYSTEM_ACTION] : undefined);
     sendingRef.current = true;
-    const requestLanguage = i18n.language;
     followOutput.current = true;
 
-    appendMessage({ id: nextId(), sender: 'user', text: query, lang: requestLanguage });
+    appendMessage({ id: userId, sender: 'user', text: query, lang: requestLanguage });
     setInput('');
     const session = showArcade ? arcadeSession.current : null;
     const intent = arcadeShortcut ?? (!selectedActions && !predefinedSuggestion && arcadeIntent(query, session?.getState().game, showArcade));
@@ -203,9 +212,9 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
       setLoading(true);
       try {
         const response = await answerArcade(intent, { en, compact: modal || !visible, session, openArcade: onOpenArcade });
-        if (mounted.current) appendMessage({ id: nextId(), sender: 'ai', lang: requestLanguage, ...response });
+        if (mounted.current) appendMessage({ id, sender: 'ai', lang: requestLanguage, ...response, author });
       } catch {
-        if (mounted.current) appendMessage({ id: nextId(), sender: 'ai', tone: 'error', lang: requestLanguage, text: t('chat.erro') });
+        if (mounted.current) appendMessage({ id, sender: 'ai', tone: 'error', lang: requestLanguage, text: t('chat.erro'), author });
       } finally {
         sendingRef.current = false;
         if (mounted.current) setLoading(false);
@@ -213,12 +222,11 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
       return;
     }
     setLoading(true);
-    const id = nextId();
-    const turn = idCounter.current;
     const controller = new AbortController();
     const buffer = createStreamBuffer();
     activeRequest.current = { controller, buffer };
-    setStreaming({ id, buffer });
+    let replyAuthor = author;
+    setStreaming({ id, buffer, author });
     const updateHandoff = reply => setLabHandoff?.(current => current?.turn === turn ? { ...current, reply } : current);
     try {
       // O campo "id" é só da interface: não vai para o backend
@@ -227,8 +235,8 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
         : { sender, text, translationKey });
       const options = {
         signal: controller.signal,
-        surface: modal ? 'compact' : 'full',
-        appearance: theme === 'rick-morty' ? { theme, dimension } : undefined,
+        surface: author.surface,
+        appearance: { theme: author.theme, dimension: author.dimension },
         onEvent: event => {
           if (mounted.current && !controller.signal.aborted) buffer.push(event);
         },
@@ -241,7 +249,7 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
       const plan = actions && await actions.execute(turn, data.actions, {
         ...actionUi,
         navigate: section => {
-          if (section === 'laboratorio') setLabHandoff({ turn, modal });
+          if (section === 'laboratorio') setLabHandoff({ turn, modal, author });
           actionUi.navigate(section);
         },
       }, { signal: controller.signal });
@@ -251,6 +259,7 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
       if (plan?.snapshot) {
         live.absorb(data.liveContext);
         buffer.push({ type: 'reset' });
+        replyAuthor = Object.freeze({ ...author, attemptId: 2 });
         data = await sendMessage(query, requestLanguage, history, data.chatContext ?? conversationRef.current.chatContext,
           false, { ...options, labSnapshot: plan.snapshot });
         controller.signal.throwIfAborted();
@@ -272,6 +281,7 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
       appendMessage({
         id,
         sender: 'ai',
+        author: replyAuthor,
         text: response,
         translationKey: data.translationKey,
         context: data.liveContext,
@@ -297,6 +307,7 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
       appendMessage({
         id,
         sender: 'ai',
+        author: replyAuthor,
         tone: cancelled ? undefined : 'error',
         degraded: true,
         lang: requestLanguage,
@@ -326,7 +337,7 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
   );
 
   return (
-    <AstraSurfaceProvider surface={modal ? 'compact' : 'full'}><div
+    <AstraSurfaceProvider surface={surface}><div
       className={`portfolio-app astra-conversation ${modal ? "astra-compact" : "astra-full"}`}
       ref={viewportRef}
       data-chat-empty={!compact}
@@ -409,8 +420,8 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
                     </div>
                   ))}
                   {streaming && (
-                    <StreamingReply key={streaming.id} buffer={streaming.buffer} containerRef={messagesContainerRef} followRef={followOutput}
-                      fallback={<TypingIndicator label={t('chat.digitando', { defaultValue: en ? 'Generating reply' : 'Gerando resposta' })} />} />
+                    <StreamingReply key={streaming.id} author={streaming.author} buffer={streaming.buffer} containerRef={messagesContainerRef} followRef={followOutput}
+                      fallback={<TypingIndicator author={streaming.author} label={t('chat.digitando', { defaultValue: en ? 'Generating reply' : 'Gerando resposta' })} />} />
                   )}
                 </div>
               </div>

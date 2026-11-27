@@ -4,6 +4,7 @@ import { AlertTriangle, Check, Copy, Sparkles, User } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import AstraAvatar from './AstraAvatar';
 import { useAssistantPersona } from '../context/AssistantAppearanceContext';
+import { ASTRA_PERSONA_ID } from '../data/assistantPersonas';
 import SpotifyCard from './SpotifyCard';
 import GithubCard from './GithubCard';
 import StatsCard from './StatsCard';
@@ -221,8 +222,11 @@ function Avatar({ isUser, children }) {
   );
 }
 
+const legacyAuthor = { personaId: ASTRA_PERSONA_ID };
+
 function MessageBubble({ message, liveContext = {}, refreshing = [], onRefresh, onSelectSection, onViewFull, compact = false, active = true, children }) {
-  const persona = useAssistantPersona();
+  const author = message.id === 'welcome' ? undefined : message.author ?? legacyAuthor;
+  const persona = useAssistantPersona(undefined, author);
   const { i18n } = useTranslation();
   const uiLanguage = i18n.language.startsWith('en') ? 'en' : 'pt';
   const ui = UI;
@@ -272,11 +276,11 @@ function MessageBubble({ message, liveContext = {}, refreshing = [], onRefresh, 
       <Avatar>
         {isError
           ? <AlertTriangle className={`h-[18px] w-[18px] ${ui.errorIcon}`} aria-hidden="true" />
-          : <AstraAvatar />}
+          : <AstraAvatar author={author} />}
       </Avatar>
 
       <div className={hasCards ? 'message-content message-with-cards' : 'message-content'}>
-        {!isError && (
+        {(!isError || message.author) && (
           <div className="astra-label">
             <span>{persona?.name ?? 'Astra'}</span>
             {message.model && <span className="dim-tag">{message.model}</span>}

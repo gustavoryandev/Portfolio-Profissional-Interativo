@@ -32,10 +32,9 @@ function BenchStatus({ label, status, busy, example, language }) {
 
 export default function CodePlayground() {
   const { t, i18n } = useTranslation();
-  const { labHandoff: handoff } = useAstra();
-  const persona = useAssistantPersona(handoff?.modal ? 'compact' : 'full');
-  const en = i18n.language.startsWith('en');
   const { openAstra, openFull, labHandoff } = useAstra();
+  const persona = useAssistantPersona(labHandoff?.modal ? 'compact' : 'full', labHandoff?.author);
+  const en = i18n.language.startsWith('en');
   const { theme } = useContext(ThemeContext) ?? {};
   const dimensional = theme === 'rick-morty';
   const [lab, { example, language, code, output, status, busy }] = useLaboratory();

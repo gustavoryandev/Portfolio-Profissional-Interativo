@@ -1,4 +1,4 @@
-import { assistantPersonaId } from '../data/assistantPersonas.js';
+import { ASTRA_PERSONA_ID, assistantPersonaId } from '../data/assistantPersonas.js';
 import { createContext, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ThemeContext } from './ThemeState';
@@ -9,13 +9,12 @@ export function AstraSurfaceProvider({ surface, children }) {
   return <SurfaceContext.Provider value={surface}>{children}</SurfaceContext.Provider>;
 }
 
-export function useAssistantPersona(surface) {
+export function useAssistantPersona(surface, author) {
   const { theme, dimension } = useContext(ThemeContext) ?? {};
   const inheritedSurface = useContext(SurfaceContext);
   const { t } = useTranslation();
-  const id = assistantPersonaId({ theme, dimension, surface: surface ?? inheritedSurface });
-  if (!id) return null;
+  const id = author?.personaId ?? assistantPersonaId({ theme, dimension, surface: surface ?? inheritedSurface });
+  if (!id || id === ASTRA_PERSONA_ID) return null;
   return { id, image: `/rick-assets/avatar-${id}.webp`,
     name: t(`rick.${id}.name`), intro: t(`rick.${id}.intro`), welcome: t(`rick.${id}.welcome`) };
-
 }
