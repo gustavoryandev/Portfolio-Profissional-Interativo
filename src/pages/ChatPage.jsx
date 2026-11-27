@@ -46,8 +46,10 @@ const MOTION_CSS = `
 `;
 
 // Mesmo avatar, rótulo e forma do bubble da Astra: sem salto de layout quando a resposta chega
-function TypingIndicator({ author, label }) {
+function TypingIndicator({ author }) {
   const persona = useAssistantPersona(undefined, author);
+  const { t } = useTranslation();
+  const label = persona ? t(`rick.${persona.id}.waiting`, { defaultValue: t('chat.digitando') }) : t('chat.digitando');
   return (
     <div className="my-2 flex w-full justify-start gap-3" role="status" aria-label={label}>
       <div aria-hidden="true" className="avatar-astra mt-2 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border">
@@ -60,6 +62,7 @@ function TypingIndicator({ author, label }) {
             <span key={delay} aria-hidden="true" className="h-2 w-2 animate-bounce rounded-full bg-muted"
               style={{ animationDelay: `${delay}s` }} />
           ))}
+          {persona && <span className="text-sm text-muted" aria-hidden="true">{label}</span>}
         </div>
       </div>
     </div>
@@ -238,14 +241,15 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
 
     function reportFailure(cancelled) {
       if (!cancelled) setInput(current => current || query);
+      const errorKey = persona ? `rick.${author.personaId}.error` : 'chat.erro';
       const notice = cancelled
         ? (requestLanguage.startsWith('en') ? 'Response stopped.' : 'Resposta interrompida.')
-        : t('chat.erro', { lng: requestLanguage });
+        : t(errorKey, { lng: requestLanguage });
       updateHandoff(notice);
       appendMessage({
         id, sender: 'ai', author: replyAuthor, degraded: true, lang: requestLanguage,
         tone: cancelled ? undefined : 'error',
-        translationKey: cancelled ? undefined : 'chat.erro',
+        translationKey: cancelled ? undefined : errorKey,
         text: cancelled ? [buffer?.getText(), notice].filter(Boolean).join('\n\n') : notice,
       });
     }
@@ -347,7 +351,10 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
   };
 
   const rawPrompts = t('chat.sugestoes', { returnObjects: true });
-  const prompts = Array.isArray(rawPrompts) ? rawPrompts : [];
+  const characterPrompts = persona ? t(`rick.${persona.id}.suggestions`, { returnObjects: true }) : null;
+  const tailored = Array.isArray(characterPrompts) ? characterPrompts : [];
+  const prompts = [...tailored, ...(Array.isArray(rawPrompts) ? rawPrompts.slice(tailored.length) : [])];
+  const composerPrompts = modal ? (compact ? [] : tailored.slice(0, 2)) : (compact ? prompts : []);
   const showGaloHero = galo && !modal && !compact && !showArcade;
   const galoShortcuts = galo && !compact && !showArcade && (
     <div role="group" aria-label={t('chat.galoWelcome.shortcuts')} className="mt-2 flex flex-wrap gap-2">
@@ -447,16 +454,16 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
                   ))}
                   {streaming && (
                     <StreamingReply key={streaming.id} author={streaming.author} buffer={streaming.buffer} containerRef={messagesContainerRef} followRef={followOutput}
-                      fallback={<TypingIndicator author={streaming.author} label={t('chat.digitando', { defaultValue: en ? 'Generating reply' : 'Gerando resposta' })} />} />
+                      fallback={<TypingIndicator author={streaming.author} />} />
                   )}
                 </div>
               </div>
 
               {/* Atalhos: no estado vazio ficam dentro do hero */}
               <div className="chat-composer flex min-w-0 flex-col gap-3">
-                {!modal && !showArcade && compact && prompts.length > 0 && (
+                {!showArcade && composerPrompts.length > 0 && (
                   <div className="custom-scrollbar flex gap-2 overflow-x-auto px-1 pb-3 pt-1">
-                    {prompts.map((prompt) => (
+                    {composerPrompts.map((prompt) => (
                       <button
                         key={prompt}
                         type="button"

@@ -165,7 +165,7 @@ export function DimensionalIntro({ scene, onDismiss }) {
       </div>
     </div>
     <div className="intro-caption">
-      <div className="intro-monitor-screen"><small>{t(dock ? 'rick.dockCam' : 'rick.garageOnline')}</small><strong>{dock ? (t('rick.welcomeGustavo')) : 'Gustavo Ryan'}</strong><p>{t(dock ? 'rick.destination' : 'rick.birdperson.intro')}</p></div>
+      <div className="intro-monitor-screen"><small>{t(dock ? 'rick.dockCam' : 'rick.garageOnline')}</small><strong>{dock ? (t('rick.welcomeGustavo')) : 'Gustavo Ryan'}</strong><p>{t(dock ? 'rick.destination' : 'rick.birdperson.entrance')}</p></div>
     </div>
     </>}
     <div className="intro-controls">

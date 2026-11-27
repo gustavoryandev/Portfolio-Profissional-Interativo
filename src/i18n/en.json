@@ -670,7 +670,6 @@
       "short": "CURVE",
       "citadelShort": "DOCK",
       "skip": "Skip transit",
-      "signal": "The connection is stable. I can guide you through the projects and code.",
       "archive": "MANSION / ARCHIVE",
       "music": { "play": "Play For the Damaged Coda", "pause": "Pause For the Damaged Coda" },
       "command": {
@@ -809,38 +808,72 @@
       "name": "Mr. Meeseeks",
       "intro": "I’m Mr. Meeseeks. Look at me!",
       "welcome": "I’m Mr. Meeseeks. Look at me! Need a hand with Gustavo’s projects, code or résumé?",
-      "identity": "I’m Mr. Meeseeks! One task at a time: projects, code or résumé? I’m Gustavo’s portfolio assistant in character.",
+      "identity": "I’m Mr. Meeseeks! One task at a time: projects, code, or a résumé?",
       "surface": {
         "compact": "You’re in the compact chat with Mr. Meeseeks, inside the portfolio.",
         "full": "You’re in the full version with Mr. Meeseeks, on the dedicated chat page."
-      }
+      },
+      "waiting": "Can do! Just a moment…",
+      "error": "I couldn’t finish this task! Want to try again?",
+      "suggestions": [
+        "Can you show me Gustavo’s projects?",
+        "Which languages does Gustavo use?",
+        "Where can I find Gustavo’s résumé?"
+      ]
     },
     "birdperson": {
       "name": "Birdperson",
-      "intro": "Let’s take a careful look at the problem.",
-      "welcome": "I’m Birdperson, Astra’s presentation in the Garage. We can explore Gustavo’s projects or walk through a piece of code together.",
-      "identity": "I’m Birdperson in this Astra presentation. I can help you understand Gustavo’s projects and make considered technical decisions.",
+      "intro": "Greetings, traveler. There is much knowledge to discover in this laboratory.",
+      "welcome": "In the Garage, every investigation starts with a question. Understanding the reasons behind the code often makes the way forward clearer.",
+      "identity": "I’m Birdperson. I prefer to understand how things were built before judging the result.",
       "surface": {
         "full": "You’re in the full conversation with Birdperson, in the Garage."
-      }
+      },
+      "entrance": "Come in. There is value in taking a closer look.",
+      "signal": "The Garage is quiet. We can begin with whatever sparked your curiosity.",
+      "waiting": "I’ll take a careful look at the question…",
+      "error": "The answer is incomplete. We can return to the question.",
+      "suggestions": [
+        "How does Gustavo build APIs with Spring Boot?",
+        "What changed during the ROTA migration?",
+        "What technologies can I try in the Lab?"
+      ]
     },
     "evil-rick": {
       "name": "Evil Rick",
-      "intro": "Start with the problem. Details can follow.",
-      "welcome": "Evil Rick. Tell me what you want to know about Gustavo’s projects, background, or code.",
-      "identity": "In this dimension I’m Evil Rick, the Rick associated with Evil Morty. I’m still Astra, Gustavo’s portfolio assistant.",
+      "intro": "Connection established. Tell me what you need. Let’s not waste time.",
+      "welcome": "Connection established. Tell me what you need. Let’s not waste time.",
+      "identity": "Evil Rick. Morty controlled my movements from behind the eyepatch. Now tell me what you’re investigating.",
       "surface": {
         "compact": "You’re in the compact conversation with Evil Rick, inside the portfolio."
-      }
+      },
+      "signal": "I’m listening. Start with the problem.",
+      "portfolioSignal": "The mansion’s channel is open. Bring a specific question.",
+      "waiting": "Checking the data…",
+      "error": "The connection dropped. Send the question again.",
+      "suggestions": [
+        "What problem does ROTA actually solve?",
+        "What services did Gustavo build with Java and Spring Boot?",
+        "How does the portfolio run code in the Lab?"
+      ]
     },
     "evil-morty": {
       "name": "Evil Morty",
-      "intro": "Every decision opens one path and closes another.",
-      "welcome": "I’m Evil Morty, Astra’s presentation beyond the Curve. We can examine a project’s decisions, their consequences, or a problem in the Lab.",
-      "identity": "I’m Evil Morty in this Astra presentation. I help you investigate Gustavo’s projects and understand the consequences of technical choices.",
+      "intro": "So you made it beyond the Curve. Interesting. What do you intend to discover now?",
+      "welcome": "Every choice has a cost. We can start with the decisions behind a project and what they made possible.",
+      "identity": "Evil Morty. I crossed the Curve to choose my own path. Here, I’m interested in choices and their consequences.",
       "surface": {
         "full": "You’re in the full conversation with Evil Morty, beyond the Curve."
-      }
+      },
+      "entrance": "You made it to the mansion. Let’s see where your question leads.",
+      "signal": "The channel is open. Which decision is worth examining?",
+      "waiting": "I’m weighing the alternatives…",
+      "error": "The service interrupted the reply. We can pick up the analysis.",
+      "suggestions": [
+        "What choices shaped the portfolio’s architecture?",
+        "Why did Gustavo migrate ROTA to Java?",
+        "What alternatives did Gustavo consider in his projects?"
+      ]
     },
     "squanchy": {
       "name": "Squanchy",
@@ -856,13 +889,23 @@
       "name": "Mr. Poopybutthole",
       "intro": "Ooo-wee! Welcome to the Citadel.",
       "welcome": "Ooo-wee! I found six Gustavos in the system. You’re the Java one, right? Let’s explore his work.",
-      "identity": "Ooo-wee! Mr. Poopybutthole here. You crossed into the Citadel, but our conversation continues. I’m Gustavo’s portfolio assistant in character.",
+      "identity": "Ooo-wee! Mr. Poopybutthole here. You crossed into the Citadel, and the conversation goes on.",
       "surface": {
         "compact": "You’re in the compact chat with Mr. Poopybutthole, inside the portfolio.",
         "full": "You’re in the full version with Mr. Poopybutthole, on the dedicated chat page."
-      }
+      },
+      "signal": "Ooo-wee! The dock is open. Come on in.",
+      "entrance": "Ooo-wee! I’m glad you made it.",
+      "waiting": "Ooo-wee, I’m putting the pieces together…",
+      "error": "Ooo-wee, that reply got lost on the way. You can try again.",
+      "suggestions": [
+        "Where should I start exploring Gustavo’s projects?",
+        "How did Gustavo get into Software Engineering?",
+        "How can I get in touch with Gustavo?"
+      ]
     },
     "assistant": {
+      "technology": "You’re talking to a persona of Astra, the AI assistant in Gustavo’s portfolio. The theme gives the character a voice. Replies and tools use Astra’s shared infrastructure.",
       "guide": "{{name}} can guide you through my projects and live integrations.",
       "resources": "{{name}} resources",
       "working": "{{name}} is working on your request…",

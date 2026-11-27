@@ -1,4 +1,4 @@
-import { resolveAssistantPersona, assistantPersonaInstruction, characterResourceReply, isCharacterIntroduction } from '../server/assistantPersona.js';
+import { resolveAssistantPersona, assistantPersonaInstruction, characterResourceReply, isCharacterIntroduction, isCharacterTechnologyQuestion } from '../server/assistantPersona.js';
 import { conversationResource } from '../src/services/conversationResource.js';
 import axios from 'axios';
 import { GoogleGenerativeAI } from '@google/generative-ai';
@@ -1457,6 +1457,10 @@ export default async function handler(req, res) {
     const normalizedQuery = normalizeQuery(message);
     const surfaceIntent = surface && !labSnapshot ? astraSurfaceIntent(normalizedQuery) : null;
     if (surfaceIntent === 'open') return resourceReply({ actions: [{ type: 'astra.openFull' }] });
+    if (persona && !labSnapshot && isCharacterTechnologyQuestion(message, persona)) {
+      const translationKey = 'rick.assistant.technology';
+      return res.status(200).json({ response: readJson(`${suggestionLanguage}.json`).rick.assistant.technology, translationKey });
+    }
     if (persona && !labSnapshot && isCharacterIntroduction(message, persona)) {
       const translationKey = `rick.${persona.id}.identity`;
       return res.status(200).json({ response: readJson(`${suggestionLanguage}.json`).rick[persona.id].identity, translationKey });

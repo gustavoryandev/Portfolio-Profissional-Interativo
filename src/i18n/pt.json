@@ -670,7 +670,6 @@
       "short": "CURVA",
       "citadelShort": "DOCA",
       "skip": "Pular travessia",
-      "signal": "A conexão está estável. Posso orientar você pelos projetos e pelo código.",
       "archive": "MANSÃO / ARQUIVO",
       "music": { "play": "Tocar For the Damaged Coda", "pause": "Pausar For the Damaged Coda" },
       "command": {
@@ -809,38 +808,72 @@
       "name": "Sr. Meeseeks",
       "intro": "Eu sou o Sr. Meeseeks. Olha pra mim!",
       "welcome": "Eu sou o Sr. Meeseeks. Olha pra mim! Quer uma ajuda com os projetos, o código ou o currículo do Gustavo?",
-      "identity": "Eu sou o Sr. Meeseeks! Uma tarefa por vez: projetos, código ou currículo? Sou a assistente do portfólio do Gustavo nesse personagem.",
+      "identity": "Eu sou o Sr. Meeseeks! Uma tarefa por vez: projetos, código ou currículo?",
       "surface": {
         "compact": "Você está na conversa compacta com Sr. Meeseeks, dentro do portfólio.",
         "full": "Você está na versão completa com Sr. Meeseeks, na página dedicada à conversa."
-      }
+      },
+      "waiting": "Pode deixar! Só mais um instante…",
+      "error": "Ainda não consegui terminar essa tarefa! Vamos tentar de novo?",
+      "suggestions": [
+        "Pode me mostrar os projetos do Gustavo?",
+        "Que linguagens o Gustavo usa?",
+        "Onde encontro o currículo do Gustavo?"
+      ]
     },
     "birdperson": {
-      "name": "Pessoa-Pássaro",
-      "intro": "Vamos observar o problema com calma.",
-      "welcome": "Sou Pessoa-Pássaro, a apresentação da Astra na Garagem. Podemos examinar os projetos de Gustavo ou analisar um trecho de código passo a passo.",
-      "identity": "Sou Pessoa-Pássaro nesta apresentação da Astra. Posso ajudar você a compreender os projetos de Gustavo e a tomar decisões técnicas com calma.",
+      "name": "Pássaro-Pessoa",
+      "intro": "Saudações, viajante. Há muito conhecimento a ser descoberto neste laboratório.",
+      "welcome": "Na Garagem, toda investigação começa com uma pergunta. Conhecer as razões por trás do código costuma esclarecer o caminho.",
+      "identity": "Sou Pássaro-Pessoa. Prefiro compreender como as coisas foram construídas antes de julgar o resultado.",
       "surface": {
-        "full": "Você está na conversa completa com Pessoa-Pássaro, na Garagem."
-      }
+        "full": "Você está na conversa completa com Pássaro-Pessoa, na Garagem."
+      },
+      "entrance": "Entre. Há valor em observar com atenção.",
+      "signal": "A Garagem está tranquila. Podemos começar pelo que desperta sua curiosidade.",
+      "waiting": "Vou examinar a questão com calma…",
+      "error": "A resposta ficou incompleta. Podemos retomar a pergunta.",
+      "suggestions": [
+        "Como Gustavo desenvolve as APIs com Spring Boot?",
+        "O que mudou durante a migração de ROTA?",
+        "Que tecnologias posso experimentar no Laboratório?"
+      ]
     },
     "evil-rick": {
       "name": "Rick Maligno",
-      "intro": "Comece pelo problema. Os detalhes vêm depois.",
-      "welcome": "Rick Maligno. Diga o que quer descobrir sobre os projetos, a trajetória ou o código de Gustavo.",
-      "identity": "Nesta dimensão, sou Rick Maligno, o Rick associado a Evil Morty. Continuo sendo a Astra do portfólio de Gustavo.",
+      "intro": "Conexão estabelecida. Diga o que precisa. Não vamos desperdiçar tempo.",
+      "welcome": "Conexão estabelecida. Diga o que precisa. Não vamos desperdiçar tempo.",
+      "identity": "Rick Maligno. Morty controlava meus movimentos por trás do tapa-olho. Agora diga o que quer investigar.",
       "surface": {
         "compact": "Você está na conversa compacta com Rick Maligno, dentro do portfólio."
-      }
+      },
+      "signal": "Estou ouvindo. Comece pelo problema.",
+      "portfolioSignal": "O canal da mansão está aberto. Traga uma pergunta concreta.",
+      "waiting": "Verificando os dados…",
+      "error": "A conexão caiu. Reenvie a pergunta.",
+      "suggestions": [
+        "O que ROTA realmente resolve?",
+        "Quais serviços Gustavo desenvolveu com Java e Spring Boot?",
+        "Como o portfólio executa código no Laboratório?"
+      ]
     },
     "evil-morty": {
       "name": "Evil Morty",
-      "intro": "Toda decisão abre um caminho e fecha outro.",
-      "welcome": "Sou Evil Morty, a apresentação da Astra além da Curva. Podemos examinar as decisões de um projeto, suas consequências ou um problema no Laboratório.",
-      "identity": "Sou Evil Morty nesta apresentação da Astra. Ajudo você a investigar os projetos de Gustavo e a entender as consequências das escolhas técnicas.",
+      "intro": "Então você conseguiu sair da Curva. Interessante. O que pretende descobrir agora?",
+      "welcome": "Toda escolha tem um custo. Podemos começar pelas decisões de um projeto e pelo que elas tornaram possível.",
+      "identity": "Evil Morty. Atravessei a Curva para escolher meu próprio caminho. Aqui, me interessam as escolhas e suas consequências.",
       "surface": {
         "full": "Você está na conversa completa com Evil Morty, além da Curva."
-      }
+      },
+      "entrance": "Você chegou à mansão. Vamos ver aonde sua pergunta leva.",
+      "signal": "O canal está aberto. Qual decisão vale investigar?",
+      "waiting": "Estou avaliando as alternativas…",
+      "error": "A resposta foi interrompida pelo serviço. Podemos retomar a análise.",
+      "suggestions": [
+        "Que escolhas moldaram a arquitetura do portfólio?",
+        "Por que Gustavo migrou ROTA para Java?",
+        "Que alternativas Gustavo considerou nos projetos?"
+      ]
     },
     "squanchy": {
       "name": "Squanchy",
@@ -856,13 +889,23 @@
       "name": "Sr. Bunda Cagada",
       "intro": "Ooo-wee! Bem-vindo à Cidadela.",
       "welcome": "Ooo-wee! Achei seis Gustavos no sistema. Você é o do Java, certo? Vamos explorar o trabalho dele.",
-      "identity": "Ooo-wee! Sr. Bunda Cagada por aqui. Você atravessou para a Cidadela, mas a conversa continua. Sou a assistente do portfólio do Gustavo nesse personagem.",
+      "identity": "Ooo-wee! Sr. Bunda Cagada por aqui. Você atravessou para a Cidadela, mas a conversa continua.",
       "surface": {
         "compact": "Você está na conversa compacta com Sr. Bunda Cagada, dentro do portfólio.",
         "full": "Você está na versão completa com Sr. Bunda Cagada, na página dedicada à conversa."
-      }
+      },
+      "signal": "Ooo-wee! A doca está aberta. Entre, fique à vontade.",
+      "entrance": "Ooo-wee! Que bom que você chegou.",
+      "waiting": "Ooo-wee, estou juntando as peças…",
+      "error": "Ooo-wee, a resposta ficou pelo caminho. Pode tentar de novo.",
+      "suggestions": [
+        "Por onde começo a conhecer os projetos do Gustavo?",
+        "Como o Gustavo chegou à Engenharia de Software?",
+        "Como entro em contato com o Gustavo?"
+      ]
     },
     "assistant": {
+      "technology": "Você está conversando com uma persona da Astra, a assistente de IA do portfólio de Gustavo. A camada temática dá voz ao personagem. As respostas e ferramentas usam a infraestrutura compartilhada da Astra.",
       "guide": "{{name}} te guia pelos projetos e pelas integrações ao vivo.",
       "resources": "Recursos de {{name}}",
       "working": "{{name}} está preparando sua resposta…",

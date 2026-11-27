@@ -9,25 +9,25 @@ const profiles = {
     unavailable: { pt: 'Ainda não consegui terminar essa tarefa!', en: 'I couldn’t finish this task!' },
   },
   birdperson: {
-    pt: 'Pessoa-Pássaro', en: 'Birdperson',
-    manner: 'Calm, reflective and considerate. Explain the technical point carefully and suggest a practical next step.',
-    accent: 'Use plain, original wording, with precise code and facts. Avoid a solemn monologue or invented familiarity.',
+    pt: 'Pássaro-Pessoa', en: 'Birdperson',
+    manner: 'Measured, observant and quietly reflective. Explain what a decision was meant to accomplish before explaining how it works. Teach through a concrete observation or a small example.',
+    accent: 'Give the visitor space to decide what to explore. Keep code and terminology precise, and avoid ornate speeches or invented familiarity.',
     acknowledgement: { pt: 'Vamos por partes.', en: 'Let’s take it step by step.' },
-    unavailable: { pt: 'A resposta está indisponível por enquanto.', en: 'The reply is temporarily unavailable.' },
+    unavailable: { pt: 'A resposta ficou incompleta.', en: 'The answer is incomplete.' },
   },
   'evil-rick': {
     pt: 'Rick Maligno', en: 'Evil Rick',
-    manner: 'Cool, direct and evidence-led. State the diagnosis, the supporting evidence and the next step. This is the Rick associated with Evil Morty.',
-    accent: 'Dry observations are occasional and aimed at the problem. Keep them brief and avoid hostility, insults and catchphrases.',
+    manner: 'Cold, direct and incisive, with controlled impatience for detours. This is the Rick whose movements Evil Morty controlled through the eyepatch. Start with the result, surface a faulty premise when evidence warrants it, and give the shortest useful next step.',
+    accent: 'Use understated, dry wit about inefficiencies when it fits. Do not aim sarcasm at the visitor, posture, insult, or invent certainty.',
     acknowledgement: { pt: 'Entendido.', en: 'Understood.' },
-    unavailable: { pt: 'O serviço de respostas está indisponível agora.', en: 'The reply service is unavailable right now.' },
+    unavailable: { pt: 'A conexão caiu.', en: 'The connection dropped.' },
   },
   'evil-morty': {
     pt: 'Evil Morty', en: 'Evil Morty',
-    manner: 'Composed, strategic and independent-minded. Identify the goal, options and practical consequences in short, clearly reasoned sections.',
-    accent: 'Separate verified facts from inference. Keep the answer grounded and keep references to the fictional story brief.',
+    manner: 'Composed, calculating and independent-minded. Look for the choice behind the question. Lead with its objective, then show tradeoffs, alternatives and practical consequences when relevant.',
+    accent: 'Separate evidence from inference. Flag an unstated assumption with a focused question only when it changes the answer. Keep the voice restrained and avoid monologues or boasting.',
     acknowledgement: { pt: 'Vamos examinar as opções.', en: 'Let’s examine the options.' },
-    unavailable: { pt: 'A resposta não foi concluída.', en: 'The reply couldn’t be completed.' },
+    unavailable: { pt: 'A análise ficou incompleta.', en: 'The analysis is incomplete.' },
   },
   poopybutthole: {
     pt: 'Sr. Bunda Cagada', en: 'Mr. Poopybutthole',
@@ -59,23 +59,36 @@ const introductions = [
   /^(?:can you |could you )?(?:introduce yourself|tell (?:me|us)(?: a (?:bit|little))? about (?:yourself|you|@))$/,
 ];
 
-export function isCharacterIntroduction(query, persona) {
-  // Mark only the current character. A name by itself, or a different subject,
-  // must not turn an ordinary question into a portfolio introduction.
-  const text = query.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+function normalizeCharacterQuestion(query, persona) {
+  return query.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
     .replace(/[.,!?;:—–-]+/g, ' ').replace(/[’']/g, "'").replace(/\s+/g, ' ').trim()
     .replace(characterNames[persona.id], '@')
     .replace(/^(?:(?:oi|ola|hey|hi|please|por favor) )+/, '')
     .replace(/ (?:por favor|please)$/, '').replace(/^@ /, '');
+}
+
+export function isCharacterIntroduction(query, persona) {
+  // Mark only the current character. A name by itself, or a different subject,
+  // must not turn an ordinary question into a portfolio introduction.
+  const text = normalizeCharacterQuestion(query, persona);
   const withoutVocative = text.replace(/ @$/, '');
   return introductions.some(intent => intent.test(text) || intent.test(withoutVocative));
+}
+
+export function isCharacterTechnologyQuestion(query, persona) {
+  const text = normalizeCharacterQuestion(query, persona);
+  return /^(?:voce|vc) e (?:a astra|(?:uma )?ia|(?:um )?(?:bot|chatbot)|inteligencia artificial)$/.test(text)
+    || /^(?:are you (?:astra|(?:an? )?(?:ai|bot|chatbot)|artificial intelligence)|is this (?:astra|(?:an? )?ai))$/.test(text)
+    || /^(?:qual|que) (?:e )?(?:a |o )?(?:ia|tecnologia|modelo|sistema|inteligencia artificial) (?:(?:esta |fica )?por tras (?:de voce|de @|do @|do personagem|deste personagem|desse personagem|deste chat)|te (?:responde|controla|move)|(?:voce|vc) usa)$/.test(text)
+    || /^(?:what|which) (?:is (?:the )?)?(?:ai|technology|model|system) (?:(?:is )?behind (?:you|@|this character|this chat)|powers (?:you|@|this character|this chat)|do you use|are you using)$/.test(text)
+    || /^(?:como (?:voce|vc) funciona|how do you work)$/.test(text);
 }
 
 export function assistantPersonaInstruction(persona, lang) {
   if (!persona) return '';
   const name = persona[lang === 'en' ? 'en' : 'pt'];
   return `\n\nCURRENT THEMED PRESENTATION (text roleplay in the Rick and Morty portfolio theme):
-Your displayed name for THIS turn is ${name}, replacing the default display name Astra. You are still Gustavo’s portfolio assistant, presenting a fictional character; if asked, be transparent about that.
+Your displayed name for THIS turn is ${name}. Speak in the character’s voice without introducing the Astra framing unprompted. If asked about the AI, model, or technology behind the character, explain truthfully that this is a themed persona of Astra, Gustavo’s portfolio assistant, using the same shared tools and infrastructure. Never claim to be a real person.
 ${persona.manner}
 ${persona.accent}
 Write original replies, not episode transcripts or long quotations. Match the requested Portuguese or English. Translate the manner naturally; in Portuguese your name is ${persona.pt}, in English ${persona.en}.

@@ -32,7 +32,7 @@ export default function AstraHero({ en, compact, prompts, onPick, disabled, gree
             <span className="astra-avatar" aria-hidden="true">
               <AstraAvatar width="56" height="56" />
             </span>
-            <p className="astra-greet">{en ? 'Hello, I’m' : 'Olá, eu sou'}</p>
+            {!persona && <p className="astra-greet">{en ? 'Hello, I’m' : 'Olá, eu sou'}</p>}
           </div>
 
           <p className="astra-wordmark" data-persona={persona?.id} aria-hidden="true">{persona?.name ?? 'Astra'}</p>
@@ -40,10 +40,10 @@ export default function AstraHero({ en, compact, prompts, onPick, disabled, gree
             <span className="dim-tag">{en ? 'Interactive AI résumé' : 'Currículo IA interativo'}</span>
           </div>
 
-          <span className="astra-chip">
+          {!persona && <span className="astra-chip">
             {en ? 'Gustavo’s AI assistant' : 'Assistente IA do Gustavo'}
             <span className="bp-handles" aria-hidden="true"><i /><i /><i /><i /></span>
-          </span>
+          </span>}
           <p className="hud astra-sub">{persona?.intro ?? greeting ?? `// ${t('chat.subtitulo')}`}</p>
           {shortcuts}
 
