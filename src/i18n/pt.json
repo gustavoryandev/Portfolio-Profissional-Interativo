@@ -37,6 +37,11 @@
     "placeholder": "Digite uma pergunta sobre o Gustavo...",
     "enviar": "Enviar",
     "pensando": "Gustavo AI está digitando...",
+    "digitando": "Gerando resposta",
+    "copyCodeLabel": "Copiar código",
+    "copyCodeAction": "copiar",
+    "codeCopiedLabel": "Copiado",
+    "codeCopiedAction": "copiado",
     "sugestoesTitulo": "Sugestões de perguntas:",
     "sugestoes": [
       "Quais são os principais projetos do Gustavo?",

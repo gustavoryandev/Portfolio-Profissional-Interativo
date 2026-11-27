@@ -173,6 +173,7 @@ function renderText(value, ui, keyPrefix) {
 
 // Bloco de código: fundo #0A0A0A, texto branco, monoespaçado, nos dois temas
 function CodeBlock({ lang, code }) {
+  const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
 
   const copy = async () => {
@@ -194,12 +195,12 @@ function CodeBlock({ lang, code }) {
         <button
           type="button"
           onClick={copy}
-          aria-label={copied ? 'Copiado' : 'Copiar código'}
+          aria-label={copied ? t('chat.codeCopiedLabel') : t('chat.copyCodeLabel')}
           className="flex items-center gap-1.5 rounded px-2 py-1 font-mono text-xs text-zinc-400 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400/60"
           style={{ fontFamily: FONT_MONO }}
         >
           {copied ? <Check size={12} aria-hidden="true" /> : <Copy size={12} aria-hidden="true" />}
-          {copied ? 'copiado' : 'copiar'}
+          {copied ? t('chat.codeCopiedAction') : t('chat.copyCodeAction')}
         </button>
       </div>
       <pre className="overflow-x-auto p-4 text-[13px] leading-relaxed text-white" style={{ fontFamily: FONT_MONO }}>

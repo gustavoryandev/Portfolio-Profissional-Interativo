@@ -23,10 +23,21 @@ import { ThemeContext } from '../src/context/ThemeContext.jsx';
 const dom = new JSDOM('<div id="root"></div>', { url: 'http://localhost' });
 globalThis.window = dom.window;
 globalThis.document = dom.window.document;
+Object.defineProperty(globalThis, 'navigator', { configurable: true, value: dom.window.navigator });
+let copiedCode;
+Object.defineProperty(dom.window.navigator, 'clipboard', {
+  configurable: true,
+  value: { writeText: async code => { copiedCode = code; } },
+});
 globalThis.requestAnimationFrame = callback => setTimeout(callback, 0);
 globalThis.cancelAnimationFrame = clearTimeout;
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 const { default: i18n } = await import('../src/i18n/index.js');
+for (const [language, expected] of [['pt', 'Gerando resposta'], ['en', 'Generating reply']]) {
+  await i18n.changeLanguage(language);
+  assert.equal(i18n.t('chat.digitando'), expected);
+}
+await i18n.changeLanguage('pt');
 const root = createRoot(document.getElementById('root'));
 let requests = 0;
 let complete;
@@ -39,6 +50,32 @@ const message = { id: 'dynamic', sender: 'ai', lang: 'pt', text: 'Resposta **din
 const render = (dark, child) => act(async () => root.render(<ThemeContext.Provider value={{ darkMode: dark }}>{child}</ThemeContext.Provider>));
 await render(false, <MessageBubble message={message} liveContext={context} />);
 assert.match(document.body.textContent, /Resposta/);
+const copyCodeButton = document.querySelector('pre').parentElement.querySelector('button');
+assert.equal(copyCodeButton.getAttribute('aria-label'), 'Copiar código');
+assert.equal(copyCodeButton.textContent.trim(), 'copiar');
+const originalSetTimeout = globalThis.setTimeout;
+let resetCopiedState;
+globalThis.setTimeout = (callback, delay, ...args) => {
+  if (delay === 1500) {
+    resetCopiedState = callback;
+    return 0;
+  }
+  return originalSetTimeout(callback, delay, ...args);
+};
+try {
+  await act(async () => { copyCodeButton.click(); await Promise.resolve(); });
+  assert.equal(copiedCode, 'const x = 1;');
+  assert.equal(copyCodeButton.getAttribute('aria-label'), 'Copiado');
+  assert.equal(copyCodeButton.textContent.trim(), 'copiado');
+  await act(async () => { await i18n.changeLanguage('en'); });
+  assert.equal(copyCodeButton.getAttribute('aria-label'), 'Copied');
+  assert.equal(copyCodeButton.textContent.trim(), 'copied');
+  await act(async () => { resetCopiedState(); });
+  assert.equal(copyCodeButton.getAttribute('aria-label'), 'Copy code');
+  assert.equal(copyCodeButton.textContent.trim(), 'copy');
+} finally {
+  globalThis.setTimeout = originalSetTimeout;
+}
 const card = document.querySelector('article');
 assert.equal(card.closest('.chat-bubble'), null);
 assert.ok(card.closest('.message-card'));

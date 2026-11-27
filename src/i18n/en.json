@@ -37,6 +37,11 @@
     "placeholder": "Ask something about Gustavo...",
     "enviar": "Send",
     "pensando": "Gustavo AI is typing...",
+    "digitando": "Generating reply",
+    "copyCodeLabel": "Copy code",
+    "copyCodeAction": "copy",
+    "codeCopiedLabel": "Copied",
+    "codeCopiedAction": "copied",
     "sugestoesTitulo": "Suggested questions:",
     "sugestoes": [
       "What are Gustavo's main projects?",
