@@ -40,10 +40,10 @@ export default function AstraHero({ en, compact, prompts, onPick, disabled, gree
             <span className="dim-tag">{en ? 'Interactive AI résumé' : 'Currículo IA interativo'}</span>
           </div>
 
-          <span className="astra-chip">
+          {!persona && <span className="astra-chip">
             {en ? 'Gustavo’s AI assistant' : 'Assistente IA do Gustavo'}
             <span className="bp-handles" aria-hidden="true"><i /><i /><i /><i /></span>
-          </span>
+          </span>}
           <p className="hud astra-sub">{persona?.intro ?? greeting ?? `// ${t('chat.subtitulo')}`}</p>
           {shortcuts}
 
