@@ -161,3 +161,113 @@
 .heist-opening[data-variant="plan"] .heist-opening-skip:hover { background: var(--heist-document); }
 .heist-opening[data-still="true"] .heist-plan-sheet { display: none; }
 @media (prefers-reduced-motion: reduce) { .heist-plan-sheet { display: none; } }
+
+:root[data-theme="la-casa-de-papel-light"] .portfolio-app .site-header {
+  background: #fffdf7fa;
+  border-bottom-color: var(--line);
+}
+:root[data-theme="la-casa-de-papel-light"] .heist-record { border-color: var(--control-border); }
+:root[data-theme="la-casa-de-papel-light"] .heist-record > div {
+  box-shadow: 2px 3px 0 var(--heist-document);
+}
+:root[data-theme="la-casa-de-papel-light"] .scroll-content > :is(.scroll-section, .projects-scroll-section),
+:root[data-theme="la-casa-de-papel-light"] .scroll-footer { border-block-start: 1px solid var(--line); }
+:root[data-theme="la-casa-de-papel-light"] .scroll-portfolio .section-eyebrow { color: var(--primary); }
+:root[data-theme="la-casa-de-papel-light"] .scroll-portfolio
+:is(.about-scroll, .detail-card, .project-tile, .code-lab-panel, .astra-scroll-cta, .contact-card) {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel);
+  box-shadow: 0 10px 28px -22px #51443888;
+}
+:root[data-theme="la-casa-de-papel-light"] .scroll-portfolio
+:is(.project-tile, .code-lab-panel, .astra-scroll-cta, .contact-card) {
+  border-block-start-color: var(--control-border);
+}
+:root[data-theme="la-casa-de-papel-light"] .code-lab-toolbar { background: var(--panel-soft); }
+:root[data-theme="la-casa-de-papel-light"] .dimension-project-details {
+  --dossier-fill: var(--panel-soft);
+  --dossier-rule: var(--control-border);
+}
+
+:root[data-theme="la-casa-de-papel-light"] :is(.astra-full, .astra-entrance) {
+  background:
+    linear-gradient(90deg, #71573d12 1px, transparent 1px) 50% 0 / 30px 30px,
+    linear-gradient(#71573d12 1px, transparent 1px) 50% 0 / 30px 30px,
+    var(--page);
+}
+:root[data-theme="la-casa-de-papel-light"] .astra-shell::backdrop { background: #24201d68; }
+:root[data-theme="la-casa-de-papel-light"] .astra-full .center-panel {
+  border-color: var(--control-border);
+  border-radius: 8px;
+  background: var(--panel);
+}
+:root[data-theme="la-casa-de-papel-light"] :is(.astra-toolbar, .astra-conversation .chat-heading) {
+  background: var(--heist-document);
+  border-color: var(--line);
+}
+:root[data-theme="la-casa-de-papel-light"] .chat-heading .astra-heading-description { color: var(--heist-paper); }
+:root[data-theme="la-casa-de-papel-light"] :is(.astra-mini, .avatar-astra, .astra-avatar) {
+  border-color: var(--control-border);
+}
+:root[data-theme="la-casa-de-papel-light"] .astra-conversation :is(.chat-bubble, .portfolio-card, .astra-resource) {
+  border-radius: 6px;
+}
+:root[data-theme="la-casa-de-papel-light"] .astra-conversation .chat-bubble--astra {
+  background: var(--panel-soft);
+  border-color: var(--line);
+}
+:root[data-theme="la-casa-de-papel-light"] .astra-conversation .chat-bubble--user {
+  background: #f4e3df;
+  border-color: #b89083;
+}
+:root[data-theme="la-casa-de-papel-light"] .astra-conversation .chat-bubble--error {
+  border-color: var(--loss);
+  background: #fff1ee;
+}
+:root[data-theme="la-casa-de-papel-light"] .astra-conversation :is(.chat-composer, .astra-resources, .astra-resources-header) {
+  background: var(--panel);
+  border-color: var(--line);
+}
+:root[data-theme="la-casa-de-papel-light"] .astra-conversation .chat-form textarea {
+  background: var(--panel);
+  border: 1px solid var(--control-border);
+  border-radius: 5px;
+  caret-color: var(--ink);
+}
+:root[data-theme="la-casa-de-papel-light"] .astra-conversation .astra-hero {
+  border-radius: 8px;
+  border-color: var(--control-border);
+  background:
+    linear-gradient(90deg, #71573d16 1px, transparent 1px) center / 24px 24px,
+    linear-gradient(#71573d16 1px, transparent 1px) center / 24px 24px,
+    var(--panel-soft);
+}
+:root[data-theme="la-casa-de-papel-light"] .astra-hero::before,
+:root[data-theme="la-casa-de-papel-light"] .astra-hero .astra-spark { display: none; }
+:root[data-theme="la-casa-de-papel-light"] .astra-hero .astra-wordmark {
+  color: var(--ink);
+  font-family: var(--heist-display);
+  -webkit-text-fill-color: var(--ink);
+  -webkit-text-stroke: 0;
+  filter: none;
+}
+:root[data-theme="la-casa-de-papel-light"] .astra-entrance-panel {
+  border-color: var(--control-border);
+  background: var(--panel);
+}
+:root[data-theme="la-casa-de-papel-light"] .arcade {
+  --arcade-radius: 8px;
+  border-color: var(--control-border);
+}
+:root[data-theme="la-casa-de-papel-light"] :is(.arcade-toolbar, .arcade-card, .arcade-stat-section) {
+  background: var(--panel-soft);
+}
+:root[data-theme="la-casa-de-papel-light"] .chess-replay-board {
+  padding: 6px;
+  border: 1px solid var(--control-border);
+  background: var(--heist-document);
+}
+@media (max-width: 767px) {
+  :root[data-theme="la-casa-de-papel-light"] .astra-conversation .chat-form textarea { font-size: 16px; padding-inline: 8px; }
+}
