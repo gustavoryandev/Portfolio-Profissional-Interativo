@@ -4,6 +4,12 @@ import SceneBackdrop from './rick/SceneBackdrop';
 import { preloadScene } from './rick/sceneAssets';
 import useCharacterActivity from './rick/useCharacterActivity';
 
+export function MansionBackdrop() {
+  return <div className="dimensional-scene mansion-scene" aria-hidden="true">
+    <SceneBackdrop scene="mansion" className="mansion-art" />
+  </div>;
+}
+
 export default function DimensionalScene({ secret = false }) {
   const scene = secret ? 'plaza' : 'garage';
   const ref = useRef(null);

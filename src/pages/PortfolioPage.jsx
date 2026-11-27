@@ -17,7 +17,7 @@ import GaloCrest from '../components/GaloCrest';
 import AstraAvatar from '../components/AstraAvatar';
 import { useAssistantPersona } from '../context/AssistantAppearanceContext';
 import PortraitPortal from '../components/rick/PortraitPortal';
-import DimensionalScene from '../components/DimensionalScene';
+import DimensionalScene, { MansionBackdrop } from '../components/DimensionalScene';
 import { PortfolioShip } from '../components/rick/DimensionShip';
 import useCharacterActivity from '../components/rick/useCharacterActivity';
 import { CitadelCredential, InterdimensionalTV, RickExtraArchive, RickObjects } from '../components/rick/RickPortfolioExtras';
@@ -25,6 +25,7 @@ import DimensionAstraSignal from '../components/DimensionAstraSignal';
 import { CitadelWindows, GarageWorkbench, CitadelReception } from '../components/RickDimensionExperience';
 import perfil from '../data/perfil.json';
 import { isGaloTheme, isDimensionalTheme } from '../data/themes.js';
+import { BEYOND_CURVE } from '../data/rickDimensions.js';
 
 export default function PortfolioPage({ activeSection, projectFocus, onSectionLink }) {
   const { openAstra, openFull } = useAstra();
@@ -34,6 +35,7 @@ export default function PortfolioPage({ activeSection, projectFocus, onSectionLi
   const fullPersona = useAssistantPersona('full');
   const dimensional = isDimensionalTheme(theme);
   const secret = dimension === 'corrupted';
+  const beyond = dimensional && dimension === BEYOND_CURVE;
   const { t, i18n } = useTranslation();
   const en = i18n.language.startsWith('en');
   const pageRef = useRef(null);
@@ -87,7 +89,7 @@ export default function PortfolioPage({ activeSection, projectFocus, onSectionLi
 
   const portrait = <img className="hero-photo" src="/perfil-foto.jpeg" alt={en ? 'Gustavo Ryan' : 'Foto de Gustavo Ryan'} width="572" height="777" fetchPriority="high" />;
   return <div ref={pageRef} className="portfolio-app scroll-portfolio">
-    {dimensional && <DimensionalScene secret={secret} />}
+    {dimensional && (beyond ? <MansionBackdrop /> : <DimensionalScene secret={secret} />)}
     <a className="skip-link" href="#main-content">{en ? 'Skip to content' : 'Pular para o conteúdo'}</a>
     <Navbar ref={headerRef} portfolio activeSection={visibleSection} onSectionLink={onSectionLink} />
     <MobileNav en={en} active={visibleSection} onSectionLink={onSectionLink} />
@@ -95,10 +97,12 @@ export default function PortfolioPage({ activeSection, projectFocus, onSectionLi
       <section ref={heroRef} id="inicio" className="portfolio-hero" aria-labelledby="hero-title">
         {galo && <GaloCrest className="hero-galo-watermark" />}
         <ScrollReveal className={dimensional ? 'rick-presentation' : ''}>
-          {dimensional && <div className="dimension-label"><span>{t(secret ? 'rick.citadelCode' : 'rick.garageCode')}</span><b>{t(secret ? 'rick.citadelName' : 'rick.garageName')}</b></div>}
+          {dimensional && <div className="dimension-label">{beyond
+            ? <b className="beyond-location">{t('rick.beyond.name')}</b>
+            : <><span>{t(secret ? 'rick.citadelCode' : 'rick.garageCode')}</span><b>{t(secret ? 'rick.citadelName' : 'rick.garageName')}</b></>}</div>}
           <p className="section-eyebrow">{en ? 'SOFTWARE ENGINEERING · PUC MINAS' : 'ENGENHARIA DE SOFTWARE · PUC MINAS'}</p>
           <h1 id="hero-title">Gustavo<br /><span className="neon-title">Ryan.</span></h1>
-          <p className="hero-lead">{dimensional ? (secret ? (en ? 'Infinite versions. An original way to build.' : 'Infinitas versões. Um jeito próprio de construir.') : (en ? 'Good ideas cross galaxies.' : 'Boas ideias atravessam galáxias.')) : (en ? 'Turning ideas into digital experiences.' : 'Transformando ideias em experiências digitais.')}</p>
+          <p className="hero-lead">{dimensional && !beyond ? t(secret ? 'rick.citadelLead' : 'rick.garageLead') : (en ? 'Turning ideas into digital experiences.' : 'Transformando ideias em experiências digitais.')}</p>
           <p className="hero-description">{en ? 'Java, Spring Boot and React. Explore my projects, skills and the journey behind the code.' : 'Java, Spring Boot e React. Explore meus projetos, habilidades e a trajetória por trás do código.'}</p>
           <div className="hero-actions">
             {galo && <a className="neon-cta" href="/chat" onClick={openFull}><Sparkles size={18} aria-hidden="true" />{fullPersona ? (en ? `Talk to ${fullPersona.name}` : `Conversar com ${fullPersona.name}`) : (en ? 'Talk to Astra' : 'Conversar com Astra')}<ArrowUpRight size={18} aria-hidden="true" /></a>}
@@ -106,22 +110,24 @@ export default function PortfolioPage({ activeSection, projectFocus, onSectionLi
           </div>
           <SocialLinks />
           {dimensional && <div className="dimension-instrument-panel">
+            {!beyond && <>
             <div className="dimension-console-heading">
               <div className="dimension-readout"><span>{t('rick.control')}</span><strong>{t(secret ? 'rick.access' : 'rick.stabilized')}</strong></div>
               <div className="dimension-instruments" aria-hidden="true"><i /><span>⏚</span><b>137.0 Hz</b><em /></div>
             </div>
+            </>}
             <DimensionAstraSignal />
             <GarageWorkbench onSectionLink={onSectionLink} />
           </div>}
         </ScrollReveal>
-        {dimensional && <div className="rick-ship-stage" aria-hidden="true">
+        {dimensional && !beyond && <div className="rick-ship-stage" aria-hidden="true">
           {secret && <CitadelWindows dock />}
           {!crossing && !introScene && (secret || !shipDeparted) && <PortfolioShip docked={secret} onDepart={markShipDeparted} visible={heroActive} />}
         </div>}
         <ScrollReveal delay={.08} className="hero-profile glass-panel">
-          {dimensional && <div className="dimension-scan-label">{t(secret ? 'rick.citizen' : 'rick.researcher')}<span>{t(secret ? 'rick.dockOnline' : 'rick.stable')}</span></div>}
+          {dimensional && !beyond && <div className="dimension-scan-label">{t(secret ? 'rick.citizen' : 'rick.researcher')}<span>{t(secret ? 'rick.dockOnline' : 'rick.stable')}</span></div>}
           <div className="portrait-orbit" aria-hidden="true" />
-          {dimensional ? <PortraitPortal secret={secret} effectsPaused={effectsPaused}>{portrait}</PortraitPortal> : portrait}
+          {dimensional ? <PortraitPortal variant={beyond ? BEYOND_CURVE : secret ? 'citadel' : 'garage'} effectsPaused={effectsPaused || beyond}>{portrait}</PortraitPortal> : portrait}
           <div className="hero-profile-caption">
             <span>{en ? 'DEVELOPER' : 'DESENVOLVEDOR'} <b>/</b> {en ? 'STUDENT' : 'ESTUDANTE'}</span>
             <strong>{galo && <MapPin size={16} aria-hidden="true" />}{perfil.localizacao}</strong>

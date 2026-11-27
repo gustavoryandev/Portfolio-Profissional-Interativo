@@ -4,11 +4,14 @@ import { REDUCED_MOTION_QUERY } from '../../motionPreferences';
 export const pickleBody = '/rick-assets/pickle.webp';
 export const meeseeksBox = '/rick-assets/meeseeks-box.webp';
 export const shipArt = '/rick-assets/spaceship.webp';
+export const beyondMedia = '/rick-assets/beyond-curve';
+export const yellowPortalIcon = `${beyondMedia}/yellow-portal-icon-header.png`;
 export const compactBackdropQuery = '(max-width: 900px) and (orientation: portrait)';
 export const backdropAssets = {
   garage: { src: '/rick-assets/garage.webp', compact: '/rick-assets/garage-mobile.webp' },
   plaza: { src: '/rick-assets/citadel-plaza.webp', compact: '/rick-assets/citadel-plaza-mobile.webp' },
   dock: { src: '/rick-assets/citadel.webp' },
+  mansion: { src: `${beyondMedia}/evil-morty-mansion.webp` },
 };
 const sceneAssets = {
   workbench: [meeseeksBox],

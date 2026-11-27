@@ -1,5 +1,6 @@
 import './ProjectCard.css';
 import { useAssistantPersona } from '../context/AssistantAppearanceContext';
+import { BEYOND_CURVE } from '../data/rickDimensions.js';
 import { useContext, useId, useRef, useState } from 'react';
 import { ArrowUpRight, Expand, ImageOff, Sparkles } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -61,7 +62,7 @@ export default function ProjectCard({ project, onAskAstra, compact, featured }) 
   const citadel = dimension === 'corrupted';
   const dossier = dimensional ? projectDossiers[project.id] : undefined;
   const expanded = dossier ? detailsOpen : descriptionOpen;
-  const dimensionLabel = dimensional ? t(citadel ? 'rick.archive' : 'rick.research') : undefined;
+  const dimensionLabel = dimensional ? t(dimension === BEYOND_CURVE ? 'rick.beyond.archive' : citadel ? 'rick.archive' : 'rick.research') : undefined;
   const synopsis = description && <p id={descriptionId} className="mt-3" data-summary={compact && !expanded ? 'true' : undefined}>{description}</p>;
   return (
     <article className="project-tile glass-panel flex min-w-0 flex-col overflow-hidden" aria-labelledby={titleId} data-details-open={expanded} data-dimension-label={dimensionLabel}>

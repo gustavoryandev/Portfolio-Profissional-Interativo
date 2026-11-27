@@ -60,7 +60,7 @@ function CurrentClock({ refs, elapsed, speed, rate }: {
 export default function DimensionalPortal({ isOpen, variant = 'garage', size = 320, aspectRatio = 1,
   glowIntensity = .65, effectsPaused = false, quality = 'auto', className = '', children,
   onOpenComplete, onCloseComplete }: DimensionalPortalProps) {
-  const style = variant === 'citadel' ? portalVariants.citadel : portalVariants.garage;
+  const style = portalVariants[variant] ?? portalVariants.garage;
   const { palette: p } = style;
   const level = resolveQuality(quality);
   const detail = qualityLevels[level];

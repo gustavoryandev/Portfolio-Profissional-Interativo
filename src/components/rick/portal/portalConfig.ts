@@ -1,4 +1,4 @@
-export type PortalVariant = 'garage' | 'citadel';
+export type PortalVariant = 'garage' | 'citadel' | 'beyond-curve';
 export type PortalQuality = 'auto' | 'low' | 'high';
 
 interface PortalPalette {
@@ -26,6 +26,10 @@ export const portalVariants: Record<PortalVariant, PortalStyle> = {
   citadel: {
     palette: { abyss: '#082e38', shadow: '#106172', body: '#1ba4aa', energy: '#45f6ed', current: '#79e9d6', accent: '#c4f785', light: '#ecffff' },
     speed: .71, displacement: 3.2, spring: { stiffness: 166, damping: 21, mass: .82 },
+  },
+  'beyond-curve': {
+    palette: { abyss: '#211807', shadow: '#6e5116', body: '#b18016', energy: '#ffd84a', current: '#eab308', accent: '#e9c66a', light: '#fff4ba' },
+    speed: .64, displacement: 2.8, spring: { stiffness: 166, damping: 24, mass: .82 },
   },
 };
 

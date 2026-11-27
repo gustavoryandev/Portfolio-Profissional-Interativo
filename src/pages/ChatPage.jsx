@@ -27,6 +27,8 @@ import { actionReply } from '../services/astraActionReply';
 import { arcadeIntent } from '../arcade/commands';
 import { answerArcade } from '../arcade/replies';
 import { isGame } from '../arcade/catalog';
+import { BEYOND_CURVE } from '../data/rickDimensions.js';
+import { MansionBackdrop } from '../components/DimensionalScene';
 
 const FullArcade = lazy(() => import('../arcade/FullArcade'));
 const FONT_SANS = "Inter, 'Geist Sans', Roboto, system-ui, sans-serif";
@@ -367,6 +369,7 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
       style={{ fontFamily: FONT_SANS }}
     >
       <style>{MOTION_CSS}</style>
+      {visible && !modal && theme === 'rick-morty' && dimension === BEYOND_CURVE && <MansionBackdrop />}
 
       <div className="app-frame relative z-10 flex flex-col" onKeyDown={event => {
         if (!resourcesOpen || event.key !== 'Escape' || event.defaultPrevented) return;

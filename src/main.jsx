@@ -12,6 +12,7 @@ import './astra.css';
 import './themes.css';
 import './dimensions.css';
 import './rick-experience.css';
+import './beyond-curve.css';
 import './components/rick/character-performance.css';
 import './glassFx.js';
 import './i18n';
