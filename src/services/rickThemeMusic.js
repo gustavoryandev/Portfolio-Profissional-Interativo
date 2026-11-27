@@ -5,6 +5,11 @@ export const RICK_THEME_TRACK = {
   source: 'https://music.apple.com/us/song/1570547237',
   preview: 'https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview211/v4/98/bd/f5/98bdf567-f67e-324a-deae-452c07983691/mzaf_11617390157100661171.plus.aac.p.m4a',
 };
+export const BEYOND_CURVE_TRACK = {
+  title: 'For the Damaged Coda',
+  artist: 'Blonde Redhead',
+  preview: '/rick-assets/audio/evil-morty-30s.mp3',
+};
 
 export const RICK_MUSIC_VOLUME = 22;
 export function readRickMusicVolume(storage) {
@@ -15,11 +20,13 @@ export function readRickMusicVolume(storage) {
   return RICK_MUSIC_VOLUME;
 }
 
-export function createRickThemeMusic(Audio, onStatus, { volume = RICK_MUSIC_VOLUME, hidden = false, clock = globalThis } = {}) {
+export function createRickThemeMusic(Audio, onStatus, {
+  volume = RICK_MUSIC_VOLUME, hidden = false, clock = globalThis, source = RICK_THEME_TRACK.preview,
+} = {}) {
   const audio = new Audio();
   audio.preload = 'none';
   audio.crossOrigin = 'anonymous';
-  audio.src = RICK_THEME_TRACK.preview;
+  audio.src = source;
 
   let target = volume / 100;
   audio.volume = .5;

@@ -13,6 +13,7 @@ import { createAstraActionEngine } from './services/astraActionEngine';
 import { clickedDialogBackdrop } from './services/dialogInteraction';
 import { arcadeHref, isGame } from './arcade/catalog';
 import perfil from './data/perfil.json';
+import BeyondAchievement from './components/rick/BeyondAchievement';
 
 const ChatPage = lazy(() => import('./pages/ChatPage'));
 const projectIds = new Set(perfil.projetos.map(project => project.id));
@@ -155,7 +156,9 @@ export default function App() {
   if (!['/', '/chat'].includes(path)) return <main className="route-loading"><h1>404</h1><a href="/">{en ? 'Back to portfolio' : 'Voltar ao portfólio'}</a></main>;
   return <AstraContext.Provider value={{ lab, actions, labHandoff, setLabHandoff, actionUi,
     openAstra, openFull, returnPortfolio: event => { event.preventDefault(); close(); navigate('/'); } }}>
-    <div hidden={full} inert={Boolean(introScene)}>{portfolioVisited.current && <PortfolioIntro en={en}><PortfolioPage activeSection={route.section || 'inicio'} projectFocus={route.project || route.technology ? route : null} onSectionLink={followSectionLink} /></PortfolioIntro>}</div>
+    <div hidden={full} inert={Boolean(introScene)}>{portfolioVisited.current && <PortfolioIntro en={en}><PortfolioPage activeSection={route.section || 'inicio'} projectFocus={route.project || route.technology ? route : null} onSectionLink={followSectionLink} /></PortfolioIntro>}
+      {!full && !opened && <BeyondAchievement />}
+    </div>
     <dialog inert={showIntro || Boolean(introScene)} style={showIntro ? { visibility: 'hidden' } : undefined} ref={dialog} role={full ? 'main' : undefined} className={`astra-shell ${full ? 'astra-shell-full' : 'astra-shell-modal'}`} aria-label={persona ? (en ? `Conversation with ${assistantName}` : `Conversa com ${assistantName}`) : (en ? 'Astra conversation' : 'Conversa com a Astra')} onCancel={() => setOpened(false)} onKeyDown={trapFocus}
       onClick={event => { if (!full && opened && clickedDialogBackdrop(event)) close(); }}>
       <div className="astra-toolbar" hidden={full}>
@@ -164,6 +167,7 @@ export default function App() {
       </div>
       {started && <Suspense fallback={<p className="astra-loading" role="status">{t('rick.assistant.opening', { name: assistantName })}</p>}><ChatPage onReady={setChatReady} modal={!full} visible={full ? !showIntro : opened} onSelectSection={selectSection} draft={chatDraft}
         arcade={full ? route.arcade : null} arcadeChallenge={route.challenge} onOpenArcade={openArcade} onCloseArcade={() => navigate('/chat')} /></Suspense>}
+      {(full || opened) && <BeyondAchievement />}
     </dialog>
     {showIntro && <AstraEntrance en={en} onFinish={finishIntro} />}
   </AstraContext.Provider>;

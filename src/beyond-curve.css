@@ -109,6 +109,30 @@
 @keyframes beyond-shot-in { from { opacity: .46; } to { opacity: 1; } }
 @keyframes beyond-signal-drift { to { transform: translateY(12px); } }
 
+.beyond-achievement-region {
+  position: fixed;
+  z-index: 80;
+  inset-inline-end: max(16px, env(safe-area-inset-right));
+  top: max(76px, calc(env(safe-area-inset-top) + 60px));
+  max-width: calc(100% - 32px);
+  pointer-events: none;
+}
+.beyond-achievement {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 15px;
+  border: 1px solid var(--rick-frame);
+  border-radius: 10px;
+  box-shadow: 0 8px 28px #09090dbd;
+  background: var(--panel);
+  color: var(--accent);
+}
+.beyond-achievement > svg { flex: none; }
+.beyond-achievement p { display: grid; margin: 0; }
+.beyond-achievement span { color: var(--muted); font-size: .8rem; }
+.beyond-achievement strong { color: var(--ink); }
+
 .mansion-scene {
   background: radial-gradient(ellipse at 76% 28%, #282338, transparent 68%), var(--page);
 }

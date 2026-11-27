@@ -3,7 +3,8 @@ import { BookOpen, ChevronDown, CircuitBoard, Clapperboard, Database, IdCard, Te
 import { useTranslation } from 'react-i18next';
 import { ThemeContext } from '../../context/ThemeState';
 import { discoveries } from '../../hooks/useRickExploration';
-import { RICK_THEME_TRACK } from '../../services/rickThemeMusic';
+import { BEYOND_CURVE_TRACK, RICK_THEME_TRACK } from '../../services/rickThemeMusic';
+import { BEYOND_CURVE } from '../../data/rickDimensions';
 import { resumeUrl } from '../../data/resume';
 import { projectContent } from '../../data/projectContent';
 import OptionMenu from '../OptionMenu';
@@ -82,7 +83,7 @@ export function InterdimensionalTV({ onSectionLink }) {
 
 function DiscoveryJournal() {
   const { t } = useTranslation();
-  const { progress, enableExploration, resetExploration } = useContext(ThemeContext) ?? {};
+  const { progress, beyondUnlocked, enableExploration, resetExploration } = useContext(ThemeContext) ?? {};
   if (!progress) return null;
   const { enabled, found } = progress;
   return <Fold icon={BookOpen} label={t('rick.extras.discovery.title')}>
@@ -92,9 +93,9 @@ function DiscoveryJournal() {
     </label>
     <p>{t('rick.extras.discovery.local')}</p>
     {found.length > 0 ? <ul className="rick-discoveries">
-      {discoveries.filter(id => found.includes(id)).map(id => <li key={id}>{t(`rick.extras.discovery.${id}`)}</li>)}
+      {discoveries.filter(id => found.includes(id)).map(id => <li key={id}>{t(id === BEYOND_CURVE ? 'rick.beyond.achievement' : `rick.extras.discovery.${id}`)}</li>)}
     </ul> : <p>{t('rick.extras.discovery.empty')}</p>}
-    <button type="button" className="rick-extra-control" disabled={!found.length} onClick={event => {
+    <button type="button" className="rick-extra-control" disabled={!found.length && !beyondUnlocked} onClick={event => {
       event.currentTarget.closest('details')?.querySelector('summary')?.focus({ preventScroll: true });
       resetExploration();
     }}>{t('rick.extras.discovery.reset')}</button>
@@ -124,6 +125,7 @@ function ReplayIntroductions() {
 
 export function RickExtraArchive() {
   const { t } = useTranslation();
+  const { beyondUnlocked } = useContext(ThemeContext);
   return <Fold icon={CircuitBoard} label={t('rick.extras.title')} className="rick-extra-archive">
     <DiscoveryJournal />
     <ReplayIntroductions />
@@ -132,6 +134,7 @@ export function RickExtraArchive() {
         <li>{t('rick.extras.credits.garage')}</li>
         <li>{t('rick.extras.credits.art')} <a href="/rick-assets/sources.json" target="_blank" rel="noopener noreferrer">{t('rick.extras.credits.sources')}</a></li>
         <li><a href={RICK_THEME_TRACK.source} target="_blank" rel="noopener noreferrer">{RICK_THEME_TRACK.title}</a> · {RICK_THEME_TRACK.artist}</li>
+        {beyondUnlocked && <li>{BEYOND_CURVE_TRACK.title} · {BEYOND_CURVE_TRACK.artist}</li>}
       </ul>
       <p>{t('rick.extras.credits.implementation')}</p>
     </Fold>

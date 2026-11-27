@@ -49,7 +49,7 @@ export default function BeyondCurveTransit({ trip, onArrive, onFinish }) {
       return;
     }
 
-    returnFocus.current = document.activeElement;
+    returnFocus.current = trip.opener ?? document.activeElement;
     if (node.showModal) node.showModal();
     else node.setAttribute('open', '');
     skip.current.focus({ preventScroll: true });

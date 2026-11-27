@@ -1,16 +1,22 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { createRickThemeMusic, readRickMusicVolume } from '../services/rickThemeMusic.js';
+import { BEYOND_CURVE_TRACK, RICK_THEME_TRACK, createRickThemeMusic, readRickMusicVolume } from '../services/rickThemeMusic.js';
+import { BEYOND_CURVE } from '../data/rickDimensions.js';
+
+const pauseKey = 'rick-morty-music-paused';
 
 export default function useRickThemeMusic() {
   const player = useRef(null);
+  const track = useRef(RICK_THEME_TRACK.preview);
+  const pausedByVisitor = useRef(false);
   const savedVolume = useRef(null);
-  if (savedVolume.current === null) savedVolume.current = readRickMusicVolume({
-    getItem: key => window.localStorage.getItem(key),
-  });
+  if (savedVolume.current === null) {
+    savedVolume.current = readRickMusicVolume({ getItem: key => window.localStorage.getItem(key) });
+    try { pausedByVisitor.current = window.localStorage.getItem(pauseKey) === '1'; } catch {}
+  }
   const [musicVolume, setMusicVolume] = useState(savedVolume.current);
   const [musicStatus, setMusicStatus] = useState('idle');
   const getPlayer = useCallback(() => player.current ??= createRickThemeMusic(window.Audio, setMusicStatus, {
-    volume: savedVolume.current, hidden: document.hidden, clock: window,
+    volume: savedVolume.current, hidden: document.hidden, clock: window, source: track.current,
   }), []);
   const changeMusicVolume = useCallback(value => {
     savedVolume.current = value;
@@ -18,11 +24,30 @@ export default function useRickThemeMusic() {
     player.current?.setVolume(value);
     try { window.localStorage.setItem('rick-morty-volume', String(value)); } catch {}
   }, []);
-  const playMusic = useCallback(() => getPlayer().play(), [getPlayer]);
-  const stopMusic = useCallback(() => player.current?.stop(), []);
+  const selectMusic = useCallback((dimension, autoplay = false) => {
+    // The imported recording is available to local review while distribution rights are pending.
+    const source = dimension === BEYOND_CURVE
+      ? import.meta.env.DEV ? BEYOND_CURVE_TRACK.preview : null
+      : RICK_THEME_TRACK.preview;
+    if (source !== track.current) {
+      player.current?.dispose();
+      player.current = null;
+      track.current = source;
+      setMusicStatus('idle');
+    }
+    if (autoplay && source && !pausedByVisitor.current && savedVolume.current > 0) void getPlayer().play();
+  }, [getPlayer]);
+  const stopMusic = useCallback(() => {
+    player.current?.dispose();
+    player.current = null;
+    setMusicStatus('idle');
+  }, []);
   const toggleMusic = useCallback(() => {
+    if (!track.current) { setMusicStatus('error'); return; }
     const current = getPlayer();
-    if (current.isActive()) current.pause();
+    pausedByVisitor.current = current.isActive();
+    try { window.localStorage.setItem(pauseKey, pausedByVisitor.current ? '1' : '0'); } catch {}
+    if (pausedByVisitor.current) current.pause();
     else void current.play();
   }, [getPlayer]);
   useEffect(() => {
@@ -34,5 +59,5 @@ export default function useRickThemeMusic() {
       player.current = null;
     };
   }, []);
-  return { musicStatus, musicVolume, changeMusicVolume, playMusic, stopMusic, toggleMusic };
+  return { musicStatus, musicVolume, changeMusicVolume, selectMusic, stopMusic, toggleMusic };
 }

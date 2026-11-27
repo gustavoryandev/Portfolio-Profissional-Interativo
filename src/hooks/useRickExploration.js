@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
+import { BEYOND_CURVE } from '../data/rickDimensions.js';
 
 const storageKey = 'rick-morty-exploration';
-export const discoveries = ['citadel', 'meeseeks', 'pickle', 'reception'];
+export const discoveries = ['citadel', 'meeseeks', 'pickle', 'reception', BEYOND_CURVE];
 const empty = { enabled: false, found: [] };
 
 function restore() {
@@ -24,7 +25,7 @@ export default function useRickExploration() {
   const reset = useCallback(() => setProgress(previous => ({ ...previous, found: [] })), []);
   const recordDiscovery = useCallback(id => {
     if (!discoveries.includes(id)) return;
-    setProgress(previous => previous.enabled && !previous.found.includes(id)
+    setProgress(previous => (previous.enabled || id === BEYOND_CURVE) && !previous.found.includes(id)
       ? { ...previous, found: [...previous.found, id] } : previous);
   }, []);
   return { progress, enable, reset, recordDiscovery };

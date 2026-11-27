@@ -15,7 +15,7 @@ export { ThemeContext } from './ThemeState';
 const galoAnthemUrl = '/hino-do-galo.mp3';
 
 export function ThemeProvider({ children }) {
-  const { playMusic, stopMusic, toggleMusic, musicStatus, musicVolume, changeMusicVolume } = useRickThemeMusic();
+  const { selectMusic, stopMusic, toggleMusic, musicStatus, musicVolume, changeMusicVolume } = useRickThemeMusic();
   const { progress, enable: enableExploration, reset: resetJournal, recordDiscovery } = useRickExploration();
   const [theme, setSelectedTheme] = useState(() => {
     let initial = document.documentElement.dataset.theme;
@@ -125,11 +125,21 @@ export function ThemeProvider({ children }) {
   const anthem = useRef(null);
   const [anthemPlaying, setAnthemPlaying] = useState(false);
   const [trip, setTrip] = useState(null);
+  const pendingAchievement = useRef(false);
+  const [achievementVisible, setAchievementVisible] = useState(false);
+  const earnedBeyond = useRef(progress.found.includes(BEYOND_CURVE));
   const crossing = Boolean(trip) || introScene === 'citadel';
   const tripLocked = useRef(false);
   const scrollPosition = useRef(null);
   const palette = themePalettes.find(option => option.id === theme);
   const darkMode = !palette.light;
+
+  useLayoutEffect(() => { selectMusic(selectedDimension.current); }, [selectMusic]);
+  useEffect(() => {
+    if (!achievementVisible) return;
+    const timer = window.setTimeout(() => setAchievementVisible(false), 5500);
+    return () => window.clearTimeout(timer);
+  }, [achievementVisible]);
 
   const replayIntro = useCallback((scene, trigger) => {
     if (!isDimensionalTheme(selectedTheme.current) || tripLocked.current || introScene || document.hidden
@@ -160,6 +170,8 @@ export function ThemeProvider({ children }) {
     if (introScene === 'garage' && !replayTrigger.current) markShipDeparted();
     replayTrigger.current = null;
     setTrip(null);
+    pendingAchievement.current = false;
+    setAchievementVisible(false);
     setIntroScene(null);
     cancelAnimationFrame(focusFrame.current);
     cancelAnimationFrame(restoreFrame.current);
@@ -174,7 +186,7 @@ export function ThemeProvider({ children }) {
       setDimension('lab');
     }
 
-    if (nextTheme === 'rick-morty' && !wasRick) void playMusic();
+    if (nextTheme === 'rick-morty') selectMusic(selectedDimension.current, !wasRick);
     else if (nextTheme !== 'rick-morty' && wasRick) stopMusic();
 
     if (isGalo && !wasGalo) {
@@ -183,7 +195,7 @@ export function ThemeProvider({ children }) {
       anthem.current.pause();
       anthem.current.currentTime = 0;
     }
-  }, [introScene, markShipDeparted, playAnthem, playMusic, stopMusic]);
+  }, [introScene, markShipDeparted, playAnthem, selectMusic, stopMusic]);
 
   const arrive = useCallback((next, withDock = false) => {
     if (window.scrollY || window.scrollX) {
@@ -198,12 +210,20 @@ export function ThemeProvider({ children }) {
     }
     selectedDimension.current = next;
     if (next === 'corrupted') recordDiscovery('citadel');
-    if (next === BEYOND_CURVE) recordDiscovery(BEYOND_CURVE);
+    if (next === BEYOND_CURVE && !earnedBeyond.current) {
+      earnedBeyond.current = true;
+      recordDiscovery(BEYOND_CURVE);
+      pendingAchievement.current = true;
+    }
     setDimension(next);
     setIntroScene(withDock ? 'citadel' : null);
   }, [recordDiscovery]);
   const finishTrip = useCallback(interrupted => {
     setTrip(null);
+    if (pendingAchievement.current) {
+      pendingAchievement.current = false;
+      setAchievementVisible(true);
+    }
     if (interrupted) setIntroScene(null);
   }, []);
   const crossDimension = useCallback((event, target, firstDiscovery = false) => {
@@ -211,20 +231,24 @@ export function ThemeProvider({ children }) {
     const destination = target ?? (selectedDimension.current === 'lab' ? 'corrupted' : 'lab');
     if (destination === selectedDimension.current || (destination === BEYOND_CURVE && !unlocked.current)) return false;
     tripLocked.current = true;
+    if (destination === BEYOND_CURVE || selectedDimension.current === BEYOND_CURVE) selectMusic(destination, true);
+    setAchievementVisible(false);
     if (introScene === 'garage') markShipDeparted();
     if (effectsPaused || document.hidden || window.matchMedia?.(REDUCED_MOTION_QUERY).matches) {
       arrive(destination);
+      finishTrip(false);
       return true;
     }
     const button = event?.currentTarget;
     const bounds = (button?.querySelector('.portal-art') ?? button)?.getBoundingClientRect();
     setIntroScene(null);
     setTrip({ destination, firstDiscovery, origin: selectedDimension.current,
+      opener: button ?? document.getElementById('chat-input'),
       x: bounds ? bounds.left + bounds.width / 2 : window.innerWidth / 2,
       y: bounds ? bounds.top + bounds.height / 2 : window.innerHeight / 2,
     });
     return true;
-  }, [arrive, effectsPaused, introScene, markShipDeparted]);
+  }, [arrive, effectsPaused, finishTrip, introScene, markShipDeparted, selectMusic]);
   const discoverBeyond = useCallback(query => {
     if (!isBeyondCurveCommand(selectedTheme.current, query)) return null;
     if (tripLocked.current || replayTrigger.current) return 'busy';
@@ -243,9 +267,13 @@ export function ThemeProvider({ children }) {
     setBeyondUnlocked(false);
     try { localStorage.removeItem(BEYOND_UNLOCK_KEY); } catch {}
     resetJournal();
+    earnedBeyond.current = false;
+    pendingAchievement.current = false;
+    setAchievementVisible(false);
     setTrip(null);
     if (selectedDimension.current === BEYOND_CURVE) arrive('lab');
-  }, [arrive, resetJournal]);
+    selectMusic(selectedDimension.current);
+  }, [arrive, resetJournal, selectMusic]);
   useEffect(() => () => {
     cancelAnimationFrame(restoreFrame.current);
     cancelAnimationFrame(focusFrame.current);
@@ -285,7 +313,7 @@ export function ThemeProvider({ children }) {
   }, [theme, dimension, darkMode, palette]);
 
   return (
-      <ThemeContext.Provider value={{ musicStatus, musicVolume, changeMusicVolume, toggleMusic, effectsPaused, changeEffectsPaused, theme, darkMode, setTheme, anthemPlaying, toggleAnthem, crossDimension, crossing, dimension, beyondUnlocked, discoverBeyond, eggMessage, setEggMessage, shipDeparted, markShipDeparted, introScene, replayIntro, progress, enableExploration, resetExploration, recordDiscovery }}>
+      <ThemeContext.Provider value={{ musicStatus, musicVolume, changeMusicVolume, toggleMusic, effectsPaused, changeEffectsPaused, theme, darkMode, setTheme, anthemPlaying, toggleAnthem, crossDimension, crossing, dimension, beyondUnlocked, discoverBeyond, achievementVisible, eggMessage, setEggMessage, shipDeparted, markShipDeparted, introScene, replayIntro, progress, enableExploration, resetExploration, recordDiscovery }}>
       {children}
       {introScene && <DimensionalIntro key={introScene} scene={introScene} onDismiss={dismissIntro} />}
       {trip && <DimensionTransit trip={trip} onArrive={arrive} onFinish={finishTrip} />}
