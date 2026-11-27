@@ -552,7 +552,7 @@ test('themed identity and deterministic resources work without a model and retai
   for (const [dimension, surface, pt, en] of [
     ['lab', 'compact', 'Sr. Meeseeks', 'Mr. Meeseeks'], ['lab', 'full', 'Pássaro-Pessoa', 'Birdperson'],
     ['corrupted', 'full', 'Sr. Bunda Cagada', 'Mr. Poopybutthole'],
-    ['beyond-curve', 'compact', 'Rick Maligno', 'Evil Rick'], ['beyond-curve', 'full', 'Evil Morty', 'Evil Morty'],
+    ['beyond-curve', 'compact', 'Rick Maligno', 'Evil Rick'], ['beyond-curve', 'full', 'Morty Maligno', 'Evil Morty'],
   ]) {
     const appearance = { theme: 'rick-morty', dimension };
     for (const [lang, name, introduction, technology] of [

@@ -231,8 +231,12 @@ test('full discovery from the Citadel preserves authors as the journey and langu
   stream.finish('CURVE_FINAL');
   await until(() => completedReply('Resposta traduzida.'));
   const reply = completedReply('Resposta traduzida.');
+  assert.equal(reply.querySelector('.astra-label span').textContent, 'Morty Maligno');
+  assert.equal(reply.querySelector('img').dataset.astraCharacter, 'evil-morty');
+  await act(async () => i18n.changeLanguage('en'));
   assert.equal(reply.querySelector('.astra-label span').textContent, 'Evil Morty');
   assert.equal(reply.querySelector('img').dataset.astraCharacter, 'evil-morty');
+  await act(async () => i18n.changeLanguage('pt'));
   assert.match(completedReply('Sinal reconhecido').textContent, /Sr\. Bunda Cagada/);
 });
 

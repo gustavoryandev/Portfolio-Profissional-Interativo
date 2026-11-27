@@ -686,7 +686,7 @@
         "rupture": "Barreira rompida",
         "portal": "Portal amarelo aberto",
         "transit": "Travessia interdimensional",
-        "mansion": "Mansão de Evil Morty"
+        "mansion": "Mansão de $t(rick.evil-morty.name)"
       },
       "achievement": "Viajante Interdimensional",
       "earned": "Conquista desbloqueada"
@@ -754,7 +754,7 @@
         "empty": "Nenhuma descoberta registrada.",
         "reset": "Limpar descobertas",
         "citadel": "Travessia à Cidadela",
-        "meeseeks": "Caixa do Sr. Meeseeks",
+        "meeseeks": "Caixa do $t(rick.meeseeks.name)",
         "pickle": "Traje de Pickle Rick",
         "reception": "Placa de Morty na recepção"
       },
@@ -779,7 +779,7 @@
     "terminal": "TERMINAL DE ATENDIMENTO",
     "monitor": "{{name}} / MONITOR DA BANCADA",
     "openChat": "Abrir conversa",
-    "box": "Apertar a caixa do Sr. Meeseeks",
+    "box": "Apertar a caixa do $t(rick.meeseeks.name)",
     "javaProjects": "Mostrar projetos Java",
     "openResume": "Abrir currículo",
     "explainRota": "Explicar o projeto ROTA",
@@ -808,8 +808,8 @@
     "garageSignal": "O Rick saiu. Se alguma coisa apitar, me chama.",
     "meeseeks": {
       "name": "Sr. Meeseeks",
-      "intro": "Eu sou o Sr. Meeseeks. Olha pra mim!",
-      "welcome": "Eu sou o Sr. Meeseeks. Olha pra mim! Quer uma ajuda com os projetos, o código ou o currículo do Gustavo?",
+      "intro": "Eu sou o $t(rick.meeseeks.name). Olha pra mim!",
+      "welcome": "$t(rick.meeseeks.intro) Quer uma ajuda com os projetos, o código ou o currículo do Gustavo?",
       "identity": "Eu sou o Sr. Meeseeks! Uma tarefa por vez: projetos, código ou currículo?",
       "surface": {
         "compact": "Você está na conversa compacta com Sr. Meeseeks, dentro do portfólio.",
@@ -860,12 +860,12 @@
       ]
     },
     "evil-morty": {
-      "name": "Evil Morty",
+      "name": "Morty Maligno",
       "intro": "Então você conseguiu sair da Curva. Interessante. O que pretende descobrir agora?",
       "welcome": "Toda escolha tem um custo. Podemos começar pelas decisões de um projeto e pelo que elas tornaram possível.",
-      "identity": "Evil Morty. Atravessei a Curva para escolher meu próprio caminho. Aqui, me interessam as escolhas e suas consequências.",
+      "identity": "Morty Maligno. Atravessei a Curva para escolher meu próprio caminho. Aqui, me interessam as escolhas e suas consequências.",
       "surface": {
-        "full": "Você está na conversa completa com Evil Morty, além da Curva."
+        "full": "Você está na conversa completa com Morty Maligno, além da Curva."
       },
       "entrance": "Você chegou à mansão. Vamos ver aonde sua pergunta leva.",
       "signal": "O canal está aberto. Qual decisão vale investigar?",

@@ -686,7 +686,7 @@
         "rupture": "Barrier breached",
         "portal": "Yellow portal opened",
         "transit": "Interdimensional transit",
-        "mansion": "Evil Morty’s mansion"
+        "mansion": "$t(rick.evil-morty.name)’s mansion"
       },
       "achievement": "Interdimensional Traveler",
       "earned": "Achievement unlocked"
@@ -754,7 +754,7 @@
         "empty": "No discoveries recorded.",
         "reset": "Clear discoveries",
         "citadel": "Crossing to the Citadel",
-        "meeseeks": "Mr. Meeseeks Box",
+        "meeseeks": "$t(rick.meeseeks.name) Box",
         "pickle": "Pickle Rick’s suit",
         "reception": "Morty’s reception sign"
       },
@@ -779,7 +779,7 @@
     "terminal": "CITADEL SERVICE TERMINAL",
     "monitor": "{{name}} / WORKBENCH MONITOR",
     "openChat": "Open conversation",
-    "box": "Press the Meeseeks box",
+    "box": "Press $t(rick.meeseeks.name)’s box",
     "javaProjects": "Show Java projects",
     "openResume": "Open résumé",
     "explainRota": "Explain the ROTA project",
@@ -808,8 +808,8 @@
     "garageSignal": "Rick stepped out. If anything beeps, call me.",
     "meeseeks": {
       "name": "Mr. Meeseeks",
-      "intro": "I’m Mr. Meeseeks. Look at me!",
-      "welcome": "I’m Mr. Meeseeks. Look at me! Need a hand with Gustavo’s projects, code or résumé?",
+      "intro": "I’m $t(rick.meeseeks.name). Look at me!",
+      "welcome": "$t(rick.meeseeks.intro) Need a hand with Gustavo’s projects, code or résumé?",
       "identity": "I’m Mr. Meeseeks! One task at a time: projects, code, or a résumé?",
       "surface": {
         "compact": "You’re in the compact chat with Mr. Meeseeks, inside the portfolio.",
