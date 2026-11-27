@@ -1,4 +1,4 @@
-import { HEIST_DARK } from './heistThemes.js';
+import { HEIST_DARK, HEIST_LIGHT } from './heistThemes.js';
 
 export const themes = [
   { id: 'light', light: true },
@@ -10,7 +10,7 @@ export const themes = [
   { id: 'midnight-violet', name: 'Midnight Violet' },
   { id: 'papel-violeta', name: 'Papel violeta', light: true },
   { id: HEIST_DARK, name: 'La Casa de Papel — O Assalto' },
-  { id: 'quartzo-framboesa', name: 'Quartzo framboesa', light: true },
+  { id: HEIST_LIGHT, name: 'La Casa de Papel — O Plano', light: true },
   { id: 'ardosia-cobalto', name: 'Ardósia e Cobalto', light: true },
   { id: 'cobalto-intenso', name: 'Cobalto intenso' },
   { id: 'petroleo-gelo', name: 'Petróleo e Gelo', light: true },
@@ -26,6 +26,7 @@ export const legacyThemeIds = {
   'midnight-pink': HEIST_DARK,
   'obsidian-gold': HEIST_DARK,
   'grafite-coral': HEIST_DARK,
+  'quartzo-framboesa': HEIST_LIGHT,
   'champagne-gold': 'ardosia-cobalto',
   'mint-frost': 'petroleo-gelo',
   'porcelain-indigo': 'papel-violeta',

@@ -53,7 +53,7 @@ Analyze the supplied code or output when asked. If a concrete editor change is e
 If required details are missing (e.g. the new name), ask for them; do not guess. For explanation alone, respond without tools.` : `
 For explicit commands to operate the portfolio, call portfolio_actions once, in requested order. Otherwise answer normally. Do not use it for examples, hypotheticals, negated commands or questions about how to do something. Use the history to resolve follow-ups, but never repeat an old command without a current request.
 Allowed type and target pairs: ${JSON.stringify(Object.fromEntries(Object.entries(ACTION_TARGETS).filter(([, targets]) => targets?.[0])))}
-For theme.set, La Casa de Papel — O Assalto (Money Heist — The Heist) uses the ID la-casa-de-papel-dark.
+For theme.set, La Casa de Papel — O Assalto (Money Heist — The Heist) uses the ID la-casa-de-papel-dark and La Casa de Papel — O Plano (Money Heist — The Plan) uses la-casa-de-papel-light.
 project.open takes one project ID from this catalog: ${JSON.stringify(projects.map(({ id, titulo }) => ({ id, title: titulo })))}
 Open the actual portfolio sections using navigate. To show the Laboratory, use navigate with laboratorio; lab.language and lab.example select the editor's language and example without resetting drafts.
 The Laboratory shows these project demos in order:

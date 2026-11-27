@@ -20,12 +20,13 @@
         'midnight-pink': 'la-casa-de-papel-dark',
         'obsidian-gold': 'la-casa-de-papel-dark',
         'grafite-coral': 'la-casa-de-papel-dark',
+        'quartzo-framboesa': 'la-casa-de-papel-light',
         'champagne-gold': 'ardosia-cobalto',
         'mint-frost': 'petroleo-gelo',
         'porcelain-indigo': 'papel-violeta',
       };
       if (Object.hasOwn(legacyThemeIds, savedTheme)) savedTheme = legacyThemeIds[savedTheme];
-      const lightThemes = ['light', 'galo-light', 'papel-violeta', 'quartzo-framboesa', 'ardosia-cobalto', 'petroleo-gelo'];
+      const lightThemes = ['light', 'galo-light', 'papel-violeta', 'la-casa-de-papel-light', 'ardosia-cobalto', 'petroleo-gelo'];
       const darkThemes = ['rick-morty', 'dark', 'galo', 'aurora', 'midnight-violet', 'la-casa-de-papel-dark', 'cobalto-intenso', 'petroleo-eletrico', 'floresta-mineral'];
       const theme = lightThemes.includes(savedTheme) || darkThemes.includes(savedTheme) ? savedTheme : 'dark';
       const root = document.documentElement;

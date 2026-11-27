@@ -89,23 +89,6 @@
   --wave-glow: #BFB1DD;
 }
 
-:root[data-theme="quartzo-framboesa"], .menu-option[data-preview="quartzo-framboesa"] {
-  --palette-bg: #F7E8F0;
-  --palette-surface: #FCF5F9;
-  --palette-primary: #9A3D72;
-  --palette-on-primary: #FFFFFF;
-  --palette-accent: #71498A;
-  --palette-text: #242730;
-  --palette-muted: #65656C;
-  --palette-border: #D6C7DB;
-  --palette-tint: 252 245 249;
-  --palette-accent-rgb: 113 73 138;
-  --palette-primary-rgb: 154 61 114;
-  --wave-one: var(--palette-primary);
-  --wave-two: #DCA5C8;
-  --wave-glow: #D4ABCF;
-}
-
 :root[data-theme="cobalto-intenso"], .menu-option[data-preview="cobalto-intenso"] {
   --palette-bg: #101D44;
   --palette-surface: #1B274C;
