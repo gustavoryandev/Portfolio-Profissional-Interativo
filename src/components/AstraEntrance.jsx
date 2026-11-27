@@ -32,7 +32,7 @@ export default function AstraEntrance({ en, onFinish }) {
       <section className="astra-entrance-panel" aria-labelledby="astra-entrance-title">
         <div className="astra-entrance-avatar"><AstraAvatar surface="full" width="80" height="80" /></div>
         <span className="astra-entrance-label">{en ? 'A NEW PERSPECTIVE' : 'UMA NOVA PERSPECTIVA'}</span>
-        <h1 id="astra-entrance-title">{persona ? t(`rick.${persona.id}.entrance`, { defaultValue: persona.intro }) : <>{en ? 'Meet the mind behind' : 'Conheça as ideias'}<br />{en ? 'the experience.' : 'por trás da experiência.'}</>}</h1>
+        <h1 id="astra-entrance-title">{persona ? t(`${persona.key}.entrance`, { defaultValue: persona.intro }) : <>{en ? 'Meet the mind behind' : 'Conheça as ideias'}<br />{en ? 'the experience.' : 'por trás da experiência.'}</>}</h1>
         {!persona && <p>{en ? 'Projects, ideas and the journey. Let’s talk.' : 'Projetos, ideias e trajetória. Vamos conversar.'}</p>}
         <div className="astra-entrance-status" role="status"><span />{persona ? (en ? `Opening your conversation with ${persona.name}` : `Abrindo sua conversa com ${persona.name}`) : (en ? 'Opening your conversation with Astra' : 'Abrindo sua conversa com a Astra')}</div>
         <div className="astra-entrance-line" aria-hidden="true" />

@@ -8,7 +8,7 @@ import AstraHero from '../components/AstraHero';
 import AstraAvatar, { AstraSurfaceProvider } from '../components/AstraAvatar';
 import DimensionAstraSignal from '../components/DimensionAstraSignal';
 import { useAssistantPersona } from '../context/AssistantAppearanceContext';
-import { ASTRA_PERSONA_ID } from '../data/assistantPersonas';
+import { ASTRA_PERSONA_ID, assistantAppearance } from '../data/assistantPersonas';
 import { ThemeContext } from '../context/ThemeContext';
 import { isGaloTheme } from '../data/themes';
 import { DESIGN_SYSTEM_ACTION, isDesignSystemRequest } from '../data/designSystem';
@@ -49,7 +49,7 @@ const MOTION_CSS = `
 function TypingIndicator({ author }) {
   const persona = useAssistantPersona(undefined, author);
   const { t } = useTranslation();
-  const label = persona ? t(`rick.${persona.id}.waiting`, { defaultValue: t('chat.digitando') }) : t('chat.digitando');
+  const label = persona ? t(`${persona.key}.waiting`, { defaultValue: t('chat.digitando') }) : t('chat.digitando');
   return (
     <div className="my-2 flex w-full justify-start gap-3" role="status" aria-label={label}>
       <div aria-hidden="true" className="avatar-astra mt-2 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border">
@@ -241,7 +241,7 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
 
     function reportFailure(cancelled) {
       if (!cancelled) setInput(current => current || query);
-      const errorKey = persona ? `rick.${author.personaId}.error` : 'chat.erro';
+      const errorKey = persona ? `${persona.key}.error` : 'chat.erro';
       const notice = cancelled
         ? (requestLanguage.startsWith('en') ? 'Response stopped.' : 'Resposta interrompida.')
         : t(errorKey, { lng: requestLanguage });
@@ -268,7 +268,7 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
         return await sendMessage(query, attempt.language, history, context, suggested, {
           signal: controller.signal,
           surface: attempt.surface,
-          appearance: { theme: attempt.theme, dimension: attempt.dimension },
+          appearance: assistantAppearance(attempt.theme, attempt.dimension),
           labSnapshot,
           onEvent: event => {
             if (isCurrent() && pendingAttempt === attempt && !controller.signal.aborted) buffer.push(event);
@@ -351,7 +351,7 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
   };
 
   const rawPrompts = t('chat.sugestoes', { returnObjects: true });
-  const characterPrompts = persona ? t(`rick.${persona.id}.suggestions`, { returnObjects: true }) : null;
+  const characterPrompts = persona ? t(`${persona.key}.suggestions`, { returnObjects: true }) : null;
   const tailored = Array.isArray(characterPrompts) ? characterPrompts : [];
   const prompts = [...tailored, ...(Array.isArray(rawPrompts) ? rawPrompts.slice(tailored.length) : [])];
   const composerPrompts = modal ? (compact ? [] : tailored.slice(0, 2)) : (compact ? prompts : []);

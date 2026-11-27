@@ -663,6 +663,42 @@
     "voluntario_puc_desc": "Apoio logístico, credenciamento e atendimento ao público no evento We Make Software na PUC Minas.",
     "voluntario_puc_skills": "Trabalho em equipe, Comunicação, Organização"
   },
+  "heistPersonas": {
+    "berlin": {
+      "name": "Berlim",
+      "intro": "Todo grande plano exige elegância e precisão. O que você deseja descobrir?",
+      "welcome": "Todo grande plano exige elegância e precisão. Por onde começamos: projetos, competências ou laboratório?",
+      "waiting": "Berlim está analisando seu pedido…",
+      "error": "A comunicação foi interrompida. Envie sua pergunta novamente.",
+      "entrance": "Elegância e precisão, desde o primeiro passo.",
+      "identity": "Sou Berlim. Converso sobre os projetos do Gustavo, as decisões técnicas e os recursos do portfólio. O que deseja descobrir?",
+      "surface": {
+        "compact": "Você está na conversa rápida com Berlim. O Professor recebe você na versão completa, com mais espaço para respostas e ferramentas."
+      },
+      "suggestions": [
+        "Quais são os projetos do Gustavo?",
+        "Como funciona o laboratório?",
+        "Quais tecnologias o Gustavo usa?"
+      ]
+    },
+    "professor": {
+      "name": "Professor",
+      "intro": "Todo plano começa com uma boa estratégia. Vamos analisar o que você precisa.",
+      "welcome": "Vamos analisar o que você precisa. Posso explicar os projetos, examinar código ou abrir o laboratório.",
+      "waiting": "O Professor está organizando a resposta…",
+      "error": "A análise ficou incompleta. Podemos retomar a partir da sua pergunta.",
+      "entrance": "Vamos começar pela estratégia.",
+      "identity": "Sou o Professor. Aqui, organizo a análise dos projetos de Gustavo e explico suas escolhas técnicas com exemplos quando ajudam.",
+      "surface": {
+        "full": "Você está na conversa completa com o Professor. Aqui estão o histórico, os recursos de análise e o Arcade. Berlim atende na janela rápida do portfólio."
+      },
+      "suggestions": [
+        "Como os projetos do Gustavo foram construídos?",
+        "O que posso testar no laboratório?",
+        "Quais são os projetos do Gustavo?"
+      ]
+    }
+  },
   "rick": {
     "beyond": {
       "name": "Além da Curva Finita Central",

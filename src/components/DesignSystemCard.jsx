@@ -52,7 +52,7 @@ function GuideSection({ title, icon: Icon, children }) {
 export default function DesignSystemCard() {
   const { t, i18n } = useTranslation();
   const { theme = 'dark' } = useContext(ThemeContext) ?? {};
-  const themeName = themes.find(option => option.id === theme)?.name ?? t(`chat.designSystem.themes.${theme}`);
+  const themeName = t(`navbar.appearance.${theme}`, { defaultValue: themes.find(option => option.id === theme)?.name ?? t(`chat.designSystem.themes.${theme}`) });
   const copy = t('chat.designSystem', { returnObjects: true });
   const titleId = useId();
   const guide = useRef(null);

@@ -1462,13 +1462,13 @@ export default async function handler(req, res) {
       return res.status(200).json({ response: readJson(`${suggestionLanguage}.json`).rick.assistant.technology, translationKey });
     }
     if (persona && !labSnapshot && isCharacterIntroduction(message, persona)) {
-      const translationKey = `rick.${persona.id}.identity`;
-      return res.status(200).json({ response: readJson(`${suggestionLanguage}.json`).rick[persona.id].identity, translationKey });
+      const translationKey = `${persona.catalog}.${persona.id}.identity`;
+      return res.status(200).json({ response: readJson(`${suggestionLanguage}.json`)[persona.catalog][persona.id].identity, translationKey });
     }
     if (surfaceIntent === 'identify') {
       if (persona) {
-        const translationKey = `rick.${persona.id}.surface.${surface}`;
-        return res.status(200).json({ response: readJson(`${suggestionLanguage}.json`).rick[persona.id].surface[surface], translationKey });
+        const translationKey = `${persona.catalog}.${persona.id}.surface.${surface}`;
+        return res.status(200).json({ response: readJson(`${suggestionLanguage}.json`)[persona.catalog][persona.id].surface[surface], translationKey });
       }
       const translationKey = `chat.surface.${surface}`;
       return resourceReply({ response: readJson(`${suggestionLanguage}.json`).chat.surface[surface], translationKey });

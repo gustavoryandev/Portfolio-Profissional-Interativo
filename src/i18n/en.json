@@ -663,6 +663,42 @@
     "voluntario_puc_desc": "Logistical support, accreditation, and attendee service at the We Make Software event at PUC Minas.",
     "voluntario_puc_skills": "Teamwork, Communication, Organization"
   },
+  "heistPersonas": {
+    "berlin": {
+      "name": "Berlin",
+      "intro": "Every great plan calls for elegance and precision. What would you like to discover?",
+      "welcome": "Every great plan calls for elegance and precision. Where shall we start: projects, skills or the code lab?",
+      "waiting": "Berlin is considering your request…",
+      "error": "The connection dropped. Send your question again.",
+      "entrance": "Elegance and precision from the first step.",
+      "identity": "I’m Berlin. We can talk about Gustavo’s projects, his technical decisions and the tools in his portfolio. What would you like to explore?",
+      "surface": {
+        "compact": "You’re in the quick chat with Berlin. The Professor is in the full view, with more room for replies and tools."
+      },
+      "suggestions": [
+        "What are Gustavo’s projects?",
+        "How does the code lab work?",
+        "Which technologies does Gustavo use?"
+      ]
+    },
+    "professor": {
+      "name": "The Professor",
+      "intro": "Every plan starts with a strategy. Let’s work out what you need.",
+      "welcome": "Let’s work out what you need. I can explain the projects, examine code or open the lab.",
+      "waiting": "The Professor is organizing a reply…",
+      "error": "The analysis is incomplete. Let’s pick up from your question.",
+      "entrance": "Let’s begin with the strategy.",
+      "identity": "I’m the Professor. I help you examine Gustavo’s projects and explain their technical decisions, with examples when they help.",
+      "surface": {
+        "full": "You’re in the full conversation with the Professor. The history, analysis tools and Arcade are here. Berlin is available in the portfolio’s quick chat."
+      },
+      "suggestions": [
+        "How were Gustavo’s projects built?",
+        "What can I try in the code lab?",
+        "What are Gustavo’s projects?"
+      ]
+    }
+  },
   "rick": {
     "beyond": {
       "name": "Beyond the Central Finite Curve",
