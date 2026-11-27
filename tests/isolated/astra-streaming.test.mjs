@@ -188,6 +188,41 @@ afterEach(async () => {
   }
 });
 
+test('a new visitor can find both consoles and ask Meeseeks without unlocking the Curve or calling chat', async () => {
+  await mount('pt', '/');
+  await submit('O Rick repete alguma frase?');
+  assert.match(completedReply('Começa com Wubba').textContent, /Sr\. Meeseeks/);
+  await click($('.astra-toolbar button'));
+  await click($('.workbench-clue summary'));
+  assert.equal($('.workbench-clue').open, true);
+  assert.match($('.workbench-clue p').textContent, /Assinatura energética desconhecida/);
+
+  await click($('.dimension-portals button'));
+  await act(async () => i18n.changeLanguage('en'));
+  await click($('.workbench-clue summary'));
+  assert.equal($('.workbench-clue').open, true);
+  assert.match($('.workbench-clue p').textContent, /Access code: W_BBA L_BBA D_B-D_B/);
+  await click($('.astra-fab'));
+  await until(() => $('.astra-shell-modal[open] #chat-input'));
+  await submit('Does Rick keep repeating a phrase?');
+  assert.match(completedReply('It starts with Wubba').textContent, /Mr\. Meeseeks/);
+  assert.equal(requests.length, 0);
+  assert.equal(window.localStorage.getItem('rick-morty-beyond-unlocked'), null);
+  assert.equal($('.dimension-portal-gold'), null);
+});
+
+test('the Garage full chat gives a localized Birdperson clue and preserves its historical avatar', async () => {
+  await mount('pt');
+  await submit('Você conhece algum mistério por aqui?');
+  assert.match(completedReply('Na cultura do meu povo').textContent, /Pessoa-Pássaro/);
+  await act(async () => i18n.changeLanguage('en'));
+  const reply = completedReply("In my people's culture");
+  assert.match(reply.textContent, /Birdperson/);
+  assert.equal(reply.querySelector('img').dataset.astraCharacter, 'birdperson');
+  assert.equal(requests.length, 0);
+  assert.equal(window.localStorage.getItem('rick-morty-beyond-unlocked'), null);
+});
+
 test('compact discovery from the Garage is local, awards once, and follows the normal journal reset', async () => {
   await mount('pt', '/');
   assert.equal($('.dimension-portal-gold'), null);

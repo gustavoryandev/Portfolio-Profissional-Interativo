@@ -10,11 +10,22 @@ Fase 02 do tema Rick and Morty. A dimensão `beyond-curve` usa o mesmo seletor, 
 
 ## Descoberta e retorno
 
-- A Astra interpreta **Wubba Lubba Dub-Dub** e variantes normalizadas como mensagem integral nas duas superfícies. A comparação local remove acentos, pontuação e espaços. Uma pergunta que inclui a expressão segue o fluxo normal.
+- A Astra interpreta **Wubba Lubba Dub-Dub** e variantes normalizadas como mensagem integral nas duas superfícies. A comparação local remove acentos, pontuação e espaços. O comando funciona desde a primeira visita, independentemente da leitura das pistas.
 - O portal amarelo aparece após o reconhecimento. O primeiro envio parte da Garagem ou da Cidadela. Depois da descoberta, a navegação pelo cabeçalho abre a dimensão diretamente. Dentro dela, os dois portais levam à Garagem e à Cidadela.
 - `rick-morty-beyond-unlocked` guarda o desbloqueio. `rick-morty-dimension` guarda o destino e só restaura `beyond-curve` se a descoberta estiver registrada. O alias de tema `rick-morty-secret` continua resolvendo para a Cidadela. O seletor mantém 15 temas.
 - A primeira chegada bem-sucedida concede **Viajante Interdimensional**, inclusive com o registro opcional desativado. A conquista usa a lista `found` do diário de exploração. A limpeza do diário remove a conquista e a descoberta e retorna à Garagem quando acionada da mansão.
 - Recarregar ou abrir `/chat` diretamente conserva a dimensão válida. Ao retornar ao tema Rick depois de sair dele na mansão, a mansão volta. O comportamento de selecionar Rick a partir das duas dimensões históricas inicia na Garagem.
+
+### Pistas opcionais
+
+| Pista | Onde encontrar | Como ativar |
+| --- | --- | --- |
+| Pessoa-Pássaro | Garagem, link **Pessoa-Pássaro** no cabeçalho ou no menu de navegação móvel | Abra a Astra completa e pergunte sobre mistérios, segredos ou expressões de Rick. A sugestão **Rick tem alguma frase secreta?** também ativa a fala. |
+| Sr. Meeseeks | Garagem e Cidadela, monitor da bancada ou terminal de atendimento, abaixo da apresentação | Selecione **Abrir conversa** e pergunte sobre os segredos ou as frases de Rick. A mesma sugestão aparece no chat compacto vazio. |
+| Registro confidencial | Cidadela, painel da apresentação, logo abaixo do terminal de atendimento | Abra **Registro confidencial** para ler o sinal e o código com lacunas. |
+| Frequência anômala | Garagem, painel da apresentação, logo abaixo do monitor da bancada | Abra **Frequência anômala**, identificada pela interferência dourada, para ler a assinatura de energia. |
+
+As pistas têm textos PT/EN. O chat responde localmente e usa a persona da superfície atual. Os controles dos painéis abrem por toque, clique, Enter ou Espaço. Consultar uma pista não registra desbloqueio.
 
 ## Cena, áudio e interface
 

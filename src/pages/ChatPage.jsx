@@ -28,7 +28,7 @@ import { actionReply } from '../services/astraActionReply';
 import { arcadeIntent } from '../arcade/commands';
 import { answerArcade } from '../arcade/replies';
 import { isGame } from '../arcade/catalog';
-import { BEYOND_CURVE } from '../data/rickDimensions.js';
+import { BEYOND_CURVE, beyondHintPersona, isBeyondHintQuestion } from '../data/rickDimensions.js';
 import { MansionBackdrop } from '../components/DimensionalScene';
 
 const FullArcade = lazy(() => import('../arcade/FullArcade'));
@@ -79,6 +79,7 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
   const viewportRef = useMobileViewport();
   const { actions, actionUi, lab, openFull, setLabHandoff } = useAstra();
   const { theme, dimension, crossing, introScene, discoverBeyond } = useContext(ThemeContext) ?? {};
+  const hintPersona = beyondHintPersona(theme, dimension, surface, persona?.id);
   const destination = theme === 'rick-morty' ? `${theme}:${dimension}` : theme;
   const [presentation, setPresentation] = useState(() => ({ destination, token: 0 }));
   const [presentationActive, setPresentationActive] = useState(false);
@@ -202,8 +203,9 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
       theme, dimension, surface, language: requestLanguage,
     });
     const discovery = discoverBeyond?.(query);
-    if (discovery) {
-      const translationKey = `rick.beyond.command.${discovery}`;
+    const hint = hintPersona && !resourceActions && !arcadeShortcut && isBeyondHintQuestion(query);
+    if (discovery || hint) {
+      const translationKey = discovery ? `rick.beyond.command.${discovery}` : `rick.beyond.clues.${hintPersona}`;
       followOutput.current = true;
       setInput('');
       appendMessage({ id: userId, sender: 'user', text: query, lang: requestLanguage });
@@ -371,8 +373,9 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
   const rawPrompts = t('chat.sugestoes', { returnObjects: true });
   const characterPrompts = persona ? t(`${persona.key}.suggestions`, { returnObjects: true }) : null;
   const tailored = Array.isArray(characterPrompts) ? characterPrompts : [];
-  const prompts = [...tailored, ...(Array.isArray(rawPrompts) ? rawPrompts.slice(tailored.length) : [])];
-  const composerPrompts = modal ? (compact ? [] : tailored.slice(0, 2)) : (compact ? prompts : []);
+  const cluePrompts = hintPersona ? [t('rick.beyond.clues.prompt')] : [];
+  const prompts = [...tailored, ...cluePrompts, ...(Array.isArray(rawPrompts) ? rawPrompts.slice(tailored.length) : [])];
+  const composerPrompts = modal ? (compact ? [] : [...tailored.slice(0, 2), ...cluePrompts]) : (compact ? prompts : []);
   const showGaloHero = galo && !modal && !compact && !showArcade;
   const galoShortcuts = galo && !compact && !showArcade && (
     <div role="group" aria-label={t('chat.galoWelcome.shortcuts')} className="mt-2 flex flex-wrap gap-2">
