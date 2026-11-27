@@ -1,8 +1,25 @@
 # Passagem de sessão do portfólio
 
+## Pendências concluídas na Fase 02.1
+
+A revisão foi retomada em `codex/rick-morty-phase-02` a partir de `19c1a93`. A demonstração local está aberta na mansão em português e aguarda a aprovação visual. [Abrir demonstração](http://localhost:5176/)
+
+| Commit | Resultado |
+| --- | --- |
+| `32f2750` | O túnel em Canvas atende aos portais verde, ciano e amarelo. A Garagem, a doca e a mansão exibem a imagem final por 1,65 s. A ruptura e os marcos da trilha preservam o relógio original. |
+| `87c160e` | Os nomes da Astra usam os mesmos catálogos no cliente e no servidor. Morty Maligno em português e Evil Morty em inglês compartilham o ID de autoria. |
+| `659e8e2` | O portal do retrato da mansão usa amarelo mais vivo, realces claros e halo reforçado. O retrato conserva posição e dimensões ao longo do movimento das correntes. |
+| `bec79fa` | Pessoa-Pássaro em português e Birdperson em inglês usam o mesmo ID, avatar e comportamento. |
+
+No navegador foram conferidas as três travessias e a alternância PT/EN na Garagem, na Cidadela e na mansão. A resposta de apresentação de Pessoa-Pássaro mudou de nome e texto ao alternar o idioma, mantendo o ID e o avatar. A autoria do easter egg permaneceu com Pessoa-Pássaro após a chegada à mansão.
+
+Passaram 130 testes principais, 16 testes isolados, typecheck do portal, importação da API, build temporário e `git diff --check`. O Vite emitiu o aviso de chunks acima de 500 kB. As alterações locais independentes foram preservadas.
+
+La Casa de Papel Dark e Light estão registradas como entregas obrigatórias. O início aguarda a aprovação da demonstração da Fase 02.1. [Planejamento](IMPLEMENTATION_PLAN.md) · [Especificação das dimensões](DIMENSION_SPEC.md) · [Personas](NEW_PERSONAS_SPEC.md)
+
 ## Fase 02.1 em 27 de novembro de 2026
 
-A revisão continua em `codex/rick-morty-phase-02`, sobre `6d631dc`. O ambiente local usa a porta 5176. Na mansão, **Rever travessia** repete a sequência completa. O comando de estreia permanece disponível em uma sessão ainda sem descoberta.
+O registro inicial da revisão em `codex/rick-morty-phase-02` parte de `6d631dc`. O ambiente local usa a porta 5176. Na mansão, **Rever travessia** repete a sequência completa. O comando de estreia permanece disponível em uma sessão ainda sem descoberta.
 
 | Commit | Escopo e arquivos |
 | --- | --- |
@@ -187,11 +204,11 @@ window.fetch = async (url, options) => {
 
 ## Decisões abertas para a etapa artística
 
-As presenças de Rick Maligno e Evil Morty estão definidas pelo pedido. A atribuição de Rick à compacta, de Morty à completa e a ligação da terceira dimensão pela Cidadela são propostas reversíveis. Berlim na compacta, Professor na completa e Pássaro-Pessoa no lugar de Squanchy são requisitos. Os fundos Dark/Light e os avatares La Casa foram recebidos na V11.2, mas seus direitos de uso/distribuição ainda precisam ser confirmados antes da integração. A música também foi recebida; o proprietário informou possuir autorização, sem que documentação comprobatória tenha sido inspecionada. Deixar La Casa Light para quando houver tempo e cota. O endereço exato do rosa escuro é `midnight-pink` e o do claro é `quartzo-framboesa`.
+Rick Maligno na compacta, Morty Maligno na completa e a ligação da terceira dimensão pela Cidadela já estão ativos. Berlim na compacta e Professor na completa são requisitos de La Casa. Os fundos Dark e Light e os avatares La Casa foram recebidos na V11.2. Os direitos de uso e distribuição ainda precisam ser confirmados antes da integração. O proprietário informou possuir autorização musical, com documentação comprobatória ainda pendente de revisão. O rosa escuro usa `midnight-pink` e o claro usa `quartzo-framboesa`.
 
 ## Especificação de novas personas
 
-**Preparação documental.** [NEW_PERSONAS_SPEC.md](NEW_PERSONAS_SPEC.md) registra a matriz proposta de Rick Maligno e Evil Morty em `beyond-curve`, substituição de Squanchy por Pássaro-Pessoa na Garagem completa, e Berlim/Professor em La Casa. Inclui caracterizações amplas não imitativas, saudações e sugestões originais PT/EN, exemplos limitados aos fatos de projetos documentados, destinos de avatar e pontos de integração cliente/servidor. Nenhuma persona, tradução ou configuração foi registrada no código; nenhum prompt, tema, streaming, componente ou asset foi alterado.
+A especificação reúne a matriz ativa de Rick and Morty e as propostas de Berlim e Professor para La Casa. Inclui saudações e sugestões originais em PT/EN, exemplos de projetos e os pontos de integração no cliente e no servidor. [Especificação de personas](NEW_PERSONAS_SPEC.md)
 
 A correção da autoria por turno continua pré-requisito, conforme a etapa 2 do plano e os dois casos isolados que falham intencionalmente. Os arquivos das personas foram recebidos no ZIP V11.2, sem registro no sistema; permissões de imagem continuam pendentes. Os destinos de Berlim e Professor são `public/la-casa-de-papel/`. Nenhuma persona, tradução, tema, prompt, streaming ou componente foi alterado nesta preparação.
 
@@ -217,7 +234,7 @@ Suíte completa (`node --test --test-reporter=dot tests/*.test.mjs`), build de p
 
 Criado [THEME_PREPARATION.md](THEME_PREPARATION.md), exclusivamente documental. A analise confirma 15 temas no seletor, tokens compartilhados `--palette-*` → `--page`/`--panel`/`--ink` etc., `darkMode: 'class'` no Tailwind, aliases duplicados no JS e no primeiro paint HTML, e persistencia em `localStorage`. Beyond permanece uma dimensao secreta de `rick-morty`, nao uma quarta opcao de tema; o estado atual ainda restaura e alterna apenas Garagem/Cidadela.
 
-A especificacao preserva sem mudanca as sete cores base aprovadas para Beyond e define cores propostas para La Casa Dark/Light com base nos fundos V11.2. Dark substitui o slot `midnight-pink` e os aliases `obsidian-gold`/`grafite-coral` migram diretamente; Light e opcional, sem dependencia tecnica para Dark. Foram calculadas relacoes WCAG 2.2 para texto, botoes, foco e bordas; `--line` e decorativo e nao atinge 3:1, enquanto `--control-border` atende. Tambem foi registrado que os status claros fixos do Laboratorio falham no fundo Light e requerem alternativas locais caso o tema seja implementado.
+A preparação conserva as sete cores base de Beyond e registra cores propostas para La Casa Dark e Light com base nos fundos V11.2. Dark substitui o slot `midnight-pink` e recebe diretamente os aliases `obsidian-gold` e `grafite-coral`. Light substitui `quartzo-framboesa`. A preparação calculou relações WCAG 2.2 para texto, botões, foco e bordas. O token decorativo `--line` fica abaixo de 3:1, que é atendido por `--control-border`. Os indicadores claros fixos do Laboratório precisam de cores próprias sobre o fundo Light.
 
 Nao foi alterado codigo de producao, tema, portal, Astra, traducao ou asset. `docs/THEME_PREPARATION.md` foi incluido no script de exportacao; a exportacao foi executada e validada. `git diff --check` passou. A paleta nao declara conformidade WCAG completa; direitos das imagens, crop responsivo, icone Dali e autorizacao dos temas continuam pendentes.
 

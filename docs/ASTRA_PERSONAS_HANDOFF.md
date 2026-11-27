@@ -23,11 +23,13 @@
 | `corrupted` | `meeseeks` | `poopybutthole` |
 | `beyond-curve` | `evil-rick` | `evil-morty` |
 
-O servidor deriva o ID da combinação de tema, dimensão e superfície. Combinações inválidas usam a Astra. `squanchy` segue reconhecido na apresentação de mensagens históricas. A resposta local ao comando secreto usa o autor capturado antes da travessia. O próximo envio resolve o autor no destino. Rick Maligno é o Rick associado a Evil Morty. Todos os avatares novos são imagens estáticas, e os perfis localizados compartilham as ferramentas, o contexto e os limites da Astra.
+O servidor deriva o ID da combinação de tema, dimensão e superfície. Combinações inválidas usam a Astra. `squanchy` segue reconhecido na apresentação de mensagens históricas. A resposta local ao comando secreto usa o autor capturado antes da travessia. O próximo envio resolve o autor no destino. Todos os novos avatares são imagens estáticas, e os perfis localizados compartilham as ferramentas, o contexto e os limites da Astra.
+
+Cliente e servidor resolvem os nomes a partir das chaves `rick.<personaId>.name` nos mesmos catálogos PT/EN. O ID `evil-morty` exibe Morty Maligno em português e Evil Morty em inglês. O histórico muda o nome exibido ao alternar o idioma e conserva o mesmo ID e avatar. [Nomes em português](../src/i18n/pt.json) · [Nomes em inglês](../src/i18n/en.json)
 
 ## Voz e transparência na Fase 02.1
 
-Pássaro-Pessoa usa o ID histórico `birdperson`. O cabeçalho, o canal, a entrada completa, a saudação e as sugestões usam textos complementares em PT e EN. Espera e erro local obtêm o perfil pelo autor do turno. As perguntas diretas de identidade recebem a fala do personagem. Perguntas expressas sobre a tecnologia usam `rick.assistant.technology`, com a explicação da infraestrutura compartilhada. Ambas as rotas diretas funcionam no endpoint local. O prompt conversacional preserva a voz e a transparência junto das ferramentas e do contexto profissional.
+Pessoa-Pássaro usa o ID histórico `birdperson`. O cabeçalho, o canal, a entrada completa, a saudação e as sugestões usam textos complementares em PT e EN. Espera e erro local obtêm o perfil pelo autor do turno. As perguntas diretas de identidade recebem a fala do personagem. Perguntas expressas sobre a tecnologia usam `rick.assistant.technology`, com a explicação da infraestrutura compartilhada. Ambas as rotas diretas funcionam no endpoint local. O prompt conversacional preserva a voz e a transparência junto das ferramentas e do contexto profissional.
 
 ## Como estender o contrato
 
@@ -36,4 +38,4 @@ Pássaro-Pessoa usa o ID histórico `birdperson`. O cabeçalho, o canal, a entra
 3. Limitar a persona à apresentação e à voz. Usar os mesmos fatos de perfil, políticas de ferramentas, limites de modelos, validações de ações e permissões do Laboratório.
 4. Rodar os testes de identidade do servidor e a matriz de regressão do cliente. A primeira resposta do cenário novo deve usar o novo ID. As respostas anteriores e as reapresentações em PT/EN devem continuar ligadas ao ID de origem.
 
-[Resolvedor compartilhado](../src/data/assistantPersonas.js) · [Aparência](../src/context/AssistantAppearanceContext.jsx) · [Perfis server-side](../server/assistantPersona.js) · [Especificação futura](NEW_PERSONAS_SPEC.md)
+[Resolvedor compartilhado](../src/data/assistantPersonas.js) · [Aparência](../src/context/AssistantAppearanceContext.jsx) · [Perfis server-side](../server/assistantPersona.js) · [Especificação de personas](NEW_PERSONAS_SPEC.md)

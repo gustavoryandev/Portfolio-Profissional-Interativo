@@ -4,9 +4,9 @@ Fase 02 do tema Rick and Morty. A dimensão `beyond-curve` usa o mesmo seletor, 
 
 | Dimensão | ID | Astra compacta | Astra completa |
 | --- | --- | --- | --- |
-| Garagem do Rick | `lab` | Sr. Meeseeks | Pássaro-Pessoa / Birdperson |
-| Cidadela dos Ricks | `corrupted` | Sr. Meeseeks | Sr. Bunda Cagada / Mr. Poopybutthole |
-| Além da Curva Finita Central | `beyond-curve` | Rick Maligno / Evil Rick | Evil Morty |
+| Garagem do Rick | `lab` | Sr. Meeseeks / Mr. Meeseeks | Pessoa-Pássaro / Birdperson |
+| Cidadela dos Ricks | `corrupted` | Sr. Meeseeks / Mr. Meeseeks | Sr. Bunda Cagada / Mr. Poopybutthole |
+| Além da Curva Finita Central | `beyond-curve` | Rick Maligno / Evil Rick | Morty Maligno / Evil Morty |
 
 ## Descoberta e retorno
 
@@ -18,9 +18,11 @@ Fase 02 do tema Rick and Morty. A dimensão `beyond-curve` usa o mesmo seletor, 
 
 ## Cena, áudio e interface
 
-A estreia dura 6,7 s. Uma câmera em Canvas 2D avança pelos anéis e pelas partículas projetados em perspectiva. Fendas luminosas acompanham a abertura da barreira. A luz do túnel muda à medida que o visitante se aproxima do portal, e uma íris revela o único cenário da sequência, a mansão. Uma revisita pelo cabeçalho dura cerca de 1,18 s. **Rever travessia**, no canal da mansão, abre a versão completa novamente. Escape, o botão de pular, aba em segundo plano, perda do contexto do Canvas e ativação de movimento reduzido concluem a chegada. O diálogo devolve o foco ao controle de origem. A escala e a quantidade de elementos variam com a tela e o dispositivo. A arte ausente cede ao fundo de contraste. Com movimento reduzido ou efeitos pausados, a troca é direta.
+O relógio da sequência original de estreia é de 6,7 s. Uma câmera em Canvas 2D avança pelos anéis e pelas partículas projetados em perspectiva. Fendas luminosas acompanham a abertura da barreira. A luz do túnel muda à medida que o visitante se aproxima do portal, e uma íris revela a mansão. A rota curta de revisita tem um relógio de cerca de 1,18 s. **Rever travessia**, no canal da mansão, abre a sequência completa novamente. A ruptura e os marcos de áudio conservam seus tempos originais.
 
-A mansão usa o WebP local de 1125 × 603 com enquadramento CSS para retrato. O degradê protege títulos e painéis. A paleta combina `#09090D`, `#13131A`, `#1C1B23` e o dourado `#EAB308`, com `#FFD84A` reservado à energia do portal. O portal do cabeçalho usa o PNG transparente compacto de 123 × 128 e tem alternativa CSS. A moldura do retrato reutiliza o SVG procedural com correntes em contrarrotação, partículas douradas e pulsação no halo. O retrato mantém a geometria em uma camada própria. A animação contínua cede fora da viewport, em aba oculta, quando pausada ou com preferência por movimento reduzido. Os avatares temáticos são estáticos com alternativa visual em caso de erro.
+As travessias reutilizam o túnel em Canvas 2D. A saída da Garagem para a Cidadela usa verde. A saída da Cidadela para a Garagem usa ciano. O portal da Curva usa amarelo. As imagens finais da Garagem, da doca da Cidadela e da mansão usam 1,65 s de apresentação, tomando a duração original da doca como referência. Escape, o botão de pular, aba em segundo plano, perda do contexto do Canvas e ativação de movimento reduzido concluem a chegada. O diálogo devolve o foco ao controle de origem. Com movimento reduzido ou efeitos pausados, a troca é direta.
+
+A mansão usa o WebP local de 1125 × 603 com enquadramento CSS para retrato. O degradê protege títulos e painéis. A paleta da dimensão combina `#09090D`, `#13131A`, `#1C1B23` e `#EAB308`. O portal do cabeçalho usa o PNG transparente compacto de 123 × 128 e tem alternativa CSS. Ele serve de referência para o amarelo vivo, os realces claros e o halo do portal atrás da fotografia. O SVG procedural conserva as correntes em contrarrotação, as partículas e o enquadramento. O retrato permanece estável em sua própria camada. A animação contínua cede fora da viewport, em aba oculta, quando pausada ou com preferência por movimento reduzido. Os avatares temáticos são estáticos com alternativa visual em caso de erro.
 
 Nas superfícies opacas, o texto principal tem contraste de 15,36:1 e o secundário de 7,89:1 sobre os cards. O anel amarelo tem 13,36:1 sobre a superfície escura. Portfólio e Astra completa foram medidos nas seis larguras solicitadas, de 375 a 1920 px.
 
