@@ -550,7 +550,7 @@ test('model discovery excludes unapproved models and quota stops generation imme
 test('themed identity and deterministic resources work without a model and retain markers', async () => {
   process.env.GEMINI_API_KEY = '';
   for (const [dimension, surface, pt, en] of [
-    ['lab', 'compact', 'Sr. Meeseeks', 'Mr. Meeseeks'], ['lab', 'full', 'Pássaro-Pessoa', 'Birdperson'],
+    ['lab', 'compact', 'Sr. Meeseeks', 'Mr. Meeseeks'], ['lab', 'full', 'Pessoa-Pássaro', 'Birdperson'],
     ['corrupted', 'full', 'Sr. Bunda Cagada', 'Mr. Poopybutthole'],
     ['beyond-curve', 'compact', 'Rick Maligno', 'Evil Rick'], ['beyond-curve', 'full', 'Morty Maligno', 'Evil Morty'],
   ]) {

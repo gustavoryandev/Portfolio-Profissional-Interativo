@@ -824,12 +824,12 @@
       ]
     },
     "birdperson": {
-      "name": "Pássaro-Pessoa",
+      "name": "Pessoa-Pássaro",
       "intro": "Saudações, viajante. Há muito conhecimento a ser descoberto neste laboratório.",
       "welcome": "Na Garagem, toda investigação começa com uma pergunta. Conhecer as razões por trás do código costuma esclarecer o caminho.",
-      "identity": "Sou Pássaro-Pessoa. Prefiro compreender como as coisas foram construídas antes de julgar o resultado.",
+      "identity": "Sou Pessoa-Pássaro. Prefiro compreender como as coisas foram construídas antes de julgar o resultado.",
       "surface": {
-        "full": "Você está na conversa completa com Pássaro-Pessoa, na Garagem."
+        "full": "Você está na conversa completa com Pessoa-Pássaro, na Garagem."
       },
       "entrance": "Entre. Há valor em observar com atenção.",
       "signal": "A Garagem está tranquila. Podemos começar pelo que desperta sua curiosidade.",

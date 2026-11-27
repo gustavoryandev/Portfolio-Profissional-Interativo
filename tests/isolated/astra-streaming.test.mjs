@@ -351,12 +351,19 @@ test('a language change during streaming keeps the request language and translat
   stream.finish('LANGUAGE_FINAL');
   await until(() => completedReply('Resposta traduzida.'));
 
+  const reply = completedReply('Resposta traduzida.');
+  assert.equal(reply.querySelector('.astra-label span').textContent, 'Pessoa-Pássaro');
+  assert.equal(reply.querySelector('img').dataset.astraCharacter, 'birdperson');
   assert.equal(requests[0].lang, 'en');
   assert.deepEqual(translationRequests.at(-1), {
     action: 'translate',
     text: 'STREAM_START LANGUAGE_FINAL',
     lang: 'pt',
   });
+  await act(async () => i18n.changeLanguage('en'));
+  const original = completedReply('LANGUAGE_FINAL');
+  assert.equal(original.querySelector('.astra-label span').textContent, 'Birdperson');
+  assert.equal(original.querySelector('img').dataset.astraCharacter, 'birdperson');
 });
 
 test('a simple programming example renders as code without opening a resource card', async () => {
@@ -427,7 +434,7 @@ test('late JSON after stopping cannot change the theme or clear the replacement 
   await send('Troque o tema.', { preview: false });
   await click($('.chat-form [aria-label="Parar resposta"]'));
   await until(() => completedReply('Resposta interrompida.'));
-  assert.equal(completedReply('Resposta interrompida.').querySelector('.astra-label span').textContent, 'Pássaro-Pessoa');
+  assert.equal(completedReply('Resposta interrompida.').querySelector('.astra-label span').textContent, 'Pessoa-Pássaro');
   const replacement = await send('Responda de novo.');
   await act(async () => late(Response.json({ response: 'STALE_REPLY', actions: [{ type: 'theme.set', target: 'dark' }] })));
   assert.equal(document.documentElement.dataset.theme, 'rick-morty');
@@ -463,7 +470,7 @@ test('an error is displayed in the current locale without changing the request o
   await act(async () => fail(Response.json({ error: 'Temporarily unavailable' }, { status: 503 })));
   await until(() => completedReply('A resposta ficou incompleta.'));
   assert.equal(requests[0].lang, 'en');
-  assert.equal(completedReply('A resposta ficou incompleta.').querySelector('.astra-label span').textContent, 'Pássaro-Pessoa');
+  assert.equal(completedReply('A resposta ficou incompleta.').querySelector('.astra-label span').textContent, 'Pessoa-Pássaro');
   assert.equal(translationRequests.length, 0);
 });
 
