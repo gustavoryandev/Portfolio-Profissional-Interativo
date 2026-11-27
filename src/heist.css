@@ -113,7 +113,6 @@
 :root[data-theme="la-casa-de-papel-dark"] .hero-actions img { border-radius: 50%; object-fit: cover; }
 
 :root[data-theme="la-casa-de-papel-dark"] .hero-profile {
-  padding: 10px;
   background: #161313;
   border: 1px solid #845960;
   border-radius: 5px;

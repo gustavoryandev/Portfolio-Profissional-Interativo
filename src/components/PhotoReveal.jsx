@@ -6,6 +6,7 @@ const DEFAULT_SOFTNESS = 38;
 const MAX_DEVICE_PIXEL_RATIO = 2;
 const TRAIL_LIFETIME = 660;
 const MAX_STAMPS = 30;
+const DEFAULT_MATTE = ['#141414', '#141414'];
 
 function drawAlternative(context, image, width, height, placement) {
   if (placement) {
@@ -119,7 +120,9 @@ export default function PhotoReveal({
     const canvas = canvasRef.current;
     const alternative = alternativeRef.current;
     const context = canvas.getContext('2d');
-    if (!context) return;
+    const alternativeFrame = document.createElement('canvas');
+    const frameContext = alternativeFrame.getContext('2d');
+    if (!context || !frameContext) return;
 
     let width = 0;
     let height = 0;
@@ -194,7 +197,7 @@ export default function PhotoReveal({
           context.fillRect(stamp.x - stamp.radius, stamp.y - stamp.radius, stamp.radius * 2, stamp.radius * 2);
         }
         context.globalCompositeOperation = 'source-in';
-        drawAlternative(context, alternative, width, height, alternativePlacement);
+        context.drawImage(alternativeFrame, 0, 0, width, height);
         context.globalCompositeOperation = 'source-over';
       }
       if (target || trail.length) schedule();
@@ -203,15 +206,28 @@ export default function PhotoReveal({
 
     const resize = () => {
       const bounds = container.getBoundingClientRect();
+      const sizeChanged = width !== bounds.width || height !== bounds.height;
       width = bounds.width;
       height = bounds.height;
       pixelRatio = Math.min(MAX_DEVICE_PIXEL_RATIO, Math.max(.5, Number(window.devicePixelRatio) || 1));
       const backingWidth = Math.max(1, Math.round(width * pixelRatio));
       const backingHeight = Math.max(1, Math.round(height * pixelRatio));
-      if (canvas.width === backingWidth && canvas.height === backingHeight) return;
+      if (!sizeChanged && canvas.width === backingWidth && canvas.height === backingHeight) return;
       stop();
       canvas.width = backingWidth;
       canvas.height = backingHeight;
+      alternativeFrame.width = backingWidth;
+      alternativeFrame.height = backingHeight;
+      if (!width || !height) return;
+      // Paint the opaque alternate once at this size. Only the brush mask changes per frame.
+      frameContext.setTransform(backingWidth / width, 0, 0, backingHeight / height, 0, 0);
+      drawAlternative(frameContext, alternative, width, height, alternativePlacement);
+      frameContext.globalCompositeOperation = 'destination-over';
+      const matte = frameContext.createLinearGradient(0, 0, 0, height);
+      const colors = alternativePlacement?.matte ?? DEFAULT_MATTE;
+      colors.forEach((color, index) => matte.addColorStop(index / (colors.length - 1), color));
+      frameContext.fillStyle = matte;
+      frameContext.fillRect(0, 0, width, height);
     };
 
     const handleMove = event => {
@@ -283,7 +299,10 @@ export default function PhotoReveal({
       <div id={stageId} ref={containerRef} className="photo-reveal-stage"
         style={{ position: 'relative', overflow: 'hidden', aspectRatio, touchAction: 'pan-y pinch-zoom', ...style }}>
         <img src={originalSrc} alt={alt} draggable="false" fetchPriority="high"
-          aria-hidden={showingAlternative || undefined} style={containedImageStyle} />
+          aria-hidden={showingAlternative || undefined}
+          style={{ ...containedImageStyle, visibility: showingAlternative ? 'hidden' : 'visible' }} />
+        {showingAlternative && <div aria-hidden="true" style={{ position: 'absolute', inset: 0,
+          background: `linear-gradient(${(alternativePlacement?.matte ?? DEFAULT_MATTE).join(', ')})` }} />}
         {alternativeSrc && (
           <img key={alternativeSrc} ref={alternativeRef} src={alternativeSrc}
             alt={showingAlternative ? alternativeAlt : ''} aria-hidden={!showingAlternative}

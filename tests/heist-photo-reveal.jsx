@@ -16,6 +16,7 @@ export async function verifyPhotoReveal() {
   let frameId = 0;
   let painted = 0;
   let alternativeRect;
+  let matteRect;
   let hidden = false;
   let intersection;
   const preference = new window.EventTarget();
@@ -34,8 +35,11 @@ export async function verifyPhotoReveal() {
   window.HTMLCanvasElement.prototype.getContext = () => ({
     setTransform() {},
     clearRect() {},
-    fillRect() { painted += 1; },
-    drawImage(_image, ...rect) { alternativeRect = rect; },
+    fillRect(...rect) {
+      if (this.globalCompositeOperation === 'destination-over') matteRect = rect;
+      else if (this.globalCompositeOperation !== 'destination-out') painted += 1;
+    },
+    drawImage(image, ...rect) { if (image.tagName === 'IMG') alternativeRect = rect; },
     createLinearGradient() { return { addColorStop() {} }; },
     createRadialGradient() { return { addColorStop() {} }; },
   });
@@ -69,6 +73,7 @@ export async function verifyPhotoReveal() {
     await act(async () => alternative.dispatchEvent(new window.Event('load')));
     assert.equal(toggle().disabled, false);
     assert.equal(stage().querySelector('canvas').width, 440);
+    assert.deepEqual(matteRect, [0, 0, 220, 260]);
 
     pointer(stage(), 'pointerdown');
     pointer(window, 'pointerup');
@@ -104,9 +109,11 @@ export async function verifyPhotoReveal() {
     assert.equal(alternative.style.left, '-12.5%');
     assert.equal(alternative.getAttribute('aria-hidden'), 'false');
     assert.equal(stage().querySelector('img').getAttribute('aria-hidden'), 'true');
+    assert.equal(stage().querySelector('img').style.visibility, 'hidden');
     await act(async () => alternative.dispatchEvent(new window.Event('error')));
     assert.equal(toggle().disabled, true);
     assert.equal(stage().querySelector('img').hasAttribute('aria-hidden'), false);
+    assert.equal(stage().querySelector('img').style.visibility, 'visible');
     assert.equal(alternative.style.opacity, '0');
   } finally {
     await act(async () => root.unmount());
