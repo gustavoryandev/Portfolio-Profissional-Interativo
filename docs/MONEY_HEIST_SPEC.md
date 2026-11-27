@@ -16,7 +16,7 @@ O seletor existente continua oferecendo 15 temas. `midnight-pink`, `obsidian-gol
 
 A hero usa o enquadramento noturno da Casa da Moeda, com a fachada preservada por pontos focais CSS e degradês distintos em celular e desktop. A mesma linguagem de cartões grafite, bordas e texto papel percorre o portfólio e as ferramentas da Astra. As regras se aplicam às seções existentes, inclusive cartões de projeto, laboratório, métricas, contato e rodapé. Os estilos dos dossiês ficam preparados para os componentes existentes. O Arcade mantém as cores semânticas de cada jogo sobre a superfície temática, e o tabuleiro de replay usa bronze claro e vinho. A análise e os motores continuam compartilhados.
 
-A grade e a largura do card seguem os mesmos breakpoints do tema Escuro. A escala do nome é compartilhada pela família La Casa de Papel e serve de referência para O Plano. O Assalto mantém caixa alta, faixa vermelha e o enquadramento de 425:500 do PhotoReveal.
+A grade e a largura do card seguem os mesmos breakpoints do tema Escuro. A escala do nome é compartilhada pela família La Casa de Papel e serve de referência para O Plano. O Assalto mantém caixa alta e faixa vermelha. O card reserva o mesmo espaço de 425:500 e exibe o retrato original inteiro na proporção natural de 572:777. [Enquadramento e alinhamento](HEIST_PORTRAIT_HANDOFF.md)
 
 | Viewport | Fonte do nome antes → depois | Largura do card antes → depois | Card do tema Escuro |
 | --- | --- | --- | --- |

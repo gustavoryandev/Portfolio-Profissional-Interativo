@@ -7,12 +7,25 @@ const MAX_DEVICE_PIXEL_RATIO = 2;
 const TRAIL_LIFETIME = 660;
 const MAX_STAMPS = 30;
 
-function drawCover(context, image, width, height, crop) {
-  if (crop) {
-    context.drawImage(image, crop.x, crop.y, crop.width, crop.height, 0, 0, width, height);
+function drawAlternative(context, image, width, height, placement) {
+  if (placement) {
+    const left = placement.x * width;
+    const drawWidth = placement.width * width;
+    context.drawImage(image, left, placement.y * height, drawWidth,
+      drawWidth * image.naturalHeight / image.naturalWidth);
+    if (placement.fadeRight) {
+      const right = left + drawWidth;
+      const start = right - placement.fadeRight * drawWidth;
+      const edge = context.createLinearGradient(start, 0, right, 0);
+      edge.addColorStop(0, 'transparent');
+      edge.addColorStop(1, 'black');
+      context.globalCompositeOperation = 'destination-out';
+      context.fillStyle = edge;
+      context.fillRect(start, 0, Math.max(0, width - start), height);
+    }
     return;
   }
-  const scale = Math.max(width / image.naturalWidth, height / image.naturalHeight);
+  const scale = Math.min(width / image.naturalWidth, height / image.naturalHeight);
   const drawWidth = image.naturalWidth * scale;
   const drawHeight = image.naturalHeight * scale;
   context.drawImage(
@@ -39,15 +52,19 @@ function subscribeToMediaQuery(query, listener) {
   return () => query.removeListener(listener);
 }
 
-function imageStyle(crop) {
-  if (!crop) return { position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' };
+const containedImageStyle = { position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'contain' };
+
+function alternativeStyle(placement) {
+  if (!placement) return containedImageStyle;
   return {
     position: 'absolute',
-    width: `${crop.imageWidth / crop.width * 100}%`,
-    height: `${crop.imageHeight / crop.height * 100}%`,
-    left: `${-crop.x / crop.width * 100}%`,
-    top: `${-crop.y / crop.height * 100}%`,
+    width: `${placement.width * 100}%`,
+    height: 'auto',
+    left: `${placement.x * 100}%`,
+    top: `${placement.y * 100}%`,
     maxWidth: 'none',
+    maskImage: placement.fadeRight
+      ? `linear-gradient(to right, black ${(1 - placement.fadeRight) * 100}%, transparent)` : undefined,
   };
 }
 
@@ -56,8 +73,7 @@ export default function PhotoReveal({
   alternativeSrc,
   alt = '',
   alternativeAlt = '',
-  originalCrop,
-  alternativeCrop,
+  alternativePlacement,
   showLabel,
   hideLabel,
   radius = DEFAULT_RADIUS,
@@ -178,7 +194,7 @@ export default function PhotoReveal({
           context.fillRect(stamp.x - stamp.radius, stamp.y - stamp.radius, stamp.radius * 2, stamp.radius * 2);
         }
         context.globalCompositeOperation = 'source-in';
-        drawCover(context, alternative, width, height, alternativeCrop);
+        drawAlternative(context, alternative, width, height, alternativePlacement);
         context.globalCompositeOperation = 'source-over';
       }
       if (target || trail.length) schedule();
@@ -254,7 +270,7 @@ export default function PhotoReveal({
       resizeObserver?.disconnect();
       stop();
     };
-  }, [interactive, alternativeCrop, radius, softness]);
+  }, [interactive, alternativePlacement, radius, softness]);
 
   const handleAlternativeError = event => {
     setLoadedAlternative('');
@@ -267,14 +283,14 @@ export default function PhotoReveal({
       <div id={stageId} ref={containerRef} className="photo-reveal-stage"
         style={{ position: 'relative', overflow: 'hidden', aspectRatio, touchAction: 'pan-y pinch-zoom', ...style }}>
         <img src={originalSrc} alt={alt} draggable="false" fetchPriority="high"
-          aria-hidden={showingAlternative || undefined} style={imageStyle(originalCrop)} />
+          aria-hidden={showingAlternative || undefined} style={containedImageStyle} />
         {alternativeSrc && (
           <img key={alternativeSrc} ref={alternativeRef} src={alternativeSrc}
             alt={showingAlternative ? alternativeAlt : ''} aria-hidden={!showingAlternative}
             draggable="false" decoding="async"
             onLoad={() => { if (alternativeRef.current?.naturalWidth) setLoadedAlternative(alternativeSrc); }}
             onError={handleAlternativeError}
-            style={{ ...imageStyle(alternativeCrop), opacity: showingAlternative ? 1 : 0, pointerEvents: 'none' }}
+            style={{ ...alternativeStyle(alternativePlacement), opacity: showingAlternative ? 1 : 0, pointerEvents: 'none' }}
           />
         )}
         {interactive && <canvas ref={canvasRef} aria-hidden="true"

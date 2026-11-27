@@ -15,6 +15,7 @@ export async function verifyPhotoReveal() {
   const frames = new Map();
   let frameId = 0;
   let painted = 0;
+  let alternativeRect;
   let hidden = false;
   let intersection;
   const preference = new window.EventTarget();
@@ -34,7 +35,8 @@ export async function verifyPhotoReveal() {
     setTransform() {},
     clearRect() {},
     fillRect() { painted += 1; },
-    drawImage() {},
+    drawImage(_image, ...rect) { alternativeRect = rect; },
+    createLinearGradient() { return { addColorStop() {} }; },
     createRadialGradient() { return { addColorStop() {} }; },
   });
 
@@ -56,8 +58,10 @@ export async function verifyPhotoReveal() {
   const toggle = () => check().querySelector('button');
   try {
     await act(async () => root.render(<PhotoReveal originalSrc="/base.jpeg" alt="Professional portrait"
-      alternativeSrc="/alternate.webp" alternativeAlt="Masked portrait" showLabel="Reveal" hideLabel="Return" />));
+      alternativeSrc="/alternate.webp" alternativeAlt="Masked portrait" showLabel="Reveal" hideLabel="Return"
+      alternativePlacement={{ x: -.125, y: .025, width: .75, fadeRight: .125 }} />));
     assert.equal(stage().querySelector('img').alt, 'Professional portrait');
+    assert.equal(stage().querySelector('img').style.objectFit, 'contain');
     assert.equal(toggle().disabled, true);
     const alternative = stage().querySelector('img[src="/alternate.webp"]');
     Object.defineProperty(alternative, 'naturalWidth', { value: 918 });
@@ -71,6 +75,7 @@ export async function verifyPhotoReveal() {
     assert.equal(frames.size, 1);
     runFrame(16);
     assert.ok(painted > 0, 'a quick tap leaves a radial stamp');
+    assert.deepEqual(alternativeRect, [-27.5, 6.5, 165, 165 * 1713 / 918]);
     runFrame(760);
     assert.equal(frames.size, 0, 'no work remains after the stamp fades');
 
@@ -94,6 +99,9 @@ export async function verifyPhotoReveal() {
     assert.equal(stage().querySelector('canvas'), null);
     await act(async () => toggle().click());
     assert.equal(alternative.alt, 'Masked portrait');
+    assert.equal(alternative.style.width, '75%');
+    assert.equal(alternative.style.height, 'auto');
+    assert.equal(alternative.style.left, '-12.5%');
     assert.equal(alternative.getAttribute('aria-hidden'), 'false');
     assert.equal(stage().querySelector('img').getAttribute('aria-hidden'), 'true');
     await act(async () => alternative.dispatchEvent(new window.Event('error')));
