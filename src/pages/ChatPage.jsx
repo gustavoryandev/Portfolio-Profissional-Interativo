@@ -234,6 +234,7 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
       appendMessage({
         id, sender: 'ai', author: replyAuthor, degraded: true, lang: requestLanguage,
         tone: cancelled ? undefined : 'error',
+        translationKey: cancelled ? undefined : 'chat.erro',
         text: cancelled ? [buffer?.getText(), notice].filter(Boolean).join('\n\n') : notice,
       });
     }
@@ -414,7 +415,7 @@ export default function ChatPage({ modal = false, visible = true, onReady, onSel
 
                   {messages.filter(message => !showGaloHero || message.id !== 'welcome').map(message => (
                     <div id={messageAnchor(message.id)} tabIndex={-1} className="chat-msg-in outline-none" key={message.id}>
-                      <MessageBubble message={message.id === 'welcome' ? { ...message, text: persona?.welcome ?? t(welcomeKey), translationKey: persona ? undefined : welcomeKey } : message} liveContext={live.context} refreshing={live.refreshing} onRefresh={live.refresh} onSelectSection={onSelectSection}
+                      <MessageBubble message={message.id === 'welcome' ? { ...message, text: persona?.welcome ?? t(welcomeKey), translationKey: persona ? undefined : welcomeKey, lang: i18n.language } : message} liveContext={live.context} refreshing={live.refreshing} onRefresh={live.refresh} onSelectSection={onSelectSection}
                         onViewFull={openFull ? viewFullMessage : undefined} compact={modal} active={visible && !showArcade}>
                         {message.id === 'welcome' && modal && galoShortcuts}
                         {message.reviewId && <LaboratoryReview reviewId={message.reviewId} onOpenLab={() => onSelectSection?.('laboratorio')}
