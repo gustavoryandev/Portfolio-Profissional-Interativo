@@ -17,6 +17,7 @@
   --rick-frame: #655433;
   --rick-portrait-border: #e9c66a66;
   --rick-title-shadow: #3b3220;
+  --neon-strength: .10;
   --beyond-alert: #d95757;
   --beyond-glow: #6e5116;
   --beyond-energy: #fff4ba;
@@ -134,6 +135,19 @@
   background: linear-gradient(90deg, #09090df5, #09090daa 37%, #09090d36 74%),
     linear-gradient(0deg, #09090df2, transparent 52%, #09090d50);
 }
+:root[data-dimension="beyond-curve"] .rick-presentation {
+  background: linear-gradient(150deg, #1c1b23fa, #13131afa 72%);
+  box-shadow: 0 16px 45px #0005;
+}
+:root[data-dimension="beyond-curve"] .portfolio-hero .neon-title {
+  color: var(--accent);
+  text-shadow: 0 2px 0 var(--page);
+}
+:root[data-dimension="beyond-curve"] .hero-profile {
+  border-radius: 16px;
+  border-color: var(--line);
+  box-shadow: 0 14px 36px #0005;
+}
 @media (width >= 900px) {
   :root[data-dimension="beyond-curve"] .portfolio-hero {
     grid-template: "presentation portrait" auto / minmax(0, 1.25fr) minmax(0, .9fr);
@@ -183,10 +197,72 @@
 :root[data-dimension="beyond-curve"] .astra-hero {
   background: linear-gradient(132deg, var(--panel-soft), var(--panel) 75%);
 }
-:root[data-dimension="beyond-curve"] .workbench-monitor {
-  border-color: var(--rick-frame);
-  background: var(--panel-soft);
+:root[data-dimension="beyond-curve"] .astra-wordmark {
+  color: var(--ink);
+  filter: none;
+  text-shadow: none;
+  animation: none;
+}
+:root[data-dimension="beyond-curve"] .astra-hero .astra-sub {
+  max-width: 58ch;
   color: var(--accent);
+  font-family: inherit;
+  font-size: clamp(1rem, 1.5vw, 1.2rem);
+  font-weight: 500;
+  line-height: 1.6;
+}
+:root[data-dimension="beyond-curve"] .astra-shell-modal::backdrop {
+  background: #09090dc2;
+  backdrop-filter: none;
+}
+:root[data-dimension="beyond-curve"] .astra-compact .center-panel {
+  border-width: 1px;
+  border-radius: 0;
+  border-color: var(--line);
+}
+:root[data-dimension="beyond-curve"] .dimension-instrument-panel {
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-inline-start: 2px solid var(--rick-frame);
+  border-radius: 10px;
+  box-shadow: none;
+}
+:root[data-dimension="beyond-curve"] .dimension-instrument-panel::before,
+:root[data-dimension="beyond-curve"] .dimension-instrument-panel::after,
+:root[data-dimension="beyond-curve"] .garage-workbench :is(.meeseeks-box, .workbench-screw) { display: none; }
+:root[data-dimension="beyond-curve"] .dimension-instrument-panel .dimension-astra-signal {
+  min-height: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+:root[data-dimension="beyond-curve"] .garage-workbench {
+  display: flex;
+  flex-wrap: wrap;
+  min-height: 0;
+}
+:root[data-dimension="beyond-curve"] .workbench-monitor {
+  flex: 1 1 auto;
+  min-height: 44px;
+  border-color: var(--rick-frame);
+  background: transparent;
+  color: var(--accent);
+}
+:root[data-dimension="beyond-curve"] .workbench-monitor:hover { background: var(--panel-soft); }
+.beyond-replay {
+  min-height: 44px;
+  padding-inline: 8px;
+  color: var(--accent);
+  font-size: .8rem;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.beyond-replay:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) {
+  .beyond-replay { display: none; }
+}
+:root[data-dimension="beyond-curve"] :is(.code-lab-panel, .rick-extra-archive, .arcade, .project-tile) {
+  border-color: var(--line);
+  box-shadow: 0 10px 25px #09090d52;
 }
 :root[data-dimension="beyond-curve"] .chat-bubble--error {
   border-color: color-mix(in srgb, var(--beyond-alert) 68%, var(--line));

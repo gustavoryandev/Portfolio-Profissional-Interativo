@@ -671,6 +671,8 @@
       "citadelShort": "DOCA",
       "skip": "Pular travessia",
       "archive": "MANSÃO / ARQUIVO",
+      "channel": "Canal da mansão",
+      "replay": "Rever travessia",
       "music": { "play": "Tocar For the Damaged Coda", "pause": "Pausar For the Damaged Coda" },
       "command": {
         "accepted": "Sinal reconhecido. Coordenadas confirmadas.",

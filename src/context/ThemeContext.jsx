@@ -197,6 +197,7 @@ export function ThemeProvider({ children }) {
   }, [introScene, markShipDeparted, playAnthem, selectMusic, stopMusic]);
 
   const arrive = useCallback((next, withDock = false) => {
+    if (selectedDimension.current === next) return;
     if (window.scrollY || window.scrollX) {
       const readingLine = document.querySelector('.site-header')?.getBoundingClientRect().bottom ?? 0;
       const section = [...document.querySelectorAll('.scroll-content > [id]')].find(element => {
@@ -226,15 +227,16 @@ export function ThemeProvider({ children }) {
     }
     if (interrupted) setIntroScene(null);
   }, [setMusicCue]);
-  const crossDimension = useCallback((event, target, firstDiscovery = false) => {
+  const crossDimension = useCallback((event, target, extended = false) => {
     if (!isDimensionalTheme(selectedTheme.current) || tripLocked.current || replayTrigger.current) return false;
     const destination = target ?? (selectedDimension.current === 'lab' ? 'corrupted' : 'lab');
     if (!['lab', 'corrupted', BEYOND_CURVE].includes(destination)) return false;
-    if (destination === selectedDimension.current || (destination === BEYOND_CURVE && !unlocked.current)) return false;
-    tripLocked.current = true;
     const direct = effectsPaused || document.hidden || window.matchMedia?.(REDUCED_MOTION_QUERY).matches;
+    if (destination === selectedDimension.current && (!extended || direct)) return false;
+    if (destination === BEYOND_CURVE && !unlocked.current) return false;
+    tripLocked.current = true;
     if (destination === BEYOND_CURVE || selectedDimension.current === BEYOND_CURVE) {
-      selectMusic(destination, true, firstDiscovery && !direct ? .48 : 1);
+      selectMusic(destination, true, extended && !direct ? .48 : 1);
     }
     setAchievementVisible(false);
     if (introScene === 'garage') markShipDeparted();
@@ -246,13 +248,16 @@ export function ThemeProvider({ children }) {
     const button = event?.currentTarget;
     const bounds = (button?.querySelector('.portal-art') ?? button)?.getBoundingClientRect();
     setIntroScene(null);
-    setTrip({ destination, firstDiscovery, origin: selectedDimension.current,
+    setTrip({ destination, extended, origin: selectedDimension.current,
       opener: button ?? document.getElementById('chat-input'),
       x: bounds ? bounds.left + bounds.width / 2 : window.innerWidth / 2,
       y: bounds ? bounds.top + bounds.height / 2 : window.innerHeight / 2,
     });
     return true;
   }, [arrive, effectsPaused, finishTrip, introScene, markShipDeparted, selectMusic]);
+  const replayBeyond = useCallback(event => {
+    if (selectedDimension.current === BEYOND_CURVE) crossDimension(event, BEYOND_CURVE, true);
+  }, [crossDimension]);
   const discoverBeyond = useCallback(query => {
     if (!isBeyondCurveCommand(selectedTheme.current, query)) return null;
     if (tripLocked.current || replayTrigger.current) return 'busy';
@@ -317,7 +322,7 @@ export function ThemeProvider({ children }) {
   }, [theme, dimension, darkMode, palette]);
 
   return (
-      <ThemeContext.Provider value={{ musicStatus, musicVolume, changeMusicVolume, toggleMusic, effectsPaused, changeEffectsPaused, theme, darkMode, setTheme, anthemPlaying, toggleAnthem, crossDimension, crossing, dimension, beyondUnlocked, discoverBeyond, achievementVisible, eggMessage, setEggMessage, shipDeparted, markShipDeparted, introScene, replayIntro, progress, enableExploration, resetExploration, recordDiscovery }}>
+      <ThemeContext.Provider value={{ musicStatus, musicVolume, changeMusicVolume, toggleMusic, effectsPaused, changeEffectsPaused, theme, darkMode, setTheme, anthemPlaying, toggleAnthem, crossDimension, crossing, dimension, beyondUnlocked, discoverBeyond, achievementVisible, eggMessage, setEggMessage, shipDeparted, markShipDeparted, introScene, replayIntro, replayBeyond, progress, enableExploration, resetExploration, recordDiscovery }}>
       {children}
       {introScene && <DimensionalIntro key={introScene} scene={introScene} onDismiss={dismissIntro} />}
       {trip && <DimensionTransit trip={trip} onArrive={arrive} onFinish={finishTrip} onMusicCue={setMusicCue} />}

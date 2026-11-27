@@ -14,9 +14,9 @@ export default function BeyondCurveTransit({ trip, onArrive, onFinish, onMusicCu
   const skip = useRef(null);
   const finish = useRef(null);
   const incoming = trip.destination === BEYOND_CURVE;
-  const discovery = incoming && trip.firstDiscovery;
-  const route = incoming ? discovery ? curveFlightRoutes.discovery : curveFlightRoutes.revisit : curveFlightRoutes.departure;
-  const [shot, setShot] = useState(discovery ? 'instability' : 'portal');
+  const extended = incoming && trip.extended;
+  const route = incoming ? extended ? curveFlightRoutes.discovery : curveFlightRoutes.revisit : curveFlightRoutes.departure;
+  const [shot, setShot] = useState(extended ? 'instability' : 'portal');
   const [fallback, setFallback] = useState(false);
 
   useLayoutEffect(() => {
@@ -88,7 +88,7 @@ export default function BeyondCurveTransit({ trip, onArrive, onFinish, onMusicCu
         while (curveFlightCues[cueIndex + 1]?.progress <= progress) {
           const cue = curveFlightCues[++cueIndex];
           setShot(cue.shot);
-          if (discovery && cue.volume) onMusicCue?.(cue.volume);
+          if (extended && cue.volume) onMusicCue?.(cue.volume);
           if (cue.shot === 'mansion') arrive();
         }
         if (fraction === 1) settle(false);
@@ -102,6 +102,7 @@ export default function BeyondCurveTransit({ trip, onArrive, onFinish, onMusicCu
       timer = setTimeout(() => settle(false), 700);
     }
     preference?.addEventListener('change', onPreference);
+    stage.addEventListener('contextlost', interrupt);
     document.addEventListener('visibilitychange', onVisibility);
     window.addEventListener('popstate', interrupt);
     return () => {
@@ -109,6 +110,7 @@ export default function BeyondCurveTransit({ trip, onArrive, onFinish, onMusicCu
       cancelAnimationFrame(frame);
       clearTimeout(timer);
       preference?.removeEventListener('change', onPreference);
+      stage.removeEventListener('contextlost', interrupt);
       document.removeEventListener('visibilitychange', onVisibility);
       window.removeEventListener('resize', resize);
       window.removeEventListener('popstate', interrupt);
@@ -118,7 +120,7 @@ export default function BeyondCurveTransit({ trip, onArrive, onFinish, onMusicCu
       const opener = returnFocus.current;
       if (restore && opener?.isConnected) opener.focus({ preventScroll: true });
     };
-  }, [discovery, incoming, onArrive, onFinish, onMusicCue, route, trip]);
+  }, [extended, incoming, onArrive, onFinish, onMusicCue, route, trip]);
 
   return <dialog ref={dialog} className="beyond-transit" data-shot={shot} data-renderer={fallback ? 'fallback' : 'canvas'}
     aria-label={t('rick.beyond.scenes.transit')}

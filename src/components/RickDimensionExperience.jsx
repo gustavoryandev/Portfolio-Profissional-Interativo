@@ -4,6 +4,7 @@ import { ThemeContext } from '../context/ThemeState';
 import { useAstra } from '../context/AstraContext';
 import { useAssistantPersona } from '../context/AssistantAppearanceContext';
 import { REDUCED_MOTION_QUERY, RICK_INTRO_DURATION } from '../motionPreferences';
+import { BEYOND_CURVE } from '../data/rickDimensions';
 import RickThemeMusic from './RickThemeMusic';
 import CharacterPerformance from './rick/CharacterPerformance';
 import MeeseeksRig from './rick/MeeseeksRig';
@@ -33,7 +34,7 @@ export function CharacterArt({ who = 'morty', badge = false, gaze = false }) {
 const rota = perfil.projetos.find(project => project.id === 'car-rental');
 export function GarageWorkbench({ onSectionLink }) {
   const persona = useAssistantPersona();
-  const { dimension, setEggMessage, recordDiscovery } = useContext(ThemeContext);
+  const { dimension, setEggMessage, recordDiscovery, replayBeyond, crossing, effectsPaused } = useContext(ThemeContext);
   const { openAstra } = useAstra();
   const { t, i18n } = useTranslation();
   const [meeseeks, setMeeseeks] = useState(false);
@@ -42,9 +43,12 @@ export function GarageWorkbench({ onSectionLink }) {
   const assets = useSceneAssets(dimension === 'lab' ? 'workbench' : null, active || meeseeks);
   return <div ref={bench} className="garage-workbench" data-rick-motion data-active={active}>
     <button type="button" className="workbench-monitor" onClick={openAstra} aria-haspopup="dialog">
-      <span>{dimension === 'corrupted' ? t('rick.terminal') : t('rick.monitor', { name: persona?.name })}</span>
+      <span>{dimension === BEYOND_CURVE ? t('rick.beyond.channel')
+        : dimension === 'corrupted' ? t('rick.terminal') : t('rick.monitor', { name: persona?.name })}</span>
       <strong>{t('rick.openChat')}</strong>
     </button>
+    {dimension === BEYOND_CURVE && !effectsPaused && <button type="button" className="beyond-replay"
+      aria-disabled={crossing} onClick={replayBeyond}>{t('rick.beyond.replay')}</button>}
     <button type="button" className="meeseeks-box" aria-label={t('rick.box')} aria-pressed={meeseeks} onClick={() => {
       setMeeseeks(value => !value);
       if (!meeseeks) recordDiscovery?.('meeseeks');

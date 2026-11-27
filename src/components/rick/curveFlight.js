@@ -24,7 +24,7 @@ export const curveFlightRoutes = {
   departure: { duration: 640, from: .57, to: .83 },
 };
 
-const gold = [255, 184, 46];
+const gold = [255, 197, 55];
 const indigo = [122, 113, 255];
 const ice = [107, 194, 246];
 const energy = [255, 241, 170];
@@ -50,6 +50,17 @@ function trace(ctx, points) {
   for (let i = 1; i < points.length; i++) ctx.lineTo(...points[i]);
 }
 
+function traceRidge(ctx, points) {
+  const last = points.at(-1);
+  ctx.moveTo((last[0] + points[0][0]) / 2, (last[1] + points[0][1]) / 2);
+  for (let i = 0; i < points.length; i++) {
+    const [x, y] = points[i];
+    const [nextX, nextY] = points[(i + 1) % points.length];
+    ctx.quadraticCurveTo(x, y, (x + nextX) / 2, (y + nextY) / 2);
+  }
+  ctx.closePath();
+}
+
 function drawTunnel(ctx, camera, lowQuality) {
   const { x, y, focal, clock, distance, visible, golden, dissolve } = camera;
   const samples = lowQuality ? 28 : 44;
@@ -66,6 +77,22 @@ function drawTunnel(ctx, camera, lowQuality) {
     rings.push({ points: ringPoints(samples, at, depth, focal, x, y, clock, 1 + golden), depth });
   }
   if (!rings.length) return;
+  // Broad, softly lit ribbons spiral between the fine ridges.
+  if (rings.length > 2) {
+    const veil = ctx.createRadialGradient(x, y, 0, x, y, focal * 1.1);
+    veil.addColorStop(0, tint(highlight, .03 * visible * dissolve));
+    veil.addColorStop(.33, tint(highlight, (.13 + .07 * golden) * visible * dissolve));
+    veil.addColorStop(.69, tint(hue, .16 * visible * dissolve));
+    veil.addColorStop(1, tint(hue, 0));
+    ctx.fillStyle = veil;
+    for (let band = 0; band < samples; band += lowQuality ? 7 : 8) {
+      const edge = rings.map((ring, i) => ring.points[(band + i * 2) % samples]);
+      const returnEdge = rings.map((ring, i) => ring.points[(band + i * 2 + 2 + Math.floor(i / 5)) % samples]).reverse();
+      ctx.beginPath();
+      traceRidge(ctx, [...edge, ...returnEdge]);
+      ctx.fill();
+    }
+  }
   // Longitudinal lines share the same projected rings and turn with the tunnel.
   // Connecting alternating bands leaves open space for the vanishing point.
   for (let band = 0; band < samples; band += 4) {
@@ -82,13 +109,15 @@ function drawTunnel(ctx, camera, lowQuality) {
     const near = 1 / (1 + depth * .28);
     const opacity = near * visible * dissolve;
     ctx.beginPath();
-    trace(ctx, points);
-    ctx.closePath();
-    ctx.lineWidth = 2 + near * (3 + golden * 5);
-    ctx.strokeStyle = tint(hue, opacity * .2);
+    traceRidge(ctx, points);
+    ctx.lineWidth = 7 + near * (9 + golden * 10);
+    ctx.strokeStyle = tint(hue, opacity * .075);
+    ctx.stroke();
+    ctx.lineWidth = 3 + near * (3 + golden * 5);
+    ctx.strokeStyle = tint(hue, opacity * .18);
     ctx.stroke();
     ctx.lineWidth = .7 + near * 1.45;
-    ctx.strokeStyle = tint(hue, opacity * .57);
+    ctx.strokeStyle = tint(hue, opacity * .51);
     ctx.stroke();
     // Short currents move along each ridge independently of the shell.
     const run = Math.floor((clock * -24 + depth * 2 + samples * 10) % samples + samples) % samples;
@@ -127,11 +156,11 @@ function drawParticles(ctx, camera, lowQuality, progress) {
 
 function drawBreach(ctx, camera, progress, lowQuality) {
   const { x, y, focal, clock } = camera;
-  const fracture = ease(.407, .55, progress);
-  const release = ease(.515, .67, progress);
+  const fracture = ease(.365, .5, progress);
+  const release = ease(.495, .676, progress);
   const opacity = fracture * (1 - release);
   if (opacity < .01) return;
-  const radius = focal * mix(.1, 1.7, release);
+  const radius = focal * mix(.16, 1.7, release);
   const branches = lowQuality ? 9 : 14;
   const points = [];
   ctx.beginPath();
@@ -142,6 +171,13 @@ function drawBreach(ctx, camera, progress, lowQuality) {
   }
   trace(ctx, points);
   ctx.closePath();
+  const opening = ctx.createRadialGradient(x, y, radius * .15, x, y, radius * 1.3);
+  opening.addColorStop(0, tint([46, 25, 6], opacity * .86));
+  opening.addColorStop(.52, tint(gold, opacity * .13));
+  opening.addColorStop(.82, tint(energy, opacity * .34));
+  opening.addColorStop(1, tint(gold, 0));
+  ctx.fillStyle = opening;
+  ctx.fill();
   ctx.strokeStyle = tint(gold, opacity * .64);
   ctx.lineWidth = 8;
   ctx.stroke();
@@ -173,13 +209,29 @@ function drawBreach(ctx, camera, progress, lowQuality) {
   ctx.strokeStyle = tint(energy, opacity * .85);
   ctx.lineWidth = 1;
   ctx.stroke();
+
+  if (release > 0) {
+    ctx.fillStyle = tint(energy, opacity * .63);
+    for (let i = 0; i < branches; i++) {
+      const angle = i * TAU / branches + release * .32;
+      const travel = radius * (1.05 + release * noise(i + 838));
+      const px = x + Math.cos(angle) * travel;
+      const py = y + Math.sin(angle) * travel * .8;
+      const size = (3 + noise(i + 854) * 11) * (1 - release);
+      ctx.beginPath();
+      ctx.moveTo(px, py);
+      ctx.lineTo(px + Math.cos(angle) * size * 2.6, py + Math.sin(angle) * size * 2.6);
+      ctx.lineTo(px - Math.sin(angle) * size, py + Math.cos(angle) * size);
+      ctx.fill();
+    }
+  }
 }
 
 export function paintCurveFlight(ctx, width, height, progress, lowQuality) {
   const clock = clamp(progress);
   const revolve = ease(.015, .24, clock);
   const golden = ease(.39, .64, clock);
-  const landing = ease(.765, 1, clock);
+  const landing = ease(.78, 1, clock);
   const focus = Math.min(width, height);
   const x = width * (.5 + Math.sin(clock * 9.4) * .09 * (1 - landing));
   const y = height * (.48 + Math.sin(clock * 6.5) * .063 * (1 - landing));
@@ -190,8 +242,8 @@ export function paintCurveFlight(ctx, width, height, progress, lowQuality) {
 
   ctx.clearRect(0, 0, width, height);
   const atmosphere = ctx.createRadialGradient(x, y, 0, x, y, focal * 1.85);
-  atmosphere.addColorStop(0, tint(blendColor([35, 27, 85], [84, 47, 6], golden), 1));
-  atmosphere.addColorStop(.45, tint(blendColor([18, 16, 47], [38, 25, 18], golden), 1));
+  atmosphere.addColorStop(0, tint(blendColor([35, 27, 85], [88, 51, 9], golden), 1));
+  atmosphere.addColorStop(.45, tint(blendColor([21, 14, 46], [42, 26, 14], golden), 1));
   atmosphere.addColorStop(1, '#09090d');
   ctx.fillStyle = atmosphere;
   ctx.fillRect(0, 0, width, height);
@@ -202,7 +254,7 @@ export function paintCurveFlight(ctx, width, height, progress, lowQuality) {
 
   if (landing > 0) {
     ctx.globalCompositeOperation = 'destination-out';
-    const radius = Math.hypot(width, height) * (.06 + landing * 1.05);
+    const radius = Math.hypot(width, height) * (.03 + Math.pow(landing, 1.35));
     const iris = ctx.createRadialGradient(x, y, radius * .56, x, y, radius);
     iris.addColorStop(0, '#000');
     iris.addColorStop(.72, '#000e');

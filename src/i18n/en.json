@@ -671,6 +671,8 @@
       "citadelShort": "DOCK",
       "skip": "Skip transit",
       "archive": "MANSION / ARCHIVE",
+      "channel": "Mansion channel",
+      "replay": "Replay crossing",
       "music": { "play": "Play For the Damaged Coda", "pause": "Pause For the Damaged Coda" },
       "command": {
         "accepted": "Signal recognized. Coordinates confirmed.",
