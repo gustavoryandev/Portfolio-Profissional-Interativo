@@ -644,18 +644,64 @@ test('common evaluator questions use verified portfolio facts and cards without 
   }
 });
 
+test('missing Gemini setup affects free questions on both surfaces and the same requests recover after setup', async () => {
+  const originalFetch = globalThis.fetch;
+  const prompts = [
+    { lang: 'pt', surface: 'compact', appearance: { theme: 'la-casa-de-papel-dark' }, userMessage: 'Fala aí.' },
+    { lang: 'en', surface: 'full', appearance: { theme: 'rick-morty', dimension: 'lab' }, userMessage: 'Tell me something fun.' },
+  ];
+  const request = body => ({ method: 'POST', body: { ...body, stream: true, streamRetry: true } });
+  const answer = 'An original, model-generated reply.';
+  const providerRequests = [];
+  try {
+    process.env.GEMINI_API_KEY = '   ';
+    globalThis.fetch = async (_url, options) => {
+      const contents = JSON.parse(options.body).contents;
+      providerRequests.push(contents.at(-1).parts[0].text);
+      const result = { candidates: [{ content: { role: 'model', parts: [{ text: answer }] }, finishReason: 'STOP' }] };
+      return new Response(`data: ${JSON.stringify(result)}\n\n`, { headers: { 'Content-Type': 'text/event-stream' } });
+    };
+    for (const [index, prompt] of prompts.entries()) {
+      const result = response();
+      await handler(request(prompt), result);
+      assert.equal(result.code, 200);
+      assert.equal(result.body.degraded, true);
+      assert.equal(result.body.model, undefined);
+      assert.match(result.body.response, index === 0 ? /não está configurado/ : /not configured/);
+    }
+    const catalog = response();
+    await handler({ method: 'POST', body: { action: 'models' } }, catalog);
+    assert.equal(catalog.code, 503);
+    for (const predefinedSuggestion of [true, false]) {
+      const result = response();
+      await handler(request({ ...prompts[0], predefinedSuggestion, userMessage: 'Quais são os principais projetos do Gustavo?' }), result);
+      assert.match(result.body.response, /\[PROJECTS_CARD\]/);
+      assert.equal(result.body.degraded, undefined);
+    }
+    assert.deepEqual(providerRequests, []);
+
+    process.env.GEMINI_API_KEY = ' setup-regression-fixture ';
+    mockAdapter = async config => ({ status: 200, config, data: { models: [] } });
+    for (const prompt of prompts) {
+      const events = [];
+      const streamed = { ...response(), flushHeaders() { this.headersSent = true; },
+        write(line) { events.push(JSON.parse(line)); return true; }, end() {} };
+      await handler(request(prompt), streamed);
+      assert.ok(events[0].model);
+      assert.equal(events.find(event => event.type === 'delta')?.text, answer);
+      assert.equal(events.at(-1).type, 'done');
+      assert.ok(events.every(event => !event.degraded));
+    }
+    assert.deepEqual(providerRequests, prompts.map(prompt => prompt.userMessage));
+  } finally { globalThis.fetch = originalFetch; process.env.GEMINI_API_KEY = ''; mockAdapter = undefined; }
+});
+
 test('when no completion is available the browser gets a themed reply and no partial text or actions', async () => {
   const originalFetch = globalThis.fetch;
   const body = { userMessage: 'How does Gustavo use Spring Boot?', lang: 'en', surface: 'full', stream: true,
     streamRetry: true, appearance: { theme: 'rick-morty', dimension: 'corrupted' } };
   const request = { method: 'POST', body };
   try {
-    process.env.GEMINI_API_KEY = '';
-    const immediate = response();
-    await handler(request, immediate);
-    assert.equal(immediate.body.degraded, true);
-    assert.match(immediate.body.response, /^Ooo-wee/);
-
     process.env.GEMINI_API_KEY = 'blocked-response-fixture';
     mockAdapter = async config => ({ status: 200, config, data: { models: [] } });
     let calls = 0;
@@ -675,6 +721,7 @@ test('when no completion is available the browser gets a themed reply and no par
     assert.equal(calls, 1);
     assert.deepEqual(events.map(event => event.type), ['meta', 'delta', 'reset', 'meta', 'delta', 'done']);
     assert.equal(events[3].degraded, true);
-    assert.equal(events[4].text, immediate.body.response);
+    assert.match(events[4].text, /^Ooo-wee/);
+    assert.doesNotMatch(events[4].text, /Incomplete opening/);
   } finally { globalThis.fetch = originalFetch; process.env.GEMINI_API_KEY = ''; mockAdapter = undefined; }
 });
