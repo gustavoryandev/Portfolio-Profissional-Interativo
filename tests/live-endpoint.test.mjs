@@ -153,6 +153,24 @@ test('explicit GitHub and combined requests retain the summary even after a pend
   }
 }));
 
+test('a typed 12-month commit total uses GitHub without Gemini or a prior card on either surface', () => withMetricsFixture(async () => {
+  assert.equal(process.env.GEMINI_API_KEY, '');
+  for (const [surface, appearance, lang, userMessage] of [
+    ['compact', { theme: 'dark' }, 'pt', 'Quantos commits o Gustavo fez nos últimos 12 meses?'],
+    ['full', { theme: 'rick-morty', dimension: 'beyond-curve' }, 'en', 'How many commits did Gustavo make in the last 12 months?'],
+  ]) {
+    const result = response();
+    await handler({ method: 'POST', body: { surface, appearance, lang, userMessage, chatHistory: [], stream: true, streamRetry: true } }, result);
+    assert.equal(result.code, 200);
+    assert.equal(result.body.liveContext.github.status, 'ok');
+    assert.equal(result.body.liveContext.github.stats.commits, 0);
+    assert.match(result.body.response, /\*\*0 commits\*\*/);
+    assert.doesNotMatch(result.body.response, /\[\w+_CARD\]/);
+    assert.equal(result.body.model, undefined);
+    assert.equal(result.body.degraded, undefined);
+  }
+}));
+
 test('unavailable metrics are reported once per cause without promising data or emitting empty cards', async () => {
   const keys = ['GITHUB_TOKEN', 'WAKATIME_API_KEY', 'WAKATIME_ACCESS_TOKEN', 'WAKATIME_USERNAME'];
   const previous = Object.fromEntries(keys.map(key => [key, process.env[key]]));
@@ -166,6 +184,10 @@ test('unavailable metrics are reported once per cause without promising data or 
     assert.equal(absent.body.liveContext.wakatime.status, 'not_configured');
     assert.equal(absent.body.response.match(/não configurada/g).length, 1);
     assert.doesNotMatch(absent.body.response, /Aqui estão|\[\w+_CARD\]/);
+    const total = response();
+    await unconfiguredHandler({ method: 'POST', body: { ...query, userMessage: 'Quantos commits o Gustavo fez nos últimos 12 meses?' } }, total);
+    assert.match(total.body.response, /GitHub[^\n]*não configurada/);
+    assert.doesNotMatch(total.body.response, /\d+ commits|\[\w+_CARD\]/);
 
     process.env.GITHUB_TOKEN = 'rejected-test-token';
     process.env.WAKATIME_API_KEY = 'limited-test-token';
