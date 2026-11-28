@@ -172,7 +172,7 @@ test('a typed 12-month commit total uses GitHub without Gemini or a prior card o
 }));
 
 test('unavailable metrics are reported once per cause without promising data or emitting empty cards', async () => {
-  const keys = ['GITHUB_TOKEN', 'WAKATIME_API_KEY', 'WAKATIME_ACCESS_TOKEN', 'WAKATIME_USERNAME'];
+  const keys = ['GITHUB_USERNAME', 'GITHUB_TOKEN', 'WAKATIME_API_KEY', 'WAKATIME_ACCESS_TOKEN', 'WAKATIME_USERNAME'];
   const previous = Object.fromEntries(keys.map(key => [key, process.env[key]]));
   try {
     for (const key of keys) process.env[key] = '';
@@ -189,6 +189,7 @@ test('unavailable metrics are reported once per cause without promising data or 
     assert.match(total.body.response, /GitHub[^\n]*não configurada/);
     assert.doesNotMatch(total.body.response, /\d+ commits|\[\w+_CARD\]/);
 
+    process.env.GITHUB_USERNAME = 'rejected-test-user';
     process.env.GITHUB_TOKEN = 'rejected-test-token';
     process.env.WAKATIME_API_KEY = 'limited-test-token';
     const oldAdapter = axios.defaults.adapter;
