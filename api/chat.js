@@ -1346,9 +1346,10 @@ function profileReply(query, suggestionIndex, language) {
   return null;
 }
 
-function unavailableReply(persona, language, chatContext) {
+function unavailableReply(persona, language, chatContext, noticeOverride) {
   const en = language === 'en';
-  const notice = persona?.unavailable[language] ?? (en ? 'I couldn’t answer this question right now.' : 'Não consegui responder a esta pergunta agora.');
+  const notice = noticeOverride ?? persona?.unavailable[language]
+    ?? (en ? 'I couldn’t answer this question right now.' : 'Não consegui responder a esta pergunta agora.');
   const nextStep = en ? 'You can try again or explore the projects, résumé and skills from the portfolio menu.'
     : 'Você pode tentar de novo ou consultar os projetos, o currículo e as habilidades pelo menu do portfólio.';
   return { response: `${notice} ${nextStep}`, degraded: true, chatContext };
@@ -1375,7 +1376,7 @@ export default async function handler(req, res) {
       return res.status(200).json(await wakaTime.stats(body.range));
     }
     if (body.action === 'models') {
-      const apiKey = process.env.GEMINI_API_KEY;
+      const apiKey = process.env.GEMINI_API_KEY?.trim();
       if (!apiKey) return res.status(503).json({ error: 'Model catalog unavailable' });
       res.setHeader('Cache-Control', 'no-store');
       return res.status(200).json({ models: await getModelList(apiKey) });
@@ -1391,7 +1392,7 @@ export default async function handler(req, res) {
     }
     if (body.action === 'translate') {
       if (typeof body.text !== 'string' || body.text.length > 20000 || !['pt', 'en'].includes(body.lang)) return res.status(400).json({ error: 'Invalid translation request' });
-      const apiKey = process.env.GEMINI_API_KEY;
+      const apiKey = process.env.GEMINI_API_KEY?.trim();
       if (!apiKey) return res.status(503).json({ error: 'Translation unavailable' });
       // Keep executable/interactive content outside the model's translation.
       const protectedParts = [];
@@ -1426,8 +1427,8 @@ export default async function handler(req, res) {
     const write = payload => writeEvent(res, payload, controller.signal);
     res.setHeader('Cache-Control', 'no-store');
     if (stream && body.streamRetry === true) {
-      recoverChat = async () => {
-        const reply = unavailableReply(persona, suggestionLanguage, sanitizeChatContext(body.chatContext));
+      recoverChat = async notice => {
+        const reply = unavailableReply(persona, suggestionLanguage, sanitizeChatContext(body.chatContext), notice);
         if (!res.headersSent) return res.status(200).json(reply);
         await write({ type: 'reset' });
         await write({ type: 'meta', chatContext: reply.chatContext, degraded: true });
@@ -1547,8 +1548,11 @@ export default async function handler(req, res) {
       const liveContext = forClient(await readLive(METRICS_WAIT_MS));
       return resourceReply({ response, liveContext });
     }
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey?.trim()) return recoverChat ? await recoverChat() : res.status(503).json({ error: 'Chat indisponível.' });
+    const apiKey = process.env.GEMINI_API_KEY?.trim();
+    if (!apiKey) {
+      const notice = readJson(`${suggestionLanguage}.json`).chat.aiNotConfigured;
+      return recoverChat ? await recoverChat(notice) : res.status(503).json({ error: notice });
+    }
 
     const messages = normalizeHistory(chatHistory);
     const lastUser = normalizeQuery(messages.findLast(m => m.role === 'user')?.text || '');

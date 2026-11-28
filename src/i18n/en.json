@@ -32,6 +32,7 @@
       "matchUnavailable": "I couldn’t confirm Galo’s last match on ESPN right now. Please try again shortly."
     },
     "erro": "Your question could not be processed right now. Please try again shortly.",
+    "aiNotConfigured": "The AI service for free-form questions is not configured in this environment.",
     "boasVindas": "Hello! I am Gustavo's virtual assistant. How can I help you today?",
     "subtitulo": "Ask about projects, tech stack, university, or live metrics.",
     "placeholder": "Ask something about Gustavo...",

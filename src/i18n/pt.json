@@ -32,6 +32,7 @@
       "matchUnavailable": "Não consegui confirmar o último jogo do Galo na ESPN agora. Tente novamente em instantes."
     },
     "erro": "Não foi possível processar sua pergunta agora. Tente novamente em instantes.",
+    "aiNotConfigured": "O serviço de IA para perguntas livres não está configurado neste ambiente.",
     "boasVindas": "Olá! Sou o assistente virtual do Gustavo. Como posso te ajudar hoje?",
     "subtitulo": "Pergunte sobre projetos, stack técnica, faculdade ou métricas ao vivo.",
     "placeholder": "Digite uma pergunta sobre o Gustavo...",
