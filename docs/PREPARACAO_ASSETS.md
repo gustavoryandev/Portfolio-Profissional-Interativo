@@ -1,6 +1,10 @@
 # Preparacao de assets para implementacoes futuras
 
-27 de novembro de 2026. Guia complementar baseado em [ASSET_INVENTORY.md](ASSET_INVENTORY.md), [CURRENT_THEME_INVENTORY.md](CURRENT_THEME_INVENTORY.md), [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md), [SESSION_HANDOFF.md](SESSION_HANDOFF.md) e buscas pontuais nos componentes referenciados. A importacao seletiva V11.2 esta registrada abaixo e no [relatorio de importacao](ASSET_IMPORT_V11_2_REPORT.md). Nenhum arquivo foi recortado, recomprimido ou integrado a funcionalidade.
+Snapshot histórico de preparação em 27 de novembro de 2026, anterior à integração dos temas, personas e dimensão Beyond. As frases abaixo sobre assets “não integrados”, funcionalidades planejadas e caminhos propostos descrevem aquele estágio e foram preservadas como registro; não representam o estado atual do runtime.
+
+**Estado após a integração (`codex/release-integration`, commit `595e4a98`):** La Casa Dark/Light usa os fundos, avatares, máscara de header e fotografia de revelação versionados; Rick and Morty usa os avatares de Pessoa-Pássaro, Rick Maligno e Evil Morty, o cenário da mansão e o ícone amarelo compacto versionados. A faixa de Beyond está versionada, mas o código a habilita apenas como preview em desenvolvimento enquanto a distribuição não estiver confirmada. Os demais candidatos de cenas/imagens da Curva continuam fora do Git e sem referência no runtime. Consulte [ASSETS_PENDENTES.md](ASSETS_PENDENTES.md) para o estado por arquivo e [heistThemes.js](../src/data/heistThemes.js), [assistantPersonas.js](../src/data/assistantPersonas.js), [sceneAssets.js](../src/components/rick/sceneAssets.js) e [rickThemeMusic.js](../src/services/rickThemeMusic.js) para as referências atuais. A integração não confirma licenças ou direitos de distribuição.
+
+Este guia complementar foi baseado em [ASSET_INVENTORY.md](ASSET_INVENTORY.md), [CURRENT_THEME_INVENTORY.md](CURRENT_THEME_INVENTORY.md), [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md), [SESSION_HANDOFF.md](SESSION_HANDOFF.md) e buscas pontuais nos componentes referenciados. A importacao seletiva V11.2 esta registrada abaixo e no [relatorio de importacao](ASSET_IMPORT_V11_2_REPORT.md). O registro descreve preparação e recomendações daquela etapa.
 
 ## Convencoes e limites do inventario
 

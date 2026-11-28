@@ -1,6 +1,6 @@
 # Imagens do tema Rick and Morty
 
-Os personagens, avatares, portal, nave e cenas da Cidadela usam imagens encontradas na internet. A garagem ilustrada foi mantida conforme solicitado.
+Esta tabela registra fontes do conjunto original de Rick and Morty. Os assets adicionados depois, incluindo arquivos do pacote V11.2 e o ícone compacto do portal amarelo, têm proveniências diferentes e estão listados separadamente abaixo. A garagem ilustrada foi mantida conforme solicitado.
 
 | Arquivo local | Fonte |
 | --- | --- |
@@ -19,6 +19,21 @@ Os personagens, avatares, portal, nave e cenas da Cidadela usam imagens encontra
 | `docs/assets/rick-reference/pickle-rat.png` | [Fonte](https://www.pngmart.com/image/754649) |
 
 Os endereços de origem também estão em `public/rick-assets/sources.json`. As imagens usadas pela interface são WebPs locais. Os desenhos de referência ficam em `docs/assets/rick-reference` e o script de download usa `.cache/rick-reference`.
+
+## Assets de runtime adicionados na integração
+
+Os caminhos abaixo estão versionados na branch `codex/release-integration` e são usados pelo runtime. Formatos, dimensões e hashes do pacote estão no [inventário de assets](ASSET_INVENTORY.md); as referências de código estão em [assistantPersonas.js](../src/data/assistantPersonas.js), [sceneAssets.js](../src/components/rick/sceneAssets.js) e [DimensionPortal.jsx](../src/components/DimensionPortal.jsx).
+
+| Arquivo | Origem registrada e uso atual |
+| --- | --- |
+| `public/rick-assets/avatar-birdperson.webp` | Pacote V11.2; avatar da persona completa na Garagem. Direitos de adaptação/redistribuição não verificados. |
+| `public/rick-assets/avatar-evil-rick.webp` | Pacote V11.2; avatar da persona compacta em Beyond. Direitos de adaptação/redistribuição não verificados. |
+| `public/rick-assets/avatar-evil-morty.webp` | Pacote V11.2; avatar da persona completa em Beyond. Direitos de adaptação/redistribuição não verificados. |
+| `public/rick-assets/beyond-curve/evil-morty-mansion.webp` | Pacote V11.2; fundo da mansão e cena de chegada a Beyond. Direitos de distribuição não confirmados. |
+| `public/rick-assets/beyond-curve/yellow-portal-icon-header.png` | Variante compacta gerada por IA a partir de imagem de referência de Rick and Morty, conforme informação fornecida pelo usuário; usada no botão do portal Beyond. A inclusão no commit foi autorizada; isso não é uma declaração de licença geral de distribuição. |
+| `public/rick-assets/audio/evil-morty-30s.mp3` | Pacote V11.2; preview local da música de Beyond apenas em desenvolvimento. A autorização foi informada pelo proprietário, sem documento comprobatório inspecionado; a faixa fica desabilitada em produção enquanto essa pendência persistir. |
+
+As cenas `beyond-curve-transit.webp`, `central-finite-curve.webp`, `central-finite-curve-reference.webp`, `dimensional-rupture.webp`, `yellow-portal-scene.webp`, `yellow-portal.webp` e a versão maior `yellow-portal-icon.png` não são assets de runtime nesta integração; permanecem candidatos locais não rastreados. Consulte [ASSETS_PENDENTES.md](ASSETS_PENDENTES.md) para o estado dos demais candidatos e pendências de distribuição.
 
 ## Artes de atuação da Garagem
 

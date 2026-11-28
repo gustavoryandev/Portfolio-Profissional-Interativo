@@ -10,6 +10,12 @@ A pergunta exata de commits exibiu 560 na compacta e na completa no navegador. A
 
 A integração aguarda aprovação na demonstração e as referências das branches de origem estão preservadas.
 
+## Estado atual dos assets após a integração · 28 de novembro de 2026
+
+No commit `595e4a98` da branch `codex/release-integration`, os assets de runtime de La Casa de Papel e Rick and Morty descritos em [ASSETS_PENDENTES.md](ASSETS_PENDENTES.md) estão versionados e ligados ao código. Isso inclui os dois fundos e as personas de La Casa, a máscara e o retrato de PhotoReveal; em Rick, os avatares de Pessoa-Pássaro, Rick Maligno e Evil Morty, o cenário da mansão e o ícone amarelo compacto. A trilha `evil-morty-30s.mp3` está versionada, mas só é habilitada para preview em desenvolvimento enquanto a distribuição não estiver confirmada.
+
+As etapas e relatos abaixo preservam o estado observado em cada fase; afirmações antigas como “não integrado”, “ausente” ou “fora dos commits” são históricas quando contradizem este estado. Os arquivos candidatos de cenas Beyond e versões maiores dos ícones permanecem locais, não rastreados e sem referência no runtime. A integração não confirma licenças ou direitos de distribuição.
+
 ## Correção das perguntas livres após a Fase 05
 
 A correção está em `codex/release-integration`, com checkpoint inicial `refs/codex/checkpoints/astra-free-replies` em `4bff5c9`. A causa confirmada foi a configuração do Gemini ausente na antiga worktree de La Casa de Papel. A sessão local em 5183 reproduziu literalmente os erros relatados no Professor e na Pessoa-Pássaro e também falhou na compacta convencional. Restaurar a configuração local fez o mesmo handler voltar a gerar respostas. A demonstração integrada e a publicação já responderam aos testes iniciais, antes da correção de código. [Avaliação por ambiente e persona](ASTRA_EVALUATION.md)

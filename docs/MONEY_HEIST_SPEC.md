@@ -2,6 +2,8 @@
 
 27 de novembro de 2026. A Fase 03 partiu do commit consolidado `2e84d2b` em `codex/la-casa-de-papel-dark`. O Vite atende por loopback na porta 5177. A worktree de Rick and Morty manteve sua execução independente na porta 5176. [Portfólio](http://127.0.0.1:5177/) · [Astra completa](http://127.0.0.1:5177/chat)
 
+> Registro histórico da Fase 03. Estados de worktree, portas, validação e integração abaixo referem-se àquela sessão; o estado de assets posterior está resumido na seção atualizada adiante e em [ASSETS_PENDENTES.md](ASSETS_PENDENTES.md).
+
 ## Tema e superfícies
 
 O seletor existente continua oferecendo 15 temas. `midnight-pink`, `obsidian-gold` e `grafite-coral` migram diretamente para `la-casa-de-papel-dark` no bootstrap, no provider e na validação das ações da Astra. O nome é La Casa de Papel — O Assalto em português e Money Heist — The Heist em inglês.
@@ -49,7 +51,9 @@ A seleção usa o mesmo resolvedor e as mesmas ferramentas da Astra. Cada mensag
 | `public/perfil-foto.jpeg` | Retrato profissional versionado |
 | `public/la-casa-de-papel/perfil-foto-reveal.webp` | Fotografia mascarada definitiva, versão sem perdas de 1076 × 1462 |
 
-Os arquivos com direitos de distribuição pendentes estão disponíveis localmente, fora dos commits. A worktree também recebeu seis mídias já usadas pelo código consolidado de Rick and Morty. As cópias foram conferidas por SHA-256 e o servidor entregou as 13 mídias públicas verificadas sem divergência. Para reproduzir a demonstração em outro checkout, providenciar os mesmos arquivos locais e instalar com `npm ci`. A liberação de publicação dos demais assets locais continua pendente. [Recortes e fallback](HEIST_PORTRAIT_HANDOFF.md)
+**Estado registrado na Fase 03, em 27 de novembro de 2026:** os arquivos com direitos de distribuição pendentes estavam disponíveis localmente, fora dos commits. A worktree também recebeu seis mídias já usadas pelo código consolidado de Rick and Morty. As cópias foram conferidas por SHA-256 e o servidor entregou as 13 mídias públicas verificadas sem divergência. Para reproduzir aquela demonstração em outro checkout, era necessário providenciar os mesmos arquivos locais e instalar com `npm ci`. [Recortes e fallback](HEIST_PORTRAIT_HANDOFF.md)
+
+**Estado após a integração, em 28 de novembro de 2026:** os caminhos da tabela para fundos, máscara, personas e fotografia de revelação estão versionados e referenciados pelo runtime. A fotografia `perfil-foto-reveal.webp` é usada por `HeistPortrait.jsx`/`PhotoReveal`; os avatares e a máscara são configurados em `heistThemes.js`. A existência no Git e o uso no código não resolvem a pendência de direitos de distribuição; confirmar a autorização aplicável antes de publicar esses arquivos.
 
 ## Validação
 
