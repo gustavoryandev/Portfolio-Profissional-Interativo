@@ -1,5 +1,11 @@
 # Matriz de regressão da Astra
 
+## Perguntas livres no ambiente integrado · 27 de novembro de 2026
+
+- `tests/live-endpoint.test.mjs` verifica configuração vazia em PT/EN na compacta de La Casa e na completa de Rick. A API não chama o provedor, devolve o aviso específico e mantém o card de projetos funcionando por clique e digitação. Restaurar a configuração na fixture faz as mesmas perguntas chegarem ao modelo e concluírem com NDJSON. A suíte conserva a regressão de bloqueio por segurança depois de texto parcial, com `reset`, resposta degradada e nenhum fragmento confirmado.
+- **135/135 testes principais e 19/19 isolados** passaram. Também passaram o typecheck do portal, a importação ESM do handler e `git diff --check`. O build temporário, sem carregar arquivos locais de ambiente, transformou 2.282 módulos. O aviso preexistente de chunks acima de 500 kB foi mantido.
+- A prova com o Gemini real incluiu as duas superfícies, as três dimensões de Rick and Morty e as duas variantes de La Casa de Papel. Foram verificadas 14 respostas no navegador, em PT e EN, com perguntas sobre conversação, projetos, REST, Java, Python, Spring Boot e métricas. A comparação incluiu o site publicado e os handlers versionados da `main`, da Fase 01 e das branches temáticas. [Resultados por persona e ambiente](ASTRA_EVALUATION.md)
+
 ## Fase 02.1 · 27 de novembro de 2026
 
 - **130 testes principais e 16 isolados aprovados.** Passaram também build temporário, typecheck do portal, importação da API e verificação do diff.

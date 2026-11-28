@@ -1,5 +1,11 @@
 # Problemas conhecidos e limites de verificação
 
+## Configuração da geração livre · 27 de novembro de 2026
+
+As demonstrações de La Casa de Papel em 5177/5183 já têm `GEMINI_API_KEY` na configuração local. A ausência da variável explicava os erros genéricos em todas as personas e superfícies que usavam aquele servidor. A integração agora indica configuração ausente em português ou inglês. Cada worktree usada para demonstração precisa receber `GEMINI_API_KEY` no processo ou no seu próprio `.env.local`. Reinicie o servidor local depois de uma alteração quando necessário. Produção fornece a variável pelo ambiente da hospedagem. [Diagnóstico e comparação](ASTRA_EVALUATION.md)
+
+Na amostra, o WakaTime chegou a aparecer como desconhecido em um turno. A consulta direta posterior retornou `ok`, e a repetição contextual apresentou o total conferido. Disponibilidade e latência dos provedores externos continuam sujeitas ao ambiente e à janela do teste. [Matriz](ASTRA_REGRESSION_REPORT.md)
+
 ## Estado da Fase 05
 
 - O build local passou com o aviso preexistente de chunks acima de 500 kB. A análise de fluidez geral fica para a etapa prevista no plano.

@@ -1,5 +1,13 @@
 # Passagem de sessão do portfólio
 
+## Correção das perguntas livres após a Fase 05
+
+A correção está em `codex/release-integration`, com checkpoint inicial `refs/codex/checkpoints/astra-free-replies` em `4bff5c9`. A causa confirmada foi a configuração do Gemini ausente na antiga worktree de La Casa de Papel. A sessão local em 5183 reproduziu literalmente os erros relatados no Professor e na Pessoa-Pássaro e também falhou na compacta convencional. Restaurar a configuração local fez o mesmo handler voltar a gerar respostas. A demonstração integrada e a publicação já responderam aos testes iniciais, antes da correção de código. [Avaliação por ambiente e persona](ASTRA_EVALUATION.md)
+
+O commit `e27d770` atualiza `api/chat.js` e os catálogos PT/EN para indicar configuração ausente, mantendo os controles de recuperação de resposta e as rotas determinísticas. O commit `c026339` atualiza `tests/live-endpoint.test.mjs` com a regressão e a recuperação. A configuração Gemini da worktree de La Casa de Papel ficou exclusiva no arquivo local ignorado. Os HEADs da `main` e das branches de origem foram conferidos.
+
+Passaram 135 testes principais, 19 isolados, build temporário, typecheck do portal, importação da API e `git diff --check`. A comparação com a versão publicada foi apenas diagnóstica. A revisão local aguarda aprovação na Astra completa. [Demonstração](http://127.0.0.1:5178/chat) · [Matriz](ASTRA_REGRESSION_REPORT.md) · [Pendências](KNOWN_ISSUES.md)
+
 ## Fase 05 em 27 de novembro de 2026
 
 A integração está em `codex/release-integration`, na worktree `C:/Users/Diego/.codex/worktrees/release-integration/Portfolio-Profissional-Interativo`. A demonstração Vite usa loopback na porta 5178. [Portfólio](http://127.0.0.1:5178/) · [Astra completa](http://127.0.0.1:5178/chat)

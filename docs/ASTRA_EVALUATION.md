@@ -1,5 +1,33 @@
 # Avaliação da Astra na Fase 01
 
+## Correção das perguntas livres · 27 de novembro de 2026
+
+A causa reproduzida foi a ausência de `GEMINI_API_KEY` no ambiente da worktree de La Casa de Papel. Na porta 5183, o mesmo “fala ai” retornou JSON degradado sem modelo em 4–113 ms para a Astra compacta, o Professor e a Pessoa-Pássaro. Os dois textos de persona eram idênticos aos relatos. Na mesma porta e no mesmo código, a adição exclusiva de `GEMINI_API_KEY` em `.env.local`, ignorado pelo Git, fez a pergunta do Professor completar NDJSON com `gemini-3.5-flash-lite` em cerca de 1,2 s. Berlim também respondeu na porta 5177. A integração e a worktree de Rick já encontravam a configuração no início da investigação. O endpoint lê a variável do processo, com `.env.local` da própria worktree como fonte local.
+
+| Referência | Evidência com o Gemini real |
+| --- | --- |
+| `main` em `e13942d` | Handler exportado para pasta temporária respondeu “fala ai” por NDJSON com `done` e `gemini-3.5-flash-lite`, usando a configuração via ambiente do processo. |
+| Astra Fase 01 em `5637d64` | Mesma comparação confirmou NDJSON, `done` e `gemini-3.5-flash-lite`. As amostras históricas de perfil, Laboratório e contexto continuam registradas abaixo. |
+| Rick em `78d1adc`, porta 5176 | Pessoa-Pássaro respondeu “fala ai” em NDJSON com `gemini-3.5-flash-lite`. |
+| La Casa de Papel em `64b53d3`, portas 5177/5183 | A configuração local, aplicada sem alterar o código da branch, restabeleceu o streaming de Berlim e do Professor. |
+| Integração a partir de `4bff5c9`, porta 5178 | Na comparação inicial, “Fala alguma coisa legal” completou em cerca de 1,2 s e “wakatime” em cerca de 10,6 s. Na revisão corrigida foram verificadas as duas superfícies no navegador. |
+| Produção publicada | “Fala alguma coisa legal” completou em cerca de 1,5 s com `gemini-3.5-flash-lite`. “wakatime” completou em cerca de 11,7 s com `gemini-3.6-flash`. O atalho de projetos retornou JSON local. O ensaio não pressupõe o SHA do deploy. [Produção](https://gustavoryan.vercel.app/chat) |
+
+O clique em um atalho sinaliza `predefinedSuggestion`. Várias sugestões têm resposta determinística e os atalhos de recursos podem enviar ações fixas. O texto exato sobre projetos também foi reconhecido quando digitado. A pergunta reformulada sobre Spring Boot foi ao Gemini, que citou o GEOSOLAR como exemplo. Para texto aberto, o servidor fornece perfil, histórico, idioma, persona e ferramentas disponíveis, valida a geração e entrega os eventos NDJSON. A ausência de configuração interrompia esse caminho antes de qualquer chamada ao Gemini, enquanto os cards determinísticos continuavam funcionando. Nenhuma evidência ligou a falha ao merge dos temas. As chamadas reais da amostra concluíram sem indicação de 401, 403 ou 429 ao cliente. O painel de cotas do projeto ficou fora do ensaio. [Limites oficiais do Gemini](https://aistudio.google.com/docs/rate-limits)
+
+Foram confirmadas **14 respostas com modelo no navegador** após a mudança, enviadas pelo campo de texto. A amostra verificou pertinência do conteúdo e autoria exibida, além do status HTTP.
+
+| Tema ou dimensão | Astra compacta | Astra completa |
+| --- | --- | --- |
+| Convencional | Astra respondeu a um pedido informal de curiosidade sobre programação. | Astra explicou REST, deu um exemplo de GET em continuação e respondeu sobre o tempo de código com o período. |
+| Garagem | Sr. Meeseeks apresentou um exemplo Java para somar dois números. | Pessoa-Pássaro respondeu a “fala ai”. |
+| Cidadela | Mr. Meeseeks respondeu em inglês sobre ROTA, descreveu os dados conhecidos e delimitou o que não podia confirmar sobre a migração. | Sr. Bunda Cagada explicou o papel do Spring Boot. |
+| Além da Curva | Evil Rick explicou em inglês o que faz um endpoint REST com uma analogia. | Morty Maligno descreveu a formação de Gustavo e declarou que a motivação pela escolha do curso não estava documentada. |
+| O Assalto | Berlim entendeu a pergunta com erro de digitação sobre a formação de Gustavo. | Professor explicou o escopo conhecido de ROTA e suas migrações SQL. |
+| O Plano | Berlim comparou tipagem em Java e Python. | Professor respondeu ao termo “wakatime” e indicou que a fonte estava desconhecida naquele turno. A consulta direta posterior retornou `ok`. |
+
+O clique e a digitação da sugestão de métricas exibiram os cards de GitHub e WakaTime. A reformulação sobre tempo de código gerou texto e apresentou o mesmo total de 136 h 47 min confirmado pela integração. O texto gerado citou a data final no fuso UTC do payload. A faixa da API excluía o dia corrente no fuso configurado. A atualização direta das fontes respondeu HTTP 200 e marcou GitHub e WakaTime como `ok`. Cancelamento, troca de persona, respostas tardias, proteção de ações, cota e recuperação após erro continuam cobertos por simulações. A amostra real foi pontual. [Matriz](ASTRA_REGRESSION_REPORT.md)
+
 27 de novembro de 2026 · Branch `codex/astra-phase-01` · Demonstração local em [Astra completa](http://127.0.0.1:5174/chat).
 
 ## Problemas corrigidos
