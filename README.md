@@ -1,233 +1,216 @@
-# Portfólio Interativo com IA 👨‍💻
 
-![React](https://img.shields.io/badge/React-19-007ec6?style=for-the-badge&logo=react&logoColor=white) ![Vite](https://img.shields.io/badge/Vite-6-007ec6?style=for-the-badge&logo=vite&logoColor=white) ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white) ![Google Gemini](https://img.shields.io/badge/Google_Gemini-8E75B2?style=for-the-badge&logo=google&logoColor=white) ![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white) ![GitHub repo size](https://img.shields.io/github/repo-size/gustavoryan-del/Portfolio-Profissional-Interativo?style=for-the-badge&logo=files) ![GitHub stars](https://img.shields.io/github/stars/gustavoryan-del/Portfolio-Profissional-Interativo?style=for-the-badge&logo=github) ![GitHub forks](https://img.shields.io/github/forks/gustavoryan-del/Portfolio-Profissional-Interativo?style=for-the-badge&logo=git) ![GitHub language count](https://img.shields.io/github/languages/count/gustavoryan-del/Portfolio-Profissional-Interativo?style=for-the-badge&logo=javascript)
+<div align="center">
 
----
+# Portfólio Interativo com IA
 
-## 📚 Índice
+**Um portfólio conversacional apresentado pela Astra, em português e inglês.**
 
-- [Links úteis](#-links-úteis)
-- [Sobre o projeto](#-sobre-o-projeto)
-- [Capturas de tela](#-capturas-de-tela)
-- [Funcionalidades](#-funcionalidades)
-- [Tecnologias](#-tecnologias)
-- [Arquitetura](#-arquitetura)
-- [Instalação e execução](#-instalação-e-execução)
-- [Segurança e arquivos locais](#-segurança-e-arquivos-locais)
-- [Deploy](#-deploy)
-- [Estrutura do projeto](#-estrutura-do-projeto)
-- [Testes e build](#-testes-e-build)
-- [Documentação](#-documentação)
-- [Autor](#-autor)
-- [Contribuição](#-contribuição)
-- [Licença](#-licença)
+![React 19](https://img.shields.io/badge/React-19-0D6EFD?style=for-the-badge&logo=react&logoColor=white)
+![Vite 6](https://img.shields.io/badge/Vite-6-0A0A0A?style=for-the-badge&logo=vite&logoColor=38BDF8)
+![Tailwind CSS 3](https://img.shields.io/badge/Tailwind_CSS-3-0A0A0A?style=for-the-badge&logo=tailwindcss&logoColor=38BDF8)
+![Gemini](https://img.shields.io/badge/Gemini_API-0D6EFD?style=for-the-badge&logo=googlegemini&logoColor=white)
+![Vercel](https://img.shields.io/badge/Vercel-0A0A0A?style=for-the-badge&logo=vercel&logoColor=white)
+
+[Portfólio](https://gustavoryan.vercel.app) · [GitHub](https://github.com/gustavoryandev) · [LinkedIn](https://linkedin.com/in/gryangomesguedes) · [Contato](mailto:gryangomesguedes@gmail.com)
+
+</div>
 
 ---
 
-## 🔗 Links úteis
+## Sobre o projeto
 
-- 🌐 **Portfólio:** [gustavoryan.vercel.app](https://gustavoryan.vercel.app)
-- 💻 **GitHub:** [gustavoryandev](https://github.com/gustavoryandev)
-- 💼 **LinkedIn:** [Gustavo Ryan Gomes Guedes](https://linkedin.com/in/gryangomesguedes)
-- 📧 **Contato:** [gryangomesguedes@gmail.com](mailto:gryangomesguedes@gmail.com)
+O portfólio de Gustavo Ryan Gomes Guedes combina páginas interativas e uma conversa com a Astra. A rota / apresenta projetos, experiência, formação, habilidades e contato. A Astra compacta abre no portfólio; /chat oferece a experiência completa, com acesso ao Laboratório, Arcade, xadrez e cards de integrações.
 
-## 📝 Sobre o projeto
+As respostas podem usar Gemini quando configurado. Sem a chave, funções determinísticas e recursos locais continuam disponíveis; perguntas que dependem da geração por IA informam a indisponibilidade.
 
-Portfólio de Gustavo Ryan Gomes Guedes, graduando em Engenharia de Software na PUC Minas. A página inicial (`/`) reúne projetos, tecnologias, experiência, formação e contato. O botão flutuante **Perguntar pra Astra** abre a conversa rápida em um painel lateral, em tela cheia no celular. Os links **Astra** e **Conversar com Astra** levam à interface completa em `/chat`, com acesso ao xadrez, ao Arcade e aos cards de integrações.
+## Funcionalidades
 
-O conteúdo do perfil é mantido em `src/data/perfil.json`. A seção de habilidades apresenta o globo e a lista de tecnologias. A Astra pode mostrar a proficiência em um card da conversa.
+### Astra e cards
 
-## 📸 Capturas de tela
+A conversa funciona em português e inglês, com respostas JSON ou streaming NDJSON, tradução sob demanda e contexto de conversas anteriores. O prompt trata biografias, READMEs e descrições de terceiros como dados, não como instruções. Perguntas selecionadas sobre métricas são atendidas diretamente pelas integrações.
+
+| Marcador | Conteúdo |
+|---|---|
+| <code>[RESUME_CARD]</code> | Currículo PDF |
+| <code>[PROJECTS_CARD]</code>, <code>[EXPERIENCE_CARD]</code>, <code>[SKILLS_CARD]</code> | Projetos, experiência e habilidades |
+| <code>[GITHUB_CARD]</code>, <code>[GITHUB_ACTIVITY_CARD]</code>, <code>[GITHUB_LANGUAGES_CARD]</code>, <code>[REPOSITORIES_CARD]</code> | Estatísticas, atividade, linguagens e repositórios do GitHub |
+| <code>[STATS_CARD]</code>, <code>[WAKATIME_CARD]</code> | Métricas de programação do WakaTime |
+| <code>[SPOTIFY_CARD]</code>, <code>[CANVAS_CARD]</code>, <code>[GALO_CARD]</code>, <code>[GALO_CARD:N]</code>, <code>[GALO_CARD:ALL]</code> | Spotify, matérias no Canvas LMS e jogos do Atlético Mineiro |
+| <code>[CHESS_CARD]</code>, <code>[CHESS_GAME]</code>, <code>[CHESS_REPLAY]</code> | Perfil e partidas de xadrez, tabuleiro e replay |
+| <code>[CONTACT_FORM]</code> | Formulário de contato |
+
+Os dados externos incluem GitHub, WakaTime, Spotify, Canvas LMS, ESPN e Chess.com. O cache é separado por fonte; falhas podem manter o último dado válido visível e indicar que está desatualizado.
+
+### Temas, dimensões e personas
+
+O seletor reúne temas claros, escuros e paletas do Galo, além das experiências temáticas integradas nesta release:
+
+- **Rick and Morty:** Garage, Citadel e a dimensão secreta Beyond. Personas: Meeseeks e Pessoa-Pássaro na Garage; Meeseeks e Sr. Bunda Cagada na Citadel; Rick Maligno e Evil Morty em Beyond. As travessias respeitam movimento reduzido e têm fallback.
+- **La Casa de Papel:** tema escuro **O Assalto** e claro **O Plano**, com Berlim na Astra compacta, Professor na completa e o efeito interativo de máscara no retrato.
+- A Astra compacta e a completa compartilham contexto e ações, mantendo a persona correspondente ao tema e à dimensão.
+
+O preview de áudio de Beyond usa evil-morty-30s.mp3 somente em desenvolvimento; o código o desabilita em builds de produção enquanto a distribuição não estiver confirmada.
+
+### Laboratório, jogos e xadrez
+
+O Laboratório permite experimentar exemplos de código e revisar alterações antes de aplicá-las. O Arcade inclui Snake, Pong, Frogger, Pulse Maze e Orbit Blocks, com recordes locais. A experiência de xadrez permite importar partidas, analisar lances e jogar contra um bot local; a análise usa Stockfish em Web Worker.
+
+### Contato
+
+O formulário envia notificações e confirmações pelo handler serverless /api/contact, com verificação reCAPTCHA e envio ao EmailJS no servidor. Há validação, limites de envio e proteção contra reenvio incerto.
+
+### Interface e acessibilidade
+
+A interface é responsiva, bilíngue e respeita a preferência por movimento reduzido. Os componentes incluem controles por teclado, estados de carregamento e falha e alternativas para mídias indisponíveis.
+
+## Stack
+
+| Camada | Tecnologias |
+|---|---|
+| Interface | React 19, Vite 6, Tailwind CSS 3, i18next |
+| API | Node.js, funções serverless da Vercel e handlers locais do Vite |
+| IA | Google Gemini, opcional por configuração |
+| Integrações | GitHub, WakaTime, Spotify, Canvas LMS, ESPN e Chess.com |
+| Xadrez e mídia | chess.js, react-chessboard, Stockfish, pdf.js |
+| Contato | reCAPTCHA e EmailJS via servidor |
+
+## Arquitetura
+
+    Navegador (React)
+       ├─ POST /api/chat ───────> Astra, métricas e contexto de integrações
+       ├─ POST /api/contact ────> reCAPTCHA e envio de e-mail
+       └─ páginas e assets locais
+                  │
+                  ▼
+          handlers serverless
+          api/chat.js · api/contact.js
+
+Em produção, a Vercel atende as rotas API e serve a aplicação. No desenvolvimento, o plugin em server/devApi.js encaminha /api/chat e /api/contact aos mesmos handlers. O arquivo vercel.json direciona /chat à aplicação React.
+
+## Capturas de tela
 
 **Portfólio no desktop**
 
-![Página inicial com apresentação de Gustavo, atalhos para projetos e Astra e retrato de perfil](docs/screenshots/portfolio-desktop.jpg)
+![Página inicial com apresentação, projetos e retrato](docs/screenshots/portfolio-desktop.jpg)
 
-**Chat e habilidades no mobile**
+**Astra e habilidades no mobile**
 
 <p>
-  <img src="docs/screenshots/astra-mobile.jpg" alt="Chat da Astra com campo de mensagem e navegação na base" width="320" />
-  <img src="docs/screenshots/habilidades-mobile.jpg" alt="Grade de tecnologias em duas colunas e navegação inferior" width="320" />
+  <img src="docs/screenshots/astra-mobile.jpg" alt="Astra no mobile" width="320" />
+  <img src="docs/screenshots/habilidades-mobile.jpg" alt="Habilidades no mobile" width="320" />
 </p>
 
-## ✨ Funcionalidades
+## Como executar localmente
 
-- **Assistente Astra:** perguntas sobre perfil, projetos e trajetória, com histórico contextual e respostas em fluxo. Nas duas interfaces, digite `/help` ou abra Recursos para ver atalhos de navegação, projetos, métricas, tema, idioma e Laboratório.
-- **Catálogo de projetos:** busca por texto, filtros por categoria e rolagem horizontal com gestos no celular.
-- **Laboratório de código:** exemplos editáveis em desktop e celular. JavaScript e Python rodam no navegador. Java usa Wandbox. Experimente pedir “Abra o Laboratório, selecione Python, carregue Bro Fit e mude o nome do aluno para Ana”. A Astra mostra a alteração para revisão antes de aplicá-la. Rascunhos e resultados ficam em memória enquanto você navega entre as interfaces e são limpos ao recarregar a página.
-- **Interface mobile:** navegação inferior para Astra e Projetos, campo de mensagem na base do chat e habilidades em duas colunas. As demais seções ficam no Menu.
-- **Cards interativos na conversa:** projetos, habilidades, experiência, currículo, contato e dados de serviços externos aparecem junto às respostas.
-- **Integrações ao vivo:** estatísticas do GitHub, linguagens e repositórios; atividade de programação via WakaTime; música atual via Spotify; tarefas acadêmicas do Canvas LMS; agenda do Atlético Mineiro; e perfil/partida de xadrez do Chess.com.
-- **Jogos:** xadrez local com Stockfish e Astra Arcade em `/chat?arcade=1`. O Arcade inclui Snake, Pong, Frogger, Pulse Maze e Orbit Blocks, com recordes salvos no navegador.
-- **Atualização de dados:** os cards indicam quando a fonte está indisponível e permitem tentar novamente quando aplicável.
-- **Navegação por seções:** sobre mim, projetos, experiência, educação, habilidades, proficiência e contato.
-- **Currículo para download:** arquivos PDF em português e inglês.
-- **Contato por formulário:** envio de mensagem e confirmação ao visitante via EmailJS.
-- **Português e inglês:** seletor de idioma na interface e suporte a respostas da assistente nos dois idiomas.
-- **Aparência:** temas claro e escuro, Galo CAM Light e Dark e outras paletas personalizadas. A logo GR acompanha o tema, e a interface respeita a preferência por movimento reduzido.
+### Requisitos
 
-## 🛠 Tecnologias
+- Node.js 22.13 ou superior, exigido pela versão de pdfjs-dist no lockfile.
+- npm.
 
-### Front-end
+### Instalação
 
-- React 19 e Vite
-- JavaScript (ES modules)
-- Tailwind CSS 3
-- i18next e react-i18next
-- Framer Motion e Lucide React
-- Axios
-- `chess.js` e `react-chessboard` para a experiência de xadrez
+    git clone https://github.com/gustavoryan-del/Portfolio-Profissional-Interativo.git
+    cd Portfolio-Profissional-Interativo
+    npm ci
+    cp .env.example .env.local
 
-### API e serviços
+Preencha apenas as integrações que deseja habilitar. Nunca versione .env.local.
 
-- Node.js e funções serverless da Vercel
-- Google Gemini API para a assistente e tradução de respostas
-- GitHub API, WakaTime, Spotify, Canvas LMS, ESPN e Chess.com para dados dos cards
-- EmailJS Browser SDK para o formulário de contato
+### Servidores de desenvolvimento
 
-## 🏗 Arquitetura
+    npm run dev
 
-```mermaid
-flowchart LR
-    U[Visitante] --> UI[React + Vite]
-    UI -->|mensagens, tradução e atualização| API[/api/chat/]
-    API --> AI[Google Gemini]
-    API --> LIVE[GitHub · WakaTime · Spotify · Canvas · ESPN · Chess.com]
-    UI -->|formulário de contato| EMAIL[EmailJS]
-    UI --> DATA[perfil.json e arquivos estáticos]
-```
+O Vite inclui handlers locais para as rotas de chat e contato.
 
-O front-end envia mensagens, pedidos de tradução e atualização de contexto para `/api/chat`. Em produção, `api/chat.js` funciona como função serverless da Vercel. No desenvolvimento, o plugin de `server/devApi.js` encaminha a mesma rota ao handler local. A conversa rápida e a Astra completa compartilham a sessão em memória na mesma aba. O formulário EmailJS é enviado diretamente do navegador com identificadores públicos próprios do serviço.
+    npx vercel dev
 
-## 🚀 Instalação e execução
+Use vercel dev para testar as funções serverless no ambiente local da Vercel. Ambos os servidores exibem o endereço local no terminal.
 
-### Pré-requisitos
+### Build e preview
 
-- Node.js 22.13 ou superior (requisito do `pdfjs-dist` usado no projeto)
-- npm
-- Chaves das integrações que deseja habilitar (opcionais para abrir a interface)
+    npm run build
+    npm run preview
 
-### 1. Instale as dependências
+## Variáveis de ambiente
 
-```bash
-npm ci
-```
+.env.example lista as configurações suportadas. Sem GEMINI_API_KEY, a geração livre fica indisponível, mas respostas determinísticas e recursos locais continuam funcionando. Integrações sem credenciais exibem seu estado de indisponibilidade.
 
-### 2. Configure o ambiente
+| Variáveis | Uso |
+|---|---|
+| GEMINI_API_KEY | Geração de respostas e tradução pela Gemini API |
+| GITHUB_USERNAME, GITHUB_TOKEN | Métricas, repositórios e atividade; o token melhora os limites de consulta |
+| WAKATIME_ACCESS_TOKEN, WAKATIME_USERNAME | Métricas via OAuth ou perfil público |
+| WAKATIME_APP_ID, WAKATIME_APP_SECRET, WAKATIME_REFRESH_TOKEN, WAKATIME_REDIRECT_URI | Autorização e renovação OAuth do WakaTime |
+| WAKATIME_TIMEZONE, WAKATIME_PUBLIC_PROJECTS, WAKATIME_HIDDEN_DEPENDENCIES | Fuso, projetos que podem aparecer e dependências omitidas |
+| SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, SPOTIFY_REFRESH_TOKEN | Integração Spotify |
+| CANVAS_API_TOKEN, CANVAS_BASE_URL | Integração Canvas LMS |
+| CHESS_USERNAME | Perfil do Chess.com; há um padrão no código |
+| VITE_RECAPTCHA_SITE_KEY | Chave pública reCAPTCHA v3 usada no navegador |
+| RECAPTCHA_SECRET_KEY, RECAPTCHA_MIN_SCORE, RECAPTCHA_ALLOWED_HOSTNAMES | Verificação reCAPTCHA no servidor |
+| EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID_FOR_ME, EMAILJS_TEMPLATE_ID_FOR_SENDER, EMAILJS_PUBLIC_KEY, EMAILJS_PRIVATE_KEY | Envio server-side pelo EmailJS |
 
-Copie [`.env.example`](.env.example) para `.env.local` e preencha apenas as variáveis das integrações que pretende usar.
+### OAuth do WakaTime
 
-| Variável | Uso |
-| --- | --- |
-| `GEMINI_API_KEY` | Respostas e tradução da assistente Astra |
-| `GITHUB_USERNAME`, `GITHUB_TOKEN` | Métricas e repositórios do GitHub |
-| `WAKATIME_ACCESS_TOKEN` ou `WAKATIME_USERNAME` | Métricas de programação via OAuth ou perfil público |
-| `SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET`, `SPOTIFY_REFRESH_TOKEN` | Música atual no Spotify |
-| `CANVAS_API_TOKEN`, `CANVAS_BASE_URL` | Informações acadêmicas do Canvas LMS |
-| `CHESS_USERNAME` | Perfil e dados de xadrez do Chess.com |
-| `VITE_EMAILJS_SERVICE_ID`, `VITE_EMAILJS_TEMPLATE_ID_FOR_ME`, `VITE_EMAILJS_TEMPLATE_ID_FOR_SENDER`, `VITE_EMAILJS_PUBLIC_KEY` | Formulário e confirmação de contato |
+Cadastre http://localhost:8787/callback no aplicativo OAuth do WakaTime, configure WAKATIME_APP_ID e WAKATIME_APP_SECRET no .env.local e execute:
 
-Para detalhes dos templates de contato, consulte [`docs/contact-email.md`](docs/contact-email.md).
+    npm run wakatime:oauth
 
-Para autorizar o card completo, cadastre `http://localhost:8787/callback` no seu [app WakaTime](https://wakatime.com/apps), preencha `WAKATIME_APP_ID` e `WAKATIME_APP_SECRET` e rode `npm run wakatime:oauth`. O script salva os tokens em `.env.local`. Na Vercel, configure o token de acesso e, para renová-lo automaticamente, o ID, o segredo e o token de renovação. Se o token foi emitido com outro endereço de callback, configure `WAKATIME_REDIRECT_URI` com esse endereço.
+O fluxo local recebe o callback e fornece os tokens para configuração. Mantenha tokens e segredos apenas em arquivos locais ignorados ou nas variáveis da hospedagem. WAKATIME_PUBLIC_PROJECTS controla os nomes de projetos públicos; outros aparecem como privados. WAKATIME_HIDDEN_DEPENDENCIES aceita nomes ou prefixos com *.
 
-Em `WAKATIME_PUBLIC_PROJECTS`, informe os nomes que podem aparecer no ranking e no status de atividade. A atividade em outros projetos aparece como “Projeto privado”. `WAKATIME_HIDDEN_DEPENDENCIES` aceita nomes ou prefixos com `*` para omitir bibliotecas do ranking. Ajuste `WAKATIME_TIMEZONE` se o fuso da conta for diferente de `America/Sao_Paulo`.
+## Segurança, arquivos locais e mídia
 
-### 3. Inicie o servidor de desenvolvimento
+- Guarde tokens e segredos em .env.local durante o desenvolvimento e nas configurações privadas da hospedagem.
+- Variáveis com prefixo VITE_ são incorporadas ao código entregue ao navegador. Não use esse prefixo para segredos.
+- O conteúdo de public/ é copiado para o build e pode ser publicado. Não coloque ali arquivos privados ou sem autorização de distribuição.
+- O .gitignore não retira do índice um arquivo já rastreado. Antes de preparar um commit, confira os arquivos e as regras aplicáveis:
 
-```bash
-npm run dev
-```
+    git check-ignore -v -- .env.local
+    git ls-files -- .env.local
+    git diff --cached --name-only
 
-Abra a URL local exibida pelo Vite. A configuração do projeto disponibiliza `/api/chat` durante o desenvolvimento. Reinicie o servidor após alterar variáveis de ambiente.
+As licenças de terceiros estão registradas em [THIRD_PARTY_NOTICES.txt](public/THIRD_PARTY_NOTICES.txt). A presença de uma mídia no repositório não concede, por si só, direitos adicionais de redistribuição.
 
-### Build local
+## Deploy na Vercel
 
-```bash
-npm run build
-npm run preview
-```
+1. Importe o repositório na Vercel.
+2. Configure as variáveis necessárias em **Settings → Environment Variables**, mantendo segredos como variáveis server-side.
+3. Faça o deploy. A aplicação é servida como conteúdo estático e as rotas API usam funções serverless.
 
-## 🔒 Segurança e arquivos locais
+vercel.json encaminha /chat para index.html e configura a duração máxima de api/chat.js. O formulário de contato depende também das variáveis de reCAPTCHA e EmailJS.
 
-- Guarde chaves privadas, senhas e tokens em `.env.local` no desenvolvimento e nas variáveis de ambiente da hospedagem em produção. Mantenha apenas nomes de variáveis e valores de exemplo em `.env.example`.
-- O Vite inclui variáveis `VITE_` no código entregue ao navegador e copia `public/` para o build, inclusive arquivos ignorados pelo Git. Reserve `VITE_` para valores públicos, como os identificadores do EmailJS, e coloque em `public/` apenas materiais destinados à publicação.
-- O [`.gitignore`](.gitignore) cobre arquivos de ambiente, credenciais locais, chaves privadas, bancos de dados, dumps, backups, arquivos compactados, logs e caches de desenvolvimento. Migrações SQL, código e arquivos públicos usados pela aplicação são versionados.
+## Testes e typecheck
 
-Antes de um commit, confira a regra aplicada ao arquivo local e os nomes dos arquivos preparados para versionamento.
+O package.json não define um script npm test. Execute as suítes existentes diretamente:
 
-```bash
-git check-ignore -v -- .env.local
-git diff --cached --name-only
-```
+    node --test tests/*.test.mjs
+    node --test tests/isolated/*.test.mjs
+    node node_modules/typescript/bin/tsc --noEmit -p tsconfig.portal.json
+    npm run build
 
-O `.gitignore` só atua sobre arquivos ainda fora do índice. Use `git ls-files -- <caminho>` para verificar se um arquivo já foi rastreado. Se uma credencial aparecer em um commit, revogue-a e gere outra no provedor. O valor antigo pode continuar no histórico mesmo depois de o arquivo sair do índice.
+## Documentação
 
-## ☁️ Deploy
-
-Na Vercel, o Vite gera o front-end e `api/chat.js` atende à rota serverless `/api/chat`. Configure no painel da hospedagem as variáveis privadas das integrações e as variáveis públicas do EmailJS antes do build. O arquivo `vercel.json` direciona `/chat` para a aplicação React.
-
-## 📂 Estrutura do projeto
-
-```text
-.
-├── api/
-│   └── chat.js                 # Assistente, tradução e fontes de dados ao vivo
-├── docs/                       # Notas das integrações e capturas de tela
-├── public/                     # Imagens, ícones e currículos PDF
-├── server/
-│   ├── devApi.js                # Rota local /api/chat para o Vite
-│   └── liveCache.js             # Cache de integrações no servidor
-├── src/
-│   ├── arcade/                  # Jogos e recordes locais da Astra
-│   ├── components/              # Chat, cards e seções do portfólio
-│   ├── context/                 # Estado global do tema
-│   ├── data/                    # Perfil, projetos e tecnologias
-│   ├── hooks/                   # Hooks de contexto ao vivo
-│   ├── i18n/                    # Traduções em português e inglês
-│   ├── pages/                   # Rotas do portfólio e do chat
-│   └── services/                # Cliente da API, contato e contexto ao vivo
-├── supabase/migrations/        # Esquema para futura sincronização do Arcade
-├── tests/                       # Testes automatizados existentes
-├── .env.example                 # Modelo das variáveis de ambiente
-└── vite.config.js               # Vite e middleware local da API
-```
-
-## 🧪 Testes e build
-
-Os testes existentes usam o test runner nativo do Node.js. Para executá-los:
-
-```bash
-node --test tests/*.test.mjs
-```
-
-Para verificar a compilação de produção:
-
-```bash
-npm run build
-```
-
-## 📖 Documentação
-
-- [Configuração do contato EmailJS](docs/contact-email.md)
 - [Astra Arcade e recordes locais](docs/astra-arcade.md)
-- [Catálogo e origem dos projetos do GitHub](docs/github-projects.md)
-- [Documentação do React](https://react.dev/)
-- [Documentação do Vite](https://vite.dev/)
-- [Documentação do Gemini API](https://ai.google.dev/gemini-api/docs)
+- [Configuração do contato](docs/contact-email.md)
+- [Catálogo de projetos e dados GitHub](docs/github-projects.md)
+- [Experiência Rick and Morty](docs/rick-morty-experience.md)
+- [Fontes e preparação dos assets Rick](docs/rick-morty-assets.md)
+- [La Casa de Papel — O Assalto e O Plano](docs/MONEY_HEIST_SPEC.md)
+- [Avisos de terceiros](public/THIRD_PARTY_NOTICES.txt)
 
-## 👤 Autor
+## Resumo em inglês
 
-**Gustavo Ryan Gomes Guedes** — graduando em Engenharia de Software na PUC Minas.
+An interactive portfolio presented through Astra, a bilingual AI assistant with local deterministic features and optional Gemini generation. It includes project, résumé, skills and live-data cards; a code Laboratory; an Arcade; chess analysis with local Stockfish; and responsive portfolio pages. Themes include Rick and Morty with Garage, Citadel and the secret Beyond dimension, plus La Casa de Papel’s dark Heist and light Plan variants with Berlin and the Professor personas. Serverless routes handle chat and contact; local Vite middleware supports development. See .env.example for configuration and the documentation links above for details.
 
-- [GitHub](https://github.com/gustavoryandev)
-- [LinkedIn](https://linkedin.com/in/gryangomesguedes)
-- [E-mail](mailto:gryangomesguedes@gmail.com)
+## Autor
 
-## 🤝 Contribuição
+**Gustavo Ryan Gomes Guedes** — Engenharia de Software · PUC Minas · Belo Horizonte, MG.
 
-Sugestões e correções podem ser enviadas por meio de *issues* ou *pull requests* no repositório. Para alterações maiores, descreva primeiro a proposta e o comportamento esperado.
+[GitHub](https://github.com/gustavoryandev) · [LinkedIn](https://linkedin.com/in/gryangomesguedes) · [E-mail](mailto:gryangomesguedes@gmail.com)
 
-## 📄 Licença
+## Licença e avisos
 
-Consulte o autor antes de redistribuir ou reutilizar o código do portfólio. As licenças de terceiros estão documentadas nos [avisos do projeto](public/THIRD_PARTY_NOTICES.txt).
+Consulte o autor antes de redistribuir ou reutilizar o código. Não foi declarada uma licença geral do projeto. Licenças e créditos de terceiros estão nos [avisos do projeto](public/THIRD_PARTY_NOTICES.txt).
+
+## Contribuição
+
+Sugestões e correções podem ser enviadas por issues ou pull requests. Para mudanças maiores, descreva antes o comportamento esperado.
