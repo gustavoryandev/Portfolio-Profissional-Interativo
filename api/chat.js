@@ -1336,6 +1336,7 @@ const GITHUB_PROMPT_WAIT_MS = 2400;
 const WAKATIME_PROMPT_WAIT_MS = 4000;
 const METRICS_WAIT_MS = 700;
 const METRICS_INTENT = /\b(?:metricas?|metrics?|estatisticas?|statistics|stats|numeros)\b/;
+const GITHUB_YEARLY_COMMITS = /^(?:quantos commits (?:(?:o )?gustavo|ele) fez (?:no github )?nos ultimos 12 meses|how many commits (?:did (?:gustavo|he) make|has (?:gustavo|he) made) (?:on github )?in the (?:last|past) 12 months)[\s?!.,]*$/;
 const DETAILED_REQUEST = /\b(?:analise|analy[sz]e|arquitetura|architecture|compare|depure|debug|detalh\w*|detail\w*|implement\w*|passo a passo|step by step|tradeoffs?|justifique|justify)\b/;
 const ACTION_REQUEST = /\b(?:abra|acesse|ative|carregue|execute|mude|mostre|pare|reinicie|restaure|selecione|troque|open|load|run|show|switch|change|reset|restore|navigate)\b/;
 
@@ -1527,6 +1528,23 @@ export default async function handler(req, res) {
     const affirmative = /^(?:sim|yes|yeah|sure|ok|claro|quero|pode)(?:\s+(?:please|por favor|sim))?[\s,!?.]*$/.test(normalizedQuery);
     if (!planFirst && pendingMetrics && /^(?:nao|no|nope)(?:[\s,!?.]+(?:obrigad[oa]|thanks))?[\s,!?.]*$/.test(normalizedQuery)) {
       return resourceReply({ response: String(body.lang).startsWith('en') ? 'Okay, we will keep just the summary.' : 'Tudo bem, vamos manter apenas o resumo.', translationKey: 'chat.metricsDeclined' });
+    }
+    if (!planFirst && GITHUB_YEARLY_COMMITS.test(normalizedQuery)) {
+      const readLive = prepareLiveContext(['github']);
+      const liveContext = forClient(await readLive(GITHUB_PROMPT_WAIT_MS));
+      const { github } = liveContext;
+      const copy = readJson(`${suggestionLanguage}.json`).chat.liveData;
+      const commits = github?.stats?.commits;
+      if (github?.status !== 'ok' || !Number.isFinite(commits)) {
+        const notice = github?.status === 'ok' ? 'empty' : liveDataNoticeKey(github);
+        return resourceReply({ response: `GitHub — ${copy[notice]}`, liveContext });
+      }
+      const en = suggestionLanguage === 'en';
+      const count = new Intl.NumberFormat(en ? 'en-US' : 'pt-BR').format(commits);
+      const amount = `**${count} ${commits === 1 ? 'commit' : 'commits'}**`;
+      const result = en ? `GitHub recorded ${amount} for Gustavo in the last 12 months.`
+        : `O GitHub registrou ${amount} do Gustavo nos últimos 12 meses.`;
+      return resourceReply({ response: github.stale ? `${result} ${copy.stale}` : result, liveContext });
     }
     const githubQuery = /\bgithub\b/.test(normalizedQuery);
     const wakatimeQuery = WAKATIME_INTENT.test(normalizedQuery);
