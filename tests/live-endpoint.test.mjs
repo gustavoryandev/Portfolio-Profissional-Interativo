@@ -22,6 +22,32 @@ function response() {
     setHeader(name, value) { this.headers[name] = value; }, json(body) { this.body = body; return this; } };
 }
 
+async function withMetricsFixture(check) {
+  const originalUser = process.env.GITHUB_USERNAME;
+  const originalToken = process.env.GITHUB_TOKEN;
+  process.env.GITHUB_USERNAME = 'fixture';
+  process.env.GITHUB_TOKEN = 'metrics-fixture';
+  const count = { totalCount: 0 };
+  const user = {
+    login: 'fixture', createdAt: '2020-01-01', followers: count, following: count,
+    repositories: { ...count, nodes: [], pageInfo: { hasNextPage: false } },
+    allRepositories: { nodes: [] }, pullRequests: count, issues: count,
+    contributionsCollection: { totalCommitContributions: 0, contributionCalendar: { totalContributions: 0, weeks: [] } },
+  };
+  mockAdapter = async config => {
+    const data = config.url.endsWith('/graphql') ? { data: { user } }
+      : config.url.includes('api.github.com') ? []
+        : { data: { total_seconds: 3600, is_up_to_date: true } };
+    return { status: 200, config, data };
+  };
+  try { await check(); } finally {
+    if (originalUser === undefined) delete process.env.GITHUB_USERNAME;
+    else process.env.GITHUB_USERNAME = originalUser;
+    process.env.GITHUB_TOKEN = originalToken;
+    mockAdapter = undefined;
+  }
+}
+
 test('identity replies survive a provider outage while model-dependent requests stay degraded', async () => {
   const body = { appearance: { theme: 'rick-morty', dimension: 'corrupted' }, surface: 'full', stream: true, streamRetry: true };
   for (const [lang, userMessage] of [['pt', 'me fale sobre vc senhor cagada'], ['en', 'Tell me about yourself, Mr. Poopybutthole']]) {
@@ -88,7 +114,7 @@ test('integration refresh completes without a Gemini key or model request', asyn
   } finally { mockAdapter = undefined; }
 });
 
-test('metrics summary and confirmation bypass the model and keep the requested sources', async () => {
+test('metrics summary and confirmation bypass the model and keep the requested sources', () => withMetricsFixture(async () => {
   let res = response();
   await handler({ method: 'POST', body: { userMessage: 'Show GitHub and WakaTime metrics', lang: 'en' } }, res);
   assert.equal(res.code, 200);
@@ -101,9 +127,9 @@ test('metrics summary and confirmation bypass the model and keep the requested s
   assert.equal(res.body.model, undefined);
   assert.deepEqual(res.body.response.match(/\[[A-Z_]+\]/g), ['[GITHUB_CARD]', '[GITHUB_ACTIVITY_CARD]', '[GITHUB_LANGUAGES_CARD]', '[REPOSITORIES_CARD]', '[STATS_CARD]']);
   assert.deepEqual(Object.keys(res.body.liveContext), ['github', 'wakatime']);
-});
+}));
 
-test('WakaTime-only requests do not load GitHub', async () => {
+test('WakaTime-only requests do not load GitHub', () => withMetricsFixture(async () => {
   for (const userMessage of ['me mostre as metricas do waka time', 'WakaTime metrics', 'Show Waka-Time metrics', 'tempo de código', 'coding time']) {
     const res = response();
     await handler({ method: 'POST', body: { userMessage, lang: 'pt' } }, res);
@@ -111,9 +137,9 @@ test('WakaTime-only requests do not load GitHub', async () => {
     assert.deepEqual(res.body.response.match(/\[[A-Z_]+\]/g), ['[WAKATIME_CARD]']);
     assert.equal(res.body.liveContext.github, undefined);
   }
-});
+}));
 
-test('explicit GitHub and combined requests retain the summary even after a pending offer', async () => {
+test('explicit GitHub and combined requests retain the summary even after a pending offer', () => withMetricsFixture(async () => {
   for (const [userMessage, cards] of [
     ['Show GitHub metrics', ['[GITHUB_CARD]']],
     ['Mostre as métricas do GitHub e WakaTime', ['[GITHUB_CARD]', '[WAKATIME_CARD]']],
@@ -124,6 +150,44 @@ test('explicit GitHub and combined requests retain the summary even after a pend
     assert.equal(res.code, 200);
     assert.deepEqual(res.body.response.match(/\[[A-Z_]+\]/g), cards);
     assert.equal(Object.hasOwn(res.body.liveContext, 'wakatime'), cards.includes('[WAKATIME_CARD]'));
+  }
+}));
+
+test('unavailable metrics are reported once per cause without promising data or emitting empty cards', async () => {
+  const keys = ['GITHUB_TOKEN', 'WAKATIME_API_KEY', 'WAKATIME_ACCESS_TOKEN', 'WAKATIME_USERNAME'];
+  const previous = Object.fromEntries(keys.map(key => [key, process.env[key]]));
+  try {
+    for (const key of keys) process.env[key] = '';
+    const { default: unconfiguredHandler } = await import('../api/chat.js?missing-metrics');
+    const query = { userMessage: 'Mostre as métricas detalhadas do GitHub e do WakaTime', lang: 'pt' };
+    const absent = response();
+    await unconfiguredHandler({ method: 'POST', body: query }, absent);
+    assert.equal(absent.body.liveContext.github.status, 'not_configured');
+    assert.equal(absent.body.liveContext.wakatime.status, 'not_configured');
+    assert.equal(absent.body.response.match(/não configurada/g).length, 1);
+    assert.doesNotMatch(absent.body.response, /Aqui estão|\[\w+_CARD\]/);
+
+    process.env.GITHUB_TOKEN = 'rejected-test-token';
+    process.env.WAKATIME_API_KEY = 'limited-test-token';
+    const oldAdapter = axios.defaults.adapter;
+    axios.defaults.adapter = async config => {
+      if (config.url.includes('api.github.com')) return { status: 200, config, data: { errors: [{ type: 'FORBIDDEN' }] } };
+      throw { response: { status: 429 } };
+    };
+    let rejectedHandler;
+    try {
+      ({ default: rejectedHandler } = await import('../api/chat.js?rejected-metrics'));
+    } finally { axios.defaults.adapter = oldAdapter; }
+    const rejected = response();
+    await rejectedHandler({ method: 'POST', body: query }, rejected);
+    assert.match(rejected.body.response, /GitHub[^\n]*rejeitou as credenciais/);
+    assert.match(rejected.body.response, /WakaTime[^\n]*limite de requisições/);
+    assert.doesNotMatch(rejected.body.response, /Aqui estão|\[\w+_CARD\]/);
+  } finally {
+    for (const [key, value] of Object.entries(previous)) {
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
+    }
   }
 });
 
@@ -624,6 +688,49 @@ test('current character reaches JSON and streaming model instructions without ch
   } finally {
     globalThis.fetch = originalFetch; process.env.GEMINI_API_KEY = ''; mockAdapter = undefined;
   }
+});
+
+test('free-form coding metrics load the same WakaTime data on every surface and theme without a card', async () => {
+  const savedAdapter = axios.defaults.adapter;
+  const savedFetch = globalThis.fetch;
+  process.env.GEMINI_API_KEY = 'shared-metrics-fixture';
+  let wakaRequests = 0;
+  axios.defaults.adapter = async config => {
+    if (config.url.includes('generativelanguage.googleapis.com')) return { status: 200, config, data: { models: [] } };
+    assert.match(config.url, /^https:\/\/api\.wakatime\.com\//);
+    wakaRequests++;
+    if (wakaRequests <= 3) await new Promise(resolve => setTimeout(resolve, 1400));
+    return { status: 200, config, data: { data: { total_seconds: 492420, languages: [{ name: 'Java', total_seconds: 3600 }] } } };
+  };
+  let metricsHandler;
+  try {
+    ({ default: metricsHandler } = await import('../api/chat.js?shared-metrics'));
+  } finally { axios.defaults.adapter = savedAdapter; }
+  const modelPrompts = [];
+  globalThis.fetch = async (_url, options) => {
+    modelPrompts.push(JSON.parse(options.body).systemInstruction.parts[0].text);
+    return Response.json({ candidates: [{ content: { role: 'model', parts: [{ text: 'Verified coding metrics.' }] }, finishReason: 'STOP' }] });
+  };
+  try {
+    for (const appearance of [
+      { theme: 'dark' }, { theme: 'la-casa-de-papel-dark' }, { theme: 'la-casa-de-papel-light' },
+      ...['lab', 'corrupted', 'beyond-curve'].map(dimension => ({ theme: 'rick-morty', dimension })),
+    ]) {
+      for (const surface of ['full', 'compact']) {
+        const lang = surface === 'full' ? 'pt' : 'en';
+        const userMessage = lang === 'pt' ? 'Quanto tempo ele passou programando?' : 'How long has Gustavo spent coding?';
+        const res = response();
+        await metricsHandler({ method: 'POST', body: { appearance, surface, lang, userMessage, chatHistory: [] } }, res);
+        assert.equal(res.body.liveContext.wakatime.status, 'ok');
+        assert.equal(res.body.liveContext.wakatime.summary.totalFormatted, '136h 47m');
+        assert.match(modelPrompts.at(-1), /STATUS DAS APIS: \{"wakatime":\{"status":"ok"/);
+        assert.match(modelPrompts.at(-1), /"totalFormatted":"136h 47m"/);
+        assert.match(modelPrompts.at(-1), /DADOS COMPLETOS DO PERFIL:/);
+      }
+    }
+    assert.equal(new Set(modelPrompts.map(prompt => prompt.match(/STATUS DAS APIS: (.*)/)[1])).size, 1);
+    assert.equal(wakaRequests, 3);
+  } finally { globalThis.fetch = savedFetch; process.env.GEMINI_API_KEY = ''; }
 });
 
 test('common evaluator questions use verified portfolio facts and cards without Gemini', async () => {
