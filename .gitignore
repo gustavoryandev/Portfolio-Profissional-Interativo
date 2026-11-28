@@ -114,3 +114,6 @@ test-results/
 *.7z
 *.swp
 *.swo
+
+# Documentação interna mantida apenas localmente
+/docs/
