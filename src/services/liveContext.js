@@ -9,6 +9,15 @@ export function sourcesForText(text = '') {
     .map(match => CARD_SOURCES[match[1]]).filter(Boolean))];
 }
 
+export function liveDataNoticeKey(data) {
+  if (data?.status === 'not_configured') return 'notConfigured';
+  if (data?.reason === 'unauthorized') return 'unauthorized';
+  if (data?.reason === 'rate_limited') return 'rateLimited';
+  if (data?.status === 'empty' || data?.reason === 'no_data') return 'empty';
+  if (!data || ['unknown', 'loading'].includes(data.status) || data.reason === 'processing') return 'pending';
+  return 'unavailable';
+}
+
 export function needsRefresh(source, data) {
   if (data?.status === 'not_configured' || ['unauthorized', 'rate_limited'].includes(data?.reason)) return false;
   return !data || data.status !== 'ok' || data.stale || (source === 'github' && data.languages == null);

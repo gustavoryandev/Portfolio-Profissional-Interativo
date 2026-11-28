@@ -33,6 +33,17 @@
     },
     "erro": "Your question could not be processed right now. Please try again shortly.",
     "aiNotConfigured": "The AI service for free-form questions is not configured in this environment.",
+    "liveData": {
+      "loading": "Loading integration data…",
+      "notConfigured": "Integration not configured in this environment.",
+      "unauthorized": "The integration rejected the credentials or denied access.",
+      "rateLimited": "The integration reached its request limit. Wait before trying again.",
+      "empty": "The integration returned no data for this request.",
+      "pending": "The request is still pending. Try again shortly.",
+      "unavailable": "Data temporarily unavailable.",
+      "stale": "Showing the last available data. Update temporarily unavailable.",
+      "retry": "Try again"
+    },
     "boasVindas": "Hello! I am Gustavo's virtual assistant. How can I help you today?",
     "subtitulo": "Ask about projects, tech stack, university, or live metrics.",
     "placeholder": "Ask something about Gustavo...",

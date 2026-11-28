@@ -33,6 +33,17 @@
     },
     "erro": "Não foi possível processar sua pergunta agora. Tente novamente em instantes.",
     "aiNotConfigured": "O serviço de IA para perguntas livres não está configurado neste ambiente.",
+    "liveData": {
+      "loading": "Carregando dados da integração…",
+      "notConfigured": "Integração não configurada neste ambiente.",
+      "unauthorized": "A integração rejeitou as credenciais ou não autorizou o acesso.",
+      "rateLimited": "A integração atingiu o limite de requisições. Aguarde antes de tentar novamente.",
+      "empty": "A integração consultada não retornou dados para esse pedido.",
+      "pending": "A consulta está em andamento. Tente novamente em instantes.",
+      "unavailable": "Dados temporariamente indisponíveis.",
+      "stale": "Exibindo os últimos dados disponíveis. Atualização temporariamente indisponível.",
+      "retry": "Tentar novamente"
+    },
     "boasVindas": "Olá! Sou o assistente virtual do Gustavo. Como posso te ajudar hoje?",
     "subtitulo": "Pergunte sobre projetos, stack técnica, faculdade ou métricas ao vivo.",
     "placeholder": "Digite uma pergunta sobre o Gustavo...",

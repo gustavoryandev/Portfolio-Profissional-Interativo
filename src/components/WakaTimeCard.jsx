@@ -2,6 +2,7 @@ import { CardShell } from './ui/CardShell';
 import React from 'react';
 import { Clock, Code2, Terminal } from 'lucide-react';
 import LanguageIcon from './LanguageIcon';
+import LiveDataNotice from './LiveDataNotice';
 
 const copy = {
   pt: {
@@ -65,6 +66,8 @@ export default function WakaTimeCard({ context, lang = 'pt' }) {
 
       {!ok ? (
         <div className={`rounded-xl border border-dashed py-10 text-center text-sm font-medium ${ui.dashed}`}>{t.unavailable}</div>
+      ) : week.status === 'error' ? (
+        <LiveDataNotice data={week} lang={lang} />
       ) : !hasData ? (
         <div className={`rounded-xl border border-dashed py-10 text-center text-sm font-medium ${ui.dashed}`}>{t.none}</div>
       ) : (
