@@ -1,5 +1,11 @@
 # Problemas conhecidos e limites de verificação
 
+## Integrações na demonstração oficial · 28 de novembro de 2026
+
+A porta 5178 usa o mesmo ambiente para as duas superfícies e todas as personas da Astra. Portas antigas de demonstração foram encerradas depois de reproduzir a ausência de configuração de GitHub e WakaTime em La Casa de Papel. A origem exata da sessão manual inicial permanece sem confirmação. O erro transitório anterior da geração de texto sobre commits não teve causa de provedor confirmada. A contagem objetiva agora é consultada diretamente no GitHub. [Diagnóstico](ASTRA_EVALUATION.md)
+
+EmailJS continua bloqueado no ambiente local por configuração efetivamente vazia da chave privada e do reCAPTCHA. A ativação de reCAPTCHA v3 segue para a etapa reservada. O ensaio não enviou e-mail. [Validação real e limites](ASTRA_EVALUATION.md)
+
 ## Configuração da geração livre · 27 de novembro de 2026
 
 As demonstrações de La Casa de Papel em 5177/5183 já têm `GEMINI_API_KEY` na configuração local. A ausência da variável explicava os erros genéricos em todas as personas e superfícies que usavam aquele servidor. A integração agora indica configuração ausente em português ou inglês. Cada worktree usada para demonstração precisa receber `GEMINI_API_KEY` no processo ou no seu próprio `.env.local`. Reinicie o servidor local depois de uma alteração quando necessário. Produção fornece a variável pelo ambiente da hospedagem. [Diagnóstico e comparação](ASTRA_EVALUATION.md)

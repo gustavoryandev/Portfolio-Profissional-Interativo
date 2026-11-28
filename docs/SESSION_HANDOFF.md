@@ -1,5 +1,15 @@
 # Passagem de sessão do portfólio
 
+## Integrações e retomada · 28 de novembro de 2026
+
+A demonstração oficial de `codex/release-integration` está na 5178. A worktree integrada tem o mesmo ambiente efetivo do checkout original para as integrações ativas. As portas de fases anteriores foram encerradas depois de se confirmar que La Casa, em 5177/5183, tinha Gemini, mas recebia `not_configured` para GitHub e WakaTime. [Astra completa](http://127.0.0.1:5178/chat) · [Relatório de integrações](ASTRA_EVALUATION.md)
+
+Os sete arquivos do trabalho interrompido já estavam nos commits `f86cf02` e `27240a7`, que ampliaram o roteamento compartilhado de perguntas livres e corrigiram avisos de métricas indisponíveis. A retomada registrou `19b27f0` para consultar diretamente o total de commits dos últimos 12 meses e `3105e2e` para a regressão das duas superfícies. A comunicação permanece compartilhada entre personas.
+
+A pergunta exata de commits exibiu 560 na compacta e na completa no navegador. A API da própria demonstração confirmou os mesmos snapshots de GitHub e WakaTime nas 12 combinações de tema e superfície, sem card prévio. O Laboratório exibiu `42` em JavaScript, Python e Java. O replay concluiu a análise via Stockfish. Passaram 138 testes principais, 19 isolados, build temporário, typecheck, importação da API e `git diff --check`. EmailJS segue sem ensaio de entrega por depender da configuração reservada de reCAPTCHA. [Regressões](ASTRA_REGRESSION_REPORT.md) · [Pendências](KNOWN_ISSUES.md)
+
+A integração aguarda aprovação na demonstração e as referências das branches de origem estão preservadas.
+
 ## Correção das perguntas livres após a Fase 05
 
 A correção está em `codex/release-integration`, com checkpoint inicial `refs/codex/checkpoints/astra-free-replies` em `4bff5c9`. A causa confirmada foi a configuração do Gemini ausente na antiga worktree de La Casa de Papel. A sessão local em 5183 reproduziu literalmente os erros relatados no Professor e na Pessoa-Pássaro e também falhou na compacta convencional. Restaurar a configuração local fez o mesmo handler voltar a gerar respostas. A demonstração integrada e a publicação já responderam aos testes iniciais, antes da correção de código. [Avaliação por ambiente e persona](ASTRA_EVALUATION.md)

@@ -1,5 +1,13 @@
 # Matriz de regressão da Astra
 
+## Equivalência das integrações · 28 de novembro de 2026
+
+Foram aprovados **138 testes principais**, **19 isolados da Astra** e **29 focados no handler**. Também passaram build temporário de produção, typecheck do portal, importação ESM do handler e `git diff --check`. O build compilou 2.282 módulos e manteve o aviso de chunks acima de 500 kB.
+
+As fixtures verificaram que fontes sem dados não geram cards redundantes ou anúncios de métricas, que configuração ausente, 403 e 429 recebem mensagens distintas e que zero commits é um resultado válido do GitHub. A pergunta exata de commits funciona sem configuração Gemini em compacta PT e completa EN. A matriz WakaTime simula uma primeira coleta mais lenta que a janela antiga e verifica os mesmos dados e perfil nas 12 combinações de tema e superfície. [Testes](../tests/live-endpoint.test.mjs)
+
+Na 5178, as 12 combinações retornaram dados reais e os mesmos snapshots de GitHub e WakaTime ao pedir métricas sem histórico. A compacta e a completa responderam no navegador à pergunta digitada sobre commits. Morty Maligno voltou a completar uma resposta livre com o Gemini e WakaTime. Stockfish processou um PGN no navegador e as três linguagens do Laboratório produziram o resultado real esperado. [Inventário e evidências](ASTRA_EVALUATION.md)
+
 ## Perguntas livres no ambiente integrado · 27 de novembro de 2026
 
 - `tests/live-endpoint.test.mjs` verifica configuração vazia em PT/EN na compacta de La Casa e na completa de Rick. A API não chama o provedor, devolve o aviso específico e mantém o card de projetos funcionando por clique e digitação. Restaurar a configuração na fixture faz as mesmas perguntas chegarem ao modelo e concluírem com NDJSON. A suíte conserva a regressão de bloqueio por segurança depois de texto parcial, com `reset`, resposta degradada e nenhum fragmento confirmado.
